@@ -9,6 +9,9 @@ export const dummyQuizzes: Quiz[] = [
     id: "1",
     title: "JavaScript Fundamentals",
     description: "Test your knowledge of JavaScript basics",
+    generationStatus: "completed",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     questions: [
       {
         id: "q1",
@@ -73,6 +76,9 @@ export const dummyQuizzes: Quiz[] = [
     id: "2",
     title: "React Basics",
     description: "Fundamentals of React framework",
+    generationStatus: "completed",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     questions: [
       {
         id: "q1",
@@ -117,6 +123,9 @@ export const dummyQuizzes: Quiz[] = [
     id: "3",
     title: "Web Development Trivia",
     description: "General web development knowledge",
+    generationStatus: "completed",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
     questions: [
       {
         id: "q1",

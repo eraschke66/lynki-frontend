@@ -6,12 +6,7 @@ import {
   ProtectedRoute,
   AuthCallback,
 } from "@/features/auth";
-import {
-  QuizzesPage,
-  QuizList,
-  QuizTaking,
-  QuizResults,
-} from "@/features/quiz";
+import { QuizzesPage, QuizTaking, QuizResults } from "@/features/quiz";
 import { DocumentsPage } from "@/features/documents";
 
 export function AppRoutes() {

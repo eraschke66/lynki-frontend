@@ -200,18 +200,14 @@ export async function fetchQuiz(quizId: string): Promise<Quiz> {
           const options = (q.question_options || []).sort(
             (a, b) => a.option_index - b.option_index,
           );
+          const correctOption = options.find((opt) => opt.is_correct);
           return {
             id: q.id,
             question: q.question,
-            options: options.map((opt) => ({
-              id: opt.id,
-              optionText: opt.option_text,
-              optionIndex: opt.option_index,
-              isCorrect: opt.is_correct,
-              explanation: opt.explanation,
-            })),
+            options: options.map((opt) => opt.option_text),
             correctAnswer:
               options.find((opt) => opt.is_correct)?.option_index ?? 0,
+            explanation: correctOption?.explanation,
             hint: q.hint ?? undefined,
             difficultyLevel: q.difficulty_level,
             conceptId: q.concept_id ?? undefined,
@@ -247,9 +243,6 @@ export async function submitQuizAttempt(
       }
 
       const isCorrect = question.correctAnswer === answer.selectedOption;
-      const selectedOption = question.options.find(
-        (opt) => opt.optionIndex === answer.selectedOption,
-      );
 
       return {
         questionId: question.id,
@@ -257,7 +250,7 @@ export async function submitQuizAttempt(
         selectedOptionIndex: answer.selectedOption,
         correctOptionIndex: question.correctAnswer,
         isCorrect,
-        explanation: selectedOption?.explanation ?? "",
+        explanation: question.explanation ?? "",
         hint: question.hint,
       };
     });

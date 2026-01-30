@@ -9,12 +9,13 @@ export interface QuestionOption {
 export interface QuizQuestion {
   id: string;
   question: string;
-  options: QuestionOption[];
+  options: string[];
   correctAnswer: number;
+  explanation?: string;
   hint?: string;
-  difficultyLevel: "easy" | "medium" | "hard";
+  difficultyLevel?: "easy" | "medium" | "hard";
   conceptId?: string;
-  orderIndex: number;
+  orderIndex?: number;
 }
 
 export interface Quiz {

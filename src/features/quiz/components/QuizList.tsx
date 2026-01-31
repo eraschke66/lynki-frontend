@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
 import { useAuth } from "@/features/auth";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   Card,
   CardContent,
@@ -19,32 +19,22 @@ import {
 } from "lucide-react";
 import { fetchUserQuizzes } from "../services/quizService";
 import type { QuizListItem } from "@/types/quiz";
+import { quizQueryKeys } from "@/lib/queryKeys";
 
 export function QuizList() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [quizzes, setQuizzes] = useState<QuizListItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function loadQuizzes() {
-      if (!user) return;
-
-      try {
-        setLoading(true);
-        const data = await fetchUserQuizzes(user.id);
-        setQuizzes(data);
-      } catch (err) {
-        console.error("Failed to load quizzes:", err);
-        setError("Failed to load quizzes. Please try again.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadQuizzes();
-  }, [user]);
+  // Fetch quizzes with React Query (cached, no refetch on focus)
+  const {
+    data: quizzes = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: quizQueryKeys.list(user?.id ?? ""),
+    queryFn: () => fetchUserQuizzes(user!.id),
+    enabled: !!user,
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -78,7 +68,7 @@ export function QuizList() {
     navigate(`/quiz/${quizId}`);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center space-y-4">
@@ -95,7 +85,7 @@ export function QuizList() {
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
             <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
-            <p className="text-destructive">{error}</p>
+            <p className="text-destructive">Failed to load quizzes. Please try again.</p>
             <Button onClick={() => window.location.reload()}>Retry</Button>
           </div>
         </CardContent>
@@ -134,7 +124,7 @@ export function QuizList() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {quizzes.map((quiz) => (
+        {quizzes.map((quiz: QuizListItem) => (
           <Card
             key={quiz.id}
             className="hover:shadow-lg transition-all hover:border-primary/50"

@@ -15,13 +15,7 @@ import { FileUploader } from "./FileUploader";
 import { DocumentsList } from "./DocumentsList";
 import type { Document } from "../types";
 import { toast } from "sonner";
-
-// Query keys for React Query
-export const documentQueryKeys = {
-  all: ["documents"] as const,
-  list: (userId: string) => [...documentQueryKeys.all, "list", userId] as const,
-  stats: (userId: string) => [...documentQueryKeys.all, "stats", userId] as const,
-};
+import { documentQueryKeys } from "@/lib/queryKeys";
 
 export function DocumentsPage() {
   const { user } = useAuth();

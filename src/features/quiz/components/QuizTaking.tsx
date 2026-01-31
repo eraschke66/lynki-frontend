@@ -14,12 +14,7 @@ import {
 } from "lucide-react";
 import { fetchQuiz, submitQuizAttempt } from "../services/quizService";
 import type { QuizAnswer } from "@/types/quiz";
-
-// Query keys for React Query
-export const quizQueryKeys = {
-  all: ["quizzes"] as const,
-  detail: (quizId: string) => [...quizQueryKeys.all, "detail", quizId] as const,
-};
+import { quizQueryKeys } from "@/lib/queryKeys";
 
 export function QuizTaking() {
   const { quizId } = useParams<{ quizId: string }>();

@@ -8,6 +8,7 @@ import {
 } from "@/features/auth";
 import { QuizzesPage, QuizTaking, QuizResults } from "@/features/quiz";
 import { DocumentsPage } from "@/features/documents";
+import { DocumentStudyPage } from "@/features/study";
 
 export function AppRoutes() {
   return (
@@ -45,6 +46,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <DocumentsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/study/:documentId"
+        element={
+          <ProtectedRoute>
+            <DocumentStudyPage />
           </ProtectedRoute>
         }
       />

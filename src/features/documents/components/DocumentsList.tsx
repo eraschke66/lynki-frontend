@@ -10,6 +10,7 @@ import {
   BookOpen,
   Play,
   AlertCircle,
+  GraduationCap,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -109,7 +110,7 @@ export function DocumentsList({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [documentIds, onDocumentUpdate]);
+  }, [documentIds, onDocumentUpdate, documents]);
 
   useEffect(() => {
     // Load quiz status for each document
@@ -339,15 +340,28 @@ export function DocumentsList({
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => onDelete(doc.id, doc.filePath)}
-                    className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                    <span className="sr-only">Delete</span>
-                  </Button>
+                  <div className="flex items-center justify-end gap-1">
+                    {doc.status === "completed" && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs gap-1"
+                        onClick={() => navigate(`/study/${doc.id}`)}
+                      >
+                        <GraduationCap className="w-4 h-4" />
+                        Study
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(doc.id, doc.filePath)}
+                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}

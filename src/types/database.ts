@@ -318,6 +318,122 @@ export interface Database {
           },
         ];
       };
+      user_concept_mastery: {
+        Row: {
+          id: string;
+          user_id: string;
+          concept_id: string;
+          status: "not_started" | "in_progress" | "mastered";
+          correct_count: number;
+          attempt_count: number;
+          current_streak: number;
+          mastered_at: string | null;
+          next_review_at: string | null;
+          review_interval_days: number;
+          review_count: number;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          concept_id: string;
+          status?: "not_started" | "in_progress" | "mastered";
+          correct_count?: number;
+          attempt_count?: number;
+          current_streak?: number;
+          mastered_at?: string | null;
+          next_review_at?: string | null;
+          review_interval_days?: number;
+          review_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          concept_id?: string;
+          status?: "not_started" | "in_progress" | "mastered";
+          correct_count?: number;
+          attempt_count?: number;
+          current_streak?: number;
+          mastered_at?: string | null;
+          next_review_at?: string | null;
+          review_interval_days?: number;
+          review_count?: number;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_concept_mastery_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_concept_mastery_concept_id_fkey";
+            columns: ["concept_id"];
+            referencedRelation: "concepts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_question_attempts: {
+        Row: {
+          id: string;
+          user_id: string;
+          question_id: string;
+          concept_id: string | null;
+          selected_option: number;
+          is_correct: boolean;
+          time_spent_ms: number | null;
+          session_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          question_id: string;
+          concept_id?: string | null;
+          selected_option: number;
+          is_correct: boolean;
+          time_spent_ms?: number | null;
+          session_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          question_id?: string;
+          concept_id?: string | null;
+          selected_option?: number;
+          is_correct?: boolean;
+          time_spent_ms?: number | null;
+          session_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_question_attempts_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_question_attempts_question_id_fkey";
+            columns: ["question_id"];
+            referencedRelation: "questions";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "user_question_attempts_concept_id_fkey";
+            columns: ["concept_id"];
+            referencedRelation: "concepts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

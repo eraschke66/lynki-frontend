@@ -8,9 +8,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
 import {
   Accordion,
@@ -36,7 +33,7 @@ import {
   getNextConceptToStudy,
 } from "../services/studyService";
 import { StudySession } from "./StudySession";
-import type { ConceptMastery, DocumentProgress } from "../types";
+import type { ConceptMastery } from "../types";
 
 const studyQueryKeys = {
   documentProgress: (documentId: string, userId: string) =>
@@ -74,7 +71,7 @@ export function DocumentStudyPage() {
     setStudyingConceptId(conceptId);
   };
 
-  const handleSessionComplete = (wasMastered: boolean) => {
+  const handleSessionComplete = () => {
     setStudyingConceptId(null);
     // Invalidate to refresh progress
     queryClient.invalidateQueries({

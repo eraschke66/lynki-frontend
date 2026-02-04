@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -37,26 +36,23 @@ interface StudySessionProps {
 
 export function StudySession({
   conceptId,
-  documentId,
   onComplete,
   onExit,
 }: StudySessionProps) {
   const { user } = useAuth();
-  const navigate = useNavigate();
 
   const [session, setSession] = useState<StudySessionType | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [wasMastered, setWasMastered] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now());
 
   // Track progress towards mastery in this session
   const [sessionCorrectCount, setSessionCorrectCount] = useState(0);
-  const [totalCorrectNeeded, setTotalCorrectNeeded] = useState(MASTERY_CONFIG.CORRECT_TO_MASTER);
+  const [totalCorrectNeeded, setTotalCorrectNeeded] = useState<number>(MASTERY_CONFIG.CORRECT_TO_MASTER);
 
   useEffect(() => {
     async function loadSession() {
@@ -88,7 +84,6 @@ export function StudySession({
       const correct = optionIndex === currentQuestion.correctAnswer;
 
       setSelectedAnswer(optionIndex);
-      setIsCorrect(correct);
       setShowFeedback(true);
 
       // Record the attempt

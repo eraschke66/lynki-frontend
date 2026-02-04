@@ -72,7 +72,7 @@ export function SignupForm() {
       }
 
       if (session) {
-        navigate("/quizzes");
+        navigate("/home");
         return;
       }
 

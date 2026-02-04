@@ -9,6 +9,7 @@ import {
 import { QuizzesPage, QuizTaking, QuizResults } from "@/features/quiz";
 import { DocumentsPage } from "@/features/documents";
 import { DocumentStudyPage } from "@/features/study";
+import { Dashboard } from "@/features/dashboard";
 
 export function AppRoutes() {
   return (
@@ -17,6 +18,14 @@ export function AppRoutes() {
       <Route path="/login" element={<LoginForm />} />
       <Route path="/signup" element={<SignupForm />} />
       <Route path="/auth/callback" element={<AuthCallback />} />
+      <Route
+        path="/home"
+        element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        }
+      />
       <Route
         path="/quizzes"
         element={

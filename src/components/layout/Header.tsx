@@ -1,29 +1,45 @@
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import LogoSvg from "@/assets/logo.svg?react";
+import { Home, BookOpen, FileText } from "lucide-react";
 
 export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = async () => {
     await signOut();
     navigate("/", { replace: true });
   };
 
+  const handleLogoClick = () => {
+    if (user) {
+      navigate("/home");
+    } else {
+      navigate("/");
+    }
+  };
+
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "text-sm font-medium transition-colors hover:text-primary",
-      isActive ? "text-primary" : "text-muted-foreground",
+      "flex items-center gap-2 text-sm font-medium transition-colors hover:text-primary px-3 py-2 rounded-md",
+      isActive ? "text-primary bg-primary/10" : "text-muted-foreground",
     );
+
+  // Check if we're on the study page
+  const isStudyPage = location.pathname.startsWith("/study/");
 
   return (
     <header className="sticky top-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-b border-border z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <div className="flex items-center gap-3">
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={handleLogoClick}
+          >
             <div className="w-10 h-10 flex items-center justify-center">
               <LogoSvg className="w-full h-full" />
             </div>
@@ -33,12 +49,22 @@ export function Header() {
           </div>
 
           {user && (
-            <nav className="hidden md:flex items-center gap-6">
-              <NavLink to="/quizzes" className={navLinkClass}>
-                Quizzes
+            <nav className="hidden md:flex items-center gap-1">
+              <NavLink
+                to="/home"
+                className={navLinkClass}
+                end
+              >
+                <Home className="w-4 h-4" />
+                Home
               </NavLink>
               <NavLink to="/documents" className={navLinkClass}>
-                Documents
+                <FileText className="w-4 h-4" />
+                Materials
+              </NavLink>
+              <NavLink to="/quizzes" className={navLinkClass}>
+                <BookOpen className="w-4 h-4" />
+                Quizzes
               </NavLink>
             </nav>
           )}

@@ -8,7 +8,7 @@ export function AuthCallback() {
   useEffect(() => {
     supabase.auth.onAuthStateChange((event, session) => {
       if (event === "SIGNED_IN" && session) {
-        navigate("/quizzes", { replace: true });
+        navigate("/home", { replace: true });
       }
     });
   }, [navigate]);

@@ -46,6 +46,34 @@ type FullQuizResponse = {
   questions: QuizQuestion[];
 };
 
+type BktUpdatePayload = {
+  user_id: string;
+  question_id: string;
+  document_id: string;
+  claude_score: number; // 0..100
+};
+
+async function postBktUpdate(payload: BktUpdatePayload): Promise<void> {
+  const res = await fetch(`${API_URL}/bkt/update`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    // Intenta leer body para debug (sin romper si no hay JSON)
+    let bodyText = "";
+    try {
+      bodyText = await res.text();
+    } catch {
+      bodyText = "";
+    }
+    throw new Error(
+      `BKT update failed (${res.status} ${res.statusText}) ${bodyText ? `- ${bodyText}` : ""}`,
+    );
+  }
+}
+
 /**
  * Fetch all quizzes for a user directly from Supabase.
  */
@@ -257,6 +285,37 @@ export async function submitQuizAttempt(
 
     const score = questionResults.filter((r) => r.isCorrect).length;
     const percentage = (score / quiz.questions.length) * 100;
+
+    // -----------------------------
+    // BKT INTEGRATION (non-blocking)
+    // -----------------------------
+    const documentId = quiz.documentId;
+    if (!documentId) {
+      console.warn(
+        "BKT update skipped: quiz.documentId is missing (quizId=%s)",
+        quizId,
+      );
+    } else {
+      const updates = questionResults.map((r) =>
+        postBktUpdate({
+          user_id: userId,
+          question_id: r.questionId,
+          document_id: documentId,
+          claude_score: r.isCorrect ? 100 : 0,
+        }),
+      );
+
+      const settled = await Promise.allSettled(updates);
+
+      const failed = settled.filter((s) => s.status === "rejected");
+      if (failed.length > 0) {
+        console.error(
+          `BKT: ${failed.length}/${settled.length} updates failed (quizId=${quizId}, userId=${userId}).`,
+          failed.map((f) => (f.status === "rejected" ? f.reason : null)),
+        );
+        // Important: do not throw. Quiz submission must continue.
+      }
+    }
 
     // Save attempt to Supabase
     const { data: attempt, error } = await supabase

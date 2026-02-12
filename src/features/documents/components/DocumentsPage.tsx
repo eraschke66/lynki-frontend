@@ -42,10 +42,10 @@ export function DocumentsPage() {
     queryFn: () => fetchUserDocuments(user!.id),
     enabled: !!user,
     // Poll every 5 seconds if there are documents in processing/pending state
-    refetchInterval: (query) => {
-      const docs = query.state.data as typeof documents | undefined;
+    refetchInterval: (query): number | false => {
+      const docs = query.state.data as Document[] | undefined;
       const hasProcessing = docs?.some(
-        (d) => d.status === "pending" || d.status === "processing",
+        (d: Document) => d.status === "pending" || d.status === "processing",
       );
       return hasProcessing ? 5000 : false;
     },

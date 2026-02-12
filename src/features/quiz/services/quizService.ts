@@ -4,7 +4,9 @@ import type { Database } from "@/types/database";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
+// -----------------------------
 // Supabase query result types
+// -----------------------------
 type QuizWithRelations = {
   id: string;
   title: string;
@@ -46,22 +48,23 @@ type FullQuizResponse = {
   questions: QuizQuestion[];
 };
 
-type BktUpdatePayload = {
+// -----------------------------
+// BKT payloads
+// -----------------------------
+type BktBatchUpdatePayload = {
   user_id: string;
-  question_id: string;
   document_id: string;
-  claude_score: number; // 0..100
+  updates: Array<{ question_id: string; claude_score: number }>; // 0..100
 };
 
-async function postBktUpdate(payload: BktUpdatePayload): Promise<void> {
-  const res = await fetch(`${API_URL}/bkt/update`, {
+async function postBktBatchUpdate(payload: BktBatchUpdatePayload): Promise<void> {
+  const res = await fetch(`${API_URL}/bkt/update-batch`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
-    // Intenta leer body para debug (sin romper si no hay JSON)
     let bodyText = "";
     try {
       bodyText = await res.text();
@@ -69,7 +72,7 @@ async function postBktUpdate(payload: BktUpdatePayload): Promise<void> {
       bodyText = "";
     }
     throw new Error(
-      `BKT update failed (${res.status} ${res.statusText}) ${bodyText ? `- ${bodyText}` : ""}`,
+      `BKT batch failed (${res.status} ${res.statusText}) ${bodyText ? `- ${bodyText}` : ""}`,
     );
   }
 }
@@ -77,9 +80,7 @@ async function postBktUpdate(payload: BktUpdatePayload): Promise<void> {
 /**
  * Fetch all quizzes for a user directly from Supabase.
  */
-export async function fetchUserQuizzes(
-  userId: string,
-): Promise<QuizListItem[]> {
+export async function fetchUserQuizzes(userId: string): Promise<QuizListItem[]> {
   try {
     const { data, error } = await supabase
       .from("quizzes")
@@ -91,12 +92,8 @@ export async function fetchUserQuizzes(
         document_id,
         generation_status,
         created_at,
-        documents (
-          title
-        ),
-        questions (
-          id
-        )
+        documents ( title ),
+        questions ( id )
       `,
       )
       .eq("user_id", userId)
@@ -123,9 +120,7 @@ export async function fetchUserQuizzes(
 /**
  * Fetch quiz for a specific document directly from Supabase.
  */
-export async function fetchDocumentQuiz(
-  documentId: string,
-): Promise<QuizListItem | null> {
+export async function fetchDocumentQuiz(documentId: string): Promise<QuizListItem | null> {
   try {
     const { data, error } = await supabase
       .from("quizzes")
@@ -137,35 +132,30 @@ export async function fetchDocumentQuiz(
         document_id,
         generation_status,
         created_at,
-        documents (
-          title
-        ),
-        questions (
-          id
-        )
+        documents ( title ),
+        questions ( id )
       `,
       )
       .eq("document_id", documentId)
       .single();
 
     if (error) {
-      if (error.code === "PGRST116") return null; // No rows returned
+      if (error.code === "PGRST116") return null;
       throw error;
     }
-
     if (!data) return null;
 
-    const typedData = data as unknown as QuizWithRelations;
+    const typed = data as unknown as QuizWithRelations;
 
     return {
-      id: typedData.id,
-      title: typedData.title,
-      description: typedData.description,
-      documentId: typedData.document_id ?? undefined,
-      documentTitle: typedData.documents?.title ?? undefined,
-      generationStatus: typedData.generation_status,
-      questionCount: typedData.questions?.length ?? 0,
-      createdAt: typedData.created_at,
+      id: typed.id,
+      title: typed.title,
+      description: typed.description,
+      documentId: typed.document_id ?? undefined,
+      documentTitle: typed.documents?.title ?? undefined,
+      generationStatus: typed.generation_status,
+      questionCount: typed.questions?.length ?? 0,
+      createdAt: typed.created_at,
     };
   } catch (error) {
     console.error("Error fetching document quiz:", error);
@@ -225,16 +215,13 @@ export async function fetchQuiz(quizId: string): Promise<Quiz> {
       questions: (typedQuiz.questions || [])
         .sort((a, b) => a.order_index - b.order_index)
         .map((q) => {
-          const options = (q.question_options || []).sort(
-            (a, b) => a.option_index - b.option_index,
-          );
+          const options = (q.question_options || []).sort((a, b) => a.option_index - b.option_index);
           const correctOption = options.find((opt) => opt.is_correct);
           return {
             id: q.id,
             question: q.question,
             options: options.map((opt) => opt.option_text),
-            correctAnswer:
-              options.find((opt) => opt.is_correct)?.option_index ?? 0,
+            correctAnswer: correctOption?.option_index ?? 0,
             explanation: correctOption?.explanation,
             hint: q.hint ?? undefined,
             difficultyLevel: q.difficulty_level,
@@ -252,7 +239,8 @@ export async function fetchQuiz(quizId: string): Promise<Quiz> {
 }
 
 /**
- * Submit quiz attempt and get results (still uses FastAPI for grading logic).
+ * Submit quiz attempt and get results.
+ * BKT is sent ONCE (batch) and is NON-FATAL.
  */
 export async function submitQuizAttempt(
   quizId: string,
@@ -260,16 +248,11 @@ export async function submitQuizAttempt(
   answers: QuizAnswer[],
 ): Promise<QuizResult> {
   try {
-    // First, fetch the quiz to get question details
     const quiz = await fetchQuiz(quizId);
 
-    // Calculate score and build results locally
     const questionResults = answers.map((answer) => {
       const question = quiz.questions.find((q) => q.id === answer.questionId);
-      if (!question) {
-        throw new Error(`Question ${answer.questionId} not found`);
-      }
-
+      if (!question) throw new Error(`Question ${answer.questionId} not found`);
       const isCorrect = question.correctAnswer === answer.selectedOption;
 
       return {
@@ -287,37 +270,33 @@ export async function submitQuizAttempt(
     const percentage = (score / quiz.questions.length) * 100;
 
     // -----------------------------
-    // BKT INTEGRATION (non-blocking)
+    // BKT (batch) - non fatal
     // -----------------------------
     const documentId = quiz.documentId;
     if (!documentId) {
-      console.warn(
-        "BKT update skipped: quiz.documentId is missing (quizId=%s)",
-        quizId,
-      );
+      console.warn("BKT skipped: quiz.documentId missing (quizId=%s)", quizId);
     } else {
-      const updates = questionResults.map((r) =>
-        postBktUpdate({
-          user_id: userId,
+      const payload: BktBatchUpdatePayload = {
+        user_id: userId,
+        document_id: documentId,
+        updates: questionResults.map((r) => ({
           question_id: r.questionId,
-          document_id: documentId,
           claude_score: r.isCorrect ? 100 : 0,
-        }),
-      );
+        })),
+      };
 
-      const settled = await Promise.allSettled(updates);
-
-      const failed = settled.filter((s) => s.status === "rejected");
-      if (failed.length > 0) {
+      try {
+        await postBktBatchUpdate(payload);
+      } catch (e) {
         console.error(
-          `BKT: ${failed.length}/${settled.length} updates failed (quizId=${quizId}, userId=${userId}).`,
-          failed.map((f) => (f.status === "rejected" ? f.reason : null)),
+          `BKT batch failed (quizId=${quizId}, userId=${userId}, updates=${payload.updates.length})`,
+          e,
         );
-        // Important: do not throw. Quiz submission must continue.
+        // DO NOT throw.
       }
     }
 
-    // Save attempt to Supabase
+    // Save attempt
     const { data: attempt, error } = await supabase
       .from("user_quiz_attempts")
       .insert({
@@ -353,15 +332,7 @@ export async function submitQuizAttempt(
 export async function fetchQuizAttempts(
   userId: string,
   quizId: string,
-): Promise<
-  Array<{
-    id: string;
-    score: number;
-    totalQuestions: number;
-    percentage: number;
-    completedAt: string;
-  }>
-> {
+): Promise<Array<{ id: string; score: number; totalQuestions: number; percentage: number; completedAt: string }>> {
   try {
     const { data, error } = await supabase
       .from("user_quiz_attempts")
@@ -395,9 +366,7 @@ export async function triggerQuizGeneration(
   try {
     const response = await fetch(`${API_URL}/quizzes/generate`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         document_id: documentId,
         questions_per_concept: questionsPerConcept,
@@ -405,17 +374,10 @@ export async function triggerQuizGeneration(
       }),
     });
 
-    if (!response.ok) {
-      throw new Error("Failed to trigger quiz generation");
-    }
+    if (!response.ok) throw new Error("Failed to trigger quiz generation");
 
     const data = await response.json();
-
-    return {
-      quizId: data.quiz_id,
-      status: data.status,
-      message: data.message,
-    };
+    return { quizId: data.quiz_id, status: data.status, message: data.message };
   } catch (error) {
     console.error("Error triggering quiz generation:", error);
     throw error;
@@ -424,28 +386,17 @@ export async function triggerQuizGeneration(
 
 /**
  * Subscribe to quiz generation status updates.
- * Fetches full quiz details including question count when status changes.
  */
-export function subscribeToQuizUpdates(
-  documentId: string,
-  callback: (quiz: QuizListItem) => void,
-) {
+export function subscribeToQuizUpdates(documentId: string, callback: (quiz: QuizListItem) => void) {
   const channel = supabase
     .channel(`quiz-updates-${documentId}`)
     .on(
       "postgres_changes",
-      {
-        event: "*",
-        schema: "public",
-        table: "quizzes",
-        filter: `document_id=eq.${documentId}`,
-      },
+      { event: "*", schema: "public", table: "quizzes", filter: `document_id=eq.${documentId}` },
       async (payload) => {
         if (payload.new) {
-          const data =
-            payload.new as Database["public"]["Tables"]["quizzes"]["Row"];
+          const data = payload.new as Database["public"]["Tables"]["quizzes"]["Row"];
 
-          // Fetch question count when quiz is completed
           let questionCount = 0;
           if (data.generation_status === "completed") {
             try {
@@ -455,7 +406,7 @@ export function subscribeToQuizUpdates(
                 .eq("quiz_id", data.id);
               questionCount = count ?? 0;
             } catch {
-              // Ignore count errors, will show 0
+              // ignore
             }
           }
 
@@ -485,8 +436,6 @@ export function subscribeToQuizUpdates(
 export function calculateQuizScore(quiz: Quiz, answers: QuizAnswer[]): number {
   return answers.reduce((score, answer) => {
     const question = quiz.questions.find((q) => q.id === answer.questionId);
-    return question && question.correctAnswer === answer.selectedOption
-      ? score + 1
-      : score;
+    return question && question.correctAnswer === answer.selectedOption ? score + 1 : score;
   }, 0);
 }

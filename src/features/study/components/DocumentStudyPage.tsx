@@ -146,7 +146,7 @@ export function DocumentStudyPage() {
       <>
         <Header />
         <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
-          <div className="flex items-center justify-center min-h-[400px]">
+          <div className="flex items-center justify-center min-h-100">
             <div className="text-center space-y-4">
               <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
               <p className="text-muted-foreground">Loading progress...</p>

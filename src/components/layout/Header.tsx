@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import LogoSvg from "@/assets/logo.svg?react";
-import { Home, BookOpen, FileText } from "lucide-react";
+import { Home, FileText } from "lucide-react";
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -53,10 +53,6 @@ export function Header() {
               <NavLink to="/documents" className={navLinkClass}>
                 <FileText className="w-4 h-4" />
                 Materials
-              </NavLink>
-              <NavLink to="/quizzes" className={navLinkClass}>
-                <BookOpen className="w-4 h-4" />
-                Quizzes
               </NavLink>
             </nav>
           )}

@@ -1,77 +1,123 @@
 /**
- * Types for the study/mastery feature
+ * Types for the BKT-driven adaptive learning system.
+ *
+ * BKT (Bayesian Knowledge Tracing) is now the single source of truth for mastery.
+ * The frontend is a thin client — sessions come from the backend, answers are
+ * validated server-side, and mastery is tracked via p_mastery probabilities.
  */
 
 export type MasteryStatus = "not_started" | "in_progress" | "mastered";
 
-export interface ConceptMastery {
-  id: string;
-  conceptId: string;
-  conceptName: string;
-  conceptExplanation: string;
-  topicId: string;
-  topicName: string;
-  documentId: string;
+// ---------------------------------------------------------------------------
+// BKT Configuration (mirrors backend constants — keep in sync)
+// ---------------------------------------------------------------------------
+
+export const BKT_CONFIG = {
+  // p_mastery threshold for "mastered" status (adjustable, see backend service.py)
+  MASTERY_THRESHOLD: 0.85,
+} as const;
+
+// ---------------------------------------------------------------------------
+// Progress types (from GET /bkt/progress/:userId/:documentId)
+// ---------------------------------------------------------------------------
+
+export interface ConceptProgress {
+  concept_id: string;
+  concept_name: string;
+  explanation: string;
+  p_mastery: number; // 0.0 - 1.0
+  n_attempts: number;
+  n_correct: number;
   status: MasteryStatus;
-  correctCount: number;
-  attemptCount: number;
-  currentStreak: number;
-  accuracyPercent: number;
-  questionCount: number;
-  masteredAt: string | null;
-  nextReviewAt: string | null;
-  reviewIntervalDays: number;
-  reviewCount: number;
+  is_mastered: boolean;
+  question_count: number;
 }
 
 export interface TopicProgress {
-  topicId: string;
-  topicName: string;
-  documentId: string;
-  concepts: ConceptMastery[];
-  totalConcepts: number;
-  masteredConcepts: number;
-  inProgressConcepts: number;
-  notStartedConcepts: number;
-  overallProgress: number; // 0-100
+  topic_id: string;
+  topic_name: string;
+  status: MasteryStatus;
+  concepts: ConceptProgress[];
+  total_concepts: number;
+  mastered_concepts: number;
+  overall_progress: number; // 0-100
 }
 
 export interface DocumentProgress {
-  documentId: string;
-  documentTitle: string;
+  document_id: string;
+  document_title: string;
   topics: TopicProgress[];
-  totalConcepts: number;
-  masteredConcepts: number;
-  overallProgress: number;
-  isReadyForReview: boolean;
-  conceptsDueForReview: number;
+  total_concepts: number;
+  mastered_concepts: number;
+  overall_progress: number; // 0-100
+  mastery_threshold: number;
 }
 
-export interface StudySessionQuestion {
+// ---------------------------------------------------------------------------
+// Session types (from GET /bkt/session/:userId/:documentId)
+// ---------------------------------------------------------------------------
+
+export interface SessionQuestionOption {
+  id: string;
+  text: string;
+  index: number;
+}
+
+export interface SessionQuestion {
   id: string;
   question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation?: string;
-  hint?: string;
-  difficultyLevel: "easy" | "medium" | "hard";
-  conceptId: string;
-  conceptName: string;
+  hint?: string | null;
+  difficulty_level: string;
+  concept_id?: string | null;
+  concept_name: string;
+  options: SessionQuestionOption[];
 }
 
-export interface StudySession {
-  sessionId: string;
-  conceptId: string;
-  conceptName: string;
-  documentId: string;
-  questions: StudySessionQuestion[];
-  currentQuestionIndex: number;
-  correctCount: number;
-  attemptCount: number;
-  masteryThreshold: number; // Number of correct answers needed to master
-  isComplete: boolean;
-  isMastered: boolean;
+export interface SessionConceptSummary {
+  concept_id: string;
+  concept_name: string;
+  p_mastery: number;
+  n_attempts: number;
 }
+
+export interface BKTSession {
+  session_id: string;
+  questions: SessionQuestion[];
+  concepts: SessionConceptSummary[];
+  total_questions: number;
+  all_mastered: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Answer types (from POST /bkt/answer)
+// ---------------------------------------------------------------------------
+
+export interface AnswerRequest {
+  user_id: string;
+  question_id: string;
+  document_id: string;
+  selected_option_index: number;
+  session_id?: string;
+  time_spent_ms?: number;
+}
+
+export interface AnswerResult {
+  question_id: string;
+  concept_id: string | null;
+  is_correct: boolean;
+  correct_option_index: number;
+  correct_option_text: string;
+  explanation: string;
+  selected_option_index: number;
+  p_mastery_before: number;
+  p_mastery_after: number;
+  is_newly_mastered: boolean;
+  mastery_threshold: number;
+}
+
+// ---------------------------------------------------------------------------
+// Legacy types (kept temporarily for old quiz flow compatibility)
+// ---------------------------------------------------------------------------
 
 export interface QuestionAttempt {
   questionId: string;
@@ -81,12 +127,9 @@ export interface QuestionAttempt {
   timeSpentMs?: number;
 }
 
-// Constants for mastery algorithm
+/** @deprecated Use BKT_CONFIG instead */
 export const MASTERY_CONFIG = {
-  // Number of correct answers needed to master a concept
   CORRECT_TO_MASTER: 3,
-  // Max questions per study session (to prevent frustration)
   MAX_QUESTIONS_PER_SESSION: 10,
-  // Spaced repetition intervals (in days)
   REVIEW_INTERVALS: [1, 3, 7, 14, 30, 60],
 } as const;

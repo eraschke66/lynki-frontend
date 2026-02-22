@@ -19,139 +19,164 @@ import {
   Trophy,
   Target,
   Sparkles,
+  TrendingUp,
 } from "lucide-react";
-import {
-  startStudySession,
-  recordQuestionAttempt,
-} from "../services/studyService";
-import type { StudySession as StudySessionType } from "../types";
-import { MASTERY_CONFIG } from "../types";
+import { fetchBktSession, submitAnswer } from "../services/studyService";
+import type { BKTSession, SessionQuestion, AnswerResult } from "../types";
+
+// Per-concept mastery tracker accumulated across all answers in the session
+interface ConceptDelta {
+  concept_name: string;
+  p_start: number;
+  p_end: number;
+  newly_mastered: boolean;
+}
 
 interface StudySessionProps {
-  conceptId: string;
+  topicId: string;
   documentId: string;
-  onComplete: (wasMastered: boolean) => void;
+  onComplete: () => void;
   onExit: () => void;
 }
 
 export function StudySession({
-  conceptId,
+  topicId,
+  documentId,
   onComplete,
   onExit,
 }: StudySessionProps) {
   const { user } = useAuth();
 
-  const [session, setSession] = useState<StudySessionType | null>(null);
+  const [session, setSession] = useState<BKTSession | null>(null);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+  const [currentResult, setCurrentResult] = useState<AnswerResult | null>(null);
   const [showFeedback, setShowFeedback] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
-  const [wasMastered, setWasMastered] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState<number>(
     Date.now(),
   );
+  const [submitting, setSubmitting] = useState(false);
 
-  // Track progress towards mastery in this session
-  const [sessionCorrectCount, setSessionCorrectCount] = useState(0);
-  const [totalCorrectNeeded, setTotalCorrectNeeded] = useState<number>(
-    MASTERY_CONFIG.CORRECT_TO_MASTER,
+  // Accumulated stats
+  const [correctCount, setCorrectCount] = useState(0);
+  const [conceptDeltas, setConceptDeltas] = useState<Map<string, ConceptDelta>>(
+    new Map(),
   );
 
   useEffect(() => {
     async function loadSession() {
       if (!user) return;
-
       setLoading(true);
-      const newSession = await startStudySession(conceptId, user.id);
-
-      if (newSession) {
-        setSession(newSession);
-        setTotalCorrectNeeded(
-          Math.max(
-            1,
-            MASTERY_CONFIG.CORRECT_TO_MASTER - newSession.correctCount,
-          ),
-        );
+      const bktSession = await fetchBktSession(user.id, documentId, topicId);
+      if (bktSession) {
+        setSession(bktSession);
+        // If all concepts already mastered, show that immediately
+        if (bktSession.all_mastered) {
+          setSessionComplete(true);
+        }
       }
       setLoading(false);
       setQuestionStartTime(Date.now());
     }
-
     loadSession();
-  }, [conceptId, user]);
+  }, [topicId, documentId, user]);
 
-  const currentQuestion = session?.questions[session.currentQuestionIndex];
+  const currentQuestion: SessionQuestion | undefined =
+    session?.questions[currentIndex];
 
   const handleSelectOption = useCallback(
     async (optionIndex: number) => {
-      if (!session || !currentQuestion || !user || showFeedback) return;
+      if (!session || !currentQuestion || !user || showFeedback || submitting)
+        return;
 
-      const timeSpent = Date.now() - questionStartTime;
-      const correct = optionIndex === currentQuestion.correctAnswer;
-
+      setSubmitting(true);
       setSelectedAnswer(optionIndex);
       setShowFeedback(true);
 
-      // Record the attempt
-      const result = await recordQuestionAttempt(
-        user.id,
-        {
-          questionId: currentQuestion.id,
-          conceptId: currentQuestion.conceptId,
-          selectedOption: optionIndex,
-          isCorrect: correct,
-          timeSpentMs: timeSpent,
-        },
-        session.sessionId,
-      );
+      const timeSpent = Date.now() - questionStartTime;
+      const result = await submitAnswer({
+        user_id: user.id,
+        question_id: currentQuestion.id,
+        document_id: documentId,
+        selected_option_index: optionIndex,
+        session_id: session.session_id,
+        time_spent_ms: timeSpent,
+      });
 
-      // Update session state
-      if (correct) {
-        setSessionCorrectCount((prev) => prev + 1);
+      if (result) {
+        setCurrentResult(result);
+
+        if (result.is_correct) {
+          setCorrectCount((prev) => prev + 1);
+        }
+
+        // Update per-concept mastery delta tracking
+        const conceptId = result.concept_id ?? currentQuestion.concept_id ?? "";
+        setConceptDeltas((prev) => {
+          const updated = new Map(prev);
+          const existing = updated.get(conceptId);
+          if (existing) {
+            updated.set(conceptId, {
+              ...existing,
+              p_end: result.p_mastery_after,
+              newly_mastered:
+                existing.newly_mastered || result.is_newly_mastered,
+            });
+          } else {
+            updated.set(conceptId, {
+              concept_name: currentQuestion.concept_name,
+              p_start: result.p_mastery_before,
+              p_end: result.p_mastery_after,
+              newly_mastered: result.is_newly_mastered,
+            });
+          }
+          return updated;
+        });
       }
 
-      // Check if mastered
-      if (result.isMastered) {
-        setWasMastered(true);
-      }
+      setSubmitting(false);
     },
-    [session, currentQuestion, user, showFeedback, questionStartTime],
+    [
+      session,
+      currentQuestion,
+      user,
+      showFeedback,
+      submitting,
+      questionStartTime,
+      documentId,
+    ],
   );
 
   const handleNext = useCallback(() => {
     if (!session) return;
 
-    const nextIndex = session.currentQuestionIndex + 1;
-
-    // Check if session should end
-    const reachedMastery = wasMastered;
-    const reachedMaxQuestions = nextIndex >= session.questions.length;
-    const reachedSessionGoal = sessionCorrectCount >= totalCorrectNeeded;
-
-    if (reachedMastery || reachedMaxQuestions || reachedSessionGoal) {
+    const nextIndex = currentIndex + 1;
+    if (nextIndex >= session.questions.length) {
       setSessionComplete(true);
       return;
     }
 
-    // Move to next question
-    setSession({
-      ...session,
-      currentQuestionIndex: nextIndex,
-    });
+    setCurrentIndex(nextIndex);
     setSelectedAnswer(null);
+    setCurrentResult(null);
     setShowFeedback(false);
     setShowHint(false);
     setQuestionStartTime(Date.now());
-  }, [session, wasMastered, sessionCorrectCount, totalCorrectNeeded]);
+  }, [session, currentIndex]);
 
-  const handleComplete = () => {
-    onComplete(wasMastered);
-  };
+  const getOptionLabel = (index: number) => String.fromCharCode(65 + index);
 
-  const getOptionLabel = (index: number) => {
-    return String.fromCharCode(65 + index);
-  };
+  const masteryPercent = (p: number) => Math.round(p * 100);
+
+  // Any concept newly mastered this session?
+  const anyNewlyMastered = Array.from(conceptDeltas.values()).some(
+    (d) => d.newly_mastered,
+  );
+
+  // ---------- Render states ----------
 
   if (loading) {
     return (
@@ -164,14 +189,14 @@ export function StudySession({
     );
   }
 
-  if (!session || !currentQuestion) {
+  if (!session) {
     return (
       <Card>
         <CardContent className="pt-6">
           <div className="text-center space-y-4">
             <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
             <p className="text-muted-foreground">
-              No questions available for this concept yet.
+              Failed to load the session. Please try again.
             </p>
             <Button variant="outline" onClick={onExit}>
               Go Back
@@ -182,24 +207,70 @@ export function StudySession({
     );
   }
 
-  // Session complete screen
-  if (sessionComplete) {
+  // All concepts already mastered (backend returned empty session)
+  if (session.all_mastered && session.questions.length === 0) {
     return (
       <Card className="max-w-2xl mx-auto">
         <CardContent className="pt-8 pb-8">
           <div className="text-center space-y-6">
-            {wasMastered ? (
+            <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto">
+              <Trophy className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                All Mastered!
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                You've mastered all concepts in this topic. Great work!
+              </p>
+            </div>
+            <Button variant="outline" onClick={onComplete}>
+              Back to Overview
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!currentQuestion && !sessionComplete) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <div className="text-center space-y-4">
+            <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground" />
+            <p className="text-muted-foreground">
+              No questions available for this topic yet.
+            </p>
+            <Button variant="outline" onClick={onExit}>
+              Go Back
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // ---------- Session complete ----------
+
+  if (sessionComplete) {
+    const deltas = Array.from(conceptDeltas.values());
+
+    return (
+      <Card className="max-w-2xl mx-auto">
+        <CardContent className="pt-8 pb-8">
+          <div className="text-center space-y-6">
+            {anyNewlyMastered ? (
               <>
                 <div className="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mx-auto">
                   <Trophy className="w-10 h-10 text-emerald-600 dark:text-emerald-400" />
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
-                    Concept Mastered! 🎉
+                    Concepts Mastered!
                   </h2>
                   <p className="text-muted-foreground mt-2">
-                    You've demonstrated understanding of{" "}
-                    <span className="font-medium">{session.conceptName}</span>
+                    Amazing progress this session!
                   </p>
                 </div>
               </>
@@ -211,49 +282,99 @@ export function StudySession({
                 <div>
                   <h2 className="text-2xl font-bold">Good Progress!</h2>
                   <p className="text-muted-foreground mt-2">
-                    Keep practicing to master{" "}
-                    <span className="font-medium">{session.conceptName}</span>
+                    Keep going to master these concepts.
                   </p>
                 </div>
               </>
             )}
 
+            {/* Session stats */}
             <div className="flex items-center justify-center gap-8 py-4">
               <div className="text-center">
                 <div className="text-3xl font-bold text-primary">
-                  {sessionCorrectCount}
+                  {correctCount}
                 </div>
                 <div className="text-sm text-muted-foreground">Correct</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold">
-                  {session.currentQuestionIndex + 1}
+                  {currentIndex + (showFeedback ? 1 : 0)}
                 </div>
                 <div className="text-sm text-muted-foreground">Questions</div>
               </div>
             </div>
 
+            {/* Per-concept mastery deltas */}
+            {deltas.length > 0 && (
+              <div className="space-y-3 text-left max-w-md mx-auto">
+                <h3 className="text-sm font-semibold text-center text-muted-foreground">
+                  Concept Mastery
+                </h3>
+                {deltas.map((d, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center gap-3 p-3 rounded-lg bg-muted/50"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">
+                        {d.concept_name}
+                      </p>
+                      <Progress
+                        value={masteryPercent(d.p_end)}
+                        className="h-1.5 mt-1"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1 text-xs shrink-0">
+                      <span className="text-muted-foreground">
+                        {masteryPercent(d.p_start)}%
+                      </span>
+                      <TrendingUp className="w-3 h-3 text-primary" />
+                      <span
+                        className={
+                          d.newly_mastered
+                            ? "font-bold text-emerald-600 dark:text-emerald-400"
+                            : "font-medium"
+                        }
+                      >
+                        {masteryPercent(d.p_end)}%
+                      </span>
+                      {d.newly_mastered && (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 ml-0.5" />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="flex gap-3 justify-center pt-4">
-              <Button variant="outline" onClick={handleComplete}>
+              <Button variant="outline" onClick={onComplete}>
                 Back to Overview
               </Button>
-              {!wasMastered && (
-                <Button
-                  onClick={() => {
-                    setSessionComplete(false);
-                    setSession({
-                      ...session,
-                      currentQuestionIndex: 0,
-                    });
-                    setSelectedAnswer(null);
-                    setShowFeedback(false);
-                    setSessionCorrectCount(0);
-                  }}
-                >
-                  <Sparkles className="w-4 h-4 mr-2" />
-                  Continue Practicing
-                </Button>
-              )}
+              <Button
+                onClick={() => {
+                  // Request a fresh session
+                  setSessionComplete(false);
+                  setCurrentIndex(0);
+                  setSelectedAnswer(null);
+                  setCurrentResult(null);
+                  setShowFeedback(false);
+                  setCorrectCount(0);
+                  setConceptDeltas(new Map());
+                  setLoading(true);
+                  fetchBktSession(user!.id, documentId, topicId).then((s) => {
+                    if (s) {
+                      setSession(s);
+                      if (s.all_mastered) setSessionComplete(true);
+                    }
+                    setLoading(false);
+                    setQuestionStartTime(Date.now());
+                  });
+                }}
+              >
+                <Sparkles className="w-4 h-4 mr-2" />
+                Continue Learning
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -261,10 +382,9 @@ export function StudySession({
     );
   }
 
-  const progressPercent = Math.min(
-    100,
-    (sessionCorrectCount / totalCorrectNeeded) * 100,
-  );
+  // ---------- Active question ----------
+
+  const progressPercent = ((currentIndex + 1) / session.questions.length) * 100;
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
@@ -272,7 +392,9 @@ export function StudySession({
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-muted-foreground">Studying</p>
-          <h2 className="text-lg font-semibold">{session.conceptName}</h2>
+          <h2 className="text-lg font-semibold">
+            {currentQuestion!.concept_name}
+          </h2>
         </div>
         <Button variant="ghost" size="sm" onClick={onExit}>
           <X className="w-4 h-4 mr-1" />
@@ -280,55 +402,88 @@ export function StudySession({
         </Button>
       </div>
 
-      {/* Progress towards mastery */}
+      {/* Session progress bar */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">Progress to mastery</span>
+          <span className="text-muted-foreground">Session progress</span>
           <span className="font-medium">
-            {sessionCorrectCount}/{totalCorrectNeeded} correct
+            {currentIndex + 1}/{session.questions.length}
           </span>
         </div>
         <Progress value={progressPercent} className="h-2" />
       </div>
+
+      {/* Mastery delta (live, after feedback) */}
+      {showFeedback && currentResult && (
+        <div className="flex items-center justify-center gap-2 text-sm py-1">
+          <span className="text-muted-foreground">
+            {currentQuestion!.concept_name} mastery:
+          </span>
+          <span>{masteryPercent(currentResult.p_mastery_before)}%</span>
+          <TrendingUp
+            className={`w-4 h-4 ${
+              currentResult.p_mastery_after > currentResult.p_mastery_before
+                ? "text-emerald-500"
+                : "text-rose-500"
+            }`}
+          />
+          <span
+            className={
+              currentResult.is_newly_mastered
+                ? "font-bold text-emerald-600 dark:text-emerald-400"
+                : "font-medium"
+            }
+          >
+            {masteryPercent(currentResult.p_mastery_after)}%
+          </span>
+          {currentResult.is_newly_mastered && (
+            <span className="text-emerald-600 dark:text-emerald-400 font-medium ml-1">
+              Mastered!
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Question Card */}
       <Card>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
             <CardDescription>
-              Question {session.currentQuestionIndex + 1} of{" "}
-              {session.questions.length}
+              Question {currentIndex + 1} of {session.questions.length}
             </CardDescription>
             <span
               className={`text-xs px-2 py-1 rounded-full ${
-                currentQuestion.difficultyLevel === "easy"
+                currentQuestion!.difficulty_level === "easy"
                   ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                  : currentQuestion.difficultyLevel === "medium"
+                  : currentQuestion!.difficulty_level === "medium"
                     ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400"
                     : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
               }`}
             >
-              {currentQuestion.difficultyLevel}
+              {currentQuestion!.difficulty_level}
             </span>
           </div>
           <CardTitle className="text-lg leading-relaxed">
-            {currentQuestion.question}
+            {currentQuestion!.question}
           </CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-4">
           {/* Options */}
           <div className="space-y-3">
-            {currentQuestion.options.map((option, idx) => {
+            {currentQuestion!.options.map((option) => {
+              const idx = option.index;
               const isSelected = selectedAnswer === idx;
-              const isCorrectOption = idx === currentQuestion.correctAnswer;
-              const showResult = showFeedback;
+              const isCorrectOption =
+                currentResult != null &&
+                idx === currentResult.correct_option_index;
+              const showResult = showFeedback && currentResult != null;
 
               return (
                 <button
-                  key={idx}
+                  key={option.id}
                   onClick={() => handleSelectOption(idx)}
-                  disabled={showFeedback}
+                  disabled={showFeedback || submitting}
                   className={`w-full text-left p-4 rounded-lg border-2 transition-all duration-200 ${
                     !showResult
                       ? isSelected
@@ -354,16 +509,16 @@ export function StudySession({
                       {getOptionLabel(idx)}.
                     </span>
                     <div className="flex-1">
-                      <p>{option}</p>
+                      <p>{option.text}</p>
 
-                      {/* Feedback for this option */}
+                      {/* Explanation appears on the correct option */}
                       {showResult &&
                         isCorrectOption &&
-                        currentQuestion.explanation && (
+                        currentResult?.explanation && (
                           <div className="mt-3 flex items-start gap-2">
                             <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                             <p className="text-sm text-emerald-700 dark:text-emerald-300">
-                              {currentQuestion.explanation}
+                              {currentResult.explanation}
                             </p>
                           </div>
                         )}
@@ -375,7 +530,7 @@ export function StudySession({
           </div>
 
           {/* Hint */}
-          {currentQuestion.hint && !showFeedback && (
+          {currentQuestion!.hint && !showFeedback && (
             <div className="pt-2">
               <button
                 onClick={() => setShowHint(!showHint)}
@@ -386,7 +541,7 @@ export function StudySession({
               </button>
               {showHint && (
                 <p className="mt-2 text-sm text-muted-foreground pl-6">
-                  {currentQuestion.hint}
+                  {currentQuestion!.hint}
                 </p>
               )}
             </div>
@@ -396,9 +551,7 @@ export function StudySession({
           {showFeedback && (
             <div className="pt-4 flex justify-end">
               <Button onClick={handleNext} className="gap-2">
-                {session.currentQuestionIndex ===
-                  session.questions.length - 1 ||
-                sessionCorrectCount >= totalCorrectNeeded
+                {currentIndex === session.questions.length - 1
                   ? "See Results"
                   : "Next Question"}
                 <ChevronRight className="w-4 h-4" />

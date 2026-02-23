@@ -4,30 +4,20 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import {
   Sparkles,
   Plus,
-  Clock,
-  Trophy,
   Loader2,
-  ChevronRight,
-  BookOpen,
-  Target,
-  CheckCircle,
   AlertCircle,
   RefreshCw,
-  GraduationCap,
+  ArrowRight,
+  Upload,
 } from "lucide-react";
 import { fetchDashboardData } from "../services/dashboardService";
 import { UploadModal } from "./UploadModal";
+import type { CourseSummary, DashboardData } from "../types";
 import { supabase } from "@/lib/supabase";
 
 const dashboardQueryKeys = {
@@ -83,12 +73,6 @@ export function Dashboard() {
     };
   }, [user, queryClient]);
 
-  const handleContinueStudying = () => {
-    if (dashboardData?.nextStudyItem) {
-      navigate(`/study/${dashboardData.nextStudyItem.courseId}`);
-    }
-  };
-
   if (!user) {
     navigate("/login");
     return null;
@@ -98,12 +82,10 @@ export function Dashboard() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
-          <div className="flex items-center justify-center min-h-100">
-            <div className="text-center space-y-4">
-              <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
-              <p className="text-muted-foreground">Loading your dashboard...</p>
-            </div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center space-y-3">
+            <Loader2 className="w-10 h-10 animate-spin mx-auto text-primary" />
+            <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
       </>
@@ -114,310 +96,94 @@ export function Dashboard() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
-          <Card className="max-w-lg mx-auto">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-4">
-                <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
-                <p className="text-muted-foreground">
-                  Failed to load dashboard
-                </p>
-                <Button
-                  variant="outline"
-                  onClick={() =>
-                    queryClient.invalidateQueries({
-                      queryKey: dashboardQueryKeys.data(user.id),
-                    })
-                  }
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Retry
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
+            <p className="text-sm text-muted-foreground">
+              Failed to load dashboard
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                queryClient.invalidateQueries({
+                  queryKey: dashboardQueryKeys.data(user.id),
+                })
+              }
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
+            </Button>
+          </div>
         </div>
       </>
     );
   }
 
   const hasNoCourses = !dashboardData || dashboardData.courses.length === 0;
-  const hasStudyableCourses = dashboardData?.courses.some(
-    (c) => c.totalConcepts > 0,
-  );
+  const nextItem = dashboardData?.nextStudyItem;
 
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
-        <div className="max-w-5xl mx-auto space-y-8">
-          {/* Welcome / Hero Section */}
-          <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold">
-                {hasNoCourses
-                  ? "Welcome to PassAI"
-                  : `Welcome back${user.email ? `, ${user.email.split("@")[0]}` : ""}!`}
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                {hasNoCourses
-                  ? "Upload your study materials to get started"
-                  : dashboardData?.nextStudyItem
-                    ? "Ready to continue your learning journey?"
-                    : "All caught up! Upload more materials or review what you've learned."}
-              </p>
-            </div>
+      <div className="min-h-screen bg-background pt-28 pb-16">
+        <div className="max-w-5xl mx-auto px-6">
+          {hasNoCourses ? (
+            <EmptyState onUpload={() => setUploadModalOpen(true)} />
+          ) : (
+            <div className="space-y-10">
+              {/* ── Hero: Overall progress + CTA ── */}
+              <HeroSection
+                data={dashboardData!}
+                onStartStudying={() => {
+                  if (nextItem) navigate(`/study/${nextItem.courseId}`);
+                }}
+                onUpload={() => setUploadModalOpen(true)}
+              />
 
-            {/* Primary Action Card */}
-            {hasStudyableCourses && dashboardData?.nextStudyItem ? (
-              <Card className="bg-linear-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        {dashboardData.nextStudyItem.reason === "continue" && (
-                          <Target className="w-5 h-5 text-primary" />
-                        )}
-                        {dashboardData.nextStudyItem.reason === "new" && (
-                          <BookOpen className="w-5 h-5 text-primary" />
-                        )}
-                        {dashboardData.nextStudyItem.reason === "review" && (
-                          <Clock className="w-5 h-5 text-primary" />
-                        )}
-                        <span className="text-sm font-medium text-primary">
-                          {dashboardData.nextStudyItem.reason === "continue"
-                            ? "Continue where you left off"
-                            : dashboardData.nextStudyItem.reason === "new"
-                              ? "Start new material"
-                              : "Time to review"}
-                        </span>
-                      </div>
-                      <h2 className="text-lg font-semibold">
-                        {dashboardData.nextStudyItem.courseTitle}
-                      </h2>
-                    </div>
-                    <Button
-                      size="lg"
-                      className="gap-2 shrink-0"
-                      onClick={handleContinueStudying}
-                    >
-                      <Sparkles className="w-5 h-5" />
-                      Continue Studying
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="bg-linear-to-br from-muted/50 to-transparent border-dashed">
-                <CardContent className="pt-6">
-                  <div className="flex flex-col items-center text-center gap-4 py-4">
-                    <div className="p-4 bg-primary/10 rounded-full">
-                      <Plus className="w-8 h-8 text-primary" />
-                    </div>
-                    <div className="space-y-1">
-                      <h2 className="text-lg font-semibold">
-                        {hasNoCourses
-                          ? "Upload your first material"
-                          : "Add more materials"}
-                      </h2>
-                      <p className="text-sm text-muted-foreground max-w-sm">
-                        Upload PDFs, documents, or images. We'll extract key
-                        concepts and create personalized study sessions.
-                      </p>
-                    </div>
-                    <Button
-                      size="lg"
-                      className="gap-2"
-                      onClick={() => setUploadModalOpen(true)}
-                    >
-                      <Plus className="w-5 h-5" />
-                      Upload Material
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Stats Overview */}
-          {!hasNoCourses && dashboardData && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="pt-4 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <GraduationCap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {dashboardData.totalCourses}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Courses</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-4 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
-                      <Trophy className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {dashboardData.totalConceptsMastered}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Mastered</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-4 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                      <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {dashboardData.totalConcepts}
-                      </p>
-                      <p className="text-xs text-muted-foreground">Concepts</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardContent className="pt-4 pb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                      <Target className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-2xl font-bold">
-                        {dashboardData.overallProgress}%
-                      </p>
-                      <p className="text-xs text-muted-foreground">Progress</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
-          {/* Courses List */}
-          {!hasNoCourses &&
-            dashboardData &&
-            dashboardData.courses.length > 0 && (
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>Your Courses</CardTitle>
-                    <CardDescription>
-                      Courses and study progress
-                    </CardDescription>
-                  </div>
+              {/* ── Course grid ── */}
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-lg font-semibold">Your Courses</h2>
                   <Button
-                    variant="outline"
+                    variant="ghost"
                     size="sm"
-                    className="gap-2"
+                    className="gap-2 text-muted-foreground"
                     onClick={() => setUploadModalOpen(true)}
                   >
                     <Plus className="w-4 h-4" />
                     Add Material
                   </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {dashboardData.courses.map((course) => (
-                      <div
-                        key={course.id}
-                        className={`flex items-center gap-4 p-4 rounded-lg border transition-colors ${
-                          course.totalConcepts > 0
-                            ? "hover:bg-muted/50 cursor-pointer"
-                            : "bg-muted/20"
-                        }`}
-                        onClick={() => {
-                          if (course.totalConcepts > 0) {
-                            navigate(`/study/${course.id}`);
-                          }
-                        }}
-                      >
-                        <div className="p-2 bg-muted rounded-lg shrink-0">
-                          <GraduationCap className="w-5 h-5 text-muted-foreground" />
-                        </div>
+                </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-medium truncate">
-                              {course.title}
-                            </h3>
-                            {course.hasProcessing && (
-                              <span className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                                Processing
-                              </span>
-                            )}
-                          </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {dashboardData!.courses.map((course) => (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      isRecommended={nextItem?.courseId === course.id}
+                      onClick={() => {
+                        if (course.totalConcepts > 0) {
+                          navigate(`/study/${course.id}`);
+                        }
+                      }}
+                    />
+                  ))}
 
-                          <p className="text-xs text-muted-foreground mt-0.5">
-                            {course.documentCount}{" "}
-                            {course.documentCount === 1
-                              ? "document"
-                              : "documents"}
-                            {course.totalConcepts > 0 &&
-                              ` · ${course.totalConcepts} concepts`}
-                          </p>
-
-                          {course.totalConcepts > 0 && (
-                            <div className="mt-2 space-y-1">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="text-muted-foreground">
-                                  {course.masteredConcepts}/
-                                  {course.totalConcepts} mastered
-                                </span>
-                                <span className="font-medium">
-                                  {course.progressPercent}%
-                                </span>
-                              </div>
-                              <Progress
-                                value={course.progressPercent}
-                                className="h-1.5"
-                              />
-                            </div>
-                          )}
-
-                          {course.totalConcepts === 0 &&
-                            !course.hasProcessing && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                {course.documentCount === 0
-                                  ? "No documents yet"
-                                  : "No concepts extracted yet"}
-                              </p>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0">
-                          {course.progressPercent === 100 &&
-                            course.totalConcepts > 0 && (
-                              <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
-                                <CheckCircle className="w-4 h-4" />
-                              </span>
-                            )}
-
-                          {course.totalConcepts > 0 && (
-                            <ChevronRight className="w-5 h-5 text-muted-foreground" />
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                  {/* "+ New" card */}
+                  <button
+                    onClick={() => setUploadModalOpen(true)}
+                    className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-muted-foreground/20 p-6 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors cursor-pointer min-h-50"
+                  >
+                    <div className="p-3 rounded-full bg-muted">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium">New Course</span>
+                  </button>
+                </div>
+              </section>
+            </div>
+          )}
         </div>
       </div>
 
@@ -428,5 +194,220 @@ export function Dashboard() {
         onUploadComplete={handleUploadComplete}
       />
     </>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+ * Hero Section — overall mastery ring + primary CTA
+ * ────────────────────────────────────────────────────── */
+
+function HeroSection({
+  data,
+  onStartStudying,
+  onUpload,
+}: {
+  data: DashboardData;
+  onStartStudying: () => void;
+  onUpload: () => void;
+}) {
+  const { user } = useAuth();
+  const name = user?.email?.split("@")[0] ?? "";
+  const hasStudyable = data.courses.some((c) => c.totalConcepts > 0);
+  const nextItem = data.nextStudyItem;
+
+  const subtitle = !hasStudyable
+    ? "Your materials are being processed. Check back soon!"
+    : nextItem?.reason === "continue"
+      ? "Pick up where you left off"
+      : nextItem?.reason === "new"
+        ? "Ready to start something new"
+        : nextItem?.reason === "review"
+          ? "Time to reinforce what you've learned"
+          : "All caught up!";
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center gap-8">
+      {/* Ring */}
+      <CircularProgress
+        value={data.overallProgress}
+        size={140}
+        strokeWidth={10}
+        labelClassName="text-2xl"
+        className="shrink-0"
+      />
+
+      {/* Text + CTA */}
+      <div className="flex-1 text-center sm:text-left space-y-3">
+        <div>
+          <h1 className="text-2xl font-bold">
+            {name ? `Welcome back, ${name}` : "Welcome back"}
+          </h1>
+          <p className="text-muted-foreground mt-1">{subtitle}</p>
+        </div>
+
+        {hasStudyable && data.totalConcepts > 0 && (
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">
+              {data.totalConceptsMastered}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-foreground">
+              {data.totalConcepts}
+            </span>{" "}
+            concepts mastered
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+          {hasStudyable && nextItem ? (
+            <Button size="lg" className="gap-2" onClick={onStartStudying}>
+              <Sparkles className="w-4 h-4" />
+              {nextItem.reason === "continue"
+                ? "Continue Studying"
+                : nextItem.reason === "new"
+                  ? "Start Learning"
+                  : "Review"}
+            </Button>
+          ) : (
+            <Button size="lg" className="gap-2" onClick={onUpload}>
+              <Upload className="w-4 h-4" />
+              Upload Material
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+ * Course Card — ring + title + meta
+ * ────────────────────────────────────────────────────── */
+
+function CourseCard({
+  course,
+  isRecommended,
+  onClick,
+}: {
+  course: CourseSummary;
+  isRecommended: boolean;
+  onClick: () => void;
+}) {
+  const isClickable = course.totalConcepts > 0;
+  const isProcessing = course.hasProcessing;
+
+  return (
+    <Card
+      className={`relative overflow-hidden rounded-2xl transition-all duration-200 ${
+        isClickable
+          ? "cursor-pointer hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+          : "opacity-80"
+      } ${isRecommended ? "ring-2 ring-primary/40 shadow-md" : ""}`}
+      onClick={isClickable ? onClick : undefined}
+    >
+      {/* Recommended badge */}
+      {isRecommended && (
+        <div className="absolute top-2.5 right-2.5">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            Next up
+          </span>
+        </div>
+      )}
+
+      <CardContent className="flex flex-col items-center text-center pt-7 pb-5 px-4">
+        {/* Progress ring */}
+        <div className="mb-4">
+          {isProcessing && course.totalConcepts === 0 ? (
+            <div
+              className="relative flex items-center justify-center"
+              style={{ width: 80, height: 80 }}
+            >
+              <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+            </div>
+          ) : (
+            <CircularProgress
+              value={course.progressPercent}
+              size={80}
+              strokeWidth={7}
+              labelClassName="text-base"
+            />
+          )}
+        </div>
+
+        {/* Course name */}
+        <h3 className="font-semibold text-sm leading-tight line-clamp-2 mb-1.5 min-h-10">
+          {course.title}
+        </h3>
+
+        {/* Meta line */}
+        <p className="text-xs text-muted-foreground">
+          {course.totalConcepts > 0 ? (
+            <>
+              {course.masteredConcepts}/{course.totalConcepts} mastered
+            </>
+          ) : isProcessing ? (
+            <span className="text-blue-500">Processing...</span>
+          ) : (
+            <>
+              {course.documentCount}{" "}
+              {course.documentCount === 1 ? "doc" : "docs"}
+            </>
+          )}
+        </p>
+
+        {/* Arrow hint for clickable cards */}
+        {isClickable && (
+          <div className="mt-3 text-muted-foreground/40">
+            <ArrowRight className="w-4 h-4" />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+ * Empty State — first-time user
+ * ────────────────────────────────────────────────────── */
+
+function EmptyState({ onUpload }: { onUpload: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 max-w-md mx-auto">
+      <div className="space-y-2">
+        <h1 className="text-3xl font-bold">Welcome to PassAI</h1>
+        <p className="text-muted-foreground">
+          Upload your study materials and we'll create personalized, adaptive
+          study sessions powered by AI.
+        </p>
+      </div>
+
+      <div className="flex flex-col items-center gap-4 pt-4">
+        <CircularProgress
+          value={0}
+          size={100}
+          strokeWidth={8}
+          showLabel={false}
+        />
+        <Button size="lg" className="gap-2" onClick={onUpload}>
+          <Upload className="w-5 h-5" />
+          Upload Your First Material
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-3 gap-6 pt-8 text-center">
+        <div className="space-y-1">
+          <div className="text-2xl">📄</div>
+          <p className="text-xs text-muted-foreground">Upload PDFs & docs</p>
+        </div>
+        <div className="space-y-1">
+          <div className="text-2xl">🧠</div>
+          <p className="text-xs text-muted-foreground">AI extracts concepts</p>
+        </div>
+        <div className="space-y-1">
+          <div className="text-2xl">📈</div>
+          <p className="text-xs text-muted-foreground">Adaptive learning</p>
+        </div>
+      </div>
+    </div>
   );
 }

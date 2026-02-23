@@ -4,20 +4,19 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import {
-  BookOpen,
   CheckCircle,
-  Circle,
   Loader2,
   AlertCircle,
   Play,
   Trophy,
-  Target,
   ArrowLeft,
   Sparkles,
-  BarChart3,
+  ChevronDown,
+  Lock,
+  RotateCcw,
 } from "lucide-react";
 import { fetchCourseProgress } from "../services/studyService";
 import { StudySession } from "./StudySession";
@@ -34,8 +33,8 @@ export function CourseStudyPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Which topic is being studied (null = overview)
   const [studyingTopicId, setStudyingTopicId] = useState<string | null>(null);
+  const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
 
   const {
     data: progress,
@@ -47,9 +46,10 @@ export function CourseStudyPage() {
     enabled: !!courseId && !!user,
   });
 
+  /* ── Handlers ─────────────────────────────────────── */
+
   const handleStartStudying = () => {
     if (!progress) return;
-    // Auto-select the best topic: lowest-progress in-progress topic, or first not-started
     const inProgress = progress.topics.filter(
       (t) => t.status === "in_progress",
     );
@@ -67,14 +67,9 @@ export function CourseStudyPage() {
       setStudyingTopicId(notStarted[0].topic_id);
       return;
     }
-    // All mastered — pick first topic for review
     if (progress.topics.length > 0) {
       setStudyingTopicId(progress.topics[0].topic_id);
     }
-  };
-
-  const handleStudyTopic = (topicId: string) => {
-    setStudyingTopicId(topicId);
   };
 
   const handleSessionComplete = () => {
@@ -91,43 +86,13 @@ export function CourseStudyPage() {
     });
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "mastered":
-        return <CheckCircle className="w-5 h-5 text-emerald-500" />;
-      case "in_progress":
-        return <Target className="w-5 h-5 text-amber-500" />;
-      default:
-        return <Circle className="w-5 h-5 text-muted-foreground" />;
-    }
-  };
-
-  const getMasteryPercent = (concept: ConceptProgress) =>
-    Math.round(concept.p_mastery * 100);
-
-  const getMasteryColor = (p: number) => {
-    if (p >= 0.85) return "text-emerald-600 dark:text-emerald-400";
-    if (p >= 0.5) return "text-amber-600 dark:text-amber-400";
-    if (p > 0.2) return "text-blue-600 dark:text-blue-400";
-    return "text-muted-foreground";
-  };
-
-  const getTopicCardStyle = (topic: TopicProgress) => {
-    if (topic.status === "mastered") {
-      return "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20";
-    }
-    if (topic.status === "in_progress") {
-      return "border-amber-200 dark:border-amber-800 bg-amber-50/30 dark:bg-amber-950/10";
-    }
-    return "border-border";
-  };
+  /* ── Guard states ─────────────────────────────────── */
 
   if (!user) {
     navigate("/login");
     return null;
   }
 
-  // Show study session if actively studying a topic
   if (studyingTopicId && courseId) {
     return (
       <>
@@ -150,12 +115,10 @@ export function CourseStudyPage() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
-          <div className="flex items-center justify-center min-h-100">
-            <div className="text-center space-y-4">
-              <Loader2 className="w-12 h-12 animate-spin mx-auto text-primary" />
-              <p className="text-muted-foreground">Loading progress...</p>
-            </div>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center space-y-3">
+            <Loader2 className="w-10 h-10 animate-spin mx-auto text-primary" />
+            <p className="text-sm text-muted-foreground">Loading progress...</p>
           </div>
         </div>
       </>
@@ -166,20 +129,16 @@ export function CourseStudyPage() {
     return (
       <>
         <Header />
-        <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
-          <Card className="max-w-lg mx-auto">
-            <CardContent className="pt-6">
-              <div className="text-center space-y-4">
-                <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
-                <p className="text-muted-foreground">
-                  Failed to load course progress
-                </p>
-                <Button variant="outline" onClick={() => navigate("/home")}>
-                  Back to Dashboard
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
+            <p className="text-sm text-muted-foreground">
+              Failed to load course progress
+            </p>
+            <Button variant="outline" onClick={() => navigate("/home")}>
+              Back to Dashboard
+            </Button>
+          </div>
         </div>
       </>
     );
@@ -190,157 +149,269 @@ export function CourseStudyPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Back button */}
-          <Button
-            variant="ghost"
-            className="gap-2"
+      <div className="min-h-screen bg-background pt-28 pb-16">
+        <div className="max-w-2xl mx-auto px-6">
+          {/* Back */}
+          <button
             onClick={() => navigate("/home")}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
-          </Button>
+            Dashboard
+          </button>
 
-          {/* Course header */}
-          <div className="space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <h1 className="text-2xl font-bold">{progress.course_title}</h1>
-                <p className="text-muted-foreground">
-                  {progress.total_concepts} concepts across{" "}
-                  {progress.topics.length} topics
-                </p>
+          {/* ── Hero: ring + course info + CTA ── */}
+          <div className="flex flex-col items-center text-center mb-12">
+            <CircularProgress
+              value={progress.overall_progress}
+              size={160}
+              strokeWidth={12}
+              labelClassName="text-3xl"
+              className="mb-5"
+            />
+
+            <h1 className="text-2xl font-bold mb-1">
+              {progress.course_title}
+            </h1>
+            <p className="text-sm text-muted-foreground mb-5">
+              {progress.mastered_concepts} of {progress.total_concepts} concepts
+              mastered
+            </p>
+
+            {allMastered ? (
+              <div className="flex items-center gap-2 text-emerald-500 font-semibold">
+                <Trophy className="w-5 h-5" />
+                All Mastered!
               </div>
-
-              {allMastered ? (
-                <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                  <Trophy className="w-6 h-6" />
-                  <span className="font-semibold">All Mastered!</span>
-                </div>
-              ) : (
-                <Button onClick={handleStartStudying} className="gap-2">
-                  <Sparkles className="w-4 h-4" />
-                  Continue Learning
-                </Button>
-              )}
-            </div>
-
-            {/* Overall progress card */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Overall Mastery</span>
-                    <span className="text-sm text-muted-foreground">
-                      {progress.mastered_concepts}/{progress.total_concepts}{" "}
-                      concepts mastered
-                    </span>
-                  </div>
-                  <Progress value={progress.overall_progress} className="h-3" />
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <BarChart3 className="w-3 h-3" />
-                    <span>
-                      Mastery threshold:{" "}
-                      {Math.round(progress.mastery_threshold * 100)}%
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            ) : (
+              <Button size="lg" className="gap-2" onClick={handleStartStudying}>
+                <Sparkles className="w-4 h-4" />
+                Continue Learning
+              </Button>
+            )}
           </div>
 
-          {/* Topic cards */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              Topics
-            </h2>
+          {/* ── Learning Path ── */}
+          <div className="relative">
+            {progress.topics.map((topic, index) => {
+              const isLast = index === progress.topics.length - 1;
+              const isExpanded = expandedTopicId === topic.topic_id;
 
-            <div className="grid gap-4">
-              {progress.topics.map((topic) => (
-                <Card
+              return (
+                <PathNode
                   key={topic.topic_id}
-                  className={`transition-all hover:shadow-md ${getTopicCardStyle(topic)}`}
-                >
-                  <CardContent className="pt-6">
-                    <div className="space-y-4">
-                      {/* Topic header */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          {getStatusIcon(topic.status)}
-                          <div>
-                            <h3 className="font-semibold text-base">
-                              {topic.topic_name}
-                            </h3>
-                            <p className="text-sm text-muted-foreground">
-                              {topic.mastered_concepts}/{topic.total_concepts}{" "}
-                              concepts mastered
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          size="sm"
-                          variant={
-                            topic.status === "mastered" ? "outline" : "default"
-                          }
-                          onClick={() => handleStudyTopic(topic.topic_id)}
-                        >
-                          {topic.status === "mastered" ? (
-                            <>Review</>
-                          ) : topic.status === "in_progress" ? (
-                            <>
-                              <Play className="w-3 h-3 mr-1" />
-                              Continue
-                            </>
-                          ) : (
-                            <>
-                              <Play className="w-3 h-3 mr-1" />
-                              Start
-                            </>
-                          )}
-                        </Button>
-                      </div>
-
-                      {/* Topic progress bar */}
-                      <Progress
-                        value={topic.overall_progress}
-                        className="h-2"
-                      />
-
-                      {/* Concept chips */}
-                      <div className="flex flex-wrap gap-2">
-                        {topic.concepts.map((concept) => (
-                          <div
-                            key={concept.concept_id}
-                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${
-                              concept.is_mastered
-                                ? "bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300"
-                                : concept.status === "in_progress"
-                                  ? "bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300"
-                                  : "bg-muted border-border text-muted-foreground"
-                            }`}
-                            title={`${concept.concept_name}: ${getMasteryPercent(concept)}% mastery (${concept.n_attempts} attempts)`}
-                          >
-                            <span className="max-w-30 truncate">
-                              {concept.concept_name}
-                            </span>
-                            <span
-                              className={`text-[10px] font-bold ${getMasteryColor(concept.p_mastery)}`}
-                            >
-                              {getMasteryPercent(concept)}%
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  topic={topic}
+                  index={index}
+                  isLast={isLast}
+                  isExpanded={isExpanded}
+                  onToggleExpand={() =>
+                    setExpandedTopicId(
+                      isExpanded ? null : topic.topic_id,
+                    )
+                  }
+                  onStudy={() => setStudyingTopicId(topic.topic_id)}
+                />
+              );
+            })}
           </div>
         </div>
       </div>
     </>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+ * PathNode — a single node in the vertical learning path
+ * ═══════════════════════════════════════════════════════ */
+
+function PathNode({
+  topic,
+  index,
+  isLast,
+  isExpanded,
+  onToggleExpand,
+  onStudy,
+}: {
+  topic: TopicProgress;
+  index: number;
+  isLast: boolean;
+  isExpanded: boolean;
+  onToggleExpand: () => void;
+  onStudy: () => void;
+}) {
+  const isMastered = topic.status === "mastered";
+  const isInProgress = topic.status === "in_progress";
+
+  const nodeColor = isMastered
+    ? "bg-emerald-500 text-white"
+    : isInProgress
+      ? "bg-primary text-primary-foreground"
+      : "bg-muted text-muted-foreground";
+
+  const lineColor = isMastered
+    ? "bg-emerald-500"
+    : "bg-border";
+
+  return (
+    <div className="relative flex gap-5">
+      {/* ── Vertical connector line + circle ── */}
+      <div className="flex flex-col items-center shrink-0 w-10">
+        {/* Circle node */}
+        <div
+          className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 z-10 ${nodeColor}`}
+        >
+          {isMastered ? (
+            <CheckCircle className="w-5 h-5" />
+          ) : (
+            index + 1
+          )}
+        </div>
+
+        {/* Connector line to next node */}
+        {!isLast && (
+          <div className={`w-0.5 flex-1 min-h-6 ${lineColor}`} />
+        )}
+      </div>
+
+      {/* ── Content card ── */}
+      <div className={`flex-1 ${!isLast ? "pb-6" : "pb-0"}`}>
+        <Card
+          className={`transition-all duration-200 overflow-hidden ${
+            isMastered
+              ? "border-emerald-200 dark:border-emerald-800/50"
+              : isInProgress
+                ? "border-primary/30 shadow-sm"
+                : "border-border"
+          }`}
+        >
+          <CardContent className="pt-5 pb-4 px-5">
+            {/* Header row */}
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-base truncate">
+                  {topic.topic_name}
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {topic.mastered_concepts}/{topic.total_concepts} mastered
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                {/* Mini ring */}
+                <CircularProgress
+                  value={topic.overall_progress}
+                  size={40}
+                  strokeWidth={4}
+                  labelClassName="text-[10px]"
+                />
+
+                {/* Action button */}
+                <Button
+                  size="sm"
+                  variant={isMastered ? "outline" : "default"}
+                  className="gap-1.5"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onStudy();
+                  }}
+                >
+                  {isMastered ? (
+                    <>
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      Review
+                    </>
+                  ) : isInProgress ? (
+                    <>
+                      <Play className="w-3.5 h-3.5" />
+                      Continue
+                    </>
+                  ) : (
+                    <>
+                      <Play className="w-3.5 h-3.5" />
+                      Start
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            {/* Expand toggle for concept detail */}
+            {topic.concepts.length > 0 && (
+              <button
+                onClick={onToggleExpand}
+                className="flex items-center gap-1.5 mt-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronDown
+                  className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                    isExpanded ? "rotate-180" : ""
+                  }`}
+                />
+                {isExpanded ? "Hide" : "Show"} {topic.concepts.length} concepts
+              </button>
+            )}
+
+            {/* Concept detail panel (collapsible) */}
+            {isExpanded && (
+              <div className="mt-3 pt-3 border-t border-border space-y-1.5">
+                {topic.concepts.map((concept) => (
+                  <ConceptRow key={concept.concept_id} concept={concept} />
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════
+ * ConceptRow — single concept inside the expand panel
+ * ═══════════════════════════════════════════════════════ */
+
+function ConceptRow({ concept }: { concept: ConceptProgress }) {
+  const pct = Math.round(concept.p_mastery * 100);
+
+  const barColor = concept.is_mastered
+    ? "bg-emerald-500"
+    : concept.status === "in_progress"
+      ? "bg-amber-500"
+      : "bg-muted-foreground/20";
+
+  const textColor = concept.is_mastered
+    ? "text-emerald-600 dark:text-emerald-400"
+    : concept.status === "in_progress"
+      ? "text-amber-600 dark:text-amber-400"
+      : "text-muted-foreground";
+
+  return (
+    <div className="flex items-center gap-3 py-1.5">
+      {/* Status indicator */}
+      <div className="w-4 shrink-0 flex justify-center">
+        {concept.is_mastered ? (
+          <CheckCircle className="w-3.5 h-3.5 text-emerald-500" />
+        ) : concept.status === "not_started" ? (
+          <Lock className="w-3 h-3 text-muted-foreground/40" />
+        ) : (
+          <div className="w-2 h-2 rounded-full bg-amber-500" />
+        )}
+      </div>
+
+      {/* Name */}
+      <span className="flex-1 text-sm truncate">{concept.concept_name}</span>
+
+      {/* Mini bar */}
+      <div className="w-16 h-1.5 rounded-full bg-muted overflow-hidden shrink-0">
+        <div
+          className={`h-full rounded-full transition-all duration-500 ${barColor}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+
+      {/* Pct */}
+      <span className={`text-xs font-medium tabular-nums w-8 text-right shrink-0 ${textColor}`}>
+        {pct}%
+      </span>
+    </div>
   );
 }

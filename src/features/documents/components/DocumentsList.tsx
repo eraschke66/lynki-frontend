@@ -83,6 +83,7 @@ export function DocumentsList({
               onDocumentUpdate({
                 id: data.id,
                 userId: data.user_id,
+                courseId: data.course_id,
                 title: data.title,
                 filePath: data.file_path,
                 fileType: data.file_type,

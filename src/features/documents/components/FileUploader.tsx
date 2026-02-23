@@ -1,7 +1,15 @@
-import { useRef } from "react";
-import { Upload, X, CheckCircle, AlertCircle, FileText } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import {
+  Upload,
+  X,
+  CheckCircle,
+  AlertCircle,
+  FileText,
+  Plus,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import {
   Card,
@@ -10,8 +18,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useFileUpload } from "../hooks/useFileUpload";
+import { fetchUserCourses, createCourse } from "@/features/courses";
+import type { Course } from "@/features/courses";
 
 interface FileUploaderProps {
   userId: string;
@@ -23,8 +40,47 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
   const { uploading, uploads, error, handleFilesSelected, resetUploads } =
     useFileUpload(onUploadComplete);
 
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [creatingNew, setCreatingNew] = useState(false);
+  const [newCourseName, setNewCourseName] = useState("");
+
+  useEffect(() => {
+    if (!userId) return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const data = await fetchUserCourses(userId);
+        if (cancelled) return;
+        setCourses(data);
+        if (data.length === 1) setSelectedCourseId(data[0].id);
+      } catch (err) {
+        if (!cancelled) console.error(err);
+      }
+    };
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  const handleCreateCourse = async () => {
+    if (!newCourseName.trim()) return;
+    try {
+      const course = await createCourse(userId, newCourseName.trim());
+      setCourses((prev) => [course, ...prev]);
+      setSelectedCourseId(course.id);
+      setCreatingNew(false);
+      setNewCourseName("");
+    } catch (err) {
+      console.error("Failed to create course:", err);
+    }
+  };
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFilesSelected(e.target.files, userId);
+    if (selectedCourseId) {
+      handleFilesSelected(e.target.files, userId, selectedCourseId);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -35,8 +91,8 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!uploading) {
-      handleFilesSelected(e.dataTransfer.files, userId);
+    if (!uploading && selectedCourseId) {
+      handleFilesSelected(e.dataTransfer.files, userId, selectedCourseId);
     }
   };
 
@@ -51,16 +107,71 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Course Selector */}
+        {!hasUploads && (
+          <div className="space-y-2">
+            <Label>Course</Label>
+            {creatingNew ? (
+              <div className="flex gap-2">
+                <Input
+                  value={newCourseName}
+                  onChange={(e) => setNewCourseName(e.target.value)}
+                  placeholder="Course name"
+                  onKeyDown={(e) => e.key === "Enter" && handleCreateCourse()}
+                />
+                <Button size="sm" onClick={handleCreateCourse}>
+                  Create
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setCreatingNew(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Select
+                  value={selectedCourseId}
+                  onValueChange={setSelectedCourseId}
+                >
+                  <SelectTrigger className="flex-1">
+                    <SelectValue placeholder="Select a course" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {courses.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  size="icon"
+                  variant="outline"
+                  onClick={() => setCreatingNew(true)}
+                  title="Create new course"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+
         {!hasUploads && (
           <div
             className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              uploading
+              uploading || !selectedCourseId
                 ? "border-muted bg-muted/50"
                 : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
             }`}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            onClick={() => !uploading && fileInputRef.current?.click()}
+            onClick={() =>
+              !uploading && selectedCourseId && fileInputRef.current?.click()
+            }
           >
             <div className="flex flex-col items-center gap-2">
               <div className="p-3 bg-primary/10 rounded-full">

@@ -61,6 +61,8 @@ export interface SessionQuestionOption {
   id: string;
   text: string;
   index: number;
+  is_correct: boolean;
+  explanation?: string;
 }
 
 export interface SessionQuestion {

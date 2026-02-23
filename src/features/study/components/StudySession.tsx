@@ -51,7 +51,6 @@ export function StudySession({
   const [showHint, setShowHint] = useState(false);
   const [sessionComplete, setSessionComplete] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState(0);
-  const [submitting, setSubmitting] = useState(false);
 
   const [correctCount, setCorrectCount] = useState(0);
   const [conceptDeltas, setConceptDeltas] = useState<Map<string, ConceptDelta>>(
@@ -80,52 +79,82 @@ export function StudySession({
   /* ── Submit answer ──────────────────────────────────── */
   const handleSelectOption = useCallback(
     async (optionIndex: number) => {
-      if (!session || !currentQuestion || !user || showFeedback || submitting)
-        return;
+      if (!session || !currentQuestion || !user || showFeedback) return;
 
-      setSubmitting(true);
       setSelectedAnswer(optionIndex);
-      setShowFeedback(true);
 
+      // ── Instant client-side feedback from session data ──
+      const correctOption = currentQuestion.options.find((o) => o.is_correct);
+      const isCorrect = correctOption?.index === optionIndex;
+
+      const instantResult: AnswerResult = {
+        question_id: currentQuestion.id,
+        concept_id: currentQuestion.concept_id ?? null,
+        is_correct: isCorrect,
+        correct_option_index: correctOption?.index ?? 0,
+        correct_option_text: correctOption?.text ?? "",
+        explanation: correctOption?.explanation ?? "",
+        selected_option_index: optionIndex,
+        // Placeholder mastery — will be updated when backend responds
+        p_mastery_before: 0,
+        p_mastery_after: 0,
+        is_newly_mastered: false,
+        mastery_threshold: 0.85,
+      };
+
+      setCurrentResult(instantResult);
+      setShowFeedback(true);
+      if (isCorrect) setCorrectCount((prev) => prev + 1);
+
+      // ── Fire BKT update in background (don't block the UI) ──
       const timeSpent = Date.now() - questionStartTime;
-      const result = await submitAnswer({
+      submitAnswer({
         user_id: user.id,
         question_id: currentQuestion.id,
         course_id: courseId,
         selected_option_index: optionIndex,
         session_id: session.session_id,
         time_spent_ms: timeSpent,
+      }).then((bktResult) => {
+        if (bktResult) {
+          // Patch in the real mastery numbers from the backend
+          setCurrentResult((prev) =>
+            prev?.question_id === currentQuestion.id
+              ? {
+                  ...prev,
+                  p_mastery_before: bktResult.p_mastery_before,
+                  p_mastery_after: bktResult.p_mastery_after,
+                  is_newly_mastered: bktResult.is_newly_mastered,
+                }
+              : prev,
+          );
+
+          const conceptId =
+            bktResult.concept_id ?? currentQuestion.concept_id ?? "";
+          setConceptDeltas((prev) => {
+            const updated = new Map(prev);
+            const existing = updated.get(conceptId);
+            if (existing) {
+              updated.set(conceptId, {
+                ...existing,
+                p_end: bktResult.p_mastery_after,
+                newly_mastered:
+                  existing.newly_mastered || bktResult.is_newly_mastered,
+              });
+            } else {
+              updated.set(conceptId, {
+                concept_name: currentQuestion.concept_name,
+                p_start: bktResult.p_mastery_before,
+                p_end: bktResult.p_mastery_after,
+                newly_mastered: bktResult.is_newly_mastered,
+              });
+            }
+            return updated;
+          });
+        }
       });
-
-      if (result) {
-        setCurrentResult(result);
-        if (result.is_correct) setCorrectCount((prev) => prev + 1);
-
-        const conceptId = result.concept_id ?? currentQuestion.concept_id ?? "";
-        setConceptDeltas((prev) => {
-          const updated = new Map(prev);
-          const existing = updated.get(conceptId);
-          if (existing) {
-            updated.set(conceptId, {
-              ...existing,
-              p_end: result.p_mastery_after,
-              newly_mastered:
-                existing.newly_mastered || result.is_newly_mastered,
-            });
-          } else {
-            updated.set(conceptId, {
-              concept_name: currentQuestion.concept_name,
-              p_start: result.p_mastery_before,
-              p_end: result.p_mastery_after,
-              newly_mastered: result.is_newly_mastered,
-            });
-          }
-          return updated;
-        });
-      }
-      setSubmitting(false);
     },
-    [session, currentQuestion, user, showFeedback, submitting, questionStartTime, courseId],
+    [session, currentQuestion, user, showFeedback, questionStartTime, courseId],
   );
 
   /* ── Next question ──────────────────────────────────── */
@@ -189,9 +218,7 @@ export function StudySession({
     return (
       <div className="text-center space-y-4 py-16">
         <AlertCircle className="w-10 h-10 mx-auto text-muted-foreground" />
-        <p className="text-sm text-muted-foreground">
-          Failed to load session.
-        </p>
+        <p className="text-sm text-muted-foreground">Failed to load session.</p>
         <Button variant="outline" size="sm" onClick={onExit}>
           Go Back
         </Button>
@@ -239,7 +266,8 @@ export function StudySession({
   if (sessionComplete) {
     const deltas = Array.from(conceptDeltas.values());
     const totalAnswered = currentIndex + (showFeedback ? 1 : 0);
-    const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
+    const accuracy =
+      totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
 
     return (
       <div className="max-w-lg mx-auto py-8 space-y-8">
@@ -367,7 +395,8 @@ export function StudySession({
         {/* Step dots */}
         <div className="flex-1 flex items-center gap-1">
           {session.questions.map((_, i) => {
-            const isAnswered = i < currentIndex || (i === currentIndex && showFeedback);
+            const isAnswered =
+              i < currentIndex || (i === currentIndex && showFeedback);
             const isCurrent = i === currentIndex && !showFeedback;
             return (
               <div
@@ -440,28 +469,34 @@ export function StudySession({
           <span className="font-medium">
             {currentResult.is_correct ? "Correct!" : "Incorrect"}
           </span>
-          <span className="ml-auto flex items-center gap-1.5 text-xs tabular-nums">
-            Mastery: {pct(currentResult.p_mastery_before)}%
-            <TrendingUp
-              className={`w-3 h-3 ${
-                currentResult.p_mastery_after >= currentResult.p_mastery_before
-                  ? "text-emerald-500"
-                  : "text-rose-500"
-              }`}
-            />
-            <span
-              className={
-                currentResult.is_newly_mastered
-                  ? "font-bold text-emerald-500"
-                  : "font-semibold"
-              }
-            >
-              {pct(currentResult.p_mastery_after)}%
+          {/* Mastery numbers fade in once the BKT backend responds */}
+          {currentResult.p_mastery_after > 0 ? (
+            <span className="ml-auto flex items-center gap-1.5 text-xs tabular-nums animate-in fade-in duration-300">
+              Mastery: {pct(currentResult.p_mastery_before)}%
+              <TrendingUp
+                className={`w-3 h-3 ${
+                  currentResult.p_mastery_after >=
+                  currentResult.p_mastery_before
+                    ? "text-emerald-500"
+                    : "text-rose-500"
+                }`}
+              />
+              <span
+                className={
+                  currentResult.is_newly_mastered
+                    ? "font-bold text-emerald-500"
+                    : "font-semibold"
+                }
+              >
+                {pct(currentResult.p_mastery_after)}%
+              </span>
+              {currentResult.is_newly_mastered && (
+                <span className="text-emerald-500 font-bold ml-1">
+                  Mastered!
+                </span>
+              )}
             </span>
-            {currentResult.is_newly_mastered && (
-              <span className="text-emerald-500 font-bold ml-1">Mastered!</span>
-            )}
-          </span>
+          ) : null}
         </div>
       )}
 
@@ -478,7 +513,7 @@ export function StudySession({
             <button
               key={option.id}
               onClick={() => handleSelectOption(idx)}
-              disabled={showFeedback || submitting}
+              disabled={showFeedback}
               className={`w-full text-left px-5 py-4 rounded-2xl border-2 transition-all duration-200 ${
                 !showResult
                   ? isSelected

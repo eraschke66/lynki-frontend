@@ -1,14 +1,14 @@
 /**
- * BKT-driven study service.
+ * BKT-driven study service (course-scoped).
  *
  * All intelligence lives on the backend. This service is a thin API client:
- * - fetchDocumentProgress → GET /bkt/progress/:userId/:documentId
- * - fetchBktSession       → GET /bkt/session/:userId/:documentId
- * - submitAnswer           → POST /bkt/answer
+ * - fetchCourseProgress  → GET /bkt/progress/:userId/:courseId
+ * - fetchBktSession      → GET /bkt/session/:userId/:courseId
+ * - submitAnswer          → POST /bkt/answer
  */
 
 import type {
-  DocumentProgress,
+  CourseProgress,
   BKTSession,
   AnswerRequest,
   AnswerResult,
@@ -21,21 +21,22 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 // ---------------------------------------------------------------------------
 
 /**
- * Fetch full document progress tree (topics → concepts with BKT mastery).
+ * Fetch full course progress tree (topics → concepts with BKT mastery).
+ * Aggregates across all documents in the course.
  */
-export async function fetchDocumentProgress(
-  documentId: string,
+export async function fetchCourseProgress(
+  courseId: string,
   userId: string,
-): Promise<DocumentProgress | null> {
+): Promise<CourseProgress | null> {
   try {
-    const res = await fetch(`${API_URL}/bkt/progress/${userId}/${documentId}`);
+    const res = await fetch(`${API_URL}/bkt/progress/${userId}/${courseId}`);
     if (!res.ok) {
       console.error("Failed to fetch progress:", res.status, await res.text());
       return null;
     }
     return await res.json();
   } catch (error) {
-    console.error("Error fetching document progress:", error);
+    console.error("Error fetching course progress:", error);
     return null;
   }
 }
@@ -46,16 +47,17 @@ export async function fetchDocumentProgress(
 
 /**
  * Fetch an adaptive study session from the backend.
- * The backend uses BKT mastery + weighted random to select questions.
+ * The backend uses BKT mastery + weighted random to select questions
+ * from all documents in the course.
  * Questions do NOT include correct answers — validation is server-side.
  */
 export async function fetchBktSession(
   userId: string,
-  documentId: string,
+  courseId: string,
   topicId?: string,
 ): Promise<BKTSession | null> {
   try {
-    const url = new URL(`${API_URL}/bkt/session/${userId}/${documentId}`);
+    const url = new URL(`${API_URL}/bkt/session/${userId}/${courseId}`);
     if (topicId) {
       url.searchParams.set("topic_id", topicId);
     }

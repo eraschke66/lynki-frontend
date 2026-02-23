@@ -1,13 +1,12 @@
 import { supabase } from "@/lib/supabase";
 import { retryDocumentProcessing as retryDocProcessing } from "@/features/documents/services/documentService";
-import type { DashboardData, MaterialSummary, ReviewItem } from "../types";
+import type { DashboardData, CourseSummary } from "../types";
 
-// Time threshold for considering a document as "stuck" (10 minutes)
-const STUCK_THRESHOLD_MS = 10 * 60 * 1000;
+/** BKT mastery threshold — matches backend */
+const MASTERY_THRESHOLD = 0.85;
 
 /**
  * Retry processing a failed or stuck document
- * Wraps the documentService function for dashboard use
  */
 export async function retryDocumentProcessing(
   documentId: string,
@@ -17,257 +16,198 @@ export async function retryDocumentProcessing(
 }
 
 /**
- * Fetch all dashboard data for a user
+ * Fetch all dashboard data for a user (course-centric).
+ *
+ * Uses BKT mastery (bkt_mastery table) as the single source of truth
+ * for progress. Aggregates across all documents in each course.
  */
 export async function fetchDashboardData(
   userId: string,
 ): Promise<DashboardData> {
-  // Fetch all user's documents
-  const { data: documents, error: docsError } = await supabase
-    .from("documents")
-    .select(
-      "id, title, file_type, status, created_at, updated_at, error_message",
-    )
+  // 1. Fetch user's courses
+  const { data: courses, error: coursesError } = await supabase
+    .from("courses")
+    .select("id, title, description, created_at, updated_at")
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .order("updated_at", { ascending: false });
 
-  if (docsError) {
-    console.error("Error fetching documents:", docsError);
-    throw docsError;
+  if (coursesError) {
+    console.error("Error fetching courses:", coursesError);
+    throw coursesError;
   }
 
-  // For completed documents, fetch progress data
-  const completedDocs =
-    documents?.filter((d) => d.status === "completed") || [];
-  const docIds = completedDocs.map((d) => d.id);
+  if (!courses || courses.length === 0) {
+    return {
+      courses: [],
+      totalCourses: 0,
+      totalConceptsMastered: 0,
+      totalConcepts: 0,
+      overallProgress: 0,
+      nextStudyItem: null,
+    };
+  }
 
-  // Fetch topics and concepts for completed documents
+  const courseIds = courses.map((c) => c.id);
+
+  // 2. Fetch all documents for these courses
+  const { data: documents } = await supabase
+    .from("documents")
+    .select("id, course_id, status")
+    .in("course_id", courseIds);
+
+  // Count documents per course, and track which have processing docs
+  const docCountByCourse = new Map<string, number>();
+  const processingByCourse = new Map<string, boolean>();
+  const docIdsByCourse = new Map<string, string[]>();
+
+  documents?.forEach((doc) => {
+    docCountByCourse.set(
+      doc.course_id,
+      (docCountByCourse.get(doc.course_id) || 0) + 1,
+    );
+    if (doc.status === "pending" || doc.status === "processing") {
+      processingByCourse.set(doc.course_id, true);
+    }
+    const ids = docIdsByCourse.get(doc.course_id) || [];
+    ids.push(doc.id);
+    docIdsByCourse.set(doc.course_id, ids);
+  });
+
+  // 3. Fetch topics + concept counts for all documents
+  const allDocIds = documents?.map((d) => d.id) || [];
   const { data: topics } =
-    docIds.length > 0
+    allDocIds.length > 0
       ? await supabase
           .from("topics")
-          .select(
-            `
-          id,
-          document_id,
-          concepts (id)
-        `,
-          )
-          .in("document_id", docIds)
+          .select("id, document_id, concepts(id)")
+          .in("document_id", allDocIds)
       : { data: [] };
 
-  // Build concept count per document
-  const conceptCountByDoc = new Map<string, number>();
+  // Build concept count per course (via document → topic → concepts)
+  const conceptCountByCourse = new Map<string, number>();
+  const allConceptIds: string[] = [];
+
   topics?.forEach((topic) => {
     const docId = topic.document_id;
-    const count = (topic.concepts as { id: string }[])?.length || 0;
-    conceptCountByDoc.set(docId, (conceptCountByDoc.get(docId) || 0) + count);
-  });
+    // Find which course this document belongs to
+    const courseId = documents?.find((d) => d.id === docId)?.course_id;
+    if (!courseId) return;
 
-  // Get all concept IDs
-  const allConceptIds =
-    topics?.flatMap(
-      (t) => (t.concepts as { id: string }[])?.map((c) => c.id) || [],
-    ) || [];
-
-  // Fetch user's mastery data
-  const { data: masteryData } =
-    allConceptIds.length > 0
-      ? await supabase
-          .from("user_concept_mastery")
-          .select("*")
-          .eq("user_id", userId)
-          .in("concept_id", allConceptIds)
-      : { data: [] };
-
-  // Build mastery map by document
-  const masteryByDoc = new Map<
-    string,
-    { mastered: number; total: number; dueForReview: number }
-  >();
-  const conceptToDoc = new Map<string, string>();
-
-  topics?.forEach((topic) => {
     const concepts = (topic.concepts as { id: string }[]) || [];
-    concepts.forEach((c) => {
-      conceptToDoc.set(c.id, topic.document_id);
-    });
-
-    if (!masteryByDoc.has(topic.document_id)) {
-      masteryByDoc.set(topic.document_id, {
-        mastered: 0,
-        total: 0,
-        dueForReview: 0,
-      });
-    }
-    const entry = masteryByDoc.get(topic.document_id)!;
-    entry.total += concepts.length;
+    conceptCountByCourse.set(
+      courseId,
+      (conceptCountByCourse.get(courseId) || 0) + concepts.length,
+    );
+    concepts.forEach((c) => allConceptIds.push(c.id));
   });
 
-  const now = new Date().toISOString();
-  const reviewsDue: ReviewItem[] = [];
-
-  masteryData?.forEach((m) => {
-    const docId = conceptToDoc.get(m.concept_id);
-    if (docId) {
-      const entry = masteryByDoc.get(docId);
-      if (entry) {
-        if (m.status === "mastered") {
-          entry.mastered += 1;
-          if (m.next_review_at && m.next_review_at <= now) {
-            entry.dueForReview += 1;
-            // Add to reviews list
-            const doc = documents?.find((d) => d.id === docId);
-            reviewsDue.push({
-              conceptId: m.concept_id,
-              conceptName: "", // Will fill in below
-              documentId: docId,
-              documentTitle: doc?.title || "Unknown",
-              dueAt: m.next_review_at,
-              reviewCount: m.review_count || 0,
-            });
-          }
-        }
-      }
-    }
-  });
-
-  // Fetch concept names for reviews
-  if (reviewsDue.length > 0) {
-    const reviewConceptIds = reviewsDue.map((r) => r.conceptId);
-    const { data: concepts } = await supabase
-      .from("concepts")
-      .select("id, name")
-      .in("id", reviewConceptIds);
-
-    const conceptNameMap = new Map(concepts?.map((c) => [c.id, c.name]) || []);
-    reviewsDue.forEach((r) => {
-      r.conceptName = conceptNameMap.get(r.conceptId) || "Unknown";
-    });
-  }
-
-  // Check for quizzes
-  const { data: quizzes } =
-    docIds.length > 0
+  // 4. Fetch BKT mastery for all courses at once
+  const { data: masteryData } =
+    courseIds.length > 0
       ? await supabase
-          .from("quizzes")
-          .select("document_id, generation_status")
-          .in("document_id", docIds)
+          .from("bkt_mastery")
+          .select("course_id, knowledge_component_id, p_mastery, n_attempts")
+          .eq("user_id", userId)
+          .in("course_id", courseIds)
       : { data: [] };
 
-  const quizByDoc = new Map(
-    quizzes?.map((q) => [q.document_id, q.generation_status === "completed"]) ||
-      [],
-  );
+  // Group mastery by course
+  const masteredByCourse = new Map<string, number>();
+  const hasActivityByCourse = new Map<string, boolean>();
 
-  // Build materials list
-  const nowMs = Date.now();
-  const materials: MaterialSummary[] = (documents || []).map((doc) => {
-    const masteryInfo = masteryByDoc.get(doc.id);
-    const totalConcepts = masteryInfo?.total || 0;
-    const masteredConcepts = masteryInfo?.mastered || 0;
+  masteryData?.forEach((row) => {
+    const cid = row.course_id as string | null;
+    if (!cid) return;
+    const courseId: string = cid;
+    if (row.p_mastery >= MASTERY_THRESHOLD) {
+      masteredByCourse.set(courseId, (masteredByCourse.get(courseId) || 0) + 1);
+    }
+    if (row.n_attempts > 0) {
+      hasActivityByCourse.set(courseId, true);
+    }
+  });
 
-    // Check if document is stuck (processing for too long)
-    const updatedAt = doc.updated_at
-      ? new Date(doc.updated_at).getTime()
-      : new Date(doc.created_at).getTime();
-    const isStuck =
-      (doc.status === "pending" || doc.status === "processing") &&
-      nowMs - updatedAt > STUCK_THRESHOLD_MS;
-
+  // 5. Build course summaries
+  const courseSummaries: CourseSummary[] = courses.map((c) => {
+    const totalConcepts = conceptCountByCourse.get(c.id) || 0;
+    const masteredConcepts = masteredByCourse.get(c.id) || 0;
     return {
-      id: doc.id,
-      title: doc.title,
-      fileType: doc.file_type,
-      status: doc.status as MaterialSummary["status"],
-      createdAt: doc.created_at,
-      updatedAt: doc.updated_at || doc.created_at,
+      id: c.id,
+      title: c.title,
+      description: c.description,
+      documentCount: docCountByCourse.get(c.id) || 0,
       totalConcepts,
       masteredConcepts,
       progressPercent:
         totalConcepts > 0
           ? Math.round((masteredConcepts / totalConcepts) * 100)
           : 0,
-      conceptsDueForReview: masteryInfo?.dueForReview || 0,
-      hasQuiz: quizByDoc.get(doc.id) || false,
-      errorMessage: doc.error_message || null,
-      isStuck,
+      hasProcessing: processingByCourse.get(c.id) || false,
+      createdAt: c.created_at,
+      updatedAt: c.updated_at || c.created_at,
     };
   });
 
-  // Calculate totals
-  const totalConceptsMastered = Array.from(masteryByDoc.values()).reduce(
-    (sum, m) => sum + m.mastered,
+  // 6. Calculate totals
+  const totalConceptsMastered = courseSummaries.reduce(
+    (sum, c) => sum + c.masteredConcepts,
     0,
   );
-  const totalConcepts = Array.from(masteryByDoc.values()).reduce(
-    (sum, m) => sum + m.total,
+  const totalConcepts = courseSummaries.reduce(
+    (sum, c) => sum + c.totalConcepts,
     0,
   );
 
-  // Determine next study item
+  // 7. Determine next study item
   let nextStudyItem: DashboardData["nextStudyItem"] = null;
 
-  // Priority: in-progress concepts, then new material, then reviews
-  const inProgressMastery = masteryData?.find(
-    (m) => m.status === "in_progress",
+  // Priority: course with in-progress activity, then new course with content, then review
+  const inProgressCourse = courseSummaries.find(
+    (c) =>
+      hasActivityByCourse.get(c.id) &&
+      c.totalConcepts > 0 &&
+      c.masteredConcepts < c.totalConcepts,
   );
-  if (inProgressMastery) {
-    const docId = conceptToDoc.get(inProgressMastery.concept_id);
-    const doc = documents?.find((d) => d.id === docId);
-    const { data: concept } = await supabase
-      .from("concepts")
-      .select("name")
-      .eq("id", inProgressMastery.concept_id)
-      .single();
+  if (inProgressCourse) {
+    nextStudyItem = {
+      courseId: inProgressCourse.id,
+      courseTitle: inProgressCourse.title,
+      reason: "continue",
+    };
+  }
 
-    if (doc && concept) {
+  if (!nextStudyItem) {
+    const newCourse = courseSummaries.find(
+      (c) =>
+        !hasActivityByCourse.get(c.id) &&
+        c.totalConcepts > 0 &&
+        c.documentCount > 0,
+    );
+    if (newCourse) {
       nextStudyItem = {
-        documentId: docId!,
-        documentTitle: doc.title,
-        conceptId: inProgressMastery.concept_id,
-        conceptName: concept.name,
-        reason: "continue",
+        courseId: newCourse.id,
+        courseTitle: newCourse.title,
+        reason: "new",
       };
     }
   }
 
-  // If no in-progress, find material with unstarted concepts
   if (!nextStudyItem) {
-    for (const material of materials) {
-      if (
-        material.status === "completed" &&
-        material.totalConcepts > 0 &&
-        material.masteredConcepts < material.totalConcepts
-      ) {
-        nextStudyItem = {
-          documentId: material.id,
-          documentTitle: material.title,
-          conceptId: null,
-          conceptName: null,
-          reason: "new",
-        };
-        break;
-      }
+    const reviewCourse = courseSummaries.find(
+      (c) => c.totalConcepts > 0 && c.masteredConcepts > 0,
+    );
+    if (reviewCourse) {
+      nextStudyItem = {
+        courseId: reviewCourse.id,
+        courseTitle: reviewCourse.title,
+        reason: "review",
+      };
     }
   }
 
-  // If all concepts started, suggest review
-  if (!nextStudyItem && reviewsDue.length > 0) {
-    const review = reviewsDue[0];
-    nextStudyItem = {
-      documentId: review.documentId,
-      documentTitle: review.documentTitle,
-      conceptId: review.conceptId,
-      conceptName: review.conceptName,
-      reason: "review",
-    };
-  }
-
   return {
-    materials,
-    reviewsDue: reviewsDue.slice(0, 10), // Limit to 10
-    totalMaterials: materials.length,
+    courses: courseSummaries,
+    totalCourses: courseSummaries.length,
     totalConceptsMastered,
     totalConcepts,
     overallProgress:

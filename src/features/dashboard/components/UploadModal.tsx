@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,15 +8,34 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, CheckCircle, X, AlertCircle } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Upload,
+  FileText,
+  CheckCircle,
+  X,
+  AlertCircle,
+  Plus,
+} from "lucide-react";
 import { useFileUpload } from "@/features/documents/hooks/useFileUpload";
+import { fetchUserCourses, createCourse } from "@/features/courses";
+import type { Course } from "@/features/courses";
 
 interface UploadModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userId: string;
   onUploadComplete?: () => void;
+  /** Pre-select a course when opening modal from a course context */
+  defaultCourseId?: string;
 }
 
 export function UploadModal({
@@ -24,6 +43,7 @@ export function UploadModal({
   onOpenChange,
   userId,
   onUploadComplete,
+  defaultCourseId,
 }: UploadModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploading, uploads, error, handleFilesSelected, resetUploads } =
@@ -31,8 +51,60 @@ export function UploadModal({
       onUploadComplete?.();
     });
 
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [selectedCourseId, setSelectedCourseId] = useState<string>(
+    defaultCourseId ?? "",
+  );
+  const [creatingNew, setCreatingNew] = useState(false);
+  const [newCourseName, setNewCourseName] = useState("");
+  const [loadingCourses, setLoadingCourses] = useState(false);
+
+  // Load user's courses when modal opens
+  useEffect(() => {
+    if (!open || !userId) return;
+    let cancelled = false;
+
+    const load = async () => {
+      setLoadingCourses(true);
+      try {
+        const data = await fetchUserCourses(userId);
+        if (cancelled) return;
+        setCourses(data);
+        if (defaultCourseId) {
+          setSelectedCourseId(defaultCourseId);
+        } else if (data.length === 1) {
+          setSelectedCourseId(data[0].id);
+        }
+      } catch (err) {
+        if (!cancelled) console.error(err);
+      } finally {
+        if (!cancelled) setLoadingCourses(false);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [open, userId, defaultCourseId]);
+
+  const handleCreateCourse = async () => {
+    if (!newCourseName.trim()) return;
+    try {
+      const course = await createCourse(userId, newCourseName.trim());
+      setCourses((prev) => [course, ...prev]);
+      setSelectedCourseId(course.id);
+      setCreatingNew(false);
+      setNewCourseName("");
+    } catch (err) {
+      console.error("Failed to create course:", err);
+    }
+  };
+
   const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    handleFilesSelected(e.target.files, userId);
+    if (selectedCourseId) {
+      handleFilesSelected(e.target.files, userId, selectedCourseId);
+    }
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -43,20 +115,23 @@ export function UploadModal({
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!uploading) {
-      handleFilesSelected(e.dataTransfer.files, userId);
+    if (!uploading && selectedCourseId) {
+      handleFilesSelected(e.dataTransfer.files, userId, selectedCourseId);
     }
   };
 
   const handleClose = () => {
     if (!uploading) {
       resetUploads();
+      setCreatingNew(false);
+      setNewCourseName("");
       onOpenChange(false);
     }
   };
 
   const hasUploads = uploads.length > 0;
   const allComplete = hasUploads && uploads.every((u) => u.complete || u.error);
+  const canUpload = !!selectedCourseId && !uploading;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -64,22 +139,97 @@ export function UploadModal({
         <DialogHeader>
           <DialogTitle>Upload Study Materials</DialogTitle>
           <DialogDescription>
-            Upload your course materials (PDF, DOCX, PPTX, images). Max 10MB per
-            file.
+            Select a course, then upload your materials (PDF, DOCX, PPTX,
+            images). Max 10MB per file.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          {/* Course picker */}
+          {!hasUploads && (
+            <div className="space-y-2">
+              <Label>Course</Label>
+              {creatingNew ? (
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Course name (e.g. Biology 101)"
+                    value={newCourseName}
+                    onChange={(e) => setNewCourseName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleCreateCourse();
+                    }}
+                    autoFocus
+                  />
+                  <Button
+                    size="sm"
+                    onClick={handleCreateCourse}
+                    disabled={!newCourseName.trim()}
+                  >
+                    Create
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      setCreatingNew(false);
+                      setNewCourseName("");
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedCourseId}
+                    onValueChange={setSelectedCourseId}
+                    disabled={loadingCourses}
+                  >
+                    <SelectTrigger className="flex-1">
+                      <SelectValue
+                        placeholder={
+                          loadingCourses
+                            ? "Loading courses..."
+                            : "Select a course"
+                        }
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {courses.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() => setCreatingNew(true)}
+                    title="Create new course"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Drag and drop zone */}
           {!hasUploads && (
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                uploading
-                  ? "border-muted bg-muted/50"
-                  : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
+                !canUpload
+                  ? "border-muted bg-muted/30 opacity-60 cursor-not-allowed"
+                  : uploading
+                    ? "border-muted bg-muted/50"
+                    : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
               }`}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              onClick={() => !uploading && fileInputRef.current?.click()}
+              onClick={() =>
+                canUpload && !uploading && fileInputRef.current?.click()
+              }
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="p-3 bg-primary/10 rounded-full">
@@ -87,7 +237,9 @@ export function UploadModal({
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium">
-                    Click to upload or drag and drop
+                    {!selectedCourseId
+                      ? "Select a course first"
+                      : "Click to upload or drag and drop"}
                   </p>
                   <p className="text-xs text-muted-foreground">
                     PDF, DOCX, PPTX, Images (Max 5 files)
@@ -100,7 +252,7 @@ export function UploadModal({
                 className="hidden"
                 multiple
                 onChange={onFileChange}
-                disabled={uploading}
+                disabled={!canUpload}
                 accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
               />
             </div>

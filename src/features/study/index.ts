@@ -1,10 +1,10 @@
 // Export components
-export { DocumentStudyPage } from "./components/DocumentStudyPage";
+export { CourseStudyPage } from "./components/CourseStudyPage";
 export { StudySession } from "./components/StudySession";
 
 // Export services
 export {
-  fetchDocumentProgress,
+  fetchCourseProgress,
   fetchBktSession,
   submitAnswer,
 } from "./services/studyService";
@@ -14,7 +14,7 @@ export type {
   MasteryStatus,
   ConceptProgress,
   TopicProgress,
-  DocumentProgress,
+  CourseProgress,
   SessionQuestion,
   SessionQuestionOption,
   SessionConceptSummary,

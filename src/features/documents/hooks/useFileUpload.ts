@@ -12,6 +12,7 @@ interface UseFileUploadReturn {
   handleFilesSelected: (
     files: FileList | null,
     userId: string,
+    courseId: string,
   ) => Promise<void>;
   resetUploads: () => void;
 }
@@ -29,7 +30,7 @@ export function useFileUpload(
   }, []);
 
   const handleFilesSelected = useCallback(
-    async (fileList: FileList | null, userId: string) => {
+    async (fileList: FileList | null, userId: string, courseId: string) => {
       if (!fileList || fileList.length === 0) return;
 
       if (fileList.length > MAX_FILES_PER_BATCH) {
@@ -79,7 +80,7 @@ export function useFileUpload(
                 });
               };
 
-              await uploadDocument(file, userId, updateProgress);
+              await uploadDocument(file, userId, courseId, updateProgress);
 
               // Mark complete
               setUploads((prev) => {

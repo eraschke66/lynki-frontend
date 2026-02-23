@@ -7,6 +7,7 @@ export type ProcessingStatus =
 export interface Document {
   id: string;
   userId: string;
+  courseId: string;
   title: string;
   filePath: string;
   fileType: string;

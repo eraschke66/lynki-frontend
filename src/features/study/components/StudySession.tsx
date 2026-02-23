@@ -34,14 +34,14 @@ interface ConceptDelta {
 
 interface StudySessionProps {
   topicId: string;
-  documentId: string;
+  courseId: string;
   onComplete: () => void;
   onExit: () => void;
 }
 
 export function StudySession({
   topicId,
-  documentId,
+  courseId,
   onComplete,
   onExit,
 }: StudySessionProps) {
@@ -70,7 +70,7 @@ export function StudySession({
     async function loadSession() {
       if (!user) return;
       setLoading(true);
-      const bktSession = await fetchBktSession(user.id, documentId, topicId);
+      const bktSession = await fetchBktSession(user.id, courseId, topicId);
       if (bktSession) {
         setSession(bktSession);
         // If all concepts already mastered, show that immediately
@@ -82,7 +82,7 @@ export function StudySession({
       setQuestionStartTime(Date.now());
     }
     loadSession();
-  }, [topicId, documentId, user]);
+  }, [topicId, courseId, user]);
 
   const currentQuestion: SessionQuestion | undefined =
     session?.questions[currentIndex];
@@ -100,7 +100,7 @@ export function StudySession({
       const result = await submitAnswer({
         user_id: user.id,
         question_id: currentQuestion.id,
-        document_id: documentId,
+        course_id: courseId,
         selected_option_index: optionIndex,
         session_id: session.session_id,
         time_spent_ms: timeSpent,
@@ -146,7 +146,7 @@ export function StudySession({
       showFeedback,
       submitting,
       questionStartTime,
-      documentId,
+      courseId,
     ],
   );
 
@@ -362,7 +362,7 @@ export function StudySession({
                   setCorrectCount(0);
                   setConceptDeltas(new Map());
                   setLoading(true);
-                  fetchBktSession(user!.id, documentId, topicId).then((s) => {
+                  fetchBktSession(user!.id, courseId, topicId).then((s) => {
                     if (s) {
                       setSession(s);
                       if (s.all_mastered) setSessionComplete(true);

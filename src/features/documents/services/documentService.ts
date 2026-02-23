@@ -60,10 +60,13 @@ async function triggerBackendProcessing(
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
 
-      const response = await fetch(`${API_URL}/documents/process/${documentId}`, {
-        method: "POST",
-        signal: controller.signal,
-      });
+      const response = await fetch(
+        `${API_URL}/documents/process/${documentId}`,
+        {
+          method: "POST",
+          signal: controller.signal,
+        },
+      );
 
       clearTimeout(timeoutId);
 
@@ -74,7 +77,10 @@ async function triggerBackendProcessing(
       // Non-retryable HTTP errors (4xx)
       if (response.status >= 400 && response.status < 500) {
         const errorText = await response.text().catch(() => "Unknown error");
-        return { success: false, error: `Server rejected request: ${errorText}` };
+        return {
+          success: false,
+          error: `Server rejected request: ${errorText}`,
+        };
       }
 
       // Retryable errors (5xx, network issues)
@@ -117,6 +123,7 @@ async function triggerBackendProcessing(
 export async function uploadDocument(
   file: File,
   userId: string,
+  courseId: string,
   onProgress?: (progress: number) => void,
 ): Promise<Document> {
   // 1. Upload file to Storage
@@ -153,6 +160,7 @@ export async function uploadDocument(
     .from("documents")
     .insert({
       user_id: userId,
+      course_id: courseId,
       title: file.name,
       file_path: filePath,
       file_type: file.type,
@@ -191,11 +199,14 @@ export async function uploadDocument(
   return {
     id: document.id,
     userId: document.user_id,
+    courseId: document.course_id,
     title: document.title,
     filePath: document.file_path,
     fileType: document.file_type,
     fileSize: document.file_size,
-    status: processingResult.success ? (document.status as Document["status"]) : "failed",
+    status: processingResult.success
+      ? (document.status as Document["status"])
+      : "failed",
     createdAt: document.created_at,
     updatedAt: document.updated_at,
     errorMessage: processingResult.success ? undefined : processingResult.error,
@@ -242,6 +253,7 @@ export async function fetchUserDocuments(userId: string): Promise<Document[]> {
   return data.map((doc) => ({
     id: doc.id,
     userId: doc.user_id,
+    courseId: doc.course_id,
     title: doc.title,
     filePath: doc.file_path,
     fileType: doc.file_type,

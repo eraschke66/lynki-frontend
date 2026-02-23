@@ -19,17 +19,17 @@ import {
   Sparkles,
   BarChart3,
 } from "lucide-react";
-import { fetchDocumentProgress } from "../services/studyService";
+import { fetchCourseProgress } from "../services/studyService";
 import { StudySession } from "./StudySession";
 import type { ConceptProgress, TopicProgress } from "../types";
 
 const studyQueryKeys = {
-  documentProgress: (documentId: string, userId: string) =>
-    ["bkt", "progress", documentId, userId] as const,
+  courseProgress: (courseId: string, userId: string) =>
+    ["bkt", "progress", courseId, userId] as const,
 };
 
-export function DocumentStudyPage() {
-  const { documentId } = useParams<{ documentId: string }>();
+export function CourseStudyPage() {
+  const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -42,9 +42,9 @@ export function DocumentStudyPage() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: studyQueryKeys.documentProgress(documentId ?? "", user?.id ?? ""),
-    queryFn: () => fetchDocumentProgress(documentId!, user!.id),
-    enabled: !!documentId && !!user,
+    queryKey: studyQueryKeys.courseProgress(courseId ?? "", user?.id ?? ""),
+    queryFn: () => fetchCourseProgress(courseId!, user!.id),
+    enabled: !!courseId && !!user,
   });
 
   const handleStartStudying = () => {
@@ -80,14 +80,14 @@ export function DocumentStudyPage() {
   const handleSessionComplete = () => {
     setStudyingTopicId(null);
     queryClient.invalidateQueries({
-      queryKey: studyQueryKeys.documentProgress(documentId!, user!.id),
+      queryKey: studyQueryKeys.courseProgress(courseId!, user!.id),
     });
   };
 
   const handleExitSession = () => {
     setStudyingTopicId(null);
     queryClient.invalidateQueries({
-      queryKey: studyQueryKeys.documentProgress(documentId!, user!.id),
+      queryKey: studyQueryKeys.courseProgress(courseId!, user!.id),
     });
   };
 
@@ -128,7 +128,7 @@ export function DocumentStudyPage() {
   }
 
   // Show study session if actively studying a topic
-  if (studyingTopicId && documentId) {
+  if (studyingTopicId && courseId) {
     return (
       <>
         <Header />
@@ -136,7 +136,7 @@ export function DocumentStudyPage() {
           <div className="max-w-4xl mx-auto">
             <StudySession
               topicId={studyingTopicId}
-              documentId={documentId}
+              courseId={courseId}
               onComplete={handleSessionComplete}
               onExit={handleExitSession}
             />
@@ -172,13 +172,10 @@ export function DocumentStudyPage() {
               <div className="text-center space-y-4">
                 <AlertCircle className="w-12 h-12 mx-auto text-destructive" />
                 <p className="text-muted-foreground">
-                  Failed to load document progress
+                  Failed to load course progress
                 </p>
-                <Button
-                  variant="outline"
-                  onClick={() => navigate("/documents")}
-                >
-                  Back to Documents
+                <Button variant="outline" onClick={() => navigate("/home")}>
+                  Back to Dashboard
                 </Button>
               </div>
             </CardContent>
@@ -199,19 +196,17 @@ export function DocumentStudyPage() {
           <Button
             variant="ghost"
             className="gap-2"
-            onClick={() => navigate("/documents")}
+            onClick={() => navigate("/home")}
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Documents
+            Back to Dashboard
           </Button>
 
-          {/* Document header */}
+          {/* Course header */}
           <div className="space-y-4">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-bold">
-                  {progress.document_title}
-                </h1>
+                <h1 className="text-2xl font-bold">{progress.course_title}</h1>
                 <p className="text-muted-foreground">
                   {progress.total_concepts} concepts across{" "}
                   {progress.topics.length} topics
@@ -255,7 +250,7 @@ export function DocumentStudyPage() {
             </Card>
           </div>
 
-          {/* Topic cards (Duolingo-style) */}
+          {/* Topic cards */}
           <div className="space-y-4">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <BookOpen className="w-5 h-5" />

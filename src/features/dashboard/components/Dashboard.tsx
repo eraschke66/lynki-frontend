@@ -15,7 +15,6 @@ import {
 import {
   Sparkles,
   Plus,
-  FileText,
   Clock,
   Trophy,
   Loader2,
@@ -25,11 +24,10 @@ import {
   CheckCircle,
   AlertCircle,
   RefreshCw,
+  GraduationCap,
 } from "lucide-react";
-import { fetchDashboardData, retryDocumentProcessing } from "../services/dashboardService";
+import { fetchDashboardData } from "../services/dashboardService";
 import { UploadModal } from "./UploadModal";
-import type { MaterialSummary } from "../types";
-import { formatDistanceToNow } from "date-fns";
 import { supabase } from "@/lib/supabase";
 
 const dashboardQueryKeys = {
@@ -41,7 +39,6 @@ export function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
-  const [retryingDocId, setRetryingDocId] = useState<string | null>(null);
 
   const {
     data: dashboardData,
@@ -73,29 +70,10 @@ export function Dashboard() {
           table: "documents",
           filter: `user_id=eq.${user.id}`,
         },
-        (payload) => {
-          // Invalidate dashboard query when any document status changes
-          if (payload.new) {
-            queryClient.invalidateQueries({
-              queryKey: dashboardQueryKeys.data(user.id),
-            });
-          }
-        },
-      )
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "quizzes",
-        },
-        (payload) => {
-          // Refresh when a new quiz is created (quiz generation complete)
-          if (payload.new) {
-            queryClient.invalidateQueries({
-              queryKey: dashboardQueryKeys.data(user.id),
-            });
-          }
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: dashboardQueryKeys.data(user.id),
+          });
         },
       )
       .subscribe();
@@ -107,61 +85,7 @@ export function Dashboard() {
 
   const handleContinueStudying = () => {
     if (dashboardData?.nextStudyItem) {
-      navigate(`/study/${dashboardData.nextStudyItem.documentId}`);
-    }
-  };
-
-  const handleRetryDocument = async (e: React.MouseEvent, documentId: string) => {
-    e.stopPropagation(); // Prevent card click
-    setRetryingDocId(documentId);
-    try {
-      const success = await retryDocumentProcessing(documentId);
-      if (success) {
-        // Refetch dashboard data
-        queryClient.invalidateQueries({
-          queryKey: dashboardQueryKeys.data(user!.id),
-        });
-      }
-    } finally {
-      setRetryingDocId(null);
-    }
-  };
-
-  const getStatusBadge = (material: MaterialSummary) => {
-    // Check for stuck documents first
-    if (material.isStuck) {
-      return (
-        <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-          <AlertCircle className="w-3 h-3" />
-          Stuck
-        </span>
-      );
-    }
-
-    switch (material.status) {
-      case "pending":
-        return (
-          <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            Queued
-          </span>
-        );
-      case "processing":
-        return (
-          <span className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-            <Loader2 className="w-3 h-3 animate-spin" />
-            Processing
-          </span>
-        );
-      case "failed":
-        return (
-          <span className="flex items-center gap-1 text-xs text-red-600 dark:text-red-400">
-            <AlertCircle className="w-3 h-3" />
-            Failed
-          </span>
-        );
-      default:
-        return null;
+      navigate(`/study/${dashboardData.nextStudyItem.courseId}`);
     }
   };
 
@@ -217,9 +141,9 @@ export function Dashboard() {
     );
   }
 
-  const hasNoMaterials = !dashboardData || dashboardData.materials.length === 0;
-  const hasStudyableMaterials = dashboardData?.materials.some(
-    (m) => m.status === "completed" && m.totalConcepts > 0,
+  const hasNoCourses = !dashboardData || dashboardData.courses.length === 0;
+  const hasStudyableCourses = dashboardData?.courses.some(
+    (c) => c.totalConcepts > 0,
   );
 
   return (
@@ -231,12 +155,12 @@ export function Dashboard() {
           <div className="space-y-6">
             <div>
               <h1 className="text-2xl font-bold">
-                {hasNoMaterials
+                {hasNoCourses
                   ? "Welcome to PassAI"
                   : `Welcome back${user.email ? `, ${user.email.split("@")[0]}` : ""}!`}
               </h1>
               <p className="text-muted-foreground mt-1">
-                {hasNoMaterials
+                {hasNoCourses
                   ? "Upload your study materials to get started"
                   : dashboardData?.nextStudyItem
                     ? "Ready to continue your learning journey?"
@@ -245,7 +169,7 @@ export function Dashboard() {
             </div>
 
             {/* Primary Action Card */}
-            {hasStudyableMaterials && dashboardData?.nextStudyItem ? (
+            {hasStudyableCourses && dashboardData?.nextStudyItem ? (
               <Card className="bg-linear-to-br from-primary/10 via-primary/5 to-transparent border-primary/20">
                 <CardContent className="pt-6">
                   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -269,13 +193,8 @@ export function Dashboard() {
                         </span>
                       </div>
                       <h2 className="text-lg font-semibold">
-                        {dashboardData.nextStudyItem.documentTitle}
+                        {dashboardData.nextStudyItem.courseTitle}
                       </h2>
-                      {dashboardData.nextStudyItem.conceptName && (
-                        <p className="text-sm text-muted-foreground">
-                          {dashboardData.nextStudyItem.conceptName}
-                        </p>
-                      )}
                     </div>
                     <Button
                       size="lg"
@@ -297,7 +216,7 @@ export function Dashboard() {
                     </div>
                     <div className="space-y-1">
                       <h2 className="text-lg font-semibold">
-                        {hasNoMaterials
+                        {hasNoCourses
                           ? "Upload your first material"
                           : "Add more materials"}
                       </h2>
@@ -321,19 +240,19 @@ export function Dashboard() {
           </div>
 
           {/* Stats Overview */}
-          {!hasNoMaterials && dashboardData && (
+          {!hasNoCourses && dashboardData && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                      <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      <GraduationCap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold">
-                        {dashboardData.totalMaterials}
+                        {dashboardData.totalCourses}
                       </p>
-                      <p className="text-xs text-muted-foreground">Materials</p>
+                      <p className="text-xs text-muted-foreground">Courses</p>
                     </div>
                   </div>
                 </CardContent>
@@ -375,15 +294,13 @@ export function Dashboard() {
                 <CardContent className="pt-4 pb-4">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
-                      <Clock className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                      <Target className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold">
-                        {dashboardData.reviewsDue.length}
+                        {dashboardData.overallProgress}%
                       </p>
-                      <p className="text-xs text-muted-foreground">
-                        Reviews Due
-                      </p>
+                      <p className="text-xs text-muted-foreground">Progress</p>
                     </div>
                   </div>
                 </CardContent>
@@ -391,16 +308,16 @@ export function Dashboard() {
             </div>
           )}
 
-          {/* Materials List */}
-          {!hasNoMaterials &&
+          {/* Courses List */}
+          {!hasNoCourses &&
             dashboardData &&
-            dashboardData.materials.length > 0 && (
+            dashboardData.courses.length > 0 && (
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
-                    <CardTitle>Your Materials</CardTitle>
+                    <CardTitle>Your Courses</CardTitle>
                     <CardDescription>
-                      Study materials and progress
+                      Courses and study progress
                     </CardDescription>
                   </div>
                   <Button
@@ -410,122 +327,88 @@ export function Dashboard() {
                     onClick={() => setUploadModalOpen(true)}
                   >
                     <Plus className="w-4 h-4" />
-                    Add New
+                    Add Material
                   </Button>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {dashboardData.materials.map((material) => (
+                    {dashboardData.courses.map((course) => (
                       <div
-                        key={material.id}
+                        key={course.id}
                         className={`flex items-center gap-4 p-4 rounded-lg border transition-colors ${
-                          material.status === "completed"
+                          course.totalConcepts > 0
                             ? "hover:bg-muted/50 cursor-pointer"
                             : "bg-muted/20"
                         }`}
                         onClick={() => {
-                          if (material.status === "completed") {
-                            navigate(`/study/${material.id}`);
+                          if (course.totalConcepts > 0) {
+                            navigate(`/study/${course.id}`);
                           }
                         }}
                       >
                         <div className="p-2 bg-muted rounded-lg shrink-0">
-                          <FileText className="w-5 h-5 text-muted-foreground" />
+                          <GraduationCap className="w-5 h-5 text-muted-foreground" />
                         </div>
 
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <h3 className="font-medium truncate">
-                              {material.title}
+                              {course.title}
                             </h3>
-                            {getStatusBadge(material)}
+                            {course.hasProcessing && (
+                              <span className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                Processing
+                              </span>
+                            )}
                           </div>
 
-                          {material.status === "completed" &&
-                            material.totalConcepts > 0 && (
-                              <div className="mt-2 space-y-1">
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="text-muted-foreground">
-                                    {material.masteredConcepts}/
-                                    {material.totalConcepts} concepts
-                                  </span>
-                                  <span className="font-medium">
-                                    {material.progressPercent}%
-                                  </span>
-                                </div>
-                                <Progress
-                                  value={material.progressPercent}
-                                  className="h-1.5"
-                                />
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {course.documentCount}{" "}
+                            {course.documentCount === 1
+                              ? "document"
+                              : "documents"}
+                            {course.totalConcepts > 0 &&
+                              ` · ${course.totalConcepts} concepts`}
+                          </p>
+
+                          {course.totalConcepts > 0 && (
+                            <div className="mt-2 space-y-1">
+                              <div className="flex items-center justify-between text-xs">
+                                <span className="text-muted-foreground">
+                                  {course.masteredConcepts}/
+                                  {course.totalConcepts} mastered
+                                </span>
+                                <span className="font-medium">
+                                  {course.progressPercent}%
+                                </span>
                               </div>
-                            )}
-
-                          {material.status === "completed" &&
-                            material.totalConcepts === 0 && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                No concepts extracted yet
-                              </p>
-                            )}
-
-                          {(material.status === "pending" ||
-                            material.status === "processing") &&
-                            !material.isStuck && (
-                              <p className="text-xs text-muted-foreground mt-1">
-                                Analyzing content...
-                              </p>
-                            )}
-
-                          {/* Show error message or stuck indicator */}
-                          {material.status === "failed" &&
-                            material.errorMessage && (
-                              <p className="text-xs text-red-600 dark:text-red-400 mt-1">
-                                {material.errorMessage}
-                              </p>
-                            )}
-
-                          {material.isStuck && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                              Processing seems stuck. Try again?
-                            </p>
+                              <Progress
+                                value={course.progressPercent}
+                                className="h-1.5"
+                              />
+                            </div>
                           )}
+
+                          {course.totalConcepts === 0 &&
+                            !course.hasProcessing && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {course.documentCount === 0
+                                  ? "No documents yet"
+                                  : "No concepts extracted yet"}
+                              </p>
+                            )}
                         </div>
 
                         <div className="flex items-center gap-2 shrink-0">
-                          {material.conceptsDueForReview > 0 && (
-                            <span className="flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded-full">
-                              <Clock className="w-3 h-3" />
-                              {material.conceptsDueForReview} due
-                            </span>
-                          )}
+                          {course.progressPercent === 100 &&
+                            course.totalConcepts > 0 && (
+                              <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
+                                <CheckCircle className="w-4 h-4" />
+                              </span>
+                            )}
 
-                          {material.progressPercent === 100 && (
-                            <span className="flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400">
-                              <CheckCircle className="w-4 h-4" />
-                            </span>
-                          )}
-
-                          {/* Retry button for failed/stuck documents */}
-                          {(material.status === "failed" ||
-                            material.isStuck) && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="gap-1"
-                              disabled={retryingDocId === material.id}
-                              onClick={(e) =>
-                                handleRetryDocument(e, material.id)
-                              }
-                            >
-                              {retryingDocId === material.id ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <RefreshCw className="w-3 h-3" />
-                              )}
-                              Retry
-                            </Button>
-                          )}
-
-                          {material.status === "completed" && (
+                          {course.totalConcepts > 0 && (
                             <ChevronRight className="w-5 h-5 text-muted-foreground" />
                           )}
                         </div>
@@ -535,46 +418,6 @@ export function Dashboard() {
                 </CardContent>
               </Card>
             )}
-
-          {/* Reviews Due */}
-          {dashboardData && dashboardData.reviewsDue.length > 0 && (
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-amber-500" />
-                  Reviews Due
-                </CardTitle>
-                <CardDescription>Concepts ready for review</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {dashboardData.reviewsDue.map((review) => (
-                    <div
-                      key={review.conceptId}
-                      className="flex items-center justify-between p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors cursor-pointer"
-                      onClick={() => navigate(`/study/${review.documentId}`)}
-                    >
-                      <div>
-                        <p className="font-medium">{review.conceptName}</p>
-                        <p className="text-xs text-muted-foreground">
-                          from {review.documentTitle}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs text-muted-foreground">
-                          Due{" "}
-                          {formatDistanceToNow(new Date(review.dueAt), {
-                            addSuffix: true,
-                          })}
-                        </span>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </div>
 

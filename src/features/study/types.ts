@@ -18,7 +18,7 @@ export const BKT_CONFIG = {
 } as const;
 
 // ---------------------------------------------------------------------------
-// Progress types (from GET /bkt/progress/:userId/:documentId)
+// Progress types (from GET /bkt/progress/:userId/:courseId)
 // ---------------------------------------------------------------------------
 
 export interface ConceptProgress {
@@ -43,9 +43,9 @@ export interface TopicProgress {
   overall_progress: number; // 0-100
 }
 
-export interface DocumentProgress {
-  document_id: string;
-  document_title: string;
+export interface CourseProgress {
+  course_id: string;
+  course_title: string;
   topics: TopicProgress[];
   total_concepts: number;
   mastered_concepts: number;
@@ -54,7 +54,7 @@ export interface DocumentProgress {
 }
 
 // ---------------------------------------------------------------------------
-// Session types (from GET /bkt/session/:userId/:documentId)
+// Session types (from GET /bkt/session/:userId/:courseId)
 // ---------------------------------------------------------------------------
 
 export interface SessionQuestionOption {
@@ -95,7 +95,7 @@ export interface BKTSession {
 export interface AnswerRequest {
   user_id: string;
   question_id: string;
-  document_id: string;
+  course_id: string;
   selected_option_index: number;
   session_id?: string;
   time_spent_ms?: number;

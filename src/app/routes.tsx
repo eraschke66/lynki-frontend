@@ -7,7 +7,7 @@ import {
   AuthCallback,
 } from "@/features/auth";
 import { DocumentsPage } from "@/features/documents";
-import { DocumentStudyPage } from "@/features/study";
+import { CourseStudyPage } from "@/features/study";
 import { Dashboard } from "@/features/dashboard";
 
 export function AppRoutes() {
@@ -34,10 +34,10 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/study/:documentId"
+        path="/study/:courseId"
         element={
           <ProtectedRoute>
-            <DocumentStudyPage />
+            <CourseStudyPage />
           </ProtectedRoute>
         }
       />

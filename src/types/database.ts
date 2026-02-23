@@ -14,6 +14,110 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      courses: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          description: string | null;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          title: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          description?: string | null;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "courses_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      bkt_mastery: {
+        Row: {
+          id: string;
+          user_id: string;
+          document_id: string | null;
+          course_id: string | null;
+          knowledge_component_id: string;
+          p_mastery: number;
+          p_transit: number;
+          p_slip: number;
+          p_guess: number;
+          n_attempts: number;
+          n_correct: number;
+          last_response_correct: boolean | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          document_id?: string | null;
+          course_id?: string | null;
+          knowledge_component_id: string;
+          p_mastery?: number;
+          p_transit?: number;
+          p_slip?: number;
+          p_guess?: number;
+          n_attempts?: number;
+          n_correct?: number;
+          last_response_correct?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          document_id?: string | null;
+          course_id?: string | null;
+          knowledge_component_id?: string;
+          p_mastery?: number;
+          p_transit?: number;
+          p_slip?: number;
+          p_guess?: number;
+          n_attempts?: number;
+          n_correct?: number;
+          last_response_correct?: boolean | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "bkt_mastery_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bkt_mastery_course_id_fkey";
+            columns: ["course_id"];
+            referencedRelation: "courses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "bkt_mastery_knowledge_component_id_fkey";
+            columns: ["knowledge_component_id"];
+            referencedRelation: "concepts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       quizzes: {
         Row: {
           id: string;
@@ -273,6 +377,7 @@ export interface Database {
         Row: {
           id: string;
           user_id: string;
+          course_id: string;
           title: string;
           file_path: string;
           file_type: string;
@@ -286,6 +391,7 @@ export interface Database {
         Insert: {
           id?: string;
           user_id: string;
+          course_id: string;
           title: string;
           file_path: string;
           file_type: string;
@@ -299,6 +405,7 @@ export interface Database {
         Update: {
           id?: string;
           user_id?: string;
+          course_id?: string;
           title?: string;
           file_path?: string;
           file_type?: string;
@@ -314,6 +421,12 @@ export interface Database {
             foreignKeyName: "documents_user_id_fkey";
             columns: ["user_id"];
             referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "documents_course_id_fkey";
+            columns: ["course_id"];
+            referencedRelation: "courses";
             referencedColumns: ["id"];
           },
         ];

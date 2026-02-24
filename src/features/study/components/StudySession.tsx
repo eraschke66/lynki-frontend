@@ -253,6 +253,10 @@ export function StudySession({
         <p className="text-sm text-muted-foreground">
           No questions available for this topic yet.
         </p>
+        <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+          Questions may still be generating. Try going to your Documents page and
+          retrying the document processing, then come back.
+        </p>
         <Button variant="outline" size="sm" onClick={onExit}>
           Go Back
         </Button>

@@ -28,6 +28,8 @@ import {
 import { useFileUpload } from "@/features/documents/hooks/useFileUpload";
 import { fetchUserCourses, createCourse } from "@/features/courses";
 import type { Course } from "@/features/courses";
+import { fetchProfile } from "@/features/settings";
+import { getCurriculum } from "@/lib/curricula";
 
 interface UploadModalProps {
   open: boolean;
@@ -57,6 +59,10 @@ export function UploadModal({
   );
   const [creatingNew, setCreatingNew] = useState(false);
   const [newCourseName, setNewCourseName] = useState("");
+  const [newCourseTargetGrade, setNewCourseTargetGrade] = useState<
+    number | null
+  >(null);
+  const [userCurriculum, setUserCurriculum] = useState("percentage");
   const [loadingCourses, setLoadingCourses] = useState(false);
 
   // Load user's courses when modal opens
@@ -67,9 +73,15 @@ export function UploadModal({
     const load = async () => {
       setLoadingCourses(true);
       try {
-        const data = await fetchUserCourses(userId);
+        const [data, profile] = await Promise.all([
+          fetchUserCourses(userId),
+          fetchProfile(userId).catch(() => ({ curriculum: "percentage" })),
+        ]);
         if (cancelled) return;
         setCourses(data);
+        setUserCurriculum(profile.curriculum);
+        const curriculum = getCurriculum(profile.curriculum);
+        setNewCourseTargetGrade(curriculum.defaultTarget);
         if (defaultCourseId) {
           setSelectedCourseId(defaultCourseId);
         } else if (data.length === 1) {
@@ -91,11 +103,18 @@ export function UploadModal({
   const handleCreateCourse = async () => {
     if (!newCourseName.trim()) return;
     try {
-      const course = await createCourse(userId, newCourseName.trim());
+      const curriculum = getCurriculum(userCurriculum);
+      const course = await createCourse(
+        userId,
+        newCourseName.trim(),
+        undefined,
+        newCourseTargetGrade ?? curriculum.defaultTarget,
+      );
       setCourses((prev) => [course, ...prev]);
       setSelectedCourseId(course.id);
       setCreatingNew(false);
       setNewCourseName("");
+      setNewCourseTargetGrade(curriculum.defaultTarget);
     } catch (err) {
       console.error("Failed to create course:", err);
     }
@@ -150,33 +169,64 @@ export function UploadModal({
             <div className="space-y-2">
               <Label>Course</Label>
               {creatingNew ? (
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Course name (e.g. Biology 101)"
-                    value={newCourseName}
-                    onChange={(e) => setNewCourseName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") handleCreateCourse();
-                    }}
-                    autoFocus
-                  />
-                  <Button
-                    size="sm"
-                    onClick={handleCreateCourse}
-                    disabled={!newCourseName.trim()}
-                  >
-                    Create
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => {
-                      setCreatingNew(false);
-                      setNewCourseName("");
-                    }}
-                  >
-                    Cancel
-                  </Button>
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="Course name (e.g. Biology 101)"
+                      value={newCourseName}
+                      onChange={(e) => setNewCourseName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleCreateCourse();
+                      }}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground">
+                      Target passing grade
+                    </Label>
+                    <Select
+                      value={String(newCourseTargetGrade ?? "")}
+                      onValueChange={(v) =>
+                        setNewCourseTargetGrade(parseFloat(v))
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select target grade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getCurriculum(userCurriculum).gradeOptions.map(
+                          (opt) => (
+                            <SelectItem
+                              key={opt.value}
+                              value={String(opt.value)}
+                            >
+                              {opt.label}
+                            </SelectItem>
+                          ),
+                        )}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleCreateCourse}
+                      disabled={!newCourseName.trim()}
+                    >
+                      Create
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => {
+                        setCreatingNew(false);
+                        setNewCourseName("");
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <div className="flex gap-2">

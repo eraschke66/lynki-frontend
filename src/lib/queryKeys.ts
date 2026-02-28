@@ -26,3 +26,9 @@ export const testQueryKeys = {
   history: (courseId: string, userId: string) =>
     [...testQueryKeys.all, "history", courseId, userId] as const,
 };
+
+export const profileQueryKeys = {
+  all: ["profile"] as const,
+  detail: (userId: string) =>
+    [...profileQueryKeys.all, "detail", userId] as const,
+};

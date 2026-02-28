@@ -25,6 +25,9 @@ import {
 import { toast } from "sonner";
 import { fetchDashboardData } from "../services/dashboardService";
 import { updateCourse, deleteCourse } from "@/features/courses";
+import { fetchProfile } from "@/features/settings";
+import { getGradeLabel } from "@/lib/curricula";
+import { profileQueryKeys } from "@/lib/queryKeys";
 import { UploadModal } from "./UploadModal";
 import { EditCourseDialog } from "./EditCourseDialog";
 import { DeleteCourseDialog } from "./DeleteCourseDialog";
@@ -57,6 +60,12 @@ export function Dashboard() {
     enabled: !!user,
   });
 
+  const { data: profileData } = useQuery({
+    queryKey: profileQueryKeys.detail(user?.id ?? ""),
+    queryFn: () => fetchProfile(user!.id),
+    enabled: !!user,
+  });
+
   const handleUploadComplete = () => {
     queryClient.invalidateQueries({
       queryKey: dashboardQueryKeys.data(user!.id),
@@ -67,11 +76,14 @@ export function Dashboard() {
     courseId: string,
     title: string,
     description: string,
+    targetGrade?: number,
   ) => {
-    await updateCourse(courseId, { title, description });
+    await updateCourse(courseId, { title, description, targetGrade });
     queryClient.invalidateQueries({
       queryKey: dashboardQueryKeys.data(user!.id),
     });
+    // Invalidate pass chance since target grade may have changed
+    queryClient.invalidateQueries({ queryKey: ["test"] });
     toast.success("Course updated");
   };
 
@@ -186,6 +198,7 @@ export function Dashboard() {
                   <CourseCard
                     key={course.id}
                     course={course}
+                    curriculum={profileData?.curriculum ?? "percentage"}
                     onClick={() => navigate(`/course/${course.id}`)}
                     onEdit={() => setEditingCourse(course)}
                     onDelete={() => setDeletingCourse(course)}
@@ -219,6 +232,7 @@ export function Dashboard() {
         open={!!editingCourse}
         onOpenChange={(open) => !open && setEditingCourse(null)}
         course={editingCourse}
+        curriculum={profileData?.curriculum ?? "percentage"}
         onSave={handleEditCourse}
       />
 
@@ -238,11 +252,13 @@ export function Dashboard() {
 
 function CourseCard({
   course,
+  curriculum,
   onClick,
   onEdit,
   onDelete,
 }: {
   course: CourseSummary;
+  curriculum: string;
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -321,6 +337,9 @@ function CourseCard({
                   {passPercent}%
                 </span>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Target: {getGradeLabel(curriculum, course.targetGrade)}
+              </p>
               {/* Simple progress bar */}
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div

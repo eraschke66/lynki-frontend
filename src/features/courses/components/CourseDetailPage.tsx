@@ -20,8 +20,10 @@ import {
   fetchPassChance,
   fetchTestHistory,
 } from "@/features/test/services/testService";
-import { testQueryKeys } from "@/lib/queryKeys";
+import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
+import { fetchProfile } from "@/features/settings";
+import { getGradeLabel } from "@/lib/curricula";
 import type { TestSession } from "@/features/test/types";
 
 export function CourseDetailPage() {
@@ -36,7 +38,7 @@ export function CourseDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("courses")
-        .select("id, title, description, created_at")
+        .select("id, title, description, created_at, target_grade")
         .eq("id", courseId!)
         .single();
       if (error) throw error;
@@ -66,6 +68,13 @@ export function CourseDetailPage() {
     enabled: !!user && !!courseId,
   });
 
+  // Fetch user profile for curriculum
+  const { data: profileData } = useQuery({
+    queryKey: profileQueryKeys.detail(user?.id ?? ""),
+    queryFn: () => fetchProfile(user!.id),
+    enabled: !!user,
+  });
+
   // Fetch quiz history
   const {
     data: historyData,
@@ -86,6 +95,10 @@ export function CourseDetailPage() {
     passChanceData?.pass_probability != null
       ? Math.round(passChanceData.pass_probability * 100)
       : null;
+
+  const curriculum = profileData?.curriculum ?? "percentage";
+  const targetGrade = course?.target_grade ?? 1.0;
+  const targetLabel = getGradeLabel(curriculum, targetGrade);
 
   const sessions = historyData?.sessions ?? [];
   const completedSessions = sessions.filter((s) => s.status === "completed");
@@ -185,6 +198,9 @@ export function CourseDetailPage() {
                         strokeWidth={10}
                         labelClassName="text-2xl font-bold"
                       />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        of hitting {targetLabel}
+                      </p>
                     </>
                   ) : (
                     <div className="text-center">

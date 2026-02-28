@@ -25,6 +25,7 @@ export async function fetchUserCourses(userId: string): Promise<Course[]> {
     userId: c.user_id,
     title: c.title,
     description: c.description,
+    targetGrade: c.target_grade ?? 1.0,
     createdAt: c.created_at,
     updatedAt: c.updated_at,
   }));
@@ -37,6 +38,7 @@ export async function createCourse(
   userId: string,
   title: string,
   description?: string,
+  targetGrade?: number,
 ): Promise<Course> {
   const { data, error } = await supabase
     .from("courses")
@@ -44,6 +46,7 @@ export async function createCourse(
       user_id: userId,
       title: title.trim(),
       description: description?.trim() || null,
+      target_grade: targetGrade ?? 1.0,
     })
     .select()
     .single();
@@ -58,6 +61,7 @@ export async function createCourse(
     userId: data.user_id,
     title: data.title,
     description: data.description,
+    targetGrade: data.target_grade ?? 1.0,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };
@@ -68,12 +72,14 @@ export async function createCourse(
  */
 export async function updateCourse(
   courseId: string,
-  updates: { title?: string; description?: string },
+  updates: { title?: string; description?: string; targetGrade?: number },
 ): Promise<void> {
-  const payload: Record<string, string> = {};
+  const payload: Record<string, string | number> = {};
   if (updates.title !== undefined) payload.title = updates.title.trim();
   if (updates.description !== undefined)
     payload.description = updates.description.trim();
+  if (updates.targetGrade !== undefined)
+    payload.target_grade = updates.targetGrade;
 
   const { error } = await supabase
     .from("courses")

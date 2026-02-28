@@ -9,6 +9,8 @@ export interface CourseSummary {
   documentCount: number;
   /** Estimated passing chance from BKT (0.0–1.0), null if not yet tested */
   passChance: number | null;
+  /** Normalized target grade (0–1) */
+  targetGrade: number;
   /** Whether at least one document is still processing */
   hasProcessing: boolean;
   createdAt: string;

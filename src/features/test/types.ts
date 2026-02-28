@@ -49,6 +49,7 @@ export interface AnswerFeedback {
 export interface PassChanceData {
   course_id: string;
   pass_probability: number | null;
+  target_grade: number;
   total_skills: number;
 }
 

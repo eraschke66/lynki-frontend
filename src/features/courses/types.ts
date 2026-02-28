@@ -9,6 +9,7 @@ export interface Course {
   userId: string;
   title: string;
   description: string | null;
+  targetGrade: number;
   createdAt: string;
   updatedAt: string | null;
 }

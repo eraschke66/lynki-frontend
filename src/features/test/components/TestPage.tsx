@@ -23,7 +23,9 @@ import {
   fetchPassChance,
   completeTest,
 } from "../services/testService";
-import { testQueryKeys } from "@/lib/queryKeys";
+import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
+import { fetchProfile } from "@/features/settings";
+import { getGradeLabel } from "@/lib/curricula";
 import type { AnswerFeedback } from "../types";
 
 export function TestPage() {
@@ -43,6 +45,7 @@ export function TestPage() {
   const [answeredCount, setAnsweredCount] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
   const [passChance, setPassChance] = useState<number | null>(null);
+  const [targetGrade, setTargetGrade] = useState<number>(1.0);
   const [loadingPassChance, setLoadingPassChance] = useState(false);
 
   // Fetch quiz — either resume or new
@@ -60,6 +63,13 @@ export function TestPage() {
         ? fetchResumeTest(user!.id, sessionId)
         : fetchTest(user!.id, courseId!),
     enabled: !!user && !!courseId,
+  });
+
+  // Fetch user profile for curriculum
+  const { data: profileData } = useQuery({
+    queryKey: profileQueryKeys.detail(user?.id ?? ""),
+    queryFn: () => fetchProfile(user!.id),
+    enabled: !!user,
   });
 
   // When resuming, apply the saved progress once data loads
@@ -144,6 +154,7 @@ export function TestPage() {
         }
         const pc = await fetchPassChance(user!.id, courseId!);
         setPassChance(pc.pass_probability);
+        setTargetGrade(pc.target_grade ?? 1.0);
       } catch (err) {
         console.error("Failed to fetch pass chance:", err);
         setPassChance(null);
@@ -177,6 +188,7 @@ export function TestPage() {
     setAnsweredCount(0);
     setQuizComplete(false);
     setPassChance(null);
+    setTargetGrade(1.0);
     resumeApplied.current = false;
     // Navigate without session param so a fresh quiz is generated
     queryClient.removeQueries({
@@ -315,6 +327,13 @@ export function TestPage() {
                       strokeWidth={12}
                       labelClassName="text-3xl font-bold"
                     />
+                    <p className="text-sm text-muted-foreground mt-2">
+                      of hitting{" "}
+                      {getGradeLabel(
+                        profileData?.curriculum ?? "percentage",
+                        targetGrade,
+                      )}
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-2">

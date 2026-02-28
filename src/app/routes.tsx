@@ -10,6 +10,7 @@ import { DocumentsPage } from "@/features/documents";
 import { TestPage } from "@/features/test";
 import { Dashboard } from "@/features/dashboard";
 import { CourseDetailPage } from "@/features/courses";
+import { SettingsPage } from "@/features/settings";
 
 export function AppRoutes() {
   return (
@@ -47,6 +48,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <TestPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <SettingsPage />
           </ProtectedRoute>
         }
       />

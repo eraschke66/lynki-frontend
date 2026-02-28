@@ -47,7 +47,7 @@ export async function fetchDashboardData(
   // 1. Fetch user's courses
   const { data: courses, error: coursesError } = await supabase
     .from("courses")
-    .select("id, title, description, created_at, updated_at")
+    .select("id, title, description, created_at, updated_at, target_grade")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false });
 
@@ -124,6 +124,7 @@ export async function fetchDashboardData(
     description: c.description,
     documentCount: docCountByCourse.get(c.id) || 0,
     passChance: passChanceByCourse.get(c.id) ?? null,
+    targetGrade: c.target_grade ?? 1.0,
     hasProcessing: processingByCourse.get(c.id) || false,
     createdAt: c.created_at,
     updatedAt: c.updated_at || c.created_at,

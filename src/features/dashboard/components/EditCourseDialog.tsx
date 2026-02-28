@@ -12,16 +12,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { getCurriculum } from "@/lib/curricula";
 import type { CourseSummary } from "../types";
 
 interface EditCourseDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   course: CourseSummary | null;
+  curriculum: string;
   onSave: (
     courseId: string,
     title: string,
     description: string,
+    targetGrade?: number,
   ) => Promise<void>;
 }
 
@@ -29,18 +39,23 @@ export function EditCourseDialog({
   open,
   onOpenChange,
   course,
+  curriculum,
   onSave,
 }: EditCourseDialogProps) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [targetGrade, setTargetGrade] = useState<number>(1.0);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const curriculumInfo = getCurriculum(curriculum);
 
   // Sync form state when the dialog opens or course changes
   useEffect(() => {
     if (open && course) {
       setTitle(course.title);
       setDescription(course.description ?? "");
+      setTargetGrade(course.targetGrade ?? 1.0);
       setError(null);
     }
   }, [open, course]);
@@ -56,7 +71,7 @@ export function EditCourseDialog({
     setSaving(true);
     setError(null);
     try {
-      await onSave(course.id, trimmed, description.trim());
+      await onSave(course.id, trimmed, description.trim(), targetGrade);
       onOpenChange(false);
     } catch {
       setError("Failed to update course. Please try again.");
@@ -99,6 +114,25 @@ export function EditCourseDialog({
               placeholder="A short description of this course..."
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Target Passing Grade</Label>
+            <Select
+              value={String(targetGrade)}
+              onValueChange={(v) => setTargetGrade(parseFloat(v))}
+            >
+              <SelectTrigger className="w-full max-w-xs">
+                <SelectValue placeholder="Select target grade" />
+              </SelectTrigger>
+              <SelectContent>
+                {curriculumInfo.gradeOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={String(opt.value)}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}

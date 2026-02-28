@@ -107,7 +107,9 @@ export async function fetchDashboardData(
       .in("course_id", courseIds)
       .gt("n_attempts", 0);
 
-    const activeCourseIds = new Set(activeRows?.map((r) => r.course_id) ?? []);
+    const activeCourseIds = new Set(
+      activeRows?.map((r) => r.course_id).filter((id): id is string => id != null) ?? [],
+    );
 
     // Fetch pass chances in parallel for active courses
     const promises = Array.from(activeCourseIds).map(async (cid) => {

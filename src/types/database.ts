@@ -20,6 +20,7 @@ export interface Database {
           user_id: string;
           title: string;
           description: string | null;
+          target_grade: number;
           created_at: string;
           updated_at: string | null;
         };
@@ -28,6 +29,7 @@ export interface Database {
           user_id: string;
           title: string;
           description?: string | null;
+          target_grade?: number;
           created_at?: string;
           updated_at?: string | null;
         };
@@ -36,6 +38,7 @@ export interface Database {
           user_id?: string;
           title?: string;
           description?: string | null;
+          target_grade?: number;
           created_at?: string;
           updated_at?: string | null;
         };

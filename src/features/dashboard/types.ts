@@ -7,9 +7,8 @@ export interface CourseSummary {
   title: string;
   description: string | null;
   documentCount: number;
-  totalConcepts: number;
-  masteredConcepts: number;
-  progressPercent: number;
+  /** Estimated passing chance from BKT (0.0–1.0), null if not yet tested */
+  passChance: number | null;
   /** Whether at least one document is still processing */
   hasProcessing: boolean;
   createdAt: string;
@@ -19,12 +18,4 @@ export interface CourseSummary {
 export interface DashboardData {
   courses: CourseSummary[];
   totalCourses: number;
-  totalConceptsMastered: number;
-  totalConcepts: number;
-  overallProgress: number;
-  nextStudyItem: {
-    courseId: string;
-    courseTitle: string;
-    reason: "continue" | "new" | "review";
-  } | null;
 }

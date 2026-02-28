@@ -7,8 +7,9 @@ import {
   AuthCallback,
 } from "@/features/auth";
 import { DocumentsPage } from "@/features/documents";
-import { CourseStudyPage } from "@/features/study";
+import { TestPage } from "@/features/test";
 import { Dashboard } from "@/features/dashboard";
+import { CourseDetailPage } from "@/features/courses";
 
 export function AppRoutes() {
   return (
@@ -34,16 +35,21 @@ export function AppRoutes() {
         }
       />
       <Route
-        path="/study/:courseId"
+        path="/course/:courseId"
         element={
           <ProtectedRoute>
-            <CourseStudyPage />
+            <CourseDetailPage />
           </ProtectedRoute>
         }
       />
-      {/* Legacy quiz routes removed — BKT adaptive study replaces static quizzes */}
-      <Route path="/quizzes" element={<Navigate to="/documents" replace />} />
-      <Route path="/quiz/*" element={<Navigate to="/documents" replace />} />
+      <Route
+        path="/test/:courseId"
+        element={
+          <ProtectedRoute>
+            <TestPage />
+          </ProtectedRoute>
+        }
+      />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

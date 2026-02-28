@@ -1,4 +1,5 @@
-// Export components (will be added as we create them)
+// Export components
+export { CourseDetailPage } from "./components/CourseDetailPage";
 
 // Export services
 export {

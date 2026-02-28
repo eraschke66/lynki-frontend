@@ -12,7 +12,7 @@ export function LandingPage() {
   const { user } = useAuth();
 
   if (user) {
-    return <Navigate to="/quizzes" replace />;
+    return <Navigate to="/home" replace />;
   }
 
   return (
@@ -33,9 +33,9 @@ export function LandingPage() {
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
-                Transform your documents into intelligent quizzes.
+                Upload your study materials. Take AI-generated quizzes.
                 <br />
-                Learn smarter with AI-powered assessments.
+                See your estimated passing chance.
               </p>
             </div>
 
@@ -64,10 +64,10 @@ export function LandingPage() {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <BookOpen className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Upload Documents</h3>
+              <h3 className="text-lg font-semibold mb-2">Upload Materials</h3>
               <p className="text-sm text-muted-foreground">
-                Upload PDFs, DOCX, or text files. Our AI analyzes and extracts
-                key concepts automatically.
+                Upload PDFs, DOCX, or presentations. Our AI extracts key
+                concepts and generates quiz questions automatically.
               </p>
             </div>
 
@@ -75,12 +75,10 @@ export function LandingPage() {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Brain className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">
-                AI-Generated Quizzes
-              </h3>
+              <h3 className="text-lg font-semibold mb-2">Take Quizzes</h3>
               <p className="text-sm text-muted-foreground">
-                Get intelligent, context-aware questions tailored to your study
-                materials.
+                Test your understanding with intelligent questions tailored to
+                your study materials. Take as many as you want.
               </p>
             </div>
 
@@ -88,19 +86,21 @@ export function LandingPage() {
               <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                 <Trophy className="h-6 w-6 text-primary" />
               </div>
-              <h3 className="text-lg font-semibold mb-2">Track Progress</h3>
+              <h3 className="text-lg font-semibold mb-2">
+                Know Your Passing Chance
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Monitor your learning with detailed results and insights on your
-                performance.
+                Get an estimated passing probability powered by Bayesian
+                Knowledge Tracing. The more you practice, the more accurate it
+                gets.
               </p>
             </div>
           </div>
 
-          {/* Social Proof / Stats */}
+          {/* Footer */}
           <div className="mt-20 pt-12 border-t border-border/50">
             <p className="text-center text-sm text-muted-foreground">
-              Trusted by students and professionals • Free to get started • No
-              credit card required
+              Free to get started • No credit card required
             </p>
           </div>
         </div>

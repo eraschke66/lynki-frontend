@@ -7,6 +7,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CircularProgress } from "@/components/ui/circular-progress";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Sparkles,
   Plus,
   Loader2,
@@ -14,9 +20,16 @@ import {
   RefreshCw,
   ArrowRight,
   Upload,
+  MoreVertical,
+  Pencil,
+  Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { fetchDashboardData } from "../services/dashboardService";
+import { updateCourse, deleteCourse } from "@/features/courses";
 import { UploadModal } from "./UploadModal";
+import { EditCourseDialog } from "./EditCourseDialog";
+import { DeleteCourseDialog } from "./DeleteCourseDialog";
 import type { CourseSummary, DashboardData } from "../types";
 import { supabase } from "@/lib/supabase";
 
@@ -29,6 +42,12 @@ export function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<CourseSummary | null>(
+    null,
+  );
+  const [deletingCourse, setDeletingCourse] = useState<CourseSummary | null>(
+    null,
+  );
 
   const {
     data: dashboardData,
@@ -44,6 +63,26 @@ export function Dashboard() {
     queryClient.invalidateQueries({
       queryKey: dashboardQueryKeys.data(user!.id),
     });
+  };
+
+  const handleEditCourse = async (
+    courseId: string,
+    title: string,
+    description: string,
+  ) => {
+    await updateCourse(courseId, { title, description });
+    queryClient.invalidateQueries({
+      queryKey: dashboardQueryKeys.data(user!.id),
+    });
+    toast.success("Course updated");
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    await deleteCourse(courseId);
+    queryClient.invalidateQueries({
+      queryKey: dashboardQueryKeys.data(user!.id),
+    });
+    toast.success("Course deleted");
   };
 
   // Subscribe to real-time document status updates
@@ -167,6 +206,8 @@ export function Dashboard() {
                           navigate(`/study/${course.id}`);
                         }
                       }}
+                      onEdit={() => setEditingCourse(course)}
+                      onDelete={() => setDeletingCourse(course)}
                     />
                   ))}
 
@@ -192,6 +233,20 @@ export function Dashboard() {
         onOpenChange={setUploadModalOpen}
         userId={user.id}
         onUploadComplete={handleUploadComplete}
+      />
+
+      <EditCourseDialog
+        open={!!editingCourse}
+        onOpenChange={(open) => !open && setEditingCourse(null)}
+        course={editingCourse}
+        onSave={handleEditCourse}
+      />
+
+      <DeleteCourseDialog
+        open={!!deletingCourse}
+        onOpenChange={(open) => !open && setDeletingCourse(null)}
+        course={deletingCourse}
+        onConfirm={handleDeleteCourse}
       />
     </>
   );
@@ -288,10 +343,14 @@ function CourseCard({
   course,
   isRecommended,
   onClick,
+  onEdit,
+  onDelete,
 }: {
   course: CourseSummary;
   isRecommended: boolean;
   onClick: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 }) {
   const isClickable = course.totalConcepts > 0;
   const isProcessing = course.hasProcessing;
@@ -305,14 +364,45 @@ function CourseCard({
       } ${isRecommended ? "ring-2 ring-primary/40 shadow-md" : ""}`}
       onClick={isClickable ? onClick : undefined}
     >
-      {/* Recommended badge */}
-      {isRecommended && (
-        <div className="absolute top-2.5 right-2.5">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+      {/* Context menu (Edit / Delete) */}
+      <div className="absolute top-2 right-2 z-10">
+        {isRecommended && (
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full mr-1">
             Next up
           </span>
-        </div>
-      )}
+        )}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            >
+              <MoreVertical className="w-4 h-4" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-36">
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <CardContent className="flex flex-col items-center text-center pt-7 pb-5 px-4">
         {/* Progress ring */}

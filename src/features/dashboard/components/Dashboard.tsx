@@ -5,6 +5,7 @@ import { useAuth } from "@/features/auth";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { CircularProgress } from "@/components/ui/circular-progress";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +13,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Sparkles,
   Plus,
   Loader2,
   AlertCircle,
   RefreshCw,
   Upload,
+  ArrowRight,
   MoreVertical,
   Pencil,
   Trash2,
-  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 import { fetchDashboardData } from "../services/dashboardService";
@@ -31,7 +33,7 @@ import { profileQueryKeys } from "@/lib/queryKeys";
 import { UploadModal } from "./UploadModal";
 import { EditCourseDialog } from "./EditCourseDialog";
 import { DeleteCourseDialog } from "./DeleteCourseDialog";
-import type { CourseSummary } from "../types";
+import type { CourseSummary, DashboardData } from "../types";
 import { supabase } from "@/lib/supabase";
 
 const dashboardQueryKeys = {
@@ -95,18 +97,32 @@ export function Dashboard() {
     toast.success("Course deleted");
   };
 
-  // Subscribe to real-time document status updates
+  // Subscribe to real-time updates for documents and bkt_mastery
   useEffect(() => {
     if (!user) return;
 
     const channel = supabase
-      .channel("dashboard-document-updates")
+      .channel("dashboard-updates")
       .on(
         "postgres_changes",
         {
           event: "UPDATE",
           schema: "public",
           table: "documents",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({
+            queryKey: dashboardQueryKeys.data(user.id),
+          });
+        },
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "bkt_mastery",
           filter: `user_id=eq.${user.id}`,
         },
         () => {
@@ -170,6 +186,7 @@ export function Dashboard() {
   }
 
   const hasNoCourses = !dashboardData || dashboardData.courses.length === 0;
+  const nextItem = dashboardData?.nextStudyItem;
 
   return (
     <>
@@ -179,43 +196,56 @@ export function Dashboard() {
           {hasNoCourses ? (
             <EmptyState onUpload={() => setUploadModalOpen(true)} />
           ) : (
-            <div className="space-y-6">
-              {/* Header row */}
-              <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Your Courses</h1>
-                <Button
-                  className="gap-2"
-                  onClick={() => setUploadModalOpen(true)}
-                >
-                  <Upload className="w-4 h-4" />
-                  Upload Materials
-                </Button>
-              </div>
+            <div className="space-y-10">
+              {/* ── Hero: pass probability ring + CTA ── */}
+              <HeroSection
+                data={dashboardData!}
+                onStartStudying={() => {
+                  if (nextItem) navigate(`/course/${nextItem.courseId}`);
+                }}
+                onUpload={() => setUploadModalOpen(true)}
+              />
 
-              {/* Course grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {dashboardData!.courses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    course={course}
-                    curriculum={profileData?.curriculum ?? "percentage"}
-                    onClick={() => navigate(`/course/${course.id}`)}
-                    onEdit={() => setEditingCourse(course)}
-                    onDelete={() => setDeletingCourse(course)}
-                  />
-                ))}
+              {/* ── Course grid ── */}
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-lg font-semibold">Your Courses</h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2 text-muted-foreground"
+                    onClick={() => setUploadModalOpen(true)}
+                  >
+                    <Plus className="w-4 h-4" />
+                    Add Material
+                  </Button>
+                </div>
 
-                {/* "+ New Course" card */}
-                <button
-                  onClick={() => setUploadModalOpen(true)}
-                  className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-muted-foreground/20 p-8 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors cursor-pointer min-h-48"
-                >
-                  <div className="p-3 rounded-full bg-muted">
-                    <Plus className="w-5 h-5" />
-                  </div>
-                  <span className="text-sm font-medium">New Course</span>
-                </button>
-              </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {dashboardData!.courses.map((course) => (
+                    <CourseCard
+                      key={course.id}
+                      course={course}
+                      curriculum={profileData?.curriculum ?? "percentage"}
+                      isRecommended={nextItem?.courseId === course.id}
+                      onClick={() => navigate(`/course/${course.id}`)}
+                      onEdit={() => setEditingCourse(course)}
+                      onDelete={() => setDeletingCourse(course)}
+                    />
+                  ))}
+
+                  {/* "+ New" card */}
+                  <button
+                    onClick={() => setUploadModalOpen(true)}
+                    className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-muted-foreground/20 p-6 text-muted-foreground hover:border-primary/40 hover:text-primary transition-colors cursor-pointer min-h-50"
+                  >
+                    <div className="p-3 rounded-full bg-muted">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                    <span className="text-sm font-medium">New Course</span>
+                  </button>
+                </div>
+              </section>
             </div>
           )}
         </div>
@@ -247,34 +277,139 @@ export function Dashboard() {
 }
 
 /* ─────────────────────────────────────────────────────────
- * Course Card — title, doc count, pass chance, take quiz
+ * Hero Section — overall pass probability ring + primary CTA
+ * ────────────────────────────────────────────────────── */
+
+function HeroSection({
+  data,
+  onStartStudying,
+  onUpload,
+}: {
+  data: DashboardData;
+  onStartStudying: () => void;
+  onUpload: () => void;
+}) {
+  const { user } = useAuth();
+  const name = user?.email?.split("@")[0] ?? "";
+  const hasStudyable = data.courses.some((c) => c.totalConcepts > 0);
+  const nextItem = data.nextStudyItem;
+
+  const subtitle = !hasStudyable
+    ? "Your materials are being processed. Check back soon!"
+    : nextItem?.reason === "continue"
+      ? "Pick up where you left off"
+      : nextItem?.reason === "new"
+        ? "Ready to start something new"
+        : nextItem?.reason === "review"
+          ? "Time to reinforce what you've learned"
+          : "All caught up!";
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center gap-8">
+      {/* Pass Probability Ring */}
+      <div className="shrink-0 text-center">
+        <CircularProgress
+          value={data.overallPassProbability}
+          size={140}
+          strokeWidth={10}
+          labelClassName="text-2xl"
+        />
+        <p className="text-xs font-medium text-muted-foreground mt-2">
+          Pass Chance
+        </p>
+      </div>
+
+      {/* Text + CTA */}
+      <div className="flex-1 text-center sm:text-left space-y-3">
+        <div>
+          <h1 className="text-2xl font-bold">
+            {name ? `Welcome back, ${name}` : "Welcome back"}
+          </h1>
+          <p className="text-muted-foreground mt-1">{subtitle}</p>
+        </div>
+
+        {hasStudyable && data.totalConcepts > 0 && (
+          <p className="text-sm text-muted-foreground">
+            Studying{" "}
+            <span className="font-semibold text-foreground">
+              {data.totalConcepts}
+            </span>{" "}
+            concepts across{" "}
+            <span className="font-semibold text-foreground">
+              {data.totalCourses}
+            </span>{" "}
+            {data.totalCourses === 1 ? "course" : "courses"}
+          </p>
+        )}
+
+        <div className="flex flex-wrap gap-3 justify-center sm:justify-start">
+          {hasStudyable && nextItem ? (
+            <Button size="lg" className="gap-2" onClick={onStartStudying}>
+              <Sparkles className="w-4 h-4" />
+              {nextItem.reason === "continue"
+                ? "Continue Studying"
+                : nextItem.reason === "new"
+                  ? "Start Learning"
+                  : "Review"}
+            </Button>
+          ) : (
+            <Button size="lg" className="gap-2" onClick={onUpload}>
+              <Upload className="w-4 h-4" />
+              Upload Material
+            </Button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────────────────
+ * Course Card — circular progress ring + title + meta
  * ────────────────────────────────────────────────────── */
 
 function CourseCard({
   course,
   curriculum,
+  isRecommended,
   onClick,
   onEdit,
   onDelete,
 }: {
   course: CourseSummary;
   curriculum: string;
+  isRecommended: boolean;
   onClick: () => void;
   onEdit: () => void;
   onDelete: () => void;
 }) {
   const isProcessing = course.hasProcessing;
-  const passPercent =
-    course.passChance !== null ? Math.round(course.passChance * 100) : null;
+  const isClickable = course.totalConcepts > 0;
+
+  // Meta badge: grade label from user-level curriculum
+  const gradeLabel = getGradeLabel(curriculum, course.targetGrade);
 
   return (
     <Card
-      className="relative rounded-2xl overflow-hidden transition-all duration-200 hover:shadow-lg cursor-pointer"
-      onClick={onClick}
+      className={`relative overflow-hidden rounded-2xl transition-all duration-200 ${
+        isClickable
+          ? "cursor-pointer hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0"
+          : "opacity-80"
+      } ${isRecommended ? "ring-2 ring-primary/40 shadow-md" : ""}`}
+      onClick={isClickable ? onClick : undefined}
     >
+      {/* Recommended badge */}
+      {isRecommended && (
+        <div className="absolute top-2.5 left-2.5 z-10">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+            Next up
+          </span>
+        </div>
+      )}
+
       {/* Context menu */}
       <div
-        className="absolute top-3 right-3 z-10"
+        className="absolute top-2.5 right-2.5 z-10"
         onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenu>
@@ -299,67 +434,54 @@ function CourseCard({
         </DropdownMenu>
       </div>
 
-      <CardContent className="pt-8 pb-6 px-6 space-y-4">
-        {/* Course title */}
-        <h3 className="font-semibold text-base leading-tight line-clamp-2 pr-8">
+      <CardContent className="flex flex-col items-center text-center pt-7 pb-5 px-4">
+        {/* Progress ring */}
+        <div className="mb-4">
+          {isProcessing && course.totalConcepts === 0 ? (
+            <div
+              className="relative flex items-center justify-center"
+              style={{ width: 80, height: 80 }}
+            >
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <CircularProgress
+              value={course.passProbability}
+              size={80}
+              strokeWidth={7}
+              labelClassName="text-base"
+            />
+          )}
+        </div>
+
+        {/* Course name */}
+        <h3 className="font-semibold text-sm leading-tight line-clamp-2 mb-1.5 min-h-10">
           {course.title}
         </h3>
 
-        {/* Document count */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <FileText className="w-4 h-4" />
-          <span>
-            {course.documentCount}{" "}
-            {course.documentCount === 1 ? "document" : "documents"}
-          </span>
-        </div>
-
-        {/* Pass chance */}
-        <div className="space-y-1">
-          {isProcessing && course.documentCount > 0 ? (
-            <div className="flex items-center gap-2 text-sm text-blue-500">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Processing documents...</span>
-            </div>
-          ) : passPercent !== null ? (
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Passing Chance</span>
-                <span
-                  className={`font-bold text-lg ${
-                    passPercent >= 70
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : passPercent >= 40
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-red-600 dark:text-red-400"
-                  }`}
-                >
-                  {passPercent}%
-                </span>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                Target: {getGradeLabel(curriculum, course.targetGrade)}
-              </p>
-              {/* Simple progress bar */}
-              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${
-                    passPercent >= 70
-                      ? "bg-emerald-500"
-                      : passPercent >= 40
-                        ? "bg-amber-500"
-                        : "bg-red-500"
-                  }`}
-                  style={{ width: `${passPercent}%` }}
-                />
-              </div>
-            </div>
+        {/* Meta line */}
+        <p className="text-xs text-muted-foreground">
+          {course.totalConcepts > 0 ? (
+            <>
+              <span className="text-primary font-medium">{gradeLabel} · </span>
+              {course.passProbability}% pass chance
+            </>
+          ) : isProcessing ? (
+            <span className="text-primary">Processing...</span>
           ) : (
-            <p className="text-sm text-muted-foreground italic">
-              Not yet tested
-            </p>
+            <>
+              {course.documentCount}{" "}
+              {course.documentCount === 1 ? "doc" : "docs"}
+            </>
           )}
-        </div>
+        </p>
+
+        {/* Arrow hint for clickable cards */}
+        {isClickable && (
+          <div className="mt-3 text-muted-foreground/40">
+            <ArrowRight className="w-4 h-4" />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -28,13 +28,14 @@ import { toast } from "sonner";
 import { fetchDashboardData } from "../services/dashboardService";
 import { updateCourse, deleteCourse } from "@/features/courses";
 import { fetchProfile } from "@/features/settings";
-import { getGradeLabel } from "@/lib/curricula";
 import { profileQueryKeys } from "@/lib/queryKeys";
 import { UploadModal } from "./UploadModal";
 import { EditCourseDialog } from "./EditCourseDialog";
 import { DeleteCourseDialog } from "./DeleteCourseDialog";
 import type { CourseSummary, DashboardData } from "../types";
 import { supabase } from "@/lib/supabase";
+import { getGardenStatus, getStudyCTA, getDashboardSubtitle } from "@/lib/garden";
+import { Neko } from "@/components/garden/Neko";
 
 const dashboardQueryKeys = {
   data: (userId: string) => ["dashboard", userId] as const,
@@ -226,7 +227,6 @@ export function Dashboard() {
                     <CourseCard
                       key={course.id}
                       course={course}
-                      curriculum={profileData?.curriculum ?? "percentage"}
                       isRecommended={nextItem?.courseId === course.id}
                       onClick={() => navigate(`/course/${course.id}`)}
                       onEdit={() => setEditingCourse(course)}
@@ -294,15 +294,7 @@ function HeroSection({
   const hasStudyable = data.courses.some((c) => c.totalConcepts > 0);
   const nextItem = data.nextStudyItem;
 
-  const subtitle = !hasStudyable
-    ? "Your materials are being processed. Check back soon!"
-    : nextItem?.reason === "continue"
-      ? "Pick up where you left off"
-      : nextItem?.reason === "new"
-        ? "Ready to start something new"
-        : nextItem?.reason === "review"
-          ? "Time to reinforce what you've learned"
-          : "All caught up!";
+  const subtitle = getDashboardSubtitle(hasStudyable, nextItem?.reason ?? null);
 
   return (
     <div className="flex flex-col sm:flex-row items-center gap-8">
@@ -314,8 +306,8 @@ function HeroSection({
           strokeWidth={10}
           labelClassName="text-2xl"
         />
-        <p className="text-xs font-medium text-muted-foreground mt-2">
-          Pass Chance
+        <p className={`text-sm font-medium mt-2 ${getGardenStatus(data.overallPassProbability).color}`}>
+          {getGardenStatus(data.overallPassProbability).label}
         </p>
       </div>
 
@@ -346,16 +338,12 @@ function HeroSection({
           {hasStudyable && nextItem ? (
             <Button size="lg" className="gap-2" onClick={onStartStudying}>
               <Sparkles className="w-4 h-4" />
-              {nextItem.reason === "continue"
-                ? "Continue Studying"
-                : nextItem.reason === "new"
-                  ? "Start Learning"
-                  : "Review"}
+              {getStudyCTA(nextItem.reason)}
             </Button>
           ) : (
             <Button size="lg" className="gap-2" onClick={onUpload}>
               <Upload className="w-4 h-4" />
-              Upload Material
+              Plant a Seed
             </Button>
           )}
         </div>
@@ -370,14 +358,12 @@ function HeroSection({
 
 function CourseCard({
   course,
-  curriculum,
   isRecommended,
   onClick,
   onEdit,
   onDelete,
 }: {
   course: CourseSummary;
-  curriculum: string;
   isRecommended: boolean;
   onClick: () => void;
   onEdit: () => void;
@@ -385,9 +371,6 @@ function CourseCard({
 }) {
   const isProcessing = course.hasProcessing;
   const isClickable = course.totalConcepts > 0;
-
-  // Meta badge: grade label from user-level curriculum
-  const gradeLabel = getGradeLabel(curriculum, course.targetGrade);
 
   return (
     <Card
@@ -462,10 +445,9 @@ function CourseCard({
         {/* Meta line */}
         <p className="text-xs text-muted-foreground">
           {course.totalConcepts > 0 ? (
-            <>
-              <span className="text-primary font-medium">{gradeLabel} · </span>
-              {course.passProbability}% pass chance
-            </>
+            <span className={`font-medium ${getGardenStatus(course.passProbability).color}`}>
+              {getGardenStatus(course.passProbability).label}
+            </span>
           ) : isProcessing ? (
             <span className="text-primary">Processing...</span>
           ) : (
@@ -493,38 +475,48 @@ function CourseCard({
 
 function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 max-w-md mx-auto">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">Welcome to PassAI</h1>
-        <p className="text-muted-foreground">
-          Upload your study materials and we'll generate quizzes to test your
-          understanding and estimate your passing chance.
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 max-w-md mx-auto">
+      {/* Garden illustration with cat */}
+      <div className="flex items-end gap-4">
+        <svg width="32" height="48" viewBox="0 0 32 48" fill="none" className="opacity-40">
+          <line x1="16" y1="48" x2="16" y2="28" stroke="#0D7377" strokeWidth="2" />
+          <ellipse cx="10" cy="32" rx="6" ry="4" fill="#0D7377" opacity="0.3" />
+          <ellipse cx="22" cy="32" rx="6" ry="4" fill="#0D7377" opacity="0.3" />
+        </svg>
+        <Neko size={56} className="opacity-50" />
+      </div>
+
+      <div className="space-y-3">
+        <h1 className="text-3xl font-bold">Your garden is ready.</h1>
+        <p className="text-muted-foreground leading-relaxed">
+          Plant your first seed — upload your study materials and
+          we'll help you see where you stand.
         </p>
       </div>
 
       <Button size="lg" className="gap-2" onClick={onUpload}>
         <Upload className="w-5 h-5" />
-        Upload Your First Material
+        Plant a Seed
       </Button>
 
-      <div className="grid grid-cols-3 gap-6 pt-8 text-center">
+      <div className="grid grid-cols-3 gap-6 pt-4 text-center">
         <div className="space-y-1">
-          <div className="text-2xl">📄</div>
-          <p className="text-xs text-muted-foreground">Upload your materials</p>
+          <div className="text-2xl">🌱</div>
+          <p className="text-xs text-muted-foreground">Plant your materials</p>
         </div>
         <div className="space-y-1">
-          <div className="text-2xl">📝</div>
-          <p className="text-xs text-muted-foreground">
-            Take AI-generated quizzes
-          </p>
+          <div className="text-2xl">🌿</div>
+          <p className="text-xs text-muted-foreground">Walk the path</p>
         </div>
         <div className="space-y-1">
-          <div className="text-2xl">📊</div>
-          <p className="text-xs text-muted-foreground">
-            See your passing chance
-          </p>
+          <div className="text-2xl">🌳</div>
+          <p className="text-xs text-muted-foreground">Watch things grow</p>
         </div>
       </div>
+
+      <p className="text-xs text-muted-foreground/50 italic pt-2">
+        kanso (簡素) — simplicity is where understanding begins
+      </p>
     </div>
   );
 }

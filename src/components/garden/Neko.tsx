@@ -1,72 +1,48 @@
-/**
- * Neko — the PassAI garden cat.
- * A lo-fi line-drawn sleeping cat. Present on the dashboard,
- * breathing gently. Never judges, never celebrates. Just there.
- */
+import { useEffect, useState } from "react";
 
 interface NekoProps {
-  size?: number;
   className?: string;
+  width?: number;
 }
 
-export function Neko({ size = 80, className = "" }: NekoProps) {
+export function Neko({ className = "", width = 180 }: NekoProps) {
+  const [frame, setFrame] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setFrame((f) => (f === 0 ? 1 : 0));
+    }, 800);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <svg
-      width={size}
-      height={size * 0.6}
-      viewBox="0 0 120 72"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-      aria-label="A sleeping cat"
+    <div
+      className={`neko-container ${className}`}
+      style={{ width, display: "inline-block", position: "relative" }}
+      aria-hidden="true"
     >
-      {/* Body — curled oval */}
-      <ellipse
-        cx="60"
-        cy="48"
-        rx="38"
-        ry="20"
-        fill="#E8E4E1"
-        stroke="#B0A99F"
-        strokeWidth="1.5"
+      <img
+        src="/neko-1.png"
+        alt=""
+        style={{
+          width: "100%",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          opacity: frame === 0 ? 1 : 0,
+          transition: "opacity 0.3s ease-in-out",
+        }}
       />
-      {/* Head */}
-      <circle cx="88" cy="38" r="14" fill="#E8E4E1" stroke="#B0A99F" strokeWidth="1.5" />
-      {/* Left ear */}
-      <path d="M80 26 L76 14 L84 22" fill="#E8E4E1" stroke="#B0A99F" strokeWidth="1.5" strokeLinejoin="round" />
-      {/* Right ear */}
-      <path d="M96 26 L100 14 L92 22" fill="#E8E4E1" stroke="#B0A99F" strokeWidth="1.5" strokeLinejoin="round" />
-      {/* Inner ears — soft pink */}
-      <path d="M80.5 25 L78 17 L83 22" fill="#F0D9D0" />
-      <path d="M95.5 25 L98 17 L93 22" fill="#F0D9D0" />
-      {/* Closed eyes — peaceful */}
-      <path d="M83 37 Q85 39 87 37" stroke="#B0A99F" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-      <path d="M91 37 Q93 39 95 37" stroke="#B0A99F" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-      {/* Nose */}
-      <ellipse cx="89" cy="41" rx="1.2" ry="0.8" fill="#C4A69D" />
-      {/* Mouth */}
-      <path d="M89 42 Q87 44 85 43" stroke="#B0A99F" strokeWidth="0.8" strokeLinecap="round" fill="none" />
-      {/* Tail — curled around body */}
-      <path
-        d="M24 42 Q16 36 20 28 Q24 22 30 26"
-        stroke="#B0A99F"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        fill="none"
+      <img
+        src="/neko-2.png"
+        alt=""
+        style={{
+          width: "100%",
+          position: "relative",
+          opacity: frame === 1 ? 1 : 0,
+          transition: "opacity 0.3s ease-in-out",
+        }}
       />
-      {/* Whiskers */}
-      <line x1="98" y1="38" x2="110" y2="36" stroke="#C8C0B8" strokeWidth="0.7" />
-      <line x1="98" y1="40" x2="110" y2="41" stroke="#C8C0B8" strokeWidth="0.7" />
-      <line x1="80" y1="38" x2="68" y2="36" stroke="#C8C0B8" strokeWidth="0.7" />
-      <line x1="80" y1="40" x2="68" y2="41" stroke="#C8C0B8" strokeWidth="0.7" />
-      {/* Breathing animation — subtle body rise */}
-      <animateTransform
-        attributeName="transform"
-        type="translate"
-        values="0,0; 0,-0.8; 0,0"
-        dur="4s"
-        repeatCount="indefinite"
-      />
-    </svg>
+    </div>
   );
 }

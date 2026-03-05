@@ -1,110 +1,231 @@
 import { Button } from "@/components/ui/button";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import LogoSvg from "@/assets/logo.svg?react";
-import { Sparkles, BookOpen, Trophy, Brain } from "lucide-react";
+import { Neko } from "@/components/garden/Neko";
 
-/**
- * Landing page shown to unauthenticated users.
- * Provides entry points to sign up or log in.
- */
 export function LandingPage() {
   const { user } = useAuth();
-
-  if (user) {
-    return <Navigate to="/home" replace />;
-  }
+  if (user) return <Navigate to="/home" replace />;
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-primary/5 to-background">
-      {/* Hero Section */}
-      <div className="container mx-auto px-6 py-16 md:py-24">
-        <div className="max-w-5xl mx-auto">
-          {/* Logo and Title */}
-          <div className="flex flex-col items-center text-center space-y-8">
-            <div className="w-24 h-24 md:w-32 md:h-32">
-              <LogoSvg className="w-full h-full" />
-            </div>
-
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
-                <span className="bg-linear-to-r from-primary via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                  PassAI
-                </span>
-              </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl">
-                Upload your study materials. Take AI-generated quizzes.
-                <br />
-                See your estimated passing chance.
-              </p>
-            </div>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              <Button asChild size="lg" className="text-base px-8">
-                <Link to="/signup">
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Get Started Free
-                </Link>
-              </Button>
-              <Button
-                asChild
-                size="lg"
-                variant="outline"
-                className="text-base px-8"
-              >
-                <Link to="/login">Sign In</Link>
-              </Button>
-            </div>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid md:grid-cols-3 gap-6 mt-20">
-            <div className="group p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/50 hover:shadow-lg transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <BookOpen className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Upload Materials</h3>
-              <p className="text-sm text-muted-foreground">
-                Upload PDFs, DOCX, or presentations. Our AI extracts key
-                concepts and generates quiz questions automatically.
-              </p>
-            </div>
-
-            <div className="group p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/50 hover:shadow-lg transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Brain className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">Take Quizzes</h3>
-              <p className="text-sm text-muted-foreground">
-                Test your understanding with intelligent questions tailored to
-                your study materials. Take as many as you want.
-              </p>
-            </div>
-
-            <div className="group p-8 rounded-2xl bg-card border border-border/50 hover:border-primary/50 hover:shadow-lg transition-all duration-300">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Trophy className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold mb-2">
-                Know Your Passing Chance
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Get an estimated passing probability powered by Bayesian
-                Knowledge Tracing. The more you practice, the more accurate it
-                gets.
-              </p>
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="mt-20 pt-12 border-t border-border/50">
-            <p className="text-center text-sm text-muted-foreground">
-              Free to get started • No credit card required
-            </p>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Nav */}
+      <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-sm border-b border-border/30">
+        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+          <span className="text-xl font-bold text-primary tracking-tight">PassAI</span>
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm"><Link to="/login">Sign in</Link></Button>
+            <Button asChild size="sm"><Link to="/signup">Start Growing</Link></Button>
           </div>
         </div>
-      </div>
+      </nav>
+
+      {/* Hero */}
+      <section className="pt-32 pb-20 px-6">
+        <div className="max-w-3xl mx-auto text-center space-y-8">
+          <div className="flex justify-center items-end gap-6 mb-4">
+            <svg width="32" height="48" viewBox="0 0 32 48" fill="none" className="opacity-60">
+              <line x1="16" y1="48" x2="16" y2="24" stroke="#0D7377" strokeWidth="2" />
+              <ellipse cx="10" cy="28" rx="7" ry="5" fill="#0D7377" opacity="0.3" />
+              <ellipse cx="22" cy="28" rx="7" ry="5" fill="#0D7377" opacity="0.3" />
+            </svg>
+            <svg width="40" height="64" viewBox="0 0 40 64" fill="none">
+              <line x1="20" y1="64" x2="20" y2="20" stroke="#0D7377" strokeWidth="2.5" />
+              <ellipse cx="12" cy="30" rx="9" ry="7" fill="#0D7377" opacity="0.35" />
+              <ellipse cx="28" cy="30" rx="9" ry="7" fill="#0D7377" opacity="0.35" />
+              <ellipse cx="20" cy="20" rx="8" ry="6" fill="#0D7377" opacity="0.25" />
+            </svg>
+            <svg width="48" height="80" viewBox="0 0 48 80" fill="none">
+              <line x1="24" y1="80" x2="24" y2="16" stroke="#0D7377" strokeWidth="3" />
+              <ellipse cx="14" cy="36" rx="11" ry="8" fill="#0D7377" opacity="0.4" />
+              <ellipse cx="34" cy="36" rx="11" ry="8" fill="#0D7377" opacity="0.4" />
+              <ellipse cx="10" cy="52" rx="9" ry="7" fill="#0D7377" opacity="0.3" />
+              <ellipse cx="38" cy="52" rx="9" ry="7" fill="#0D7377" opacity="0.3" />
+              <circle cx="24" cy="14" r="6" fill="#0D7377" opacity="0.2" />
+            </svg>
+            <div className="self-end mb-1"><Neko size={72} /></div>
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight">
+            A quiet place to grow
+            <br />
+            <span className="text-primary">what you know.</span>
+          </h1>
+
+          <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
+            Upload your study materials. Take quizzes rooted in your own notes.
+            Watch your understanding grow — and know, honestly, where you stand
+            before test day.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+            <Button asChild size="lg" className="text-base px-8">
+              <Link to="/signup">Start Growing — Free</Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="text-base px-8">
+              <a href="#how-it-works">See how it works</a>
+            </Button>
+          </div>
+
+          <p className="text-xs text-muted-foreground/60 pt-2">
+            No credit card. No streaks. No pressure.
+          </p>
+        </div>
+      </section>
+
+      {/* Philosophy strip */}
+      <section className="py-12 border-y border-border/30 bg-secondary/30">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-2xl mx-auto">
+            PassAI is built on the principle of{" "}
+            <span className="text-foreground font-medium">shizen</span>{" "}
+            <span className="text-muted-foreground/60">(自然)</span> — naturalness.
+            Learning isn't a race. It's a garden. Some days things grow quickly.
+            Other days the roots go deeper where you can't see them. Both matter.
+          </p>
+        </div>
+      </section>
+
+      {/* How it works */}
+      <section id="how-it-works" className="py-20 px-6">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-16">How your garden grows</h2>
+          <div className="space-y-16">
+            <div className="flex items-start gap-6">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">1</div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Plant your seeds</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Upload your PDFs, notes, or slides. PassAI reads your materials
+                  and understands the concepts inside — the soil your garden grows from.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-6">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">2</div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Walk the path</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Take quizzes generated from your own materials. Each question is a step
+                  along a meandering path — not a straight line, not a test. Just an honest
+                  look at what you know.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-start gap-6">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">3</div>
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Watch things grow</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  See your pass probability — a real estimate of where you stand, powered by
+                  the same knowledge-tracing models used in academic research. Not a guess.
+                  Not a score. An honest mirror.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* What makes this different */}
+      <section className="py-20 px-6 bg-secondary/30 border-y border-border/30">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-4">Not another flashcard app</h2>
+          <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
+            Quizlet tests what you remember. PassAI tells you if you'll pass.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-6">
+            <div className="p-6 bg-card rounded-2xl border border-border/50">
+              <div className="text-2xl mb-3">🌱</div>
+              <h3 className="font-semibold mb-2">Your materials, your garden</h3>
+              <p className="text-sm text-muted-foreground">
+                Upload your actual study materials. Quizzes come from what you need to know — not a generic database.
+              </p>
+            </div>
+            <div className="p-6 bg-card rounded-2xl border border-border/50">
+              <div className="text-2xl mb-3">🪴</div>
+              <h3 className="font-semibold mb-2">Bayesian knowledge tracing</h3>
+              <p className="text-sm text-muted-foreground">
+                The same model used in learning science research tracks what you actually understand — not just what you got right once.
+              </p>
+            </div>
+            <div className="p-6 bg-card rounded-2xl border border-border/50">
+              <div className="text-2xl mb-3">🌿</div>
+              <h3 className="font-semibold mb-2">Designed for calm</h3>
+              <p className="text-sm text-muted-foreground">
+                No streaks. No leaderboards. No panic. Built by a teacher who knows that anxiety is the enemy of learning.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing */}
+      <section className="py-20 px-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-2">Simple, transparent</h2>
+          <p className="text-center text-muted-foreground mb-12">
+            See where you stand for free. Upgrade when you want the path forward.
+          </p>
+          <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            <div className="p-8 bg-card rounded-2xl border border-border/50">
+              <h3 className="text-lg font-semibold mb-1">Starter</h3>
+              <p className="text-3xl font-bold mb-6">Free</p>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Upload your study materials</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>AI-generated quizzes from your notes</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Pass probability after each quiz</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>1 subject</li>
+              </ul>
+              <Button asChild variant="outline" className="w-full mt-8" size="lg">
+                <Link to="/signup">Get Started</Link>
+              </Button>
+            </div>
+            <div className="p-8 bg-card rounded-2xl border-2 border-primary/40 relative">
+              <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold text-primary-foreground bg-primary px-3 py-1 rounded-full">Most Popular</span>
+              <h3 className="text-lg font-semibold mb-1">Pass Pro</h3>
+              <div className="mb-6">
+                <span className="text-3xl font-bold">$79</span>
+                <span className="text-muted-foreground">/year</span>
+                <p className="text-xs text-muted-foreground mt-1">~$6.58/mo — save 34% vs monthly</p>
+              </div>
+              <ul className="space-y-3 text-sm text-muted-foreground">
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Everything in Starter</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Unlimited subjects</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Knowledge garden — topic-by-topic growth</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Smart study plans for your exam date</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Progress over time</li>
+              </ul>
+              <Button asChild className="w-full mt-8" size="lg">
+                <Link to="/signup">Start 7-Day Free Trial</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Closing */}
+      <section className="py-16 px-6 border-t border-border/30 bg-secondary/20">
+        <div className="max-w-2xl mx-auto text-center space-y-6">
+          <Neko size={64} className="mx-auto opacity-40" />
+          <p className="text-muted-foreground text-sm italic">
+            "Gardens don't grow on schedules. But they always grow."
+          </p>
+          <Button asChild size="lg">
+            <Link to="/signup">Start Growing — Free</Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-8 px-6 border-t border-border/30">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <span className="text-sm text-muted-foreground">© 2026 PassAI — Built by a teacher, for students.</span>
+          <div className="flex gap-6 text-sm text-muted-foreground">
+            <span>IB</span><span>AP</span><span>GCSE</span><span>A-Level</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

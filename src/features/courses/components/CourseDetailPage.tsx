@@ -24,6 +24,7 @@ import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
+import { getGardenStatus } from "@/lib/garden";
 import type { TestSession } from "@/features/test/types";
 
 export function CourseDetailPage() {
@@ -190,7 +191,7 @@ export function CourseDetailPage() {
                   {passPercent !== null ? (
                     <>
                       <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-                        Passing Chance
+                        Your Garden
                       </p>
                       <CircularProgress
                         value={passPercent}
@@ -198,14 +199,17 @@ export function CourseDetailPage() {
                         strokeWidth={10}
                         labelClassName="text-2xl font-bold"
                       />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        of hitting {targetLabel}
+                      <p className={`text-sm font-medium mt-2 ${getGardenStatus(passPercent).color}`}>
+                        {getGardenStatus(passPercent).label}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        growing toward {targetLabel}
                       </p>
                     </>
                   ) : (
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground italic">
-                        Take a quiz to see your passing chance
+                        Walk the path to see how your garden grows
                       </p>
                     </div>
                   )}
@@ -216,13 +220,13 @@ export function CourseDetailPage() {
                   <div>
                     <h2 className="text-lg font-semibold">
                       {sessions.length > 0
-                        ? "Keep Practicing"
-                        : "Start Testing"}
+                        ? "Keep Tending"
+                        : "Plant Your First Seeds"}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
                       {sessions.length > 0
-                        ? "Each quiz helps improve your passing chance estimate. More quizzes = more accurate."
-                        : "Take your first quiz to start tracking your mastery of this material."}
+                        ? "Each time you walk the path, your garden reveals more."
+                        : "Take your first quiz to plant seeds and see what grows."}
                     </p>
                   </div>
                   <Button
@@ -232,7 +236,7 @@ export function CourseDetailPage() {
                     disabled={!docCount || docCount === 0}
                   >
                     <ClipboardCheck className="w-4 h-4" />
-                    {sessions.length > 0 ? "Start New Quiz" : "Take Quiz"}
+                    {sessions.length > 0 ? "Walk the Path" : "Begin Growing"}
                   </Button>
                 </div>
               </div>
@@ -364,15 +368,9 @@ function SessionCard({
               </p>
               {passPercent !== null && (
                 <p
-                  className={`text-xs font-medium ${
-                    passPercent >= 70
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : passPercent >= 40
-                        ? "text-amber-600 dark:text-amber-400"
-                        : "text-red-600 dark:text-red-400"
-                  }`}
+                  className={`text-xs font-medium ${getGardenStatus(passPercent).color}`}
                 >
-                  {passPercent}% pass
+                  {getGardenStatus(passPercent).label}
                 </p>
               )}
             </div>

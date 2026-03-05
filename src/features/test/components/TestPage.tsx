@@ -26,6 +26,7 @@ import {
 import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
+import { getGardenStatus } from "@/lib/garden";
 import type { AnswerFeedback } from "../types";
 
 export function TestPage() {
@@ -279,7 +280,7 @@ export function TestPage() {
             </p>
           </div>
           <Button variant="outline" onClick={handleExit}>
-            Back to Course
+            Back to Garden
           </Button>
         </div>
       </div>
@@ -327,8 +328,14 @@ export function TestPage() {
                       strokeWidth={12}
                       labelClassName="text-3xl font-bold"
                     />
-                    <p className="text-sm text-muted-foreground mt-2">
-                      of hitting{" "}
+                    <p className={`text-sm font-semibold mt-2 ${getGardenStatus(passPercent).color}`}>
+                      {getGardenStatus(passPercent).label}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {getGardenStatus(passPercent).description}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Growing toward{" "}
                       {getGradeLabel(
                         profileData?.curriculum ?? "percentage",
                         targetGrade,
@@ -346,10 +353,16 @@ export function TestPage() {
                 {/* Score summary */}
                 <div className="space-y-1">
                   <p className="text-lg font-semibold">
-                    You got {correctCount} out of {totalQuestions} correct
+                    {correctCount} of {totalQuestions} seeds took root
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    Score: {scorePercent}%
+                    {scorePercent >= 80
+                      ? "Your garden flourished today."
+                      : scorePercent >= 60
+                        ? "Good growth today."
+                        : scorePercent >= 40
+                          ? "The soil is getting richer."
+                          : "Every garden has days like this."}
                   </p>
                 </div>
 
@@ -361,7 +374,7 @@ export function TestPage() {
                     onClick={handleRetake}
                   >
                     <RotateCcw className="w-4 h-4" />
-                    Take Another Quiz
+                    Walk the Path Again
                   </Button>
                   <Button
                     size="lg"
@@ -370,7 +383,7 @@ export function TestPage() {
                     onClick={handleExit}
                   >
                     <X className="w-4 h-4" />
-                    Exit
+                    Return to Garden
                   </Button>
                 </div>
               </div>
@@ -402,14 +415,26 @@ export function TestPage() {
             </p>
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-muted-foreground">
-                Question {currentIndex + 1} of {totalQuestions}
+                Step {currentIndex + 1} of {totalQuestions}
               </p>
               <p className="text-sm text-muted-foreground">
-                {correctCount}/{answeredCount} correct
+                {correctCount}/{answeredCount} took root
               </p>
             </div>
             <Progress value={((currentIndex + 1) / totalQuestions) * 100} />
           </div>
+
+          {/* Mid-quiz encouragement at ~50% */}
+          {currentIndex > 0 &&
+            Math.abs((currentIndex + 1) / totalQuestions - 0.5) < 0.1 &&
+            !feedback && (
+              <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-xl mb-4">
+                <span className="text-xl">🌱</span>
+                <p className="text-sm text-green-700 dark:text-green-400 mt-1 font-medium">
+                  Along the way. Keep walking.
+                </p>
+              </div>
+            )}
 
           {/* Question card */}
           <Card className="rounded-2xl overflow-hidden">
@@ -435,7 +460,7 @@ export function TestPage() {
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium">
-                      {feedback.is_correct ? "Correct!" : "Incorrect"}
+                      {feedback.is_correct ? "That one took root." : "That seed needs more light."}
                     </p>
                     {!feedback.is_correct && (
                       <p className="text-sm mt-0.5 opacity-80">
@@ -521,7 +546,7 @@ export function TestPage() {
                 <div className="mt-8 flex justify-end">
                   <Button size="lg" className="gap-2" onClick={handleNext}>
                     {currentIndex + 1 >= totalQuestions
-                      ? "See Results"
+                      ? "See What Grew"
                       : "Next"}
                     <ArrowRight className="w-4 h-4" />
                   </Button>

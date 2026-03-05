@@ -7,7 +7,7 @@
  */
 
 export interface GradeOption {
-  label: string
+  label: string;
   value: number; // normalized 0–1
 }
 
@@ -40,7 +40,7 @@ const percentage: Curriculum = {
     { label: "55%", value: 0.55 },
     { label: "50%", value: 0.5 },
   ],
-    defaultTarget: 0.7,
+  defaultTarget: 0.7,
 };
 
 const ib: Curriculum = {

@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 
 interface NekoProps {
   className?: string;
+  size?: number;
   width?: number;
 }
 
-export function Neko({ className = "", width = 180 }: NekoProps) {
+export function Neko({ className = "", size, width }: NekoProps) {
   const [frame, setFrame] = useState(0);
+  const w = width ?? size ?? 180;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -18,7 +20,7 @@ export function Neko({ className = "", width = 180 }: NekoProps) {
   return (
     <div
       className={`neko-container ${className}`}
-      style={{ width, display: "inline-block", position: "relative" }}
+      style={{ width: w, display: "inline-block", position: "relative" }}
       aria-hidden="true"
     >
       <img

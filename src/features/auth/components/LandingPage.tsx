@@ -46,7 +46,7 @@ export function LandingPage() {
             <img
               src="/students-hero-final.png"
               alt="Two students studying together"
-              className="w-full max-w-md rounded-2xl shadow-lg"
+              className="w-full max-w-2xl rounded-2xl shadow-lg"
             />
           </div>
         </div>

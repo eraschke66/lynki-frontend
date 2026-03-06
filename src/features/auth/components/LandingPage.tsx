@@ -21,7 +21,7 @@ export function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-24 pb-20 px-6">
+      <section className="pt-24 pb-12 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-6">
           <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight">
             Turn your notes into quizzes.
@@ -53,12 +53,12 @@ export function LandingPage() {
       </section>
 
       {/* How it works */}
-      <section id="how-it-works" className="py-20 px-6">
+      <section id="how-it-works" className="py-12 px-6">
         <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-16">How it works</h2>
-          <div className="space-y-16">
+          <h2 className="text-2xl font-bold text-center mb-10">How it works</h2>
+          <div className="space-y-10">
             <div className="flex items-center gap-6">
-              <img src="/plant-seedling-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'multiply'}} />
+              <img src="/plant-seedling-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'darken'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Upload your notes</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -67,7 +67,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="flex items-center gap-6">
-              <img src="/plant-young-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'multiply'}} />
+              <img src="/plant-young-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'darken'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Take a real quiz</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -76,7 +76,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="flex items-center gap-6">
-              <img src="/plant-flower-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'multiply'}} />
+              <img src="/plant-flower-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'darken'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">See where you stand</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -89,10 +89,10 @@ export function LandingPage() {
       </section>
 
       {/* What makes this different */}
-      <section className="py-20 px-6 bg-secondary/30 border-y border-border/30">
+      <section className="py-12 px-6 bg-secondary/30 border-y border-border/30">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-4">This isn't Quizlet</h2>
-          <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
+          <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
             Quizlet tests what you remember. PassAI tells you if you'll pass.
           </p>
           <div className="grid sm:grid-cols-3 gap-6">
@@ -122,10 +122,10 @@ export function LandingPage() {
       </section>
 
       {/* Pricing */}
-      <section className="py-20 px-6">
+      <section className="py-12 px-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-2">Simple pricing</h2>
-          <p className="text-center text-muted-foreground mb-12">
+          <p className="text-center text-muted-foreground mb-10">
             Start free. Upgrade when you want the full picture.
           </p>
           <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
@@ -166,7 +166,7 @@ export function LandingPage() {
       </section>
 
       {/* Closing */}
-      <section className="py-16 px-6 border-t border-border/30 bg-secondary/20">
+      <section className="py-12 px-6 border-t border-border/30 bg-secondary/20">
         <div className="max-w-2xl mx-auto text-center space-y-6">
           <Neko size={64} className="mx-auto opacity-40" />
           <p className="text-muted-foreground text-sm italic">

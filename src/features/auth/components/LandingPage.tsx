@@ -44,7 +44,7 @@ export function LandingPage() {
 
           <div className="flex justify-center pt-4">
             <img
-              src="/students-hero.png"
+              src="/students-hero-final.png"
               alt="Two students studying together"
               className="w-full max-w-md rounded-2xl shadow-lg"
             />

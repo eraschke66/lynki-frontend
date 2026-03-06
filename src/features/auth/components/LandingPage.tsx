@@ -21,16 +21,8 @@ export function LandingPage() {
       </nav>
 
       {/* Hero */}
-      <section className="pt-32 pb-20 px-6">
+      <section className="pt-24 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          <div className="flex justify-center mb-4">
-            <img
-              src="/students-hero.png"
-              alt="Two students studying together with a cat"
-              className="w-full max-w-lg rounded-2xl shadow-lg"
-            />
-          </div>
-
           <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight">
             A quiet place to grow
             <br />
@@ -43,7 +35,7 @@ export function LandingPage() {
             before test day.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Button asChild size="lg" className="text-base px-8">
               <Link to="/signup">Start Growing — Free</Link>
             </Button>
@@ -52,9 +44,17 @@ export function LandingPage() {
             </Button>
           </div>
 
-          <p className="text-xs text-muted-foreground/60 pt-2">
+          <p className="text-xs text-muted-foreground/60">
             No credit card. No streaks. No pressure.
           </p>
+
+          <div className="flex justify-center">
+            <img
+              src="/students-hero-wide.png"
+              alt="Two students studying together with a cat"
+              className="w-full max-w-lg rounded-2xl shadow-lg"
+            />
+          </div>
         </div>
       </section>
 
@@ -76,8 +76,8 @@ export function LandingPage() {
         <div className="max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-16">How your garden grows</h2>
           <div className="space-y-16">
-            <div className="flex items-start gap-6">
-              <img src="/plant-seedling-raw.png" alt="" className="w-16 h-auto shrink-0" />
+            <div className="flex items-center gap-6">
+              <img src="/plant-seedling-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'multiply'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Plant your seeds</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -86,8 +86,8 @@ export function LandingPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-6">
-              <img src="/plant-young-raw.png" alt="" className="w-16 h-auto shrink-0" />
+            <div className="flex items-center gap-6">
+              <img src="/plant-young-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'multiply'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Walk the path</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -97,8 +97,8 @@ export function LandingPage() {
                 </p>
               </div>
             </div>
-            <div className="flex items-start gap-6">
-              <img src="/plant-flower-raw.png" alt="" className="w-16 h-auto shrink-0" />
+            <div className="flex items-center gap-6">
+              <img src="/plant-flower-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'multiply'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Watch things grow</h3>
                 <p className="text-muted-foreground leading-relaxed">

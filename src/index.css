@@ -4,30 +4,30 @@
 
 /* ─────────────────────────────────────────────
    Garden Design System — PassAI
-   Warm cream + forest greens + depth
+   Warm linen + forest greens + depth
 ───────────────────────────────────────────── */
 
 @layer base {
   :root {
     /* Core brand */
-    --background: 43 60% 96%;        /* warm cream #FAF3E0 */
-    --foreground: 160 20% 14%;       /* deep forest text */
-    --card: 40 50% 98%;              /* slightly warmer than page */
+    --background: 38 48% 87%;          /* warm linen #EDD9B0 — matches Sora video palette */
+    --foreground: 160 20% 14%;         /* deep forest text */
+    --card: 40 55% 94%;                /* lighter warm cream — lifts above linen bg */
     --card-foreground: 160 20% 14%;
-    --popover: 40 50% 99%;
+    --popover: 40 55% 96%;
     --popover-foreground: 160 20% 14%;
-    --primary: 182 80% 25%;          /* teal #0D7377 */
+    --primary: 182 80% 25%;            /* teal #0D7377 */
     --primary-foreground: 0 0% 100%;
-    --secondary: 40 35% 92%;
+    --secondary: 40 35% 88%;
     --secondary-foreground: 160 20% 20%;
-    --muted: 40 30% 90%;
+    --muted: 40 30% 85%;
     --muted-foreground: 160 12% 42%;
-    --accent: 155 43% 48%;           /* garden moss */
+    --accent: 155 43% 48%;             /* garden moss */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 40 25% 86%;
-    --input: 40 25% 88%;
+    --border: 38 30% 78%;
+    --input: 38 30% 80%;
     --ring: 182 80% 25%;
     --radius: 0.625rem;
 
@@ -41,11 +41,17 @@
     --garden-shadow:  rgba(27, 67, 50, 0.14);
     --garden-amber:   rgba(245, 200, 120, 0.12);
 
+    /* Linen palette (from Sora video) */
+    --linen-base:     #EDD9B0;
+    --linen-light:    #F5EAD0;
+    --linen-dark:     #C8A87A;
+    --linen-vignette: rgba(140, 95, 40, 0.10);
+
     /* Depth layers */
-    --shadow-soft:    0 2px 8px rgba(27, 67, 50, 0.07), 0 1px 2px rgba(27, 67, 50, 0.05);
-    --shadow-card:    0 4px 16px rgba(27, 67, 50, 0.10), 0 1px 4px rgba(27, 67, 50, 0.06);
-    --shadow-hover:   0 8px 28px rgba(27, 67, 50, 0.14), 0 2px 6px rgba(27, 67, 50, 0.08);
-    --shadow-inset:   inset 0 1px 3px rgba(27, 67, 50, 0.08);
+    --shadow-soft:  0 2px 8px rgba(27, 67, 50, 0.07),  0 1px 2px rgba(27, 67, 50, 0.05);
+    --shadow-card:  0 4px 16px rgba(27, 67, 50, 0.10), 0 1px 4px rgba(27, 67, 50, 0.06);
+    --shadow-hover: 0 8px 28px rgba(27, 67, 50, 0.14), 0 2px 6px rgba(27, 67, 50, 0.08);
+    --shadow-inset: inset 0 1px 3px rgba(27, 67, 50, 0.08);
   }
 
   .dark {
@@ -68,19 +74,17 @@
     --border: 160 18% 20%;
     --input: 160 18% 18%;
     --ring: 182 65% 42%;
-
     --garden-mist:   rgba(64, 145, 108, 0.10);
     --garden-shadow: rgba(0, 0, 0, 0.25);
     --shadow-soft:   0 2px 8px rgba(0, 0, 0, 0.2);
     --shadow-card:   0 4px 16px rgba(0, 0, 0, 0.28);
     --shadow-hover:  0 8px 28px rgba(0, 0, 0, 0.36);
+    --linen-vignette: rgba(0, 0, 0, 0.20);
   }
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
 
   html {
     font-feature-settings: "kern" 1, "liga" 1;
@@ -91,33 +95,29 @@
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, sans-serif;
 
-    /* Linen texture overlay */
     background-image:
-      /* Diagonal linen weave */
       repeating-linear-gradient(
         45deg,
-        rgba(180, 150, 100, 0.025) 0px,
-        rgba(180, 150, 100, 0.025) 1px,
+        rgba(140, 95, 40, 0.030) 0px,
+        rgba(140, 95, 40, 0.030) 1px,
         transparent 1px,
         transparent 6px
       ),
       repeating-linear-gradient(
         -45deg,
-        rgba(180, 150, 100, 0.020) 0px,
-        rgba(180, 150, 100, 0.020) 1px,
+        rgba(140, 95, 40, 0.022) 0px,
+        rgba(140, 95, 40, 0.022) 1px,
         transparent 1px,
         transparent 6px
       ),
-      /* Warm sunlight from top-right */
       radial-gradient(
         ellipse 80% 60% at 75% 0%,
-        rgba(245, 220, 160, 0.12) 0%,
+        rgba(245, 220, 160, 0.18) 0%,
         transparent 65%
       ),
-      /* Subtle garden-floor glow at bottom */
       radial-gradient(
         ellipse 60% 30% at 50% 100%,
-        rgba(64, 145, 108, 0.05) 0%,
+        rgba(64, 145, 108, 0.06) 0%,
         transparent 70%
       );
   }
@@ -129,27 +129,35 @@
 
 @layer components {
 
-  /* Cards with depth */
   .garden-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
-    box-shadow: var(--shadow-card);
+    box-shadow:
+      var(--shadow-card),
+      inset 0  2px  8px rgba(140, 95, 40, 0.06),
+      inset 0 -2px  8px rgba(140, 95, 40, 0.05),
+      inset  2px 0  8px rgba(140, 95, 40, 0.04),
+      inset -2px 0  8px rgba(140, 95, 40, 0.04);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
 
   .garden-card:hover {
-    box-shadow: var(--shadow-hover);
+    box-shadow:
+      var(--shadow-hover),
+      inset 0  2px  8px rgba(140, 95, 40, 0.04),
+      inset 0 -2px  8px rgba(140, 95, 40, 0.03),
+      inset  2px 0  8px rgba(140, 95, 40, 0.03),
+      inset -2px 0  8px rgba(140, 95, 40, 0.03);
     transform: translateY(-1px);
   }
 
-  /* Frosted glass panel — for hero sections */
   .garden-panel {
     background: linear-gradient(
       135deg,
-      rgba(250, 243, 224, 0.7) 0%,
+      rgba(245, 234, 208, 0.75) 0%,
       rgba(64, 145, 108, 0.06) 60%,
-      rgba(250, 243, 224, 0.4) 100%
+      rgba(245, 234, 208, 0.50) 100%
     );
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -161,17 +169,15 @@
       inset 0 1px 0 rgba(255, 255, 255, 0.6);
   }
 
-  /* Watercolor wash section background */
   .garden-wall {
     background:
       radial-gradient(ellipse 80% 50% at 10% 50%, rgba(64, 145, 108, 0.06) 0%, transparent 70%),
       radial-gradient(ellipse 60% 80% at 90% 20%, rgba(13, 115, 119, 0.05) 0%, transparent 65%),
-      rgba(250, 243, 224, 0.3);
+      rgba(245, 234, 208, 0.40);
     border-radius: calc(var(--radius) * 2);
     border: 1px solid rgba(64, 145, 108, 0.10);
   }
 
-  /* Botanical divider */
   .garden-divider {
     border: none;
     height: 1px;
@@ -199,7 +205,6 @@
     line-height: 1;
   }
 
-  /* Garden badge */
   .garden-badge {
     display: inline-flex;
     align-items: center;
@@ -215,7 +220,6 @@
     padding: 2px 8px;
   }
 
-  /* Active nav indicator */
   .garden-nav-active {
     color: var(--garden-canopy);
     background: var(--garden-mist);
@@ -223,7 +227,6 @@
     font-weight: 600;
   }
 
-  /* Card top-border accent (botanical stripe) */
   .garden-stripe {
     border-top: 3px solid rgba(64, 145, 108, 0.30);
   }
@@ -234,39 +237,22 @@
 }
 
 /* ─────────────────────────────────────────────
-   Scrollbar — subtle and warm
+   Scrollbar
 ───────────────────────────────────────────── */
 
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba(64, 145, 108, 0.25);
-  border-radius: 100px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(64, 145, 108, 0.45);
-}
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: rgba(64, 145, 108, 0.25); border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(64, 145, 108, 0.45); }
 
 /* ─────────────────────────────────────────────
-   Selection color
+   Selection + Focus
 ───────────────────────────────────────────── */
 
 ::selection {
-  background: rgba(64, 145, 108, 0.2);
+  background: rgba(64, 145, 108, 0.20);
   color: var(--garden-forest);
 }
-
-/* ─────────────────────────────────────────────
-   Focus ring — botanical
-───────────────────────────────────────────── */
 
 :focus-visible {
   outline: 2px solid rgba(64, 145, 108, 0.6);

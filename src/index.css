@@ -1,28 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ─────────────────────────────────────────────
-   Garden Design System — PassAI
+/* =============================================
+   Garden Design System - PassAI
    Warm linen + forest greens + depth
-───────────────────────────────────────────── */
+   ============================================= */
 
 @layer base {
   :root {
     /* Core brand */
-    --background: 38 48% 87%;          /* warm linen #EDD9B0 — matches Sora video palette */
-    --foreground: 160 20% 14%;         /* deep forest text */
-    --card: 40 55% 94%;                /* lighter warm cream — lifts above linen bg */
+    --background: 38 48% 87%;        /* warm linen #EDD9B0 */
+    --foreground: 160 20% 14%;
+    --card: 40 55% 94%;
     --card-foreground: 160 20% 14%;
     --popover: 40 55% 96%;
     --popover-foreground: 160 20% 14%;
-    --primary: 182 80% 25%;            /* teal #0D7377 */
+    --primary: 182 80% 25%;          /* teal #0D7377 */
     --primary-foreground: 0 0% 100%;
     --secondary: 40 35% 88%;
     --secondary-foreground: 160 20% 20%;
     --muted: 40 30% 85%;
     --muted-foreground: 160 12% 42%;
-    --accent: 155 43% 48%;             /* garden moss */
+    --accent: 155 43% 48%;           /* garden moss */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -32,23 +34,23 @@
     --radius: 0.625rem;
 
     /* Garden palette */
-    --garden-forest:  #1B4332;
-    --garden-canopy:  #2D6A4F;
-    --garden-moss:    #40916C;
-    --garden-sage:    #52B788;
-    --garden-leaf:    #74C69D;
-    --garden-mist:    rgba(64, 145, 108, 0.07);
-    --garden-shadow:  rgba(27, 67, 50, 0.14);
-    --garden-amber:   rgba(245, 200, 120, 0.12);
+    --garden-forest: #1B4332;
+    --garden-canopy: #2D6A4F;
+    --garden-moss: #40916C;
+    --garden-sage: #52B788;
+    --garden-leaf: #74C69D;
+    --garden-mist: rgba(64, 145, 108, 0.07);
+    --garden-shadow: rgba(27, 67, 50, 0.14);
+    --garden-amber: rgba(245, 200, 120, 0.12);
 
-    /* Linen palette (from Sora video) */
-    --linen-base:     #EDD9B0;
-    --linen-light:    #F5EAD0;
-    --linen-dark:     #C8A87A;
+    /* Linen palette */
+    --linen-base: #EDD9B0;
+    --linen-light: #F5EAD0;
+    --linen-dark: #C8A87A;
     --linen-vignette: rgba(140, 95, 40, 0.10);
 
-    /* Depth layers */
-    --shadow-soft:  0 2px 8px rgba(27, 67, 50, 0.07),  0 1px 2px rgba(27, 67, 50, 0.05);
+    /* Depth shadows */
+    --shadow-soft:  0 2px 8px rgba(27, 67, 50, 0.07), 0 1px 2px rgba(27, 67, 50, 0.05);
     --shadow-card:  0 4px 16px rgba(27, 67, 50, 0.10), 0 1px 4px rgba(27, 67, 50, 0.06);
     --shadow-hover: 0 8px 28px rgba(27, 67, 50, 0.14), 0 2px 6px rgba(27, 67, 50, 0.08);
     --shadow-inset: inset 0 1px 3px rgba(27, 67, 50, 0.08);
@@ -74,17 +76,19 @@
     --border: 160 18% 20%;
     --input: 160 18% 18%;
     --ring: 182 65% 42%;
-    --garden-mist:   rgba(64, 145, 108, 0.10);
+    --garden-mist: rgba(64, 145, 108, 0.10);
     --garden-shadow: rgba(0, 0, 0, 0.25);
-    --shadow-soft:   0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-card:   0 4px 16px rgba(0, 0, 0, 0.28);
-    --shadow-hover:  0 8px 28px rgba(0, 0, 0, 0.36);
+    --shadow-soft:  0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-card:  0 4px 16px rgba(0, 0, 0, 0.28);
+    --shadow-hover: 0 8px 28px rgba(0, 0, 0, 0.36);
     --linen-vignette: rgba(0, 0, 0, 0.20);
   }
 }
 
 @layer base {
-  * { @apply border-border; }
+  * {
+    @apply border-border;
+  }
 
   html {
     font-feature-settings: "kern" 1, "liga" 1;
@@ -94,61 +98,51 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', system-ui, sans-serif;
-
     background-image:
       repeating-linear-gradient(
         45deg,
-        rgba(140, 95, 40, 0.030) 0px,
-        rgba(140, 95, 40, 0.030) 1px,
-        transparent 1px,
-        transparent 6px
+        rgba(140, 95, 40, 0.030) 0px, rgba(140, 95, 40, 0.030) 1px,
+        transparent 1px, transparent 6px
       ),
       repeating-linear-gradient(
         -45deg,
-        rgba(140, 95, 40, 0.022) 0px,
-        rgba(140, 95, 40, 0.022) 1px,
-        transparent 1px,
-        transparent 6px
+        rgba(140, 95, 40, 0.022) 0px, rgba(140, 95, 40, 0.022) 1px,
+        transparent 1px, transparent 6px
       ),
-      radial-gradient(
-        ellipse 80% 60% at 75% 0%,
-        rgba(245, 220, 160, 0.18) 0%,
-        transparent 65%
-      ),
-      radial-gradient(
-        ellipse 60% 30% at 50% 100%,
-        rgba(64, 145, 108, 0.06) 0%,
-        transparent 70%
-      );
+      radial-gradient(ellipse 80% 60% at 75% 0%, rgba(245, 220, 160, 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 30% at 50% 100%, rgba(64, 145, 108, 0.06) 0%, transparent 70%);
+  }
+
+  h1, h2 {
+    font-family: 'Lora', Georgia, serif;
   }
 }
 
-/* ─────────────────────────────────────────────
+/* =============================================
    Garden Utility Classes
-───────────────────────────────────────────── */
+   ============================================= */
 
 @layer components {
-
   .garden-card {
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: var(--radius);
     box-shadow:
       var(--shadow-card),
-      inset 0  2px  8px rgba(140, 95, 40, 0.06),
-      inset 0 -2px  8px rgba(140, 95, 40, 0.05),
-      inset  2px 0  8px rgba(140, 95, 40, 0.04),
-      inset -2px 0  8px rgba(140, 95, 40, 0.04);
+      inset 0 2px 8px rgba(140, 95, 40, 0.06),
+      inset 0 -2px 8px rgba(140, 95, 40, 0.05),
+      inset 2px 0 8px rgba(140, 95, 40, 0.04),
+      inset -2px 0 8px rgba(140, 95, 40, 0.04);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
 
   .garden-card:hover {
     box-shadow:
       var(--shadow-hover),
-      inset 0  2px  8px rgba(140, 95, 40, 0.04),
-      inset 0 -2px  8px rgba(140, 95, 40, 0.03),
-      inset  2px 0  8px rgba(140, 95, 40, 0.03),
-      inset -2px 0  8px rgba(140, 95, 40, 0.03);
+      inset 0 2px 8px rgba(140, 95, 40, 0.04),
+      inset 0 -2px 8px rgba(140, 95, 40, 0.03),
+      inset 2px 0 8px rgba(140, 95, 40, 0.03),
+      inset -2px 0 8px rgba(140, 95, 40, 0.03);
     transform: translateY(-1px);
   }
 
@@ -194,7 +188,7 @@
   }
 
   .garden-divider::after {
-    content: "🌿";
+    content: "\1F33F";
     position: absolute;
     top: 50%;
     left: 50%;
@@ -236,18 +230,18 @@
   }
 }
 
-/* ─────────────────────────────────────────────
+/* =============================================
    Scrollbar
-───────────────────────────────────────────── */
+   ============================================= */
 
-::-webkit-scrollbar        { width: 6px; height: 6px; }
-::-webkit-scrollbar-track  { background: transparent; }
-::-webkit-scrollbar-thumb  { background: rgba(64, 145, 108, 0.25); border-radius: 100px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(64, 145, 108, 0.25); border-radius: 100px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(64, 145, 108, 0.45); }
 
-/* ─────────────────────────────────────────────
+/* =============================================
    Selection + Focus
-───────────────────────────────────────────── */
+   ============================================= */
 
 ::selection {
   background: rgba(64, 145, 108, 0.20);

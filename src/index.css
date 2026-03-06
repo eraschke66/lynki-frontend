@@ -1,209 +1,275 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@custom-variant dark (&:is(.dark *));
+/* ─────────────────────────────────────────────
+   Garden Design System — PassAI
+   Warm cream + forest greens + depth
+───────────────────────────────────────────── */
 
-@theme inline {
-    --radius-sm: calc(var(--radius) - 4px);
-    --radius-md: calc(var(--radius) - 2px);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) + 4px);
-    --radius-2xl: calc(var(--radius) + 8px);
-    --radius-3xl: calc(var(--radius) + 12px);
-    --radius-4xl: calc(var(--radius) + 16px);
-    --color-background: var(--background);
-    --color-foreground: var(--foreground);
-    --color-card: var(--card);
-    --color-card-foreground: var(--card-foreground);
-    --color-popover: var(--popover);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-primary: var(--primary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-secondary: var(--secondary);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-muted: var(--muted);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-accent: var(--accent);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-destructive: var(--destructive);
-    --color-border: var(--border);
-    --color-input: var(--input);
-    --color-ring: var(--ring);
-    --color-chart-1: var(--chart-1);
-    --color-chart-2: var(--chart-2);
-    --color-chart-3: var(--chart-3);
-    --color-chart-4: var(--chart-4);
-    --color-chart-5: var(--chart-5);
-    --color-sidebar: var(--sidebar);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-ring: var(--sidebar-ring);
-}
-
-:root {
+@layer base {
+  :root {
+    /* Core brand */
+    --background: 43 60% 96%;        /* warm cream #FAF3E0 */
+    --foreground: 160 20% 14%;       /* deep forest text */
+    --card: 40 50% 98%;              /* slightly warmer than page */
+    --card-foreground: 160 20% 14%;
+    --popover: 40 50% 99%;
+    --popover-foreground: 160 20% 14%;
+    --primary: 182 80% 25%;          /* teal #0D7377 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 35% 92%;
+    --secondary-foreground: 160 20% 20%;
+    --muted: 40 30% 90%;
+    --muted-foreground: 160 12% 42%;
+    --accent: 155 43% 48%;           /* garden moss */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 40 25% 86%;
+    --input: 40 25% 88%;
+    --ring: 182 80% 25%;
     --radius: 0.625rem;
 
-  /* ── Base palette ── */
-  --background: #FAF3E0;
-    --foreground: #2D3436;
+    /* Garden palette */
+    --garden-forest:  #1B4332;
+    --garden-canopy:  #2D6A4F;
+    --garden-moss:    #40916C;
+    --garden-sage:    #52B788;
+    --garden-leaf:    #74C69D;
+    --garden-mist:    rgba(64, 145, 108, 0.07);
+    --garden-shadow:  rgba(27, 67, 50, 0.14);
+    --garden-amber:   rgba(245, 200, 120, 0.12);
 
-  --card: #FFFFFF;
-    --card-foreground: #2D3436;
-    --popover: #FFFFFF;
-    --popover-foreground: #2D3436;
+    /* Depth layers */
+    --shadow-soft:    0 2px 8px rgba(27, 67, 50, 0.07), 0 1px 2px rgba(27, 67, 50, 0.05);
+    --shadow-card:    0 4px 16px rgba(27, 67, 50, 0.10), 0 1px 4px rgba(27, 67, 50, 0.06);
+    --shadow-hover:   0 8px 28px rgba(27, 67, 50, 0.14), 0 2px 6px rgba(27, 67, 50, 0.08);
+    --shadow-inset:   inset 0 1px 3px rgba(27, 67, 50, 0.08);
+  }
 
-  /* Teal primary */
-  --primary: #0D7377;
-    --primary-foreground: #FFFFFF;
+  .dark {
+    --background: 160 25% 8%;
+    --foreground: 40 30% 92%;
+    --card: 160 22% 11%;
+    --card-foreground: 40 30% 90%;
+    --popover: 160 22% 11%;
+    --popover-foreground: 40 30% 90%;
+    --primary: 182 65% 42%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 160 20% 16%;
+    --secondary-foreground: 40 25% 85%;
+    --muted: 160 18% 18%;
+    --muted-foreground: 160 10% 55%;
+    --accent: 155 35% 38%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 63% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 160 18% 20%;
+    --input: 160 18% 18%;
+    --ring: 182 65% 42%;
 
-  --secondary: #F5EDD6;
-    --secondary-foreground: #2D3436;
-
-  --muted: #F5EDD6;
-    --muted-foreground: #636E72;
-
-  --accent: #F5EDD6;
-    --accent-foreground: #2D3436;
-
-  --destructive: oklch(0.577 0.245 27.325);
-    --destructive-foreground: #FFFFFF;
-
-  --border: #E8E4E1;
-    --input: #E8E4E1;
-    --ring: #0D7377;
-
-  --chart-1: #0D7377;
-    --chart-2: #2ECC71;
-    --chart-3: #E67E22;
-    --chart-4: #3498DB;
-    --chart-5: #9B59B6;
-
-  --sidebar: #F5EDD6;
-    --sidebar-foreground: #2D3436;
-    --sidebar-primary: #0D7377;
-    --sidebar-primary-foreground: #FFFFFF;
-    --sidebar-accent: #F5EDD6;
-    --sidebar-accent-foreground: #2D3436;
-    --sidebar-border: #E8E4E1;
-    --sidebar-ring: #0D7377;
-
-  /* ── Garden design tokens ── */
-  --garden-forest: #1B4332;
-    --garden-canopy: #2D6A4F;
-    --garden-moss:   #40916C;
-    --garden-sage:   #52B788;
-    --garden-leaf:   #74C69D;
-    --garden-mist:   rgba(64, 145, 108, 0.06);
-    --garden-shadow: rgba(27, 67, 50, 0.12);
-}
-
-.dark {
-    --background: #1A1A2E;
-    --foreground: #F5EDD6;
-    --card: #222240;
-    --card-foreground: #F5EDD6;
-    --popover: #222240;
-    --popover-foreground: #F5EDD6;
-    --primary: #14B8A6;
-    --primary-foreground: #1A1A2E;
-    --secondary: #2A2A4A;
-    --secondary-foreground: #F5EDD6;
-    --muted: #2A2A4A;
-    --muted-foreground: #A0A0B8;
-    --accent: #2A2A4A;
-    --accent-foreground: #F5EDD6;
-    --destructive: oklch(0.396 0.141 25.723);
-    --destructive-foreground: #FFFFFF;
-    --border: #3A3A5A;
-    --input: #3A3A5A;
-    --ring: #14B8A6;
-    --chart-1: #14B8A6;
-    --chart-2: #2ECC71;
-    --chart-3: #E67E22;
-    --chart-4: #3498DB;
-    --chart-5: #9B59B6;
-    --sidebar: #222240;
-    --sidebar-foreground: #F5EDD6;
-    --sidebar-primary: #14B8A6;
-    --sidebar-primary-foreground: #1A1A2E;
-    --sidebar-accent: #2A2A4A;
-    --sidebar-accent-foreground: #F5EDD6;
-    --sidebar-border: #3A3A5A;
-    --sidebar-ring: #14B8A6;
-    --garden-forest: #52B788;
-    --garden-canopy: #74C69D;
-    --garden-moss:   #95D5B2;
-    --garden-sage:   #B7E4C7;
-    --garden-leaf:   #D8F3DC;
-    --garden-mist:   rgba(82, 183, 136, 0.08);
-    --garden-shadow: rgba(82, 183, 136, 0.15);
+    --garden-mist:   rgba(64, 145, 108, 0.10);
+    --garden-shadow: rgba(0, 0, 0, 0.25);
+    --shadow-soft:   0 2px 8px rgba(0, 0, 0, 0.2);
+    --shadow-card:   0 4px 16px rgba(0, 0, 0, 0.28);
+    --shadow-hover:  0 8px 28px rgba(0, 0, 0, 0.36);
+  }
 }
 
 @layer base {
-    * {
-          @apply border-border outline-ring/50;
-    }
-    body {
-          @apply bg-background text-foreground;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cellipse cx='20' cy='20' rx='5' ry='11' fill='none' stroke='%230D7377' stroke-width='0.7' opacity='0.07' transform='rotate(25 20 20)'/%3E%3Cellipse cx='60' cy='55' rx='4' ry='9' fill='none' stroke='%230D7377' stroke-width='0.7' opacity='0.05' transform='rotate(-15 60 55)'/%3E%3Cellipse cx='10' cy='65' rx='3' ry='7' fill='none' stroke='%2340916C' stroke-width='0.6' opacity='0.06' transform='rotate(40 10 65)'/%3E%3Cellipse cx='70' cy='15' rx='3.5' ry='8' fill='none' stroke='%2340916C' stroke-width='0.6' opacity='0.05' transform='rotate(-30 70 15)'/%3E%3C/svg%3E");
-          background-size: 80px 80px;
-    }
-    button, [role="button"] {
-          cursor: pointer;
-    }
-    button:disabled, [disabled] {
-          cursor: not-allowed;
-    }
+  * {
+    @apply border-border;
+  }
+
+  html {
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+
+    /* Linen texture overlay */
+    background-image:
+      /* Diagonal linen weave */
+      repeating-linear-gradient(
+        45deg,
+        rgba(180, 150, 100, 0.025) 0px,
+        rgba(180, 150, 100, 0.025) 1px,
+        transparent 1px,
+        transparent 6px
+      ),
+      repeating-linear-gradient(
+        -45deg,
+        rgba(180, 150, 100, 0.020) 0px,
+        rgba(180, 150, 100, 0.020) 1px,
+        transparent 1px,
+        transparent 6px
+      ),
+      /* Warm sunlight from top-right */
+      radial-gradient(
+        ellipse 80% 60% at 75% 0%,
+        rgba(245, 220, 160, 0.12) 0%,
+        transparent 65%
+      ),
+      /* Subtle garden-floor glow at bottom */
+      radial-gradient(
+        ellipse 60% 30% at 50% 100%,
+        rgba(64, 145, 108, 0.05) 0%,
+        transparent 70%
+      );
+  }
 }
 
-/* ── Garden utility classes ── */
+/* ─────────────────────────────────────────────
+   Garden Utility Classes
+───────────────────────────────────────────── */
 
-/* Cards with a subtle botanical left-border accent */
-.garden-card {
-    border-left: 3px solid var(--garden-moss);
-    box-shadow: 0 2px 12px var(--garden-shadow);
+@layer components {
+
+  /* Cards with depth */
+  .garden-card {
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
-}
-.garden-card:hover {
-    box-shadow: 0 6px 24px var(--garden-shadow);
+  }
+
+  .garden-card:hover {
+    box-shadow: var(--shadow-hover);
     transform: translateY(-1px);
-}
+  }
 
-/* Section with a plant-wall background wash */
-.garden-wall {
-    background-color: var(--garden-mist);
-    border-top: 1px solid rgba(64, 145, 108, 0.15);
-    border-bottom: 1px solid rgba(64, 145, 108, 0.15);
-}
+  /* Frosted glass panel — for hero sections */
+  .garden-panel {
+    background: linear-gradient(
+      135deg,
+      rgba(250, 243, 224, 0.7) 0%,
+      rgba(64, 145, 108, 0.06) 60%,
+      rgba(250, 243, 224, 0.4) 100%
+    );
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(64, 145, 108, 0.15);
+    border-radius: calc(var(--radius) * 2);
+    box-shadow:
+      0 4px 24px rgba(27, 67, 50, 0.10),
+      0 1px 4px rgba(27, 67, 50, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  }
 
-/* Botanical badge pill */
-.garden-badge {
-    background: var(--garden-mist);
-    color: var(--garden-forest);
-    border: 1px solid rgba(64, 145, 108, 0.25);
-    border-radius: 9999px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    padding: 0.15rem 0.6rem;
-    letter-spacing: 0.03em;
-}
+  /* Watercolor wash section background */
+  .garden-wall {
+    background:
+      radial-gradient(ellipse 80% 50% at 10% 50%, rgba(64, 145, 108, 0.06) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 80% at 90% 20%, rgba(13, 115, 119, 0.05) 0%, transparent 65%),
+      rgba(250, 243, 224, 0.3);
+    border-radius: calc(var(--radius) * 2);
+    border: 1px solid rgba(64, 145, 108, 0.10);
+  }
 
-/* Leaf separator — a subtle horizontal rule */
-.garden-divider {
+  /* Botanical divider */
+  .garden-divider {
     border: none;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(64, 145, 108, 0.3), transparent);
-    margin: 1.5rem 0;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(64, 145, 108, 0.25) 20%,
+      rgba(64, 145, 108, 0.35) 50%,
+      rgba(64, 145, 108, 0.25) 80%,
+      transparent
+    );
+    margin: 0;
+    position: relative;
+  }
+
+  .garden-divider::after {
+    content: "🌿";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 14px;
+    background: hsl(var(--background));
+    padding: 0 10px;
+    line-height: 1;
+  }
+
+  /* Garden badge */
+  .garden-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--garden-forest);
+    background: rgba(64, 145, 108, 0.10);
+    border: 1px solid rgba(64, 145, 108, 0.20);
+    border-radius: 100px;
+    padding: 2px 8px;
+  }
+
+  /* Active nav indicator */
+  .garden-nav-active {
+    color: var(--garden-canopy);
+    background: var(--garden-mist);
+    border-left: 2px solid var(--garden-moss);
+    font-weight: 600;
+  }
+
+  /* Card top-border accent (botanical stripe) */
+  .garden-stripe {
+    border-top: 3px solid rgba(64, 145, 108, 0.30);
+  }
+
+  .garden-stripe-strong {
+    border-top: 3px solid rgba(64, 145, 108, 0.55);
+  }
 }
 
-/* Nav active state with leaf indicator */
-.garden-nav-active {
-    color: var(--garden-forest);
-    background: var(--garden-mist);
-    border-left: 3px solid var(--garden-moss);
-    padding-left: calc(0.75rem - 3px);
+/* ─────────────────────────────────────────────
+   Scrollbar — subtle and warm
+───────────────────────────────────────────── */
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(64, 145, 108, 0.25);
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(64, 145, 108, 0.45);
+}
+
+/* ─────────────────────────────────────────────
+   Selection color
+───────────────────────────────────────────── */
+
+::selection {
+  background: rgba(64, 145, 108, 0.2);
+  color: var(--garden-forest);
+}
+
+/* ─────────────────────────────────────────────
+   Focus ring — botanical
+───────────────────────────────────────────── */
+
+:focus-visible {
+  outline: 2px solid rgba(64, 145, 108, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
 }

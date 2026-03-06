@@ -36,6 +36,7 @@ import type { CourseSummary, DashboardData } from "../types";
 import { supabase } from "@/lib/supabase";
 import { getGardenStatus, getStudyCTA, getDashboardSubtitle } from "@/lib/garden";
 import { Neko } from "@/components/garden/Neko";
+import { VineDecoration } from "@/components/garden/VineDecoration";
 
 const dashboardQueryKeys = {
   data: (userId: string) => ["dashboard", userId] as const,
@@ -97,7 +98,10 @@ export function Dashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [user, queryClient]);
 
-  if (!user) { navigate("/login"); return null; }
+  if (!user) {
+    navigate("/login");
+    return null;
+  }
 
   if (isLoading) {
     return (
@@ -122,7 +126,8 @@ export function Dashboard() {
             <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
             <p className="text-sm text-muted-foreground">Failed to load dashboard</p>
             <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.data(user.id) })}>
-              <RefreshCw className="w-4 h-4 mr-2" /> Retry
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Retry
             </Button>
           </div>
         </div>
@@ -136,6 +141,7 @@ export function Dashboard() {
   return (
     <>
       <Header />
+      <VineDecoration />
       <div className="min-h-screen bg-background pt-24 pb-16">
         <div className="max-w-5xl mx-auto px-6">
           {hasNoCourses ? (
@@ -144,7 +150,9 @@ export function Dashboard() {
             <div className="space-y-10">
               <HeroSection
                 data={dashboardData!}
-                onStartStudying={() => { if (nextItem) navigate(`/course/${nextItem.courseId}`); }}
+                onStartStudying={() => {
+                  if (nextItem) navigate(`/course/${nextItem.courseId}`);
+                }}
                 onUpload={() => setUploadModalOpen(true)}
               />
               <hr className="garden-divider" />
@@ -190,9 +198,25 @@ export function Dashboard() {
           )}
         </div>
       </div>
-      <UploadModal open={uploadModalOpen} onOpenChange={setUploadModalOpen} userId={user.id} onUploadComplete={handleUploadComplete} />
-      <EditCourseDialog open={!!editingCourse} onOpenChange={(open) => !open && setEditingCourse(null)} course={editingCourse} curriculum={profileData?.curriculum ?? "percentage"} onSave={handleEditCourse} />
-      <DeleteCourseDialog open={!!deletingCourse} onOpenChange={(open) => !open && setDeletingCourse(null)} course={deletingCourse} onConfirm={handleDeleteCourse} />
+      <UploadModal
+        open={uploadModalOpen}
+        onOpenChange={setUploadModalOpen}
+        userId={user.id}
+        onUploadComplete={handleUploadComplete}
+      />
+      <EditCourseDialog
+        open={!!editingCourse}
+        onOpenChange={(open) => !open && setEditingCourse(null)}
+        course={editingCourse}
+        curriculum={profileData?.curriculum ?? "percentage"}
+        onSave={handleEditCourse}
+      />
+      <DeleteCourseDialog
+        open={!!deletingCourse}
+        onOpenChange={(open) => !open && setDeletingCourse(null)}
+        course={deletingCourse}
+        onConfirm={handleDeleteCourse}
+      />
     </>
   );
 }
@@ -294,10 +318,12 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-36">
             <DropdownMenuItem onClick={onEdit}>
-              <Pencil className="w-4 h-4 mr-2" /> Edit
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit
             </DropdownMenuItem>
             <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
-              <Trash2 className="w-4 h-4 mr-2" /> Delete
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -343,7 +369,10 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
       <div className="relative">
         <div
           className="absolute rounded-full blur-3xl"
-          style={{ background: "radial-gradient(circle, rgba(64,145,108,0.12) 0%, transparent 70%)", width: 200, height: 200, top: -40, left: -40 }}
+          style={{
+            background: "radial-gradient(circle, rgba(64,145,108,0.12) 0%, transparent 70%)",
+            width: 200, height: 200, top: -40, left: -40
+          }}
         />
         <div className="flex items-end gap-4 relative">
           <svg width="28" height="52" viewBox="0 0 28 52" fill="none" className="opacity-50 mb-1">

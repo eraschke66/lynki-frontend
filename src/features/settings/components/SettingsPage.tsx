@@ -30,23 +30,17 @@ export function SettingsPage() {
     enabled: !!user,
   });
 
-  const [selectedCurriculum, setSelectedCurriculum] = useState<string | null>(
-    null,
-  );
+  const [selectedCurriculum, setSelectedCurriculum] = useState<string | null>(null);
 
-  // Use local override if set, otherwise fall back to profile value
   const activeCurriculum = selectedCurriculum ?? profile?.curriculum ?? "";
 
   const mutation = useMutation({
     mutationFn: () => updateProfile(user!.id, { curriculum: activeCurriculum }),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: profileQueryKeys.detail(user!.id),
-      });
-      // Invalidate all pass chance queries since the curriculum may affect display
+      queryClient.invalidateQueries({ queryKey: profileQueryKeys.detail(user!.id) });
       queryClient.invalidateQueries({ queryKey: ["test"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      setSelectedCurriculum(null); // Reset override so it tracks server state
+      setSelectedCurriculum(null);
       toast.success("Settings saved");
     },
     onError: () => {
@@ -54,10 +48,7 @@ export function SettingsPage() {
     },
   });
 
-  if (!user) {
-    navigate("/home");
-    return null;
-  }
+  if (!user) { navigate("/home"); return null; }
 
   const hasChanged = profile && activeCurriculum !== profile.curriculum;
   const curriculumInfo = getCurriculum(activeCurriculum || "percentage");
@@ -65,78 +56,123 @@ export function SettingsPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-background pt-28 pb-16">
+      <div className="min-h-screen bg-background pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-6">
+
           {/* Back link */}
           <button
             onClick={() => navigate("/home")}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
 
-          <h1 className="text-2xl font-bold mb-8">Settings</h1>
+          {/* Page heading */}
+          <div className="flex items-center gap-2 mb-8">
+            <span className="text-2xl">🌿</span>
+            <h1 className="text-2xl font-bold">Settings</h1>
+          </div>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <Card className="rounded-2xl">
-              <CardContent className="pt-8 pb-8 px-8 space-y-6">
-                <div className="space-y-3">
-                  <Label htmlFor="curriculum" className="text-base font-medium">
-                    Curriculum
-                  </Label>
-                  <p className="text-sm text-muted-foreground">
-                    Choose the grading system used by your school or exam board.
-                    This determines the grade scale for your target passing
-                    grades.
-                  </p>
-                  <Select
-                    value={activeCurriculum}
-                    onValueChange={setSelectedCurriculum}
-                  >
-                    <SelectTrigger id="curriculum" className="w-full max-w-xs">
-                      <SelectValue placeholder="Select curriculum" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CURRICULA.map((c) => (
-                        <SelectItem key={c.id} value={c.id}>
-                          {c.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {activeCurriculum && (
-                    <p className="text-xs text-muted-foreground">
-                      {curriculumInfo.description}
-                    </p>
-                  )}
-                </div>
+            <div className="space-y-4">
 
-                <div className="flex items-center gap-3 pt-2">
-                  <Button
-                    onClick={() => mutation.mutate()}
-                    disabled={!hasChanged || mutation.isPending}
-                  >
-                    {mutation.isPending ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Check className="w-4 h-4 mr-2" />
-                    )}
-                    Save Changes
-                  </Button>
-                  {hasChanged && (
-                    <p className="text-xs text-muted-foreground">
-                      Unsaved changes
+              {/* Curriculum card */}
+              <Card
+                className="rounded-2xl overflow-hidden"
+                style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
+              >
+                <CardContent className="pt-8 pb-8 px-8 space-y-6">
+                  <div className="space-y-3">
+                    <Label htmlFor="curriculum" className="text-base font-medium">
+                      Curriculum
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Choose the grading system used by your school or exam board. This
+                      determines the grade scale for your target passing grades.
                     </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                    <Select value={activeCurriculum} onValueChange={setSelectedCurriculum}>
+                      <SelectTrigger
+                        id="curriculum"
+                        className="w-full max-w-xs border-[rgba(64,145,108,0.2)] focus:border-[#40916C] focus:ring-[rgba(64,145,108,0.2)]"
+                      >
+                        <SelectValue placeholder="Select curriculum" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {CURRICULA.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {activeCurriculum && (
+                      <p className="text-xs text-muted-foreground">
+                        {curriculumInfo.description}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <Button
+                      onClick={() => mutation.mutate()}
+                      disabled={!hasChanged || mutation.isPending}
+                      className="shadow-[0_2px_8px_rgba(13,115,119,0.2)]"
+                    >
+                      {mutation.isPending ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <Check className="w-4 h-4 mr-2" />
+                      )}
+                      Save Changes
+                    </Button>
+                    {hasChanged && (
+                      <p className="text-xs text-muted-foreground">Unsaved changes</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Garden status reference card */}
+              <Card
+                className="rounded-2xl overflow-hidden"
+                style={{
+                  background: "linear-gradient(135deg, rgba(64,145,108,0.05) 0%, rgba(250,243,224,0) 100%)",
+                  border: "1px solid rgba(64,145,108,0.12)",
+                }}
+              >
+                <CardContent className="pt-6 pb-6 px-8">
+                  <p className="text-sm font-medium mb-4 flex items-center gap-2">
+                    <span>🌺</span>
+                    Garden Growth Guide
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {[
+                      { emoji: "🌳", label: "Thriving", range: "85%+", color: "text-emerald-700" },
+                      { emoji: "🌻", label: "Blooming", range: "70–84%", color: "text-yellow-600" },
+                      { emoji: "🌿", label: "Healthy", range: "55–69%", color: "text-green-600" },
+                      { emoji: "🌱", label: "Growing", range: "40–54%", color: "text-teal-600" },
+                      { emoji: "💧", label: "Needs Water", range: "<40%", color: "text-blue-500" },
+                    ].map(({ emoji, label, range, color }) => (
+                      <div key={label} className="flex items-center gap-3">
+                        <span className="text-xl w-7 text-center">{emoji}</span>
+                        <div>
+                          <p className={`text-sm font-medium ${color}`}>{label}</p>
+                          <p className="text-xs text-muted-foreground">{range} pass probability</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+            </div>
           )}
+
         </div>
       </div>
     </>

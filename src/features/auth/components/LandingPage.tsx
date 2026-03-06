@@ -23,27 +23,12 @@ export function LandingPage() {
       {/* Hero */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          <div className="flex justify-center items-end gap-6 mb-4">
-            <svg width="32" height="48" viewBox="0 0 32 48" fill="none" className="opacity-60">
-              <line x1="16" y1="48" x2="16" y2="24" stroke="#0D7377" strokeWidth="2" />
-              <ellipse cx="10" cy="28" rx="7" ry="5" fill="#0D7377" opacity="0.3" />
-              <ellipse cx="22" cy="28" rx="7" ry="5" fill="#0D7377" opacity="0.3" />
-            </svg>
-            <svg width="40" height="64" viewBox="0 0 40 64" fill="none">
-              <line x1="20" y1="64" x2="20" y2="20" stroke="#0D7377" strokeWidth="2.5" />
-              <ellipse cx="12" cy="30" rx="9" ry="7" fill="#0D7377" opacity="0.35" />
-              <ellipse cx="28" cy="30" rx="9" ry="7" fill="#0D7377" opacity="0.35" />
-              <ellipse cx="20" cy="20" rx="8" ry="6" fill="#0D7377" opacity="0.25" />
-            </svg>
-            <svg width="48" height="80" viewBox="0 0 48 80" fill="none">
-              <line x1="24" y1="80" x2="24" y2="16" stroke="#0D7377" strokeWidth="3" />
-              <ellipse cx="14" cy="36" rx="11" ry="8" fill="#0D7377" opacity="0.4" />
-              <ellipse cx="34" cy="36" rx="11" ry="8" fill="#0D7377" opacity="0.4" />
-              <ellipse cx="10" cy="52" rx="9" ry="7" fill="#0D7377" opacity="0.3" />
-              <ellipse cx="38" cy="52" rx="9" ry="7" fill="#0D7377" opacity="0.3" />
-              <circle cx="24" cy="14" r="6" fill="#0D7377" opacity="0.2" />
-            </svg>
-            <div className="self-end mb-1"><Neko size={72} /></div>
+          <div className="flex justify-center items-end gap-4 mb-4">
+            <img src="/plant-1.png" alt="" className="w-20 h-auto" />
+            <img src="/plant-2.png" alt="" className="w-24 h-auto" />
+            <div className="self-end mb-1"><Neko size={80} /></div>
+            <img src="/plant-3.png" alt="" className="w-24 h-auto" />
+            <img src="/plant-4.png" alt="" className="w-20 h-auto" />
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight">

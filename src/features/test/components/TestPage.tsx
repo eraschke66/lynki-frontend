@@ -38,7 +38,6 @@ export function TestPage() {
   const queryClient = useQueryClient();
   const resumeApplied = useRef(false);
 
-  // Quiz state
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
@@ -49,13 +48,7 @@ export function TestPage() {
   const [targetGrade, setTargetGrade] = useState<number>(1.0);
   const [loadingPassChance, setLoadingPassChance] = useState(false);
 
-  // Fetch quiz — either resume or new
-  const {
-    data: testData,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const { data: testData, isLoading, error, refetch } = useQuery({
     queryKey: sessionId
       ? [...testQueryKeys.all, "resume", sessionId]
       : testQueryKeys.quiz(courseId ?? "", user?.id ?? ""),
@@ -66,14 +59,12 @@ export function TestPage() {
     enabled: !!user && !!courseId,
   });
 
-  // Fetch user profile for curriculum
   const { data: profileData } = useQuery({
     queryKey: profileQueryKeys.detail(user?.id ?? ""),
     queryFn: () => fetchProfile(user!.id),
     enabled: !!user,
   });
 
-  // When resuming, apply the saved progress once data loads
   useEffect(() => {
     if (
       testData &&
@@ -96,15 +87,10 @@ export function TestPage() {
   const handleSelectOption = useCallback(
     (optionIndex: number) => {
       if (feedback || !currentQuestion || !user || !courseId) return;
-
       setSelectedOption(optionIndex);
 
-      // Instant client-side feedback using is_correct from the options
-      const selectedOpt = currentQuestion.options.find(
-        (o) => o.index === optionIndex,
-      );
+      const selectedOpt = currentQuestion.options.find((o) => o.index === optionIndex);
       const correctOpt = currentQuestion.options.find((o) => o.is_correct);
-
       const isCorrect = selectedOpt?.is_correct ?? false;
 
       const localFeedback: AnswerFeedback = {
@@ -125,29 +111,20 @@ export function TestPage() {
 
       setFeedback(localFeedback);
       setAnsweredCount((prev) => prev + 1);
-      if (isCorrect) {
-        setCorrectCount((prev) => prev + 1);
-      }
+      if (isCorrect) setCorrectCount((prev) => prev + 1);
 
-      // Fire BKT update in the background — don't block UI
-      submitAnswer(
-        user.id,
-        courseId,
-        currentQuestion.id,
-        optionIndex,
-        testData?.test_id,
-      ).catch((err) => console.error("Background BKT update failed:", err));
+      submitAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
+        (err) => console.error("Background BKT update failed:", err),
+      );
     },
     [feedback, currentQuestion, user, courseId, testData?.test_id],
   );
 
   const handleNext = useCallback(async () => {
     if (currentIndex + 1 >= totalQuestions) {
-      // Quiz complete — fetch pass chance
       setQuizComplete(true);
       setLoadingPassChance(true);
       try {
-        // Complete the session in the background
         if (testData?.test_id) {
           completeTest(user!.id, courseId!, testData.test_id).catch((err) =>
             console.error("Failed to complete test session:", err),
@@ -162,24 +139,14 @@ export function TestPage() {
       } finally {
         setLoadingPassChance(false);
       }
-      // Invalidate dashboard and history data
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      queryClient.invalidateQueries({
-        queryKey: testQueryKeys.history(courseId!, user!.id),
-      });
+      queryClient.invalidateQueries({ queryKey: testQueryKeys.history(courseId!, user!.id) });
     } else {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setFeedback(null);
     }
-  }, [
-    currentIndex,
-    totalQuestions,
-    user,
-    courseId,
-    queryClient,
-    testData?.test_id,
-  ]);
+  }, [currentIndex, totalQuestions, user, courseId, queryClient, testData?.test_id]);
 
   const handleRetake = useCallback(() => {
     setCurrentIndex(0);
@@ -191,29 +158,21 @@ export function TestPage() {
     setPassChance(null);
     setTargetGrade(1.0);
     resumeApplied.current = false;
-    // Navigate without session param so a fresh quiz is generated
-    queryClient.removeQueries({
-      queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? ""),
-    });
+    queryClient.removeQueries({ queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? "") });
     if (sessionId) {
-      queryClient.removeQueries({
-        queryKey: [...testQueryKeys.all, "resume", sessionId],
-      });
+      queryClient.removeQueries({ queryKey: [...testQueryKeys.all, "resume", sessionId] });
     }
     navigate(`/test/${courseId}`, { replace: true });
     refetch();
   }, [courseId, user, queryClient, refetch, sessionId, navigate]);
 
-  if (!user || !courseId) {
-    navigate("/home");
-    return null;
-  }
+  if (!user || !courseId) { navigate("/home"); return null; }
 
   const handleExit = useCallback(() => {
     navigate(`/course/${courseId}`);
   }, [navigate, courseId]);
 
-  // Loading state
+  // ── Loading ──
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
@@ -225,16 +184,17 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="text-center space-y-3">
-          <Loader2 className="w-10 h-10 animate-spin mx-auto text-primary" />
+          <div className="text-4xl mb-2">🌱</div>
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
           <p className="text-sm text-muted-foreground">
-            {sessionId ? "Resuming your quiz..." : "Generating your quiz..."}
+            {sessionId ? "Resuming your walk..." : "Preparing the path..."}
           </p>
         </div>
       </div>
     );
   }
 
-  // Error state
+  // ── Error ──
   if (error) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
@@ -249,15 +209,14 @@ export function TestPage() {
           <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
           <p className="text-sm text-muted-foreground">Failed to load quiz</p>
           <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Retry
+            <RefreshCw className="w-4 h-4 mr-2" /> Retry
           </Button>
         </div>
       </div>
     );
   }
 
-  // No questions available
+  // ── No questions ──
   if (!questions.length) {
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
@@ -269,14 +228,11 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="text-center space-y-4 max-w-sm">
-          <AlertCircle className="w-10 h-10 mx-auto text-muted-foreground" />
+          <div className="text-4xl">🌿</div>
           <div>
-            <h2 className="text-lg font-semibold mb-1">
-              No Questions Available
-            </h2>
+            <h2 className="text-lg font-semibold mb-1">No Questions Available</h2>
             <p className="text-sm text-muted-foreground">
-              {testData?.message ||
-                "Your documents may still be processing. Check back in a moment."}
+              {testData?.message || "Your documents may still be processing. Check back in a moment."}
             </p>
           </div>
           <Button variant="outline" onClick={handleExit}>
@@ -287,14 +243,12 @@ export function TestPage() {
     );
   }
 
-  // Quiz complete — show results
+  // ── Results ──
   if (quizComplete) {
-    const scorePercent =
-      totalQuestions > 0
-        ? Math.round((correctCount / totalQuestions) * 100)
-        : 0;
-    const passPercent =
-      passChance !== null ? Math.round(passChance * 100) : null;
+    const scorePercent = totalQuestions > 0
+      ? Math.round((correctCount / totalQuestions) * 100)
+      : 0;
+    const passPercent = passChance !== null ? Math.round(passChance * 100) : null;
 
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
@@ -306,21 +260,24 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="w-full max-w-lg px-6">
-          <Card className="rounded-2xl overflow-hidden">
+          <Card
+            className="rounded-2xl overflow-hidden"
+            style={{ borderTop: "3px solid rgba(64,145,108,0.4)" }}
+          >
             <CardContent className="pt-10 pb-8 px-8">
               <div className="flex flex-col items-center text-center space-y-6">
-                {/* Pass chance — the main number */}
                 {loadingPassChance ? (
                   <div className="space-y-3">
+                    <div className="text-3xl">🌿</div>
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                     <p className="text-sm text-muted-foreground">
-                      Calculating your passing chance...
+                      Reading the garden...
                     </p>
                   </div>
                 ) : passPercent !== null ? (
                   <div className="space-y-3">
-                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                      Estimated Passing Chance
+                    <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider">
+                      Your Garden
                     </p>
                     <CircularProgress
                       value={passPercent}
@@ -328,7 +285,7 @@ export function TestPage() {
                       strokeWidth={12}
                       labelClassName="text-3xl font-bold"
                     />
-                    <p className={`text-sm font-semibold mt-2 ${getGardenStatus(passPercent).color}`}>
+                    <p className={`text-sm font-semibold ${getGardenStatus(passPercent).color}`}>
                       {getGardenStatus(passPercent).label}
                     </p>
                     <p className="text-sm text-muted-foreground">
@@ -336,21 +293,16 @@ export function TestPage() {
                     </p>
                     <p className="text-xs text-muted-foreground">
                       Growing toward{" "}
-                      {getGradeLabel(
-                        profileData?.curriculum ?? "percentage",
-                        targetGrade,
-                      )}
+                      {getGradeLabel(profileData?.curriculum ?? "percentage", targetGrade)}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">
-                      Could not calculate passing chance
-                    </p>
+                    <p className="text-sm text-muted-foreground">Could not calculate passing chance</p>
                   </div>
                 )}
 
-                {/* Score summary */}
+                {/* Score */}
                 <div className="space-y-1">
                   <p className="text-lg font-semibold">
                     {correctCount} of {totalQuestions} seeds took root
@@ -359,27 +311,23 @@ export function TestPage() {
                     {scorePercent >= 80
                       ? "Your garden flourished today."
                       : scorePercent >= 60
-                        ? "Good growth today."
-                        : scorePercent >= 40
-                          ? "The soil is getting richer."
-                          : "Every garden has days like this."}
+                      ? "Good growth today."
+                      : scorePercent >= 40
+                      ? "The soil is getting richer."
+                      : "Every garden has days like this."}
                   </p>
                 </div>
 
                 {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-4 w-full">
-                  <Button
-                    size="lg"
-                    className="flex-1 gap-2"
-                    onClick={handleRetake}
-                  >
+                <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
+                  <Button size="lg" className="flex-1 gap-2" onClick={handleRetake}>
                     <RotateCcw className="w-4 h-4" />
                     Walk the Path Again
                   </Button>
                   <Button
                     size="lg"
                     variant="outline"
-                    className="flex-1 gap-2"
+                    className="flex-1 gap-2 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
                     onClick={handleExit}
                   >
                     <X className="w-4 h-4" />
@@ -394,10 +342,21 @@ export function TestPage() {
     );
   }
 
-  // Active question
+  // ── Active question ──
+  const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
+  const atMidpoint = currentIndex > 0 && Math.abs((currentIndex + 1) / totalQuestions - 0.5) < 0.1;
+
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
-      {/* X close button */}
+      {/* Top garden stripe */}
+      <div
+        className="absolute top-0 left-0 right-0 h-0.5"
+        style={{
+          background:
+            "linear-gradient(to right, transparent, rgba(64,145,108,0.4), rgba(13,115,119,0.5), rgba(64,145,108,0.4), transparent)",
+        }}
+      />
+
       <button
         onClick={handleExit}
         className="absolute top-5 right-5 z-10 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -408,7 +367,8 @@ export function TestPage() {
 
       <div className="min-h-full flex flex-col justify-center py-12">
         <div className="max-w-2xl w-full mx-auto px-6">
-          {/* Progress bar */}
+
+          {/* Progress */}
           <div className="mb-8">
             <p className="text-sm font-semibold mb-2 text-foreground">
               {testData?.course_name ?? "Quiz"}
@@ -421,42 +381,52 @@ export function TestPage() {
                 {correctCount}/{answeredCount} took root
               </p>
             </div>
-            <Progress value={((currentIndex + 1) / totalQuestions) * 100} />
+            <Progress
+              value={progressPercent}
+              className="h-1.5"
+              style={{ background: "rgba(64,145,108,0.12)" }}
+            />
           </div>
 
-          {/* Mid-quiz encouragement at ~50% */}
-          {currentIndex > 0 &&
-            Math.abs((currentIndex + 1) / totalQuestions - 0.5) < 0.1 &&
-            !feedback && (
-              <div className="text-center p-3 bg-green-50 dark:bg-green-950/20 rounded-xl mb-4">
-                <span className="text-xl">🌱</span>
-                <p className="text-sm text-green-700 dark:text-green-400 mt-1 font-medium">
-                  Along the way. Keep walking.
-                </p>
-              </div>
-            )}
+          {/* Mid-quiz nudge */}
+          {atMidpoint && !feedback && (
+            <div
+              className="text-center p-3 rounded-xl mb-4"
+              style={{
+                background: "rgba(64,145,108,0.07)",
+                border: "1px solid rgba(64,145,108,0.15)",
+              }}
+            >
+              <span className="text-xl">🌱</span>
+              <p className="text-sm text-[#2D6A4F] mt-1 font-medium">
+                Along the way. Keep walking.
+              </p>
+            </div>
+          )}
 
           {/* Question card */}
-          <Card className="rounded-2xl overflow-hidden">
+          <Card
+            className="rounded-2xl overflow-hidden"
+            style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
+          >
             <CardContent className="pt-8 pb-6 px-8">
-              {/* Question text */}
               <h2 className="text-xl font-semibold leading-relaxed mb-8">
                 {currentQuestion.question}
               </h2>
 
-              {/* Feedback bar */}
+              {/* Feedback */}
               {feedback && (
                 <div
-                  className={`flex items-center gap-3 p-4 rounded-xl mb-6 ${
+                  className={`flex items-start gap-3 p-4 rounded-xl mb-6 ${
                     feedback.is_correct
-                      ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+                      ? "bg-[rgba(64,145,108,0.1)] text-[#1B4332]"
                       : "bg-red-500/10 text-red-700 dark:text-red-400"
                   }`}
                 >
                   {feedback.is_correct ? (
-                    <CheckCircle2 className="w-5 h-5 shrink-0" />
+                    <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-[#40916C]" />
                   ) : (
-                    <XCircle className="w-5 h-5 shrink-0" />
+                    <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
                   )}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium">
@@ -468,9 +438,7 @@ export function TestPage() {
                       </p>
                     )}
                     {feedback.explanation && (
-                      <p className="text-sm mt-1 opacity-70">
-                        {feedback.explanation}
-                      </p>
+                      <p className="text-sm mt-1 opacity-70">{feedback.explanation}</p>
                     )}
                   </div>
                 </div>
@@ -481,28 +449,25 @@ export function TestPage() {
                 {currentQuestion.options.map((option) => {
                   const isSelected = selectedOption === option.index;
                   const showFeedback = feedback !== null;
-                  const isCorrect =
-                    showFeedback &&
-                    feedback.correct_option_index === option.index;
-                  const isWrong =
-                    showFeedback && isSelected && !feedback.is_correct;
+                  const isCorrect = showFeedback && feedback.correct_option_index === option.index;
+                  const isWrong = showFeedback && isSelected && !feedback.is_correct;
 
                   let optionClasses =
-                    "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all";
+                    "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-150";
 
                   if (showFeedback) {
                     if (isCorrect) {
-                      optionClasses += " border-emerald-500 bg-emerald-500/10";
+                      optionClasses += " border-[#40916C] bg-[rgba(64,145,108,0.08)]";
                     } else if (isWrong) {
                       optionClasses += " border-red-500 bg-red-500/10";
                     } else {
-                      optionClasses += " border-border opacity-50";
+                      optionClasses += " border-border opacity-40";
                     }
                   } else if (isSelected) {
                     optionClasses += " border-primary bg-primary/5";
                   } else {
                     optionClasses +=
-                      " border-border hover:border-primary/40 hover:bg-muted/50 cursor-pointer";
+                      " border-border hover:border-[rgba(64,145,108,0.4)] hover:bg-[rgba(64,145,108,0.04)] cursor-pointer";
                   }
 
                   const letter = String.fromCharCode(65 + option.index);
@@ -517,21 +482,19 @@ export function TestPage() {
                       <span
                         className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold shrink-0 ${
                           showFeedback && isCorrect
-                            ? "bg-emerald-500 text-white"
+                            ? "bg-[#40916C] text-white"
                             : showFeedback && isWrong
-                              ? "bg-red-500 text-white"
-                              : isSelected
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-muted-foreground"
+                            ? "bg-red-500 text-white"
+                            : isSelected
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
                         }`}
                       >
                         {letter}
                       </span>
-                      <span className="flex-1 text-sm font-medium">
-                        {option.text}
-                      </span>
+                      <span className="flex-1 text-sm font-medium">{option.text}</span>
                       {showFeedback && isCorrect && (
-                        <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
+                        <CheckCircle2 className="w-5 h-5 text-[#40916C] shrink-0" />
                       )}
                       {showFeedback && isWrong && (
                         <XCircle className="w-5 h-5 text-red-500 shrink-0" />
@@ -541,19 +504,18 @@ export function TestPage() {
                 })}
               </div>
 
-              {/* Next button */}
+              {/* Next */}
               {feedback && (
                 <div className="mt-8 flex justify-end">
                   <Button size="lg" className="gap-2" onClick={handleNext}>
-                    {currentIndex + 1 >= totalQuestions
-                      ? "See What Grew"
-                      : "Next"}
+                    {currentIndex + 1 >= totalQuestions ? "See What Grew" : "Next"}
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
               )}
             </CardContent>
           </Card>
+
         </div>
       </div>
     </div>

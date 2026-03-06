@@ -24,11 +24,11 @@ export function LandingPage() {
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-8">
           <div className="flex justify-center items-end gap-4 mb-4">
-            <img src="/plant-1.png" alt="" className="w-20 h-auto" />
-            <img src="/plant-2.png" alt="" className="w-24 h-auto" />
+            <img src="/plant-seedling-raw.png" alt="" className="w-20 h-auto" />
+            <img src="/plant-young-raw.png" alt="" className="w-24 h-auto" />
             <div className="self-end mb-1"><Neko size={80} /></div>
-            <img src="/plant-3.png" alt="" className="w-24 h-auto" />
-            <img src="/plant-4.png" alt="" className="w-20 h-auto" />
+            <img src="/plant-lush-raw.png" alt="" className="w-24 h-auto" />
+            <img src="/plant-flower-raw.png" alt="" className="w-20 h-auto" />
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight">

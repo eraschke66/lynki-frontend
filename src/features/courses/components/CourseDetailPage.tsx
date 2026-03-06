@@ -16,10 +16,7 @@ import {
   FileText,
   Play,
 } from "lucide-react";
-import {
-  fetchPassChance,
-  fetchTestHistory,
-} from "@/features/test/services/testService";
+import { fetchPassChance, fetchTestHistory } from "@/features/test/services/testService";
 import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
 import { fetchProfile } from "@/features/settings";
@@ -33,7 +30,6 @@ export function CourseDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Fetch course info
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ["courses", "detail", courseId],
     queryFn: async () => {
@@ -48,7 +44,6 @@ export function CourseDetailPage() {
     enabled: !!courseId,
   });
 
-  // Fetch document count
   const { data: docCount } = useQuery({
     queryKey: ["courses", "docs", courseId],
     queryFn: async () => {
@@ -62,53 +57,37 @@ export function CourseDetailPage() {
     enabled: !!courseId,
   });
 
-  // Fetch pass chance
   const { data: passChanceData } = useQuery({
     queryKey: testQueryKeys.passChance(courseId ?? "", user?.id ?? ""),
     queryFn: () => fetchPassChance(user!.id, courseId!),
     enabled: !!user && !!courseId,
   });
 
-  // Fetch user profile for curriculum
   const { data: profileData } = useQuery({
     queryKey: profileQueryKeys.detail(user?.id ?? ""),
     queryFn: () => fetchProfile(user!.id),
     enabled: !!user,
   });
 
-  // Fetch quiz history
-  const {
-    data: historyData,
-    isLoading: historyLoading,
-    refetch: refetchHistory,
-  } = useQuery({
+  const { data: historyData, isLoading: historyLoading, refetch: refetchHistory } = useQuery({
     queryKey: testQueryKeys.history(courseId ?? "", user?.id ?? ""),
     queryFn: () => fetchTestHistory(user!.id, courseId!),
     enabled: !!user && !!courseId,
   });
 
-  if (!user || !courseId) {
-    navigate("/home");
-    return null;
-  }
+  if (!user || !courseId) { navigate("/home"); return null; }
 
-  const passPercent =
-    passChanceData?.pass_probability != null
-      ? Math.round(passChanceData.pass_probability * 100)
-      : null;
-
+  const passPercent = passChanceData?.pass_probability != null
+    ? Math.round(passChanceData.pass_probability * 100)
+    : null;
   const curriculum = profileData?.curriculum ?? "percentage";
   const targetGrade = course?.target_grade ?? 1.0;
   const targetLabel = getGradeLabel(curriculum, targetGrade);
-
   const sessions = historyData?.sessions ?? [];
   const completedSessions = sessions.filter((s) => s.status === "completed");
 
   const handleStartQuiz = () => {
-    // Clear cached quiz so a fresh one is generated
-    queryClient.removeQueries({
-      queryKey: testQueryKeys.quiz(courseId, user.id),
-    });
+    queryClient.removeQueries({ queryKey: testQueryKeys.quiz(courseId, user.id) });
     navigate(`/test/${courseId}`);
   };
 
@@ -139,8 +118,7 @@ export function CourseDetailPage() {
             <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
             <p className="text-sm text-muted-foreground">Course not found</p>
             <Button variant="outline" onClick={() => navigate("/home")}>
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              <ArrowLeft className="w-4 h-4 mr-2" /> Back to Dashboard
             </Button>
           </div>
         </div>
@@ -151,19 +129,26 @@ export function CourseDetailPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-background pt-28 pb-16">
+      <div className="min-h-screen bg-background pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-6">
+
           {/* Back link */}
           <button
             onClick={() => navigate("/home")}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
 
-          {/* Course header */}
-          <div className="mb-8">
+          {/* Course header with garden accent */}
+          <div
+            className="mb-8 p-5 rounded-2xl"
+            style={{
+              background: "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
+              border: "1px solid rgba(64,145,108,0.12)",
+            }}
+          >
             <h1 className="text-2xl font-bold mb-2">{course.title}</h1>
             {course.description && (
               <p className="text-muted-foreground">{course.description}</p>
@@ -171,26 +156,27 @@ export function CourseDetailPage() {
             <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <FileText className="w-4 h-4" />
-                {docCount ?? 0}{" "}
-                {(docCount ?? 0) === 1 ? "document" : "documents"}
+                {docCount ?? 0} {(docCount ?? 0) === 1 ? "document" : "documents"}
               </span>
               <span className="flex items-center gap-1.5">
                 <ClipboardCheck className="w-4 h-4" />
-                {completedSessions.length}{" "}
-                {completedSessions.length === 1 ? "quiz" : "quizzes"} completed
+                {completedSessions.length} {completedSessions.length === 1 ? "quiz" : "quizzes"} completed
               </span>
             </div>
           </div>
 
           {/* Pass chance + Start quiz */}
-          <Card className="rounded-2xl overflow-hidden mb-8">
+          <Card
+            className="rounded-2xl overflow-hidden mb-8"
+            style={{ borderTop: "3px solid rgba(64,145,108,0.3)" }}
+          >
             <CardContent className="pt-8 pb-8 px-8">
               <div className="flex flex-col sm:flex-row items-center gap-8">
-                {/* Pass chance display */}
+                {/* Garden status ring */}
                 <div className="flex flex-col items-center text-center">
                   {passPercent !== null ? (
                     <>
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
+                      <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-3">
                         Your Garden
                       </p>
                       <CircularProgress
@@ -207,9 +193,13 @@ export function CourseDetailPage() {
                       </p>
                     </>
                   ) : (
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground italic">
-                        Walk the path to see how your garden grows
+                    <div
+                      className="flex flex-col items-center justify-center w-24 h-24 rounded-full text-3xl"
+                      style={{ background: "rgba(64,145,108,0.07)", border: "2px dashed rgba(64,145,108,0.2)" }}
+                    >
+                      🌱
+                      <p className="text-xs text-muted-foreground mt-2 text-center leading-tight max-w-[120px]">
+                        Walk the path to see your garden
                       </p>
                     </div>
                   )}
@@ -219,9 +209,7 @@ export function CourseDetailPage() {
                 <div className="flex-1 flex flex-col items-center sm:items-start gap-3">
                   <div>
                     <h2 className="text-lg font-semibold">
-                      {sessions.length > 0
-                        ? "Keep Tending"
-                        : "Plant Your First Seeds"}
+                      {sessions.length > 0 ? "Keep Tending" : "Plant Your First Seeds"}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
                       {sessions.length > 0
@@ -231,7 +219,7 @@ export function CourseDetailPage() {
                   </div>
                   <Button
                     size="lg"
-                    className="gap-2"
+                    className="gap-2 shadow-[0_4px_12px_rgba(13,115,119,0.2)]"
                     onClick={handleStartQuiz}
                     disabled={!docCount || docCount === 0}
                   >
@@ -246,16 +234,13 @@ export function CourseDetailPage() {
           {/* Quiz History */}
           <div>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">Quiz History</h2>
+              <div className="flex items-center gap-2">
+                <span>🌺</span>
+                <h2 className="text-lg font-semibold">Quiz History</h2>
+              </div>
               {sessions.length > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => refetchHistory()}
-                  className="gap-1.5"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  Refresh
+                <Button variant="ghost" size="sm" onClick={() => refetchHistory()} className="gap-1.5">
+                  <RefreshCw className="w-3.5 h-3.5" /> Refresh
                 </Button>
               )}
             </div>
@@ -265,9 +250,9 @@ export function CourseDetailPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : sessions.length === 0 ? (
-              <Card className="rounded-2xl">
+              <Card className="rounded-2xl" style={{ borderTop: "2px dashed rgba(64,145,108,0.2)" }}>
                 <CardContent className="py-12 text-center">
-                  <ClipboardCheck className="w-8 h-8 mx-auto text-muted-foreground mb-3" />
+                  <div className="text-3xl mb-3">🌱</div>
                   <p className="text-sm text-muted-foreground">
                     No quizzes taken yet. Start your first quiz above!
                   </p>
@@ -280,74 +265,56 @@ export function CourseDetailPage() {
                     key={session.id}
                     session={session}
                     number={sessions.length - idx}
-                    onResume={
-                      session.status === "in_progress"
-                        ? handleResumeQuiz
-                        : undefined
-                    }
+                    onResume={session.status === "in_progress" ? handleResumeQuiz : undefined}
                   />
                 ))}
               </div>
             )}
           </div>
+
         </div>
       </div>
     </>
   );
 }
 
-function SessionCard({
-  session,
-  number,
-  onResume,
-}: {
+function SessionCard({ session, number, onResume }: {
   session: TestSession;
   number: number;
   onResume?: (sessionId: string) => void;
 }) {
   const isCompleted = session.status === "completed";
-  const scorePercent =
-    session.total_questions > 0
-      ? Math.round((session.correct_count / session.total_questions) * 100)
-      : 0;
-  const passPercent =
-    session.pass_chance != null ? Math.round(session.pass_chance * 100) : null;
+  const scorePercent = session.total_questions > 0
+    ? Math.round((session.correct_count / session.total_questions) * 100)
+    : 0;
+  const passPercent = session.pass_chance != null
+    ? Math.round(session.pass_chance * 100)
+    : null;
 
   const date = new Date(session.created_at);
-  const formattedDate = date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
-  const formattedTime = date.toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+  const formattedDate = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const formattedTime = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
   return (
-    <Card className="rounded-xl overflow-hidden">
+    <Card
+      className="rounded-xl overflow-hidden transition-all duration-150 hover:shadow-[0_4px_16px_rgba(27,67,50,0.08)]"
+      style={{ borderLeft: isCompleted ? "3px solid rgba(64,145,108,0.4)" : "3px solid rgba(245,158,11,0.4)" }}
+    >
       <CardContent className="py-4 px-5">
         <div className="flex items-center gap-4">
-          {/* Status icon */}
-          <div
-            className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${
-              isCompleted
-                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                : "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-            }`}
-          >
-            {isCompleted ? (
-              <CheckCircle2 className="w-5 h-5" />
-            ) : (
-              <Clock className="w-5 h-5" />
-            )}
+          <div className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${
+            isCompleted
+              ? "bg-[rgba(64,145,108,0.1)] text-[#2D6A4F]"
+              : "bg-amber-500/10 text-amber-600"
+          }`}>
+            {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
           </div>
 
-          {/* Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <p className="text-sm font-semibold">Quiz #{number}</p>
               {!isCompleted && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 font-medium">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-medium">
                   In Progress
                 </span>
               )}
@@ -357,40 +324,28 @@ function SessionCard({
             </p>
           </div>
 
-          {/* Score */}
           {isCompleted && (
             <div className="text-right shrink-0">
               <p className="text-sm font-bold">
                 {session.correct_count}/{session.total_questions}
               </p>
-              <p className="text-xs text-muted-foreground">
-                {scorePercent}% score
-              </p>
+              <p className="text-xs text-muted-foreground">{scorePercent}% score</p>
               {passPercent !== null && (
-                <p
-                  className={`text-xs font-medium ${getGardenStatus(passPercent).color}`}
-                >
+                <p className={`text-xs font-medium ${getGardenStatus(passPercent).color}`}>
                   {getGardenStatus(passPercent).label}
                 </p>
               )}
             </div>
           )}
 
-          {/* In-progress score + resume */}
           {!isCompleted && (
             <div className="flex items-center gap-3 shrink-0">
               <p className="text-xs text-muted-foreground">
                 {session.answered_count}/{session.total_questions} answered
               </p>
               {onResume && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="gap-1.5"
-                  onClick={() => onResume(session.id)}
-                >
-                  <Play className="w-3.5 h-3.5" />
-                  Resume
+                <Button size="sm" variant="outline" className="gap-1.5 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]" onClick={() => onResume(session.id)}>
+                  <Play className="w-3.5 h-3.5" /> Resume
                 </Button>
               )}
             </div>

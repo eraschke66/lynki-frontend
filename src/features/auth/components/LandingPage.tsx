@@ -23,12 +23,12 @@ export function LandingPage() {
       {/* Hero */}
       <section className="pt-32 pb-20 px-6">
         <div className="max-w-3xl mx-auto text-center space-y-8">
-          <div className="flex justify-center items-end gap-4 mb-4">
-            <img src="/plant-seedling-raw.png" alt="" className="w-20 h-auto" />
-            <img src="/plant-young-raw.png" alt="" className="w-24 h-auto" />
-            <div className="self-end mb-1"><Neko size={80} /></div>
-            <img src="/plant-lush-raw.png" alt="" className="w-24 h-auto" />
-            <img src="/plant-flower-raw.png" alt="" className="w-20 h-auto" />
+          <div className="flex justify-center mb-4">
+            <img
+              src="/students-hero.png"
+              alt="Two students studying together with a cat"
+              className="w-full max-w-lg rounded-2xl shadow-lg"
+            />
           </div>
 
           <h1 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight">
@@ -77,7 +77,7 @@ export function LandingPage() {
           <h2 className="text-2xl font-bold text-center mb-16">How your garden grows</h2>
           <div className="space-y-16">
             <div className="flex items-start gap-6">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">1</div>
+              <img src="/plant-seedling-raw.png" alt="" className="w-16 h-auto shrink-0" />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Plant your seeds</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -87,7 +87,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="flex items-start gap-6">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">2</div>
+              <img src="/plant-young-raw.png" alt="" className="w-16 h-auto shrink-0" />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Walk the path</h3>
                 <p className="text-muted-foreground leading-relaxed">
@@ -98,7 +98,7 @@ export function LandingPage() {
               </div>
             </div>
             <div className="flex items-start gap-6">
-              <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">3</div>
+              <img src="/plant-flower-raw.png" alt="" className="w-16 h-auto shrink-0" />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Watch things grow</h3>
                 <p className="text-muted-foreground leading-relaxed">

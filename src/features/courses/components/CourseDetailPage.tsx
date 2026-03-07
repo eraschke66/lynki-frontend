@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
+import { Neko } from "@/components/garden/Neko";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CircularProgress } from "@/components/ui/circular-progress";
@@ -272,6 +273,13 @@ export function CourseDetailPage() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Neko cat - tucked into bottom-right corner of content */}
+          <div className="flex justify-end mt-10 mb-4 pr-2 opacity-50 hover:opacity-80 transition-opacity duration-500">
+            <div style={{ transform: "scaleX(-1) rotate(-8deg)" }}>
+              <Neko />
+            </div>
           </div>
 
         </div>

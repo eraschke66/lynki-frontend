@@ -20,12 +20,7 @@ export function Neko({ className = "", size, width }: NekoProps) {
   return (
     <div
       className={`neko-container ${className}`}
-      style={{
-        width: w,
-        display: "inline-block",
-        position: "relative",
-        mixBlendMode: "multiply",
-      }}
+      style={{ width: w, display: "inline-block", position: "relative" }}
       aria-hidden="true"
     >
       <img
@@ -38,6 +33,7 @@ export function Neko({ className = "", size, width }: NekoProps) {
           left: 0,
           opacity: frame === 0 ? 1 : 0,
           transition: "opacity 0.3s ease-in-out",
+          mixBlendMode: "multiply",
         }}
       />
       <img
@@ -48,6 +44,7 @@ export function Neko({ className = "", size, width }: NekoProps) {
           position: "relative",
           opacity: frame === 1 ? 1 : 0,
           transition: "opacity 0.3s ease-in-out",
+          mixBlendMode: "multiply",
         }}
       />
     </div>

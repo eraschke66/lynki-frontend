@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
+import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -56,6 +57,7 @@ export function SettingsPage() {
   return (
     <>
       <Header />
+      <VineDecoration />
       <div className="min-h-screen bg-background pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-6">
 
@@ -151,15 +153,19 @@ export function SettingsPage() {
                     Garden Growth Guide
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {[
-                      { emoji: "🌳", label: "Thriving", range: "85%+", color: "text-emerald-700" },
-                      { emoji: "🌻", label: "Blooming", range: "70–84%", color: "text-yellow-600" },
-                      { emoji: "🌿", label: "Healthy", range: "55–69%", color: "text-green-600" },
-                      { emoji: "🌱", label: "Growing", range: "40–54%", color: "text-teal-600" },
-                      { emoji: "💧", label: "Needs Water", range: "<40%", color: "text-blue-500" },
-                    ].map(({ emoji, label, range, color }) => (
+                           {[
+                      { img: "/plant-lush-raw.png", label: "Thriving", range: "85%+", color: "text-emerald-700" },
+                      { img: "/plant-flower-raw.png", label: "Blooming", range: "70-84%", color: "text-yellow-600" },
+                      { img: "/plant-young-raw.png", label: "Healthy", range: "55-69%", color: "text-green-600" },
+                      { img: "/plant-seedling-raw.png", label: "Growing", range: "40-54%", color: "text-teal-600" },
+                      { img: null, emoji: "💧", label: "Needs Water", range: "<40%", color: "text-blue-500" },
+                    ].map(({ img, emoji, label, range, color }) => (
                       <div key={label} className="flex items-center gap-3">
-                        <span className="text-xl w-7 text-center">{emoji}</span>
+                        {img ? (
+                          <img src={img} alt="" className="w-8 h-8 object-contain shrink-0" style={{ mixBlendMode: "darken" }} />
+                        ) : (
+                          <span className="text-xl w-8 text-center shrink-0">{emoji}</span>
+                        )}
                         <div>
                           <p className={`text-sm font-medium ${color}`}>{label}</p>
                           <p className="text-xs text-muted-foreground">{range} pass probability</p>

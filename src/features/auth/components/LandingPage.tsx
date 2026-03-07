@@ -30,7 +30,7 @@ export function LandingPage() {
           </h1>
 
           <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            No streaks. No leaderboards. Competitions are for sports.
+            No streaks. No leaderboards. No stress. Just focus.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-2">

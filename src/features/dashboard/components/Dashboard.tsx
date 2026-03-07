@@ -412,7 +412,7 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
         Plant a Seed
       </Button>
       <div className="grid grid-cols-3 gap-6 pt-2 text-center w-full">
-        {      {[
+        {[
           { img: "/plant-seedling-raw.png", label: "Upload your notes" },
           { img: "/plant-young-raw.png", label: "Take the quiz" },
           { img: "/plant-lush-raw.png", label: "See if you'll pass" },

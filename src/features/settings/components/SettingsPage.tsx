@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
+import { Neko } from "@/components/garden/Neko";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -32,7 +33,6 @@ export function SettingsPage() {
   });
 
   const [selectedCurriculum, setSelectedCurriculum] = useState<string | null>(null);
-
   const activeCurriculum = selectedCurriculum ?? profile?.curriculum ?? "";
 
   const mutation = useMutation({
@@ -72,7 +72,7 @@ export function SettingsPage() {
 
           {/* Page heading */}
           <div className="flex items-center gap-2 mb-8">
-            <span className="text-2xl">🌿</span>
+            <span className="text-2xl">{"\uD83C\uDF3F"}</span>
             <h1 className="text-2xl font-bold">Settings</h1>
           </div>
 
@@ -82,7 +82,6 @@ export function SettingsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-
               {/* Curriculum card */}
               <Card
                 className="rounded-2xl overflow-hidden"
@@ -94,8 +93,8 @@ export function SettingsPage() {
                       Curriculum
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Choose the grading system used by your school or exam board. This
-                      determines the grade scale for your target passing grades.
+                      Choose the grading system used by your school or exam board.
+                      This determines the grade scale for your target passing grades.
                     </p>
                     <Select value={activeCurriculum} onValueChange={setSelectedCurriculum}>
                       <SelectTrigger
@@ -149,16 +148,15 @@ export function SettingsPage() {
               >
                 <CardContent className="pt-6 pb-6 px-8">
                   <p className="text-sm font-medium mb-4 flex items-center gap-2">
-                    <span>🌺</span>
-                    Garden Growth Guide
+                    <span>{"\uD83C\uDF3A"}</span> Garden Growth Guide
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                           {[
+                    {[
                       { img: "/plant-lush-raw.png", label: "Thriving", range: "85%+", color: "text-emerald-700" },
                       { img: "/plant-flower-raw.png", label: "Blooming", range: "70-84%", color: "text-yellow-600" },
                       { img: "/plant-young-raw.png", label: "Healthy", range: "55-69%", color: "text-green-600" },
                       { img: "/plant-seedling-raw.png", label: "Growing", range: "40-54%", color: "text-teal-600" },
-                      { img: null, emoji: "💧", label: "Needs Water", range: "<40%", color: "text-blue-500" },
+                      { img: null, emoji: "\uD83D\uDCA7", label: "Needs Water", range: "<40%", color: "text-blue-500" },
                     ].map(({ img, emoji, label, range, color }) => (
                       <div key={label} className="flex items-center gap-3">
                         {img ? (
@@ -176,6 +174,10 @@ export function SettingsPage() {
                 </CardContent>
               </Card>
 
+              {/* Neko cat - bottom-left, looking up at the growth guide */}
+              <div className="flex justify-start mt-4 ml-2 opacity-50 hover:opacity-80 transition-opacity duration-500">
+                <Neko />
+              </div>
             </div>
           )}
 

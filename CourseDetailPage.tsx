@@ -99,15 +99,15 @@ export function CourseDetailPage() {
 
   if (courseLoading) {
     return (
-      <>
-        <Header />
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center space-y-3">
-            <Loader2 className="w-10 h-10 animate-spin mx-auto text-primary" />
-            <p className="text-sm text-muted-foreground">Loading...</p>
-          </div>
+      <div className="fixed inset-0 z-50 flex items-end justify-center overflow-hidden" style={{ background: "hsl(38 48% 87%)" }}>
+        <video src="/garden-loader.mp4" autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0" style={{ background: "rgba(27,67,50,0.18)" }} />
+        <div className="relative z-10 text-center pb-16 space-y-3">
+          <p className="text-white text-base font-medium tracking-wide" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.4)" }}>
+            Tending the garden...
+          </p>
         </div>
-      </>
+      </div>
     );
   }
 

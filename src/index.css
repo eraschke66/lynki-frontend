@@ -2,14 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* =============================================
-   Garden Design System - PassAI
-   Warm linen + forest greens + depth
-   ============================================= */
-
 @layer base {
   :root {
-    /* Core brand */
     --background: 38 48% 87%;
     --foreground: 160 20% 14%;
     --card: 40 55% 94%;
@@ -30,28 +24,6 @@
     --input: 38 30% 80%;
     --ring: 182 80% 25%;
     --radius: 0.625rem;
-
-    /* Garden palette */
-    --garden-forest: #1B4332;
-    --garden-canopy: #2D6A4F;
-    --garden-moss: #40916C;
-    --garden-sage: #52B788;
-    --garden-leaf: #74C69D;
-    --garden-mist: rgba(64, 145, 108, 0.07);
-    --garden-shadow: rgba(27, 67, 50, 0.14);
-    --garden-amber: rgba(245, 200, 120, 0.12);
-
-    /* Linen palette */
-    --linen-base: #EDD9B0;
-    --linen-light: #F5EAD0;
-    --linen-dark: #C8A87A;
-    --linen-vignette: rgba(140, 95, 40, 0.10);
-
-    /* Depth shadows */
-    --shadow-soft:  0 2px 8px rgba(27, 67, 50, 0.07), 0 1px 2px rgba(27, 67, 50, 0.05);
-    --shadow-card:  0 4px 16px rgba(27, 67, 50, 0.10), 0 1px 4px rgba(27, 67, 50, 0.06);
-    --shadow-hover: 0 8px 28px rgba(27, 67, 50, 0.14), 0 2px 6px rgba(27, 67, 50, 0.08);
-    --shadow-inset: inset 0 1px 3px rgba(27, 67, 50, 0.08);
   }
 
   .dark {
@@ -74,41 +46,17 @@
     --border: 160 18% 20%;
     --input: 160 18% 18%;
     --ring: 182 65% 42%;
-    --garden-mist: rgba(64, 145, 108, 0.10);
-    --garden-shadow: rgba(0, 0, 0, 0.25);
-    --shadow-soft:  0 2px 8px rgba(0, 0, 0, 0.2);
-    --shadow-card:  0 4px 16px rgba(0, 0, 0, 0.28);
-    --shadow-hover: 0 8px 28px rgba(0, 0, 0, 0.36);
-    --linen-vignette: rgba(0, 0, 0, 0.20);
   }
-}
 
-@layer base {
   * {
     border-color: hsl(var(--border));
   }
 
-  html {
-    font-feature-settings: "kern" 1, "liga" 1;
-    -webkit-font-smoothing: antialiased;
-  }
-
   body {
-    @apply bg-background text-foreground;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: 'Inter', system-ui, sans-serif;
-    background-image:
-      repeating-linear-gradient(
-        45deg,
-        rgba(140, 95, 40, 0.030) 0px, rgba(140, 95, 40, 0.030) 1px,
-        transparent 1px, transparent 6px
-      ),
-      repeating-linear-gradient(
-        -45deg,
-        rgba(140, 95, 40, 0.022) 0px, rgba(140, 95, 40, 0.022) 1px,
-        transparent 1px, transparent 6px
-      ),
-      radial-gradient(ellipse 80% 60% at 75% 0%, rgba(245, 220, 160, 0.18) 0%, transparent 65%),
-      radial-gradient(ellipse 60% 30% at 50% 100%, rgba(64, 145, 108, 0.06) 0%, transparent 70%);
+    -webkit-font-smoothing: antialiased;
   }
 
   h1, h2 {
@@ -116,82 +64,12 @@
   }
 }
 
-/* =============================================
-   Garden Utility Classes
-   ============================================= */
-
-@layer components {
-  .garden-card {
-    background: hsl(var(--card));
-    border: 1px solid hsl(var(--border));
-    border-radius: var(--radius);
-    box-shadow:
-      var(--shadow-card),
-      inset 0 2px 8px rgba(140, 95, 40, 0.06),
-      inset 0 -2px 8px rgba(140, 95, 40, 0.05),
-      inset 2px 0 8px rgba(140, 95, 40, 0.04),
-      inset -2px 0 8px rgba(140, 95, 40, 0.04);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-  }
-
-  .garden-card:hover {
-    box-shadow:
-      var(--shadow-hover),
-      inset 0 2px 8px rgba(140, 95, 40, 0.04),
-      inset 0 -2px 8px rgba(140, 95, 40, 0.03),
-      inset 2px 0 8px rgba(140, 95, 40, 0.03),
-      inset -2px 0 8px rgba(140, 95, 40, 0.03);
-    transform: translateY(-1px);
-  }
-
-  .garden-divider {
-    border: none;
-    height: 1px;
-    background: linear-gradient(
-      to right,
-      transparent,
-      rgba(64, 145, 108, 0.25) 20%,
-      rgba(64, 145, 108, 0.35) 50%,
-      rgba(64, 145, 108, 0.25) 80%,
-      transparent
-    );
-    margin: 0;
-    position: relative;
-  }
-
-  .garden-divider::after {
-    content: "\1F33F";
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 14px;
-    background: hsl(var(--background));
-    padding: 0 10px;
-    line-height: 1;
-  }
-}
-
-/* =============================================
-   Scrollbar
-   ============================================= */
-
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(64, 145, 108, 0.25); border-radius: 100px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(64, 145, 108, 0.45); }
 
-/* =============================================
-   Selection + Focus
-   ============================================= */
-
 ::selection {
   background: rgba(64, 145, 108, 0.20);
   color: #1B4332;
-}
-
-:focus-visible {
-  outline: 2px solid rgba(64, 145, 108, 0.6);
-  outline-offset: 2px;
-  border-radius: 4px;
 }

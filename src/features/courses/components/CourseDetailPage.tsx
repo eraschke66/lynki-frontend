@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Header } from "@/components/layout/Header";
+import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CircularProgress } from "@/components/ui/circular-progress";
@@ -129,6 +130,7 @@ export function CourseDetailPage() {
   return (
     <>
       <Header />
+      <VineDecoration />
       <div className="min-h-screen bg-background pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-6">
 
@@ -197,7 +199,7 @@ export function CourseDetailPage() {
                       className="flex flex-col items-center justify-center w-24 h-24 rounded-full text-3xl"
                       style={{ background: "rgba(64,145,108,0.07)", border: "2px dashed rgba(64,145,108,0.2)" }}
                     >
-                      🌱
+                      <img src="/plant-seedling-raw.png" alt="" className="w-20 h-20 object-contain" style={{ mixBlendMode: "darken" }} />
                       <p className="text-xs text-muted-foreground mt-2 text-center leading-tight max-w-[120px]">
                         Walk the path to see your garden
                       </p>
@@ -252,7 +254,7 @@ export function CourseDetailPage() {
             ) : sessions.length === 0 ? (
               <Card className="rounded-2xl" style={{ borderTop: "2px dashed rgba(64,145,108,0.2)" }}>
                 <CardContent className="py-12 text-center">
-                  <div className="text-3xl mb-3">🌱</div>
+                  <div className="text-3xl mb-3"><img src="/plant-seedling-raw.png" alt="" className="w-16 h-16 object-contain mx-auto" style={{ mixBlendMode: "darken" }} /></div>
                   <p className="text-sm text-muted-foreground">
                     No quizzes taken yet. Start your first quiz above!
                   </p>

@@ -202,6 +202,10 @@ export function Dashboard() {
                   </button>
                 </div>
               </section>
+              {/* Cat napping at the end of today's study path */}
+              <div className="flex justify-end pt-1 pr-1 opacity-45">
+                <Neko size={52} />
+              </div>
             </div>
           )}
         </div>
@@ -408,17 +412,16 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
         Plant a Seed
       </Button>
       <div className="grid grid-cols-3 gap-6 pt-2 text-center w-full">
-        {[
-          { emoji: "🌱", label: "Upload your notes" },
-          { emoji: "🌿", label: "Take the quiz" },
-          { emoji: "🌳", label: "See if you'll pass" },
-        ].map(({ emoji, label }) => (
+        {      {[
+          { img: "/plant-seedling-raw.png", label: "Upload your notes" },
+          { img: "/plant-young-raw.png", label: "Take the quiz" },
+          { img: "/plant-lush-raw.png", label: "See if you'll pass" },
+        ].map(({ img, label }) => (
           <div key={label} className="space-y-2">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto text-xl"
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto"
               style={{ background: "rgba(64,145,108,0.08)", border: "1px solid rgba(64,145,108,0.15)" }}
             >
-              {emoji}
+              <img src={img} alt="" className="w-9 h-9 object-contain" style={{ mixBlendMode: "multiply" }} />
             </div>
             <p className="text-xs text-muted-foreground">{label}</p>
           </div>

@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -12,19 +10,19 @@
 @layer base {
   :root {
     /* Core brand */
-    --background: 38 48% 87%;        /* warm linen #EDD9B0 */
+    --background: 38 48% 87%;
     --foreground: 160 20% 14%;
     --card: 40 55% 94%;
     --card-foreground: 160 20% 14%;
     --popover: 40 55% 96%;
     --popover-foreground: 160 20% 14%;
-    --primary: 182 80% 25%;          /* teal #0D7377 */
+    --primary: 182 80% 25%;
     --primary-foreground: 0 0% 100%;
     --secondary: 40 35% 88%;
     --secondary-foreground: 160 20% 20%;
     --muted: 40 30% 85%;
     --muted-foreground: 160 12% 42%;
-    --accent: 155 43% 48%;           /* garden moss */
+    --accent: 155 43% 48%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
@@ -87,7 +85,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   html {
@@ -146,32 +144,6 @@
     transform: translateY(-1px);
   }
 
-  .garden-panel {
-    background: linear-gradient(
-      135deg,
-      rgba(245, 234, 208, 0.75) 0%,
-      rgba(64, 145, 108, 0.06) 60%,
-      rgba(245, 234, 208, 0.50) 100%
-    );
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(64, 145, 108, 0.15);
-    border-radius: calc(var(--radius) * 2);
-    box-shadow:
-      0 4px 24px rgba(27, 67, 50, 0.10),
-      0 1px 4px rgba(27, 67, 50, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  }
-
-  .garden-wall {
-    background:
-      radial-gradient(ellipse 80% 50% at 10% 50%, rgba(64, 145, 108, 0.06) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 80% at 90% 20%, rgba(13, 115, 119, 0.05) 0%, transparent 65%),
-      rgba(245, 234, 208, 0.40);
-    border-radius: calc(var(--radius) * 2);
-    border: 1px solid rgba(64, 145, 108, 0.10);
-  }
-
   .garden-divider {
     border: none;
     height: 1px;
@@ -198,36 +170,6 @@
     padding: 0 10px;
     line-height: 1;
   }
-
-  .garden-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--garden-forest);
-    background: rgba(64, 145, 108, 0.10);
-    border: 1px solid rgba(64, 145, 108, 0.20);
-    border-radius: 100px;
-    padding: 2px 8px;
-  }
-
-  .garden-nav-active {
-    color: var(--garden-canopy);
-    background: var(--garden-mist);
-    border-left: 2px solid var(--garden-moss);
-    font-weight: 600;
-  }
-
-  .garden-stripe {
-    border-top: 3px solid rgba(64, 145, 108, 0.30);
-  }
-
-  .garden-stripe-strong {
-    border-top: 3px solid rgba(64, 145, 108, 0.55);
-  }
 }
 
 /* =============================================
@@ -245,7 +187,7 @@
 
 ::selection {
   background: rgba(64, 145, 108, 0.20);
-  color: var(--garden-forest);
+  color: #1B4332;
 }
 
 :focus-visible {

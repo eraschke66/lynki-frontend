@@ -27,6 +27,8 @@ import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
+import { VineDecoration } from "@/components/garden/VineDecoration";
+import { Neko } from "@/components/garden/Neko";
 import type { AnswerFeedback } from "../types";
 
 export function TestPage() {
@@ -184,7 +186,7 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="text-center space-y-3">
-          <div className="text-4xl mb-2">🌱</div>
+          <img src="/plant-seedling-raw.png" alt="" className="w-16 h-16 object-contain mx-auto mb-2" style={{ mixBlendMode: "darken" }} />
           <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
           <p className="text-sm text-muted-foreground">
             {sessionId ? "Resuming your walk..." : "Preparing the path..."}
@@ -228,7 +230,7 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="text-center space-y-4 max-w-sm">
-          <div className="text-4xl">🌿</div>
+          <img src="/plant-young-raw.png" alt="" className="w-20 h-20 object-contain mx-auto" style={{ mixBlendMode: "darken" }} />
           <div>
             <h2 className="text-lg font-semibold mb-1">No Questions Available</h2>
             <p className="text-sm text-muted-foreground">
@@ -252,6 +254,7 @@ export function TestPage() {
 
     return (
       <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+        <VineDecoration />
         <button
           onClick={handleExit}
           className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -318,7 +321,9 @@ export function TestPage() {
                   </p>
                 </div>
 
-                {/* Actions */}
+                {/* Sleeping cat */}
+                <Neko size={80} className="opacity-60 mx-auto" />
+              {/* Actions */}
                 <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
                   <Button size="lg" className="flex-1 gap-2" onClick={handleRetake}>
                     <RotateCcw className="w-4 h-4" />

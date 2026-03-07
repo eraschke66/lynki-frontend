@@ -31,6 +31,8 @@ import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
+import { VineDecoration } from "@/components/garden/VineDecoration";
+import { Neko } from "@/components/garden/Neko";
 import type { AnswerFeedback } from "../types";
 
 export function TestPage() {
@@ -273,7 +275,7 @@ export function TestPage() {
               <div className="flex flex-col items-center text-center space-y-6">
                 {loadingPassChance ? (
                   <div className="space-y-3">
-                    <div className="text-3xl">🌿</div>
+                    <img src="/plant-young-raw.png" alt="" className="w-16 h-16 object-contain mx-auto" style={{ mixBlendMode: "darken" }} />
                     <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                     <p className="text-sm text-muted-foreground">
                       Reading the garden...
@@ -358,6 +360,8 @@ export function TestPage() {
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+      <VineDecoration />
+      <VineDecoration />
       <VineDecoration />
       {/* Top garden stripe */}
       <div

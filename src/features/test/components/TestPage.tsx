@@ -29,10 +29,6 @@ import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
-import { VineDecoration } from "@/components/garden/VineDecoration";
-import { Neko } from "@/components/garden/Neko";
-import { VineDecoration } from "@/components/garden/VineDecoration";
-import { Neko } from "@/components/garden/Neko";
 import type { AnswerFeedback } from "../types";
 
 export function TestPage() {
@@ -343,9 +339,6 @@ export function TestPage() {
                     Return to Garden
                   </Button>
                 </div>
-                <div className="pt-4 flex justify-center">
-                  <Neko size={72} className="opacity-55" />
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -360,8 +353,6 @@ export function TestPage() {
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
-      <VineDecoration />
-      <VineDecoration />
       <VineDecoration />
       {/* Top garden stripe */}
       <div

@@ -29,6 +29,8 @@ import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
+import { VineDecoration } from "@/components/garden/VineDecoration";
+import { Neko } from "@/components/garden/Neko";
 import type { AnswerFeedback } from "../types";
 
 export function TestPage() {
@@ -339,6 +341,9 @@ export function TestPage() {
                     Return to Garden
                   </Button>
                 </div>
+                <div className="pt-4 flex justify-center">
+                  <Neko size={72} className="opacity-55" />
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -353,6 +358,7 @@ export function TestPage() {
 
   return (
     <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
+      <VineDecoration />
       {/* Top garden stripe */}
       <div
         className="absolute top-0 left-0 right-0 h-0.5"
@@ -402,7 +408,7 @@ export function TestPage() {
                 border: "1px solid rgba(64,145,108,0.15)",
               }}
             >
-              <span className="text-xl">🌱</span>
+              <img src="/plant-seedling-raw.png" alt="" className="w-8 h-8 object-contain inline-block" style={{ mixBlendMode: "darken" }} />
               <p className="text-sm text-[#2D6A4F] mt-1 font-medium">
                 Along the way. Keep walking.
               </p>

@@ -28,6 +28,7 @@ import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
 import { VineDecoration } from "@/components/garden/VineDecoration";
+import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { Neko } from "@/components/garden/Neko";
 import type { AnswerFeedback } from "../types";
 
@@ -174,25 +175,12 @@ export function TestPage() {
     navigate(`/course/${courseId}`);
   }, [navigate, courseId]);
 
-  // ── Loading ──
+  // ── Loading — sprinkler cat video ──
   if (isLoading) {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-        <button
-          onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
-          aria-label="Exit quiz"
-        >
-          <X className="w-6 h-6" />
-        </button>
-        <div className="text-center space-y-3">
-          <img src="/plant-seedling-raw.png" alt="" className="w-16 h-16 object-contain mx-auto mb-2" style={{ mixBlendMode: "darken" }} />
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-          <p className="text-sm text-muted-foreground">
-            {sessionId ? "Resuming your walk..." : "Preparing the path..."}
-          </p>
-        </div>
-      </div>
+      <GardenVideoLoader
+        message={sessionId ? "Resuming your walk..." : "Preparing the path..."}
+      />
     );
   }
 
@@ -416,7 +404,7 @@ export function TestPage() {
             style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
           >
             <CardContent className="pt-8 pb-6 px-8">
-              <h2 className="text-xl font-semibold leading-relaxed mb-8">
+              <h2 className="quiz-question text-xl leading-relaxed mb-8">
                 {currentQuestion.question}
               </h2>
 

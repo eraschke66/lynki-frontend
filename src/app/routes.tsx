@@ -11,6 +11,7 @@ import { TestPage } from "@/features/test";
 import { Dashboard } from "@/features/dashboard";
 import { CourseDetailPage } from "@/features/courses";
 import { SettingsPage } from "@/features/settings";
+import { AdminPage } from "@/features/admin/AdminPage";
 
 export function AppRoutes() {
   return (
@@ -56,6 +57,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <SettingsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminPage />
           </ProtectedRoute>
         }
       />

@@ -4,6 +4,7 @@ import { useAuth } from "@/features/auth";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
+import { GardenInlineIcon } from "@/components/garden/GardenIcons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { CircularProgress } from "@/components/ui/circular-progress";
@@ -198,7 +199,11 @@ export function CourseDetailPage() {
                   ) : (
                     <div
                       className="flex flex-col items-center justify-center w-24 h-24 rounded-full text-3xl"
-                      style={{ background: "rgba(64,145,108,0.07)", border: "2px dashed rgba(64,145,108,0.2)" }}
+                      style={{
+                        background: "rgba(64,145,108,0.07)",
+                        border: "1.5px solid rgba(64,145,108,0.18)",
+                        boxShadow: "0 0 0 4px rgba(64,145,108,0.06)",
+                      }}
                     >
                       <img src="/plant-seedling-raw.png" alt="" className="w-20 h-20 object-contain" style={{ mixBlendMode: "darken" }} />
                       <p className="text-xs text-muted-foreground mt-2 text-center leading-tight max-w-[120px]">
@@ -238,7 +243,7 @@ export function CourseDetailPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <span>🌺</span>
+                <GardenInlineIcon type="blossom" size={22} />
                 <h2 className="text-lg font-semibold">Quiz History</h2>
               </div>
               {sessions.length > 0 && (
@@ -253,7 +258,7 @@ export function CourseDetailPage() {
                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
               </div>
             ) : sessions.length === 0 ? (
-              <Card className="rounded-2xl" style={{ borderTop: "2px dashed rgba(64,145,108,0.2)" }}>
+              <Card className="rounded-2xl" style={{ borderTop: "2px solid rgba(64,145,108,0.12)" }}>
                 <CardContent className="py-12 text-center">
                   <div className="text-3xl mb-3"><img src="/plant-seedling-raw.png" alt="" className="w-16 h-16 object-contain mx-auto" style={{ mixBlendMode: "darken" }} /></div>
                   <p className="text-sm text-muted-foreground">

@@ -6,8 +6,7 @@ interface GardenVideoLoaderProps {
 
 /**
  * Full-screen loading overlay using the Sora garden video as background.
- * Used for long Render cold-start waits (can be 1-4 min on first load).
- * Usage: render this component when isLoading=true and backend hasn't responded yet.
+ * Used for long Render cold-start waits and quiz generation.
  */
 export function GardenVideoLoader({ message = "Tending the garden..." }: GardenVideoLoaderProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -74,14 +73,33 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
           boxShadow: "0 8px 40px rgba(27,67,50,0.3)",
         }}
       >
-        {/* Spinning leaf */}
+        {/* Spinning leaf SVG — replaces Unicode emoji */}
         <div
           style={{
-            fontSize: "2.5rem",
-            animation: "gardenSpin 2s linear infinite",
+            animation: "gardenSpin 2.5s ease-in-out infinite",
           }}
         >
-          🌿
+          <svg width={40} height={40} viewBox="0 0 32 32" fill="none">
+            <path
+              d="M8 26C8 26 6 18 10 12C14 6 22 4 26 6C26 6 28 14 24 20C20 26 12 28 8 26Z"
+              fill="#B7E4C7"
+              opacity={0.7}
+            />
+            <path
+              d="M8 26C8 26 6 18 10 12C14 6 22 4 26 6C26 6 28 14 24 20C20 26 12 28 8 26Z"
+              stroke="#74C69D"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10 24C12 20 15 16 18 13C21 10 24 8 26 6"
+              stroke="#95D5B2"
+              strokeWidth={1}
+              strokeLinecap="round"
+              opacity={0.6}
+            />
+          </svg>
         </div>
 
         {/* Message */}
@@ -117,8 +135,9 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
 
       <style>{`
         @keyframes gardenSpin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+          0%   { transform: rotate(0deg) scale(1); }
+          50%  { transform: rotate(180deg) scale(1.1); }
+          100% { transform: rotate(360deg) scale(1); }
         }
         @keyframes gardenPulse {
           0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }

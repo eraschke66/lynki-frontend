@@ -111,7 +111,7 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Nunito', 'Inter', system-ui, sans-serif;
     background-image:
       repeating-linear-gradient(45deg, rgba(140, 95, 40, 0.030) 0px, rgba(140, 95, 40, 0.030) 1px, transparent 1px, transparent 6px),
       repeating-linear-gradient(-45deg, rgba(140, 95, 40, 0.022) 0px, rgba(140, 95, 40, 0.022) 1px, transparent 1px, transparent 6px),
@@ -121,6 +121,14 @@
 
   h1, h2 {
     font-family: 'Lora', Georgia, serif;
+  }
+
+  /* Quiz question text — softer, rounder than headings */
+  .quiz-question {
+    font-family: 'Nunito', system-ui, sans-serif;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.6;
   }
 }
 
@@ -145,15 +153,16 @@
     position: relative;
   }
   .garden-divider::after {
-    content: "\1F33F";
+    content: "";
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    font-size: 14px;
+    width: 14px;
+    height: 14px;
     background: var(--background);
-    padding: 0 10px;
-    line-height: 1;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--background);
   }
 }
 

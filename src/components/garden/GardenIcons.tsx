@@ -9,8 +9,6 @@
  *   <GardenIcon type="seedling" size={20} />
  */
 
-import React from "react";
-
 type IconType =
   | "leaf"       // replaces 🌿 — general garden / section headers
   | "seedling"   // replaces 🌱 — early growth, new items

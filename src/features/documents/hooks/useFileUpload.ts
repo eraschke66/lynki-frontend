@@ -4,6 +4,16 @@ import type { UploadStatus } from "../types";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const MAX_FILES_PER_BATCH = 5;
+const ALLOWED_MIME_TYPES = new Set([
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "text/plain",
+  "image/png",
+  "image/jpeg",
+]);
 
 interface UseFileUploadReturn {
   uploading: boolean;
@@ -41,8 +51,18 @@ export function useFileUpload(
       }
 
       const files = Array.from(fileList);
-      const invalidFiles = files.filter((f) => f.size > MAX_FILE_SIZE);
 
+      const unsupportedFiles = files.filter(
+        (f) => !ALLOWED_MIME_TYPES.has(f.type),
+      );
+      if (unsupportedFiles.length > 0) {
+        setError(
+          `Unsupported file type(s): ${unsupportedFiles.map((f) => f.name).join(", ")}. Accepted: PDF, DOC, DOCX, PPT, PPTX, TXT, PNG, JPEG.`,
+        );
+        return;
+      }
+
+      const invalidFiles = files.filter((f) => f.size > MAX_FILE_SIZE);
       if (invalidFiles.length > 0) {
         setError(
           `Some files are too large. Maximum size is 10MB. (${invalidFiles

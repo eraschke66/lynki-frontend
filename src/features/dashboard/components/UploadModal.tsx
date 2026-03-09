@@ -303,7 +303,7 @@ export function UploadModal({
                 multiple
                 onChange={onFileChange}
                 disabled={!canUpload}
-                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png"
+                accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,image/png,image/jpeg"
               />
             </div>
           )}

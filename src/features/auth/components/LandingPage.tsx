@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Neko } from "@/components/garden/Neko";
+import { GardenIcon } from "@/components/garden/GardenIcons";
 
 export function LandingPage() {
   const { user } = useAuth();
@@ -97,21 +98,21 @@ export function LandingPage() {
           </p>
           <div className="grid sm:grid-cols-3 gap-6">
             <div className="p-6 bg-card rounded-2xl border border-border/50">
-              <div className="text-2xl mb-3">🌱</div>
+              <div className="mb-3"><GardenIcon type="seedling" size={28} /></div>
               <h3 className="font-semibold mb-2">Your materials only</h3>
               <p className="text-sm text-muted-foreground">
                 Upload what you actually study. Quizzes come from your notes, not a generic question bank.
               </p>
             </div>
             <div className="p-6 bg-card rounded-2xl border border-border/50">
-              <div className="text-2xl mb-3">🪴</div>
+              <div className="mb-3"><GardenIcon type="potted" size={28} /></div>
               <h3 className="font-semibold mb-2">Tracks what you know</h3>
               <p className="text-sm text-muted-foreground">
                 Not just what you got right once. The same knowledge tracking model used in academic research.
               </p>
             </div>
             <div className="p-6 bg-card rounded-2xl border border-border/50">
-              <div className="text-2xl mb-3">🌿</div>
+              <div className="mb-3"><GardenIcon type="leaf" size={28} /></div>
               <h3 className="font-semibold mb-2">Built for calm</h3>
               <p className="text-sm text-muted-foreground">
                 No streaks. No rankings. No panic. Built by a teacher who knows anxiety gets in the way of learning.

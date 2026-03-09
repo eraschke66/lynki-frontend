@@ -37,6 +37,7 @@ import { supabase } from "@/lib/supabase";
 import { getGardenStatus, getStudyCTA, getDashboardSubtitle } from "@/lib/garden";
 import { Neko } from "@/components/garden/Neko";
 import { VineDecoration } from "@/components/garden/VineDecoration";
+import { GardenInlineIcon } from "@/components/garden/GardenIcons";
 
 const dashboardQueryKeys = {
   data: (userId: string) => ["dashboard", userId] as const,
@@ -167,7 +168,7 @@ export function Dashboard() {
               <section>
                 <div className="flex items-center justify-between mb-5">
                   <div className="flex items-center gap-2">
-                    <span className="text-lg">🌿</span>
+                    <GardenInlineIcon type="leaf" size={22} />
                     <h2 className="text-lg font-semibold">Your Courses</h2>
                   </div>
                   <Button

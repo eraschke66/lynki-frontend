@@ -10,10 +10,7 @@ import { RefreshCw, Users, FileText, ClipboardCheck, ArrowLeft } from "lucide-re
 const ADMIN_EMAILS = ["erik@shryn.ai", "erikraschke@gmail.com", "erikraschke@me.com"];
 
 interface UserRow {
-  id: string;
-  email: string;
-  created_at: string;
-  last_sign_in_at: string | null;
+  user_id: string;
 }
 
 interface StatRow {
@@ -40,15 +37,10 @@ export function AdminPage() {
     setError(null);
 
     try {
-      // Fetch all profiles (public.profiles table if it exists, else auth info)
-      const { data: profiles, error: profileErr } = await (supabase as any)
-        .from("profiles")
-        .select("id, email, display_name, curriculum, created_at, updated_at")
-        .order("created_at", { ascending: false });
-
-      if (profileErr) {
-        console.warn("profiles query failed:", profileErr.message);
-      }
+      // Fetch distinct user_ids from courses as a proxy for user count
+      const { data: userRows } = await supabase
+        .from("courses")
+        .select("user_id");
 
       // Fetch total courses
       const { count: courseCount } = await supabase
@@ -79,13 +71,9 @@ export function AdminPage() {
         .order("created_at", { ascending: false })
         .limit(20);
 
-      // Build user list from profiles
-      const userList: UserRow[] = (profiles ?? []).map((p: any) => ({
-        id: p.id,
-        email: p.email ?? "unknown",
-        created_at: p.created_at,
-        last_sign_in_at: p.updated_at,
-      }));
+      // Deduplicate user_ids
+      const uniqueUserIds = [...new Set((userRows ?? []).map((r: any) => r.user_id))];
+      const userList: UserRow[] = uniqueUserIds.map((uid) => ({ user_id: uid }));
 
       setUsers(userList);
       setRecentQuizzes(quizzes ?? []);
@@ -125,7 +113,7 @@ export function AdminPage() {
   }
 
   const formatDate = (d: string | null) => {
-    if (!d) return "â";
+    if (!d) return "—";
     const date = new Date(d);
     return date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })
       + " " + date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
@@ -188,21 +176,17 @@ export function AdminPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Email</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Signed Up</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Last Active</th>
+                      <th className="py-3 px-4 font-medium text-muted-foreground">User ID</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((u) => (
-                      <tr key={u.id} className="border-b last:border-0 hover:bg-muted/30">
-                        <td className="py-3 px-4 font-medium">{u.email}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{formatDate(u.created_at)}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{formatDate(u.last_sign_in_at)}</td>
+                      <tr key={u.user_id} className="border-b last:border-0 hover:bg-muted/30">
+                        <td className="py-3 px-4 font-mono text-xs">{u.user_id}</td>
                       </tr>
                     ))}
                     {users.length === 0 && (
-                      <tr><td colSpan={3} className="py-8 text-center text-muted-foreground">
+                      <tr><td colSpan={1} className="py-8 text-center text-muted-foreground">
                         {loading ? "Loading..." : "No users found"}
                       </td></tr>
                     )}
@@ -229,7 +213,7 @@ export function AdminPage() {
                   <tbody>
                     {recentQuizzes.map((q: any) => (
                       <tr key={q.id} className="border-b last:border-0 hover:bg-muted/30">
-                        <td className="py-3 px-4 font-medium">{q.courses?.title ?? "â"}</td>
+                        <td className="py-3 px-4 font-medium">{q.courses?.title ?? "—"}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                             q.status === "completed"
@@ -242,7 +226,7 @@ export function AdminPage() {
                         <td className="py-3 px-4 text-muted-foreground">
                           {q.status === "completed"
                             ? `${q.correct_count}/${q.total_questions}`
-                            : "â"}
+                            : "—"}
                         </td>
                         <td className="py-3 px-4 text-muted-foreground">{formatDate(q.created_at)}</td>
                       </tr>
@@ -279,7 +263,7 @@ export function AdminPage() {
                         <td className="py-3 px-4 font-medium maw-w-[200px] truncate" title={d.title}>
                           {d.title}
                         </td>
-                        <td className="py-3 px-4 text-muted-foreground">{d.courses?.title ?? "â"}</td>
+                        <td className="py-3 px-4 text-muted-foreground">{d.courses?.title ?? "—"}</td>
                         <td className="py-3 px-4 text-muted-foreground">{formatBytes(d.file_size)}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${

@@ -3,11 +3,13 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import LogoSvg from "@/assets/logo.svg?react";
-import { Home, FileText, Settings } from "lucide-react";
+import { Home, FileText, Settings, Volume2, VolumeOff } from "lucide-react";
+import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 
 export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { playing, toggle: toggleMusic } = useAmbientMusic();
 
   const handleLogout = async () => {
     await signOut();
@@ -83,6 +85,14 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-4">
+          <button
+            onClick={toggleMusic}
+            aria-label={playing ? "Pause ambient music" : "Play ambient music"}
+            title={playing ? "Pause ambient music" : "Play ambient music"}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-[#2D6A4F] hover:bg-[rgba(64,145,108,0.08)] transition-colors"
+          >
+            {playing ? <Volume2 className="w-4 h-4" /> : <VolumeOff className="w-4 h-4" />}
+          </button>
           {user && (
             <>
               <p className="text-xs text-muted-foreground hidden sm:block">

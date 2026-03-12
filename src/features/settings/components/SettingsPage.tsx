@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
 import { GardenInlineIcon } from "@/components/garden/GardenIcons";
+import GhibliBackground from "@/components/garden/GhibliBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -16,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Loader2, Check } from "lucide-react";
+import { ArrowLeft, Check } from "lucide-react";
 import { toast } from "sonner";
 import { fetchProfile, updateProfile } from "../services/profileService";
 import { profileQueryKeys } from "@/lib/queryKeys";
@@ -50,18 +51,21 @@ export function SettingsPage() {
     },
   });
 
-  if (!user) { navigate("/home"); return null; }
+  if (!user) {
+    navigate("/home");
+    return null;
+  }
 
   const hasChanged = profile && activeCurriculum !== profile.curriculum;
   const curriculumInfo = getCurriculum(activeCurriculum || "percentage");
 
   return (
     <>
+      <GhibliBackground />
       <Header />
       <VineDecoration />
-      <div className="min-h-screen bg-background pt-24 pb-16">
+      <div className="relative z-10 min-h-screen pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-6">
-
           {/* Back link */}
           <button
             onClick={() => navigate("/home")}
@@ -78,8 +82,8 @@ export function SettingsPage() {
           </div>
 
           {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+            <div className="flex items-center justify-center py-16">
+              <p className="text-sm text-muted-foreground animate-pulse">Tending the garden…</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -94,8 +98,8 @@ export function SettingsPage() {
                       Curriculum
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Choose the grading system used by your school or exam board.
-                      This determines the grade scale for your target passing grades.
+                      Choose the grading system used by your school or exam board. This determines
+                      the grade scale for your target passing grades.
                     </p>
                     <Select value={activeCurriculum} onValueChange={setSelectedCurriculum}>
                       <SelectTrigger
@@ -113,9 +117,7 @@ export function SettingsPage() {
                       </SelectContent>
                     </Select>
                     {activeCurriculum && (
-                      <p className="text-xs text-muted-foreground">
-                        {curriculumInfo.description}
-                      </p>
+                      <p className="text-xs text-muted-foreground">{curriculumInfo.description}</p>
                     )}
                   </div>
 
@@ -125,12 +127,8 @@ export function SettingsPage() {
                       disabled={!hasChanged || mutation.isPending}
                       className="shadow-[0_2px_8px_rgba(13,115,119,0.2)]"
                     >
-                      {mutation.isPending ? (
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      ) : (
-                        <Check className="w-4 h-4 mr-2" />
-                      )}
-                      Save Changes
+                      <Check className="w-4 h-4 mr-2" />
+                      {mutation.isPending ? "Saving…" : "Save Changes"}
                     </Button>
                     {hasChanged && (
                       <p className="text-xs text-muted-foreground">Unsaved changes</p>
@@ -143,13 +141,15 @@ export function SettingsPage() {
               <Card
                 className="rounded-2xl overflow-hidden"
                 style={{
-                  background: "linear-gradient(135deg, rgba(64,145,108,0.05) 0%, rgba(250,243,224,0) 100%)",
+                  background:
+                    "linear-gradient(135deg, rgba(64,145,108,0.05) 0%, rgba(250,243,224,0) 100%)",
                   border: "1px solid rgba(64,145,108,0.12)",
                 }}
               >
                 <CardContent className="pt-6 pb-6 px-8">
                   <p className="text-sm font-medium mb-4 flex items-center gap-2">
-                    <GardenInlineIcon type="blossom" /> Garden Growth Guide
+                    <GardenInlineIcon type="blossom" />
+                    Garden Growth Guide
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
@@ -171,13 +171,12 @@ export function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Neko cat - bottom-left, looking up at the growth guide */}
+              {/* Neko */}
               <div className="flex justify-start mt-4 ml-2 opacity-50 hover:opacity-80 transition-opacity duration-500">
                 <Neko />
               </div>
             </div>
           )}
-
         </div>
       </div>
     </>

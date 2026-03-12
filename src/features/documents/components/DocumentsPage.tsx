@@ -4,6 +4,7 @@ import { HardDrive } from "lucide-react";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/features/auth";
+import GhibliBackground from "@/components/garden/GhibliBackground";
 import {
   fetchUserDocuments,
   getUserStorageStats,
@@ -22,26 +23,21 @@ export function DocumentsPage() {
   const queryClient = useQueryClient();
   const hasWokenBackend = useRef(false);
 
-  // Wake up Render backend once on mount
   useEffect(() => {
     if (!hasWokenBackend.current) {
       hasWokenBackend.current = true;
       wakeUpBackend().then((isAwake) => {
         if (!isAwake) {
-          console.log(
-            "Backend may be cold starting, first upload may take longer",
-          );
+          console.log("Backend may be cold starting, first upload may take longer");
         }
       });
     }
   }, []);
 
-  // Fetch documents with React Query
   const { data: documents = [], isLoading: documentsLoading } = useQuery({
     queryKey: documentQueryKeys.list(user?.id ?? ""),
     queryFn: () => fetchUserDocuments(user!.id),
     enabled: !!user,
-    // Poll every 5 seconds if there are documents in processing/pending state
     refetchInterval: (query): number | false => {
       const docs = query.state.data as Document[] | undefined;
       const hasProcessing = docs?.some(
@@ -51,7 +47,6 @@ export function DocumentsPage() {
     },
   });
 
-  // Fetch storage stats with React Query
   const { data: stats = { usedSpace: 0, fileCount: 0 } } = useQuery({
     queryKey: documentQueryKeys.stats(user?.id ?? ""),
     queryFn: () => getUserStorageStats(user!.id),
@@ -60,20 +55,15 @@ export function DocumentsPage() {
 
   const handleDelete = async (id: string, filePath: string) => {
     if (!confirm("Are you sure you want to delete this file?")) return;
-
-    // Optimistic update
     queryClient.setQueryData(
       documentQueryKeys.list(user!.id),
       (old: Document[] | undefined) => old?.filter((d) => d.id !== id) ?? [],
     );
-
     try {
       await deleteDocument(id, filePath);
-      // Invalidate to refetch fresh data
       queryClient.invalidateQueries({ queryKey: documentQueryKeys.all });
     } catch (error) {
       console.error("Delete failed:", error);
-      // Revert on error
       queryClient.invalidateQueries({ queryKey: documentQueryKeys.all });
       toast.error("Delete failed", {
         description: "Could not delete the document. Please try again.",
@@ -82,32 +72,25 @@ export function DocumentsPage() {
   };
 
   const handleUploadComplete = () => {
-    // Invalidate queries to refetch
     queryClient.invalidateQueries({ queryKey: documentQueryKeys.all });
     toast.success("Upload complete", {
-      description:
-        "Your document is now being processed. This may take a few minutes.",
+      description: "Your document is now being processed. This may take a few minutes.",
     });
   };
 
   const handleRetry = async (doc: Document) => {
     toast.loading("Retrying processing...", { id: `retry-${doc.id}` });
-
     const result = await retryDocumentProcessing(doc.id);
-
     if (result.success) {
       toast.success("Processing restarted", {
         id: `retry-${doc.id}`,
         description: `${doc.title} is being processed again.`,
       });
-      // Update the document status optimistically
       queryClient.setQueryData(
         documentQueryKeys.list(user!.id),
         (old: Document[] | undefined) =>
           old?.map((d) =>
-            d.id === doc.id
-              ? { ...d, status: "pending" as const, errorMessage: null }
-              : d,
+            d.id === doc.id ? { ...d, status: "pending" as const, errorMessage: null } : d,
           ) ?? [],
       );
     } else {
@@ -120,22 +103,18 @@ export function DocumentsPage() {
 
   const handleDocumentUpdate = useCallback(
     (updatedDoc: Document) => {
-      // Update document in cache
       queryClient.setQueryData(
         documentQueryKeys.list(user!.id),
         (old: Document[] | undefined) =>
           old?.map((d) => (d.id === updatedDoc.id ? updatedDoc : d)) ?? [],
       );
-
-      // Show toast notifications for status changes
       if (updatedDoc.status === "completed") {
         toast.success("Document ready", {
           description: `${updatedDoc.title} has been processed successfully.`,
         });
       } else if (updatedDoc.status === "failed") {
         toast.error("Processing failed", {
-          description:
-            updatedDoc.errorMessage || `Failed to process ${updatedDoc.title}`,
+          description: updatedDoc.errorMessage || `Failed to process ${updatedDoc.title}`,
         });
       }
     },
@@ -154,8 +133,9 @@ export function DocumentsPage() {
 
   return (
     <>
+      <GhibliBackground />
       <Header />
-      <div className="min-h-screen bg-background p-6 md:p-12 pt-28">
+      <div className="relative z-10 min-h-screen p-6 md:p-12 pt-28">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Stats Card */}
@@ -186,10 +166,7 @@ export function DocumentsPage() {
 
             {/* Upload Section */}
             <div className="w-full md:w-2/3">
-              <FileUploader
-                userId={user.id}
-                onUploadComplete={handleUploadComplete}
-              />
+              <FileUploader userId={user.id} onUploadComplete={handleUploadComplete} />
             </div>
           </div>
 

@@ -205,7 +205,7 @@ export function CourseDetailPage() {
                         boxShadow: "0 0 0 4px rgba(64,145,108,0.06)",
                       }}
                     >
-                      <img src="/plant-seedling-raw.png" alt="" className="w-20 h-20 object-contain" style={{ mixBlendMode: "darken" }} />
+                      <img src="/growing-icon.png" alt="" className="w-20 h-20 object-contain" />
                       <p className="text-xs text-muted-foreground mt-2 text-center leading-tight max-w-[120px]">
                         Walk the path to see your garden
                       </p>
@@ -260,7 +260,7 @@ export function CourseDetailPage() {
             ) : sessions.length === 0 ? (
               <Card className="rounded-2xl" style={{ borderTop: "2px solid rgba(64,145,108,0.12)" }}>
                 <CardContent className="py-12 text-center">
-                  <div className="text-3xl mb-3"><img src="/plant-seedling-raw.png" alt="" className="w-16 h-16 object-contain mx-auto" style={{ mixBlendMode: "darken" }} /></div>
+                  <div className="text-3xl mb-3"><img src="/growing-icon.png" alt="" className="w-16 h-16 object-contain mx-auto" /></div>
                   <p className="text-sm text-muted-foreground">
                     No quizzes taken yet. Start your first quiz above!
                   </p>

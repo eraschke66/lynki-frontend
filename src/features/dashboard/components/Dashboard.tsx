@@ -119,7 +119,7 @@ export function Dashboard() {
         <div className="absolute inset-0" style={{ background: "rgba(27,67,50,0.18)" }} />
         <div className="relative z-10 text-center pb-16 space-y-3">
           <p className="text-white text-base font-medium tracking-wide" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.4)" }}>
-            Tending the garden...
+            Getting your materials together...
           </p>
         </div>
       </div>

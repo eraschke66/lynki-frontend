@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
-import { GardenIcon, GardenInlineIcon } from "@/components/garden/GardenIcons";
+import { GardenInlineIcon } from "@/components/garden/GardenIcons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -153,18 +153,14 @@ export function SettingsPage() {
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {[
-                      { img: "/plant-lush-raw.png", label: "Thriving", range: "85%+", color: "text-emerald-700" },
-                      { img: "/plant-flower-raw.png", label: "Blooming", range: "70-84%", color: "text-yellow-600" },
-                      { img: "/plant-young-raw.png", label: "Healthy", range: "55-69%", color: "text-green-600" },
-                      { img: "/plant-seedling-raw.png", label: "Growing", range: "40-54%", color: "text-teal-600" },
-                      { img: null, gardenIconType: "droplet" as const, label: "Needs Water", range: "<40%", color: "text-blue-500" },
-                    ].map(({ img, gardenIconType, label, range, color }) => (
+                      { img: "/thriving-tree-icon.png", label: "Thriving", range: "85%+", color: "text-emerald-700" },
+                      { img: "/blooming-icon.png", label: "Blooming", range: "70-84%", color: "text-yellow-600" },
+                      { img: "/healthy-icon.png", label: "Healthy", range: "55-69%", color: "text-green-600" },
+                      { img: "/growing-icon.png", label: "Growing", range: "40-54%", color: "text-teal-600" },
+                      { img: "/water-droplet-icon.png", label: "Needs Water", range: "<40%", color: "text-blue-500" },
+                    ].map(({ img, label, range, color }) => (
                       <div key={label} className="flex items-center gap-3">
-                        {img ? (
-                          <img src={img} alt="" className="w-8 h-8 object-contain shrink-0" style={{ mixBlendMode: "darken" }} />
-                        ) : gardenIconType ? (
-                          <span className="w-8 flex justify-center shrink-0"><GardenIcon type={gardenIconType} size={28} /></span>
-                        ) : null}
+                        <img src={img} alt="" className="w-8 h-8 object-contain shrink-0" />
                         <div>
                           <p className={`text-sm font-medium ${color}`}>{label}</p>
                           <p className="text-xs text-muted-foreground">{range} pass probability</p>

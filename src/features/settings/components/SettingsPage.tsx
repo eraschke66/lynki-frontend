@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
-import { GardenInlineIcon } from "@/components/garden/GardenIcons";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -22,6 +21,14 @@ import { toast } from "sonner";
 import { fetchProfile, updateProfile } from "../services/profileService";
 import { profileQueryKeys } from "@/lib/queryKeys";
 import { CURRICULA, getCurriculum } from "@/lib/curricula";
+
+const gardenLevels = [
+  { img: "/plant-stage-4.png", label: "Thriving",    range: "85%+",   color: "text-emerald-700" },
+  { img: "/plant-stage-3.png", label: "Blooming",    range: "70–84%", color: "text-yellow-600"  },
+  { img: "/plant-stage-3.png", label: "Growing",     range: "55–69%", color: "text-green-600"   },
+  { img: "/plant-stage-2.png", label: "Sprouting",   range: "40–54%", color: "text-teal-600"    },
+  { img: "/plant-stage-1.png", label: "Needs Water", range: "<40%",   color: "text-blue-500"    },
+];
 
 export function SettingsPage() {
   const { user } = useAuth();
@@ -66,7 +73,6 @@ export function SettingsPage() {
       <VineDecoration />
       <div className="relative z-10 min-h-screen pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-6">
-          {/* Back link */}
           <button
             onClick={() => navigate("/home")}
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
@@ -75,11 +81,7 @@ export function SettingsPage() {
             Back to Dashboard
           </button>
 
-          {/* Page heading */}
-          <div className="flex items-center gap-2 mb-8">
-            <GardenInlineIcon type="leaf" size={28} />
-            <h1 className="text-2xl font-bold">Settings</h1>
-          </div>
+          <h1 className="text-2xl font-bold mb-8">Settings</h1>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
@@ -98,13 +100,12 @@ export function SettingsPage() {
                       Curriculum
                     </Label>
                     <p className="text-sm text-muted-foreground">
-                      Choose the grading system used by your school or exam board. This determines
-                      the grade scale for your target passing grades.
+                      Choose the grading system used by your school or exam board.
                     </p>
                     <Select value={activeCurriculum} onValueChange={setSelectedCurriculum}>
                       <SelectTrigger
                         id="curriculum"
-                        className="w-full max-w-xs border-[rgba(64,145,108,0.2)] focus:border-[#40916C] focus:ring-[rgba(64,145,108,0.2)]"
+                        className="w-full max-w-xs border-[rgba(64,145,108,0.2)] focus:border-[#40916C]"
                       >
                         <SelectValue placeholder="Select curriculum" />
                       </SelectTrigger>
@@ -120,7 +121,6 @@ export function SettingsPage() {
                       <p className="text-xs text-muted-foreground">{curriculumInfo.description}</p>
                     )}
                   </div>
-
                   <div className="flex items-center gap-3 pt-2">
                     <Button
                       onClick={() => mutation.mutate()}
@@ -137,7 +137,7 @@ export function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Garden status reference card */}
+              {/* Garden Growth Guide */}
               <Card
                 className="rounded-2xl overflow-hidden"
                 style={{
@@ -147,20 +147,16 @@ export function SettingsPage() {
                 }}
               >
                 <CardContent className="pt-6 pb-6 px-8">
-                  <p className="text-sm font-medium mb-4 flex items-center gap-2">
-                    <GardenInlineIcon type="blossom" />
-                    Garden Growth Guide
-                  </p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {[
-                      { img: "/thriving-tree-icon.png", label: "Thriving", range: "85%+", color: "text-emerald-700" },
-                      { img: "/blooming-icon.png", label: "Blooming", range: "70-84%", color: "text-yellow-600" },
-                      { img: "/healthy-icon.png", label: "Healthy", range: "55-69%", color: "text-green-600" },
-                      { img: "/growing-icon.png", label: "Growing", range: "40-54%", color: "text-teal-600" },
-                      { img: "/water-droplet-icon.png", label: "Needs Water", range: "<40%", color: "text-blue-500" },
-                    ].map(({ img, label, range, color }) => (
+                  <p className="text-sm font-semibold mb-5 text-[#2D6A4F]">Garden Growth Guide</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {gardenLevels.map(({ img, label, range, color }) => (
                       <div key={label} className="flex items-center gap-3">
-                        <img src={img} alt="" className="w-8 h-8 object-contain shrink-0" />
+                        <img
+                          src={img}
+                          alt=""
+                          className="w-10 h-10 object-contain shrink-0"
+                          style={{ mixBlendMode: "darken" }}
+                        />
                         <div>
                           <p className={`text-sm font-medium ${color}`}>{label}</p>
                           <p className="text-xs text-muted-foreground">{range} pass probability</p>

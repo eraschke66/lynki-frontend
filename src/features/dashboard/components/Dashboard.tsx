@@ -11,11 +11,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  Sparkles,
   Plus,
   Loader2,
   AlertCircle,
   RefreshCw,
   Upload,
+  ArrowRight,
   MoreVertical,
   Pencil,
   Trash2,
@@ -31,28 +33,12 @@ import { DeleteCourseDialog } from "./DeleteCourseDialog";
 import type { CourseSummary, DashboardData } from "../types";
 import { supabase } from "@/lib/supabase";
 import { getGardenStatus, getStudyCTA, getDashboardSubtitle } from "@/lib/garden";
-import { Neko } from "@/components/garden/Neko";
-import { VineDecoration } from "@/components/garden/VineDecoration";
+import { ParchmentCard } from "@/components/garden/ParchmentCard";
+import { PlantIndicator } from "@/components/garden/PlantIndicator";
 
 const dashboardQueryKeys = {
   data: (userId: string) => ["dashboard", userId] as const,
 };
-
-/** Map a pass probability to one of our plant PNG assets */
-function getPlantImage(probability: number): string {
-  if (probability >= 75) return "/plant-lush-raw.png";
-  if (probability >= 55) return "/plant-flower-raw.png";
-  if (probability >= 35) return "/plant-young-raw.png";
-  return "/plant-seedling-raw.png";
-}
-
-/** Map a pass probability to a bonsai/tree image for the hero */
-function getHeroTreeImage(probability: number): string {
-  if (probability >= 75) return "/thriving-tree-icon.png";
-  if (probability >= 55) return "/blooming-icon.png";
-  if (probability >= 35) return "/growing-icon.png";
-  return "/plant-young-raw.png";
-}
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -161,11 +147,43 @@ export function Dashboard() {
   return (
     <>
       <Header />
-      <VineDecoration />
-      {/* Sleeping cat — bottom right corner, tail wagging */}
-      <Neko placement="bottom-right" width={150} />
-      <div className="min-h-screen bg-background pt-24 pb-16">
-        <div className="max-w-5xl mx-auto px-6">
+      <div className="relative min-h-screen overflow-hidden">
+        {/* Ghibli background */}
+        <div
+          className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: "url(/ghibli-bg.jpg)" }}
+        />
+        <div className="fixed inset-0 bg-background/40" />
+        <div className="fixed inset-0 mist-overlay pointer-events-none" />
+
+        {/* Foliage */}
+        <img
+          src="/foliage-left.png"
+          alt=""
+          className="fixed left-0 bottom-0 w-64 lg:w-80 xl:w-96 pointer-events-none z-20 animate-drift select-none"
+          style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.2))" }}
+        />
+        <img
+          src="/foliage-right.png"
+          alt=""
+          className="fixed right-0 top-0 w-56 lg:w-72 xl:w-80 pointer-events-none z-20 animate-drift select-none"
+          style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.2))" }}
+        />
+
+        {/* Dappled light */}
+        <div className="fixed top-20 left-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none" />
+        <div className="fixed top-60 right-1/3 w-56 h-56 rounded-full bg-ghibli-sunlight/8 blur-3xl animate-shimmer pointer-events-none" style={{ animationDelay: "2s" }} />
+
+        {/* Sleeping cat */}
+        <img
+          src="/sleeping-cat.png"
+          alt="Sleeping tabby cat"
+          className="fixed bottom-4 right-6 w-28 lg:w-36 pointer-events-none z-30 select-none animate-pulse-soft"
+          style={{ animationDuration: "5s" }}
+        />
+
+        {/* Content */}
+        <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-16">
           {hasNoCourses ? (
             <EmptyState onUpload={() => setUploadModalOpen(true)} />
           ) : (
@@ -178,33 +196,21 @@ export function Dashboard() {
                 onUpload={() => setUploadModalOpen(true)}
               />
 
-              {/* Garden divider */}
-              <hr className="garden-divider" />
-
+              {/* Course grid */}
               <section>
                 <div className="flex items-center justify-between mb-5">
-                  <h2
-                    style={{
-                      fontFamily: "'Lora', Georgia, serif",
-                      fontSize: 20,
-                      fontWeight: 600,
-                      color: "#1B4332",
-                    }}
-                  >
-                    Your Learning Garden
-                  </h2>
+                  <h2 className="font-serif text-xl font-semibold text-primary">Your Courses</h2>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-2 text-muted-foreground hover:text-[#2D6A4F] hover:bg-[rgba(64,145,108,0.06)]"
+                    className="gap-2 text-muted-foreground hover:text-ghibli-forest hover:bg-ghibli-moss/10"
                     onClick={() => setUploadModalOpen(true)}
                   >
                     <Plus className="w-4 h-4" />
-                    Add Course
+                    Add Material
                   </Button>
                 </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {dashboardData!.courses.map((course) => (
                     <CourseCard
                       key={course.id}
@@ -215,32 +221,25 @@ export function Dashboard() {
                       onDelete={() => setDeletingCourse(course)}
                     />
                   ))}
-                  {/* Add new course card */}
-                  <button
-                    onClick={() => setUploadModalOpen(true)}
-                    className="flex flex-col items-center justify-center gap-3 rounded-2xl transition-all duration-200 cursor-pointer min-h-[200px]"
-                    style={{
-                      border: "2px dashed rgba(64,145,108,0.3)",
-                      background: "rgba(250,243,224,0.4)",
-                    }}
-                    onMouseEnter={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(64,145,108,0.55)";
-                      (e.currentTarget as HTMLButtonElement).style.background = "rgba(64,145,108,0.06)";
-                    }}
-                    onMouseLeave={(e) => {
-                      (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(64,145,108,0.3)";
-                      (e.currentTarget as HTMLButtonElement).style.background = "rgba(250,243,224,0.4)";
-                    }}
+                  {/* Add course card */}
+                  <ParchmentCard
+                    className="p-5 flex flex-col items-center justify-center gap-3 cursor-pointer min-h-[200px]"
+                    hover
                   >
-                    <img
-                      src="/plant-seedling-raw.png"
-                      alt=""
-                      style={{ width: 40, height: 40, objectFit: "contain", mixBlendMode: "multiply", opacity: 0.5 }}
-                    />
-                    <span style={{ fontSize: 13, fontWeight: 500, color: "#40916C" }}>
-                      Plant a New Course
-                    </span>
-                  </button>
+                    <button
+                      onClick={() => setUploadModalOpen(true)}
+                      className="flex flex-col items-center gap-3 w-full"
+                    >
+                      <img
+                        src="/seedling-add.png"
+                        alt="Plant a new seed"
+                        className="w-12 h-12 object-contain opacity-60 select-none"
+                      />
+                      <span className="font-sans text-sm font-medium text-muted-foreground">
+                        New Course
+                      </span>
+                    </button>
+                  </ParchmentCard>
                 </div>
               </section>
             </div>
@@ -271,7 +270,7 @@ export function Dashboard() {
   );
 }
 
-/* ── Hero Section — bonsai tree replacing the orange donut ── */
+/* ── Hero Section ── */
 function HeroSection({ data, onStartStudying, onUpload }: {
   data: DashboardData;
   onStartStudying: () => void;
@@ -282,142 +281,43 @@ function HeroSection({ data, onStartStudying, onUpload }: {
   const hasStudyable = data.courses.some((c) => c.totalConcepts > 0);
   const nextItem = data.nextStudyItem;
   const subtitle = getDashboardSubtitle(hasStudyable, nextItem?.reason ?? null);
-  const status = getGardenStatus(data.overallPassProbability);
-  const treeImg = getHeroTreeImage(data.overallPassProbability);
 
   return (
-    <div
-      className="rounded-2xl p-6 sm:p-8"
-      style={{
-        background: "linear-gradient(135deg, rgba(250,243,224,0.8) 0%, rgba(232,238,216,0.6) 100%)",
-        border: "1px solid rgba(64,145,108,0.18)",
-        boxShadow: "0 2px 20px rgba(27,67,50,0.08)",
-      }}
-    >
-      <p
-        style={{
-          textAlign: "center",
-          fontSize: 13,
-          color: "#7a9a7a",
-          marginBottom: 8,
-          fontFamily: "'Lora', Georgia, serif",
-          fontStyle: "italic",
-        }}
-      >
-        Your Learning Garden
+    <ParchmentCard className="p-8 flex flex-col items-center gap-4">
+      <h2 className="font-serif text-xl font-semibold text-primary mb-1">
+        {name ? `Welcome back, ${name}` : "Your Learning Garden"}
+      </h2>
+      <PlantIndicator probability={data.overallPassProbability} size="xl" />
+      <p className="text-sm font-sans text-muted-foreground mt-2 text-center max-w-md">
+        {subtitle}
       </p>
-
-      {/* Bonsai hero tree */}
-      <div className="flex flex-col items-center mb-6">
-        <div style={{ position: "relative", width: 160, height: 160 }}>
-          <img
-            src={treeImg}
-            alt=""
-            style={{
-              width: "100%",
-              height: "100%",
-              objectFit: "contain",
-              mixBlendMode: "multiply",
-              filter: "drop-shadow(0 4px 12px rgba(27,67,50,0.15))",
-            }}
-          />
-        </div>
-        {/* Status label below tree */}
-        <p
-          style={{
-            fontFamily: "'Lora', Georgia, serif",
-            fontSize: 17,
-            fontWeight: 600,
-            color: "#1B4332",
-            marginTop: 4,
-          }}
-        >
-          {status.label}
+      {hasStudyable && data.totalConcepts > 0 && (
+        <p className="text-sm font-sans text-muted-foreground">
+          Studying{" "}
+          <span className="font-semibold text-foreground">{data.totalConcepts}</span>{" "}
+          concepts across{" "}
+          <span className="font-semibold text-foreground">{data.totalCourses}</span>{" "}
+          {data.totalCourses === 1 ? "course" : "courses"}
         </p>
-        <p style={{ fontSize: 12, color: "#7a9a7a", marginTop: 2 }}>
-          {status.japanese} · {Math.round(data.overallPassProbability)}% overall
-        </p>
-      </div>
-
-      {/* Welcome text + CTA */}
-      <div className="text-center space-y-3">
-        <div>
-          <h1
-            style={{
-              fontFamily: "'Lora', Georgia, serif",
-              fontSize: 22,
-              fontWeight: 600,
-              color: "#1B4332",
-            }}
-          >
-            {name ? `Welcome back, ${name}` : "Welcome back"}
-          </h1>
-          <p className="text-muted-foreground mt-1 text-sm">{subtitle}</p>
-        </div>
-        {hasStudyable && data.totalConcepts > 0 && (
-          <p className="text-sm text-muted-foreground">
-            Studying{" "}
-            <span className="font-semibold text-foreground">{data.totalConcepts}</span>{" "}
-            concepts across{" "}
-            <span className="font-semibold text-foreground">{data.totalCourses}</span>{" "}
-            {data.totalCourses === 1 ? "course" : "courses"}
-          </p>
+      )}
+      <div className="flex flex-wrap gap-3 justify-center mt-2">
+        {hasStudyable && nextItem ? (
+          <Button size="lg" className="gap-2 rounded-parchment" onClick={onStartStudying}>
+            <Sparkles className="w-4 h-4" />
+            {getStudyCTA(nextItem.reason)}
+          </Button>
+        ) : (
+          <Button size="lg" className="gap-2 rounded-parchment" onClick={onUpload}>
+            <Upload className="w-4 h-4" />
+            Plant a Seed
+          </Button>
         )}
-        <div className="flex flex-wrap gap-3 justify-center">
-          {hasStudyable && nextItem ? (
-            <button
-              onClick={onStartStudying}
-              style={{
-                background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-                color: "#FEFAE0",
-                border: "none",
-                borderRadius: 12,
-                padding: "12px 24px",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Nunito', sans-serif",
-                cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(27,67,50,0.28)",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(-1px)";
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 6px 20px rgba(27,67,50,0.38)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "";
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(27,67,50,0.28)";
-              }}
-            >
-              {getStudyCTA(nextItem.reason)}
-            </button>
-          ) : (
-            <button
-              onClick={onUpload}
-              style={{
-                background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-                color: "#FEFAE0",
-                border: "none",
-                borderRadius: 12,
-                padding: "12px 24px",
-                fontSize: 15,
-                fontWeight: 600,
-                fontFamily: "'Nunito', sans-serif",
-                cursor: "pointer",
-                boxShadow: "0 4px 16px rgba(27,67,50,0.28)",
-                transition: "all 0.2s",
-              }}
-            >
-              Plant a Seed
-            </button>
-          )}
-        </div>
       </div>
-    </div>
+    </ParchmentCard>
   );
 }
 
-/* ── Course Card — Ghibli parchment + plant image ── */
+/* ── Course Card ── */
 function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
   course: CourseSummary;
   isRecommended: boolean;
@@ -427,73 +327,22 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 }) {
   const isProcessing = course.hasProcessing;
   const isClickable = course.totalConcepts > 0;
-  const status = getGardenStatus(course.passProbability);
-  const plantImg = getPlantImage(course.passProbability);
 
   return (
-    <div
-      onClick={isClickable ? onClick : undefined}
-      style={{
-        background: "linear-gradient(160deg, #FEFAE0 0%, #FDF5D0 60%, #FAF0C0 100%)",
-        border: isRecommended
-          ? "2px solid rgba(64,145,108,0.5)"
-          : "1px solid rgba(64,145,108,0.18)",
-        borderRadius: 18,
-        padding: "20px 16px 16px",
-        cursor: isClickable ? "pointer" : "default",
-        opacity: isClickable ? 1 : 0.8,
-        position: "relative",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        textAlign: "center",
-        boxShadow: isRecommended
-          ? "0 4px 20px rgba(27,67,50,0.14)"
-          : "0 2px 12px rgba(27,67,50,0.08)",
-        transition: "all 0.2s",
-        minHeight: 200,
-      }}
-      onMouseEnter={(e) => {
-        if (isClickable) {
-          (e.currentTarget as HTMLDivElement).style.transform = "translateY(-2px)";
-          (e.currentTarget as HTMLDivElement).style.boxShadow = "0 8px 28px rgba(27,67,50,0.18)";
-        }
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.transform = "";
-        (e.currentTarget as HTMLDivElement).style.boxShadow = isRecommended
-          ? "0 4px 20px rgba(27,67,50,0.14)"
-          : "0 2px 12px rgba(27,67,50,0.08)";
-      }}
+    <ParchmentCard
+      className={`p-5 flex flex-col items-center gap-4 text-center relative ${
+        isClickable ? "cursor-pointer" : "opacity-80"
+      } ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
+      hover={isClickable}
     >
-      {/* "Next up" badge */}
       {isRecommended && (
-        <div
-          style={{
-            position: "absolute",
-            top: 8,
-            left: 8,
-            fontSize: 9,
-            fontWeight: 700,
-            textTransform: "uppercase",
-            letterSpacing: "0.08em",
-            color: "#1B4332",
-            background: "rgba(64,145,108,0.12)",
-            border: "1px solid rgba(64,145,108,0.2)",
-            borderRadius: 20,
-            padding: "2px 7px",
-          }}
-        >
-          Next up
+        <div className="absolute top-2.5 left-2.5 z-10">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-ghibli-forest bg-ghibli-moss/12 px-2 py-0.5 rounded-full border border-ghibli-moss/20">
+            Next up
+          </span>
         </div>
       )}
-
-      {/* Three-dot menu */}
-      <div
-        style={{ position: "absolute", top: 6, right: 6, zIndex: 10 }}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className="absolute top-2.5 right-2.5 z-10" onClick={(e) => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
@@ -513,78 +362,35 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
         </DropdownMenu>
       </div>
 
-      {/* Plant image */}
-      <div style={{ marginTop: 12, marginBottom: 8, height: 72 }}>
+      <div onClick={isClickable ? onClick : undefined} className="flex flex-col items-center gap-3 w-full">
+        <h3 className="font-serif text-lg font-semibold text-primary line-clamp-2 min-h-[3rem]">
+          {course.title}
+        </h3>
         {isProcessing && course.totalConcepts === 0 ? (
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-            <Loader2 className="w-7 h-7 animate-spin" style={{ color: "#40916C" }} />
+          <div className="flex items-center justify-center" style={{ width: 64, height: 64 }}>
+            <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <img
-            src={plantImg}
-            alt=""
-            style={{
-              height: "100%",
-              width: "auto",
-              objectFit: "contain",
-              mixBlendMode: "multiply",
-              filter: "drop-shadow(0 2px 6px rgba(27,67,50,0.12))",
-            }}
-          />
+          <PlantIndicator probability={course.passProbability} size="md" />
+        )}
+        <p className="text-xs font-sans text-muted-foreground">
+          {course.totalConcepts > 0 ? (
+            <span className={`font-medium ${getGardenStatus(course.passProbability).color}`}>
+              {getGardenStatus(course.passProbability).label}
+            </span>
+          ) : isProcessing ? (
+            <span className="text-primary">Processing...</span>
+          ) : (
+            <>{course.documentCount} {course.documentCount === 1 ? "doc" : "docs"}</>
+          )}
+        </p>
+        {isClickable && (
+          <div className="mt-1 text-ghibli-moss/50">
+            <ArrowRight className="w-4 h-4" />
+          </div>
         )}
       </div>
-
-      {/* Course name */}
-      <h3
-        style={{
-          fontFamily: "'Lora', Georgia, serif",
-          fontWeight: 600,
-          fontSize: 14,
-          color: "#1B4332",
-          lineHeight: 1.35,
-          marginBottom: 4,
-          display: "-webkit-box",
-          WebkitLineClamp: 2,
-          WebkitBoxOrient: "vertical",
-          overflow: "hidden",
-        }}
-      >
-        {course.title}
-      </h3>
-
-      {/* Status label */}
-      <p style={{ fontSize: 11, color: "#7a9a7a", marginBottom: 12 }}>
-        {course.totalConcepts > 0 ? (
-          status.label
-        ) : isProcessing ? (
-          <span style={{ color: "#40916C" }}>Processing...</span>
-        ) : (
-          `${course.documentCount} ${course.documentCount === 1 ? "doc" : "docs"}`
-        )}
-      </p>
-
-      {/* Walk the Path button */}
-      {isClickable && (
-        <button
-          style={{
-            marginTop: "auto",
-            background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-            color: "#FEFAE0",
-            border: "none",
-            borderRadius: 10,
-            padding: "8px 18px",
-            fontSize: 12,
-            fontWeight: 600,
-            fontFamily: "'Nunito', sans-serif",
-            cursor: "pointer",
-            boxShadow: "0 2px 10px rgba(27,67,50,0.25)",
-            letterSpacing: "0.01em",
-          }}
-        >
-          Walk the Path
-        </button>
-      )}
-    </div>
+    </ParchmentCard>
   );
 }
 
@@ -592,73 +398,23 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 max-w-md mx-auto">
-      <div className="relative">
-        <div
-          className="absolute rounded-full blur-3xl"
-          style={{
-            background: "radial-gradient(circle, rgba(64,145,108,0.12) 0%, transparent 70%)",
-            width: 200, height: 200, top: -40, left: -40
-          }}
+      <ParchmentCard className="p-10 flex flex-col items-center gap-6">
+        <img
+          src="/seedling-add.png"
+          alt="Plant your first seed"
+          className="w-20 h-20 object-contain select-none"
         />
-        <div className="flex items-end gap-4 relative">
-          <img src="/plant-seedling-raw.png" alt="" style={{ width: 32, height: 56, objectFit: "contain", mixBlendMode: "multiply", opacity: 0.5, marginBottom: 4 }} />
-          <Neko size={60} className="opacity-60" />
-          <img src="/plant-young-raw.png" alt="" style={{ width: 28, height: 48, objectFit: "contain", mixBlendMode: "multiply", opacity: 0.45, marginBottom: 8 }} />
+        <div className="space-y-3">
+          <h1 className="font-serif text-3xl font-bold text-primary">Your garden is ready.</h1>
+          <p className="text-muted-foreground font-sans leading-relaxed">
+            Plant your first seed — upload your study materials and we'll show you where you stand before the exam does.
+          </p>
         </div>
-      </div>
-      <div className="space-y-3">
-        <h1
-          style={{
-            fontFamily: "'Lora', Georgia, serif",
-            fontSize: 28,
-            fontWeight: 600,
-            color: "#1B4332",
-          }}
-        >
-          Your garden is ready.
-        </h1>
-        <p className="text-muted-foreground leading-relaxed">
-          Plant your first seed — upload your study materials and we'll show you where you stand before the exam does.
-        </p>
-      </div>
-      <button
-        onClick={onUpload}
-        style={{
-          background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-          color: "#FEFAE0",
-          border: "none",
-          borderRadius: 14,
-          padding: "14px 32px",
-          fontSize: 16,
-          fontWeight: 600,
-          fontFamily: "'Nunito', sans-serif",
-          cursor: "pointer",
-          boxShadow: "0 4px 20px rgba(27,67,50,0.3)",
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-        }}
-      >
-        <Upload className="w-5 h-5" />
-        Plant a Seed
-      </button>
-      <div className="grid grid-cols-3 gap-6 pt-2 text-center w-full">
-        {[
-          { img: "/plant-seedling-raw.png", label: "Upload your notes" },
-          { img: "/plant-young-raw.png", label: "Take the quiz" },
-          { img: "/plant-lush-raw.png", label: "See if you'll pass" },
-        ].map(({ img, label }) => (
-          <div key={label} className="space-y-2">
-            <div
-              className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto"
-              style={{ background: "rgba(64,145,108,0.08)", border: "1px solid rgba(64,145,108,0.15)" }}
-            >
-              <img src={img} alt="" className="w-9 h-9 object-contain" style={{ mixBlendMode: "multiply" }} />
-            </div>
-            <p className="text-xs text-muted-foreground">{label}</p>
-          </div>
-        ))}
-      </div>
+        <Button size="lg" className="gap-2 rounded-parchment" onClick={onUpload}>
+          <Upload className="w-5 h-5" />
+          Plant a Seed
+        </Button>
+      </ParchmentCard>
     </div>
   );
 }

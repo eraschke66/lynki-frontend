@@ -30,6 +30,30 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* Ghibli color tokens */
+  --color-ghibli-cream:    hsl(43 76% 93%);
+  --color-ghibli-ivory:    hsl(50 80% 94%);
+  --color-ghibli-moss:     hsl(120 25% 45%);
+  --color-ghibli-forest:   hsl(140 35% 28%);
+  --color-ghibli-canopy:   hsl(150 40% 20%);
+  --color-ghibli-sunlight: hsl(45 85% 70%);
+  --color-ghibli-amber:    hsl(28 70% 55%);
+  --color-ghibli-mist:     hsl(120 15% 90%);
+  --color-ghibli-bark:     hsl(30 30% 35%);
+  --color-ghibli-petal:    hsl(350 50% 75%);
+
+  /* Ghibli border-radius */
+  --radius-parchment: 1.25rem;
+
+  /* Ghibli shadows */
+  --shadow-parchment: 0 4px 20px -4px hsl(33 30% 60% / 0.3), inset 0 1px 3px hsl(43 40% 80% / 0.5);
+  --shadow-parchment-hover: 0 8px 30px -8px hsl(33 30% 50% / 0.35), inset 0 1px 3px hsl(43 40% 80% / 0.5);
+  --shadow-glow: 0 0 40px hsl(45 85% 70% / 0.2);
+
+  /* Ghibli font families */
+  --font-serif: 'Lora', Georgia, serif;
+  --font-sans: 'Nunito', 'Inter', system-ui, sans-serif;
 }
 
 @layer base {
@@ -68,6 +92,18 @@
     --shadow-soft:  0 2px 8px rgba(27, 67, 50, 0.07), 0 1px 2px rgba(27, 67, 50, 0.05);
     --shadow-card:  0 4px 16px rgba(27, 67, 50, 0.10), 0 1px 4px rgba(27, 67, 50, 0.06);
     --shadow-hover: 0 8px 28px rgba(27, 67, 50, 0.14), 0 2px 6px rgba(27, 67, 50, 0.08);
+
+    /* Ghibli custom tokens (HSL values for use with hsl()) */
+    --ghibli-cream: 43 76% 93%;
+    --ghibli-ivory: 50 80% 94%;
+    --ghibli-moss: 120 25% 45%;
+    --ghibli-forest: 140 35% 28%;
+    --ghibli-canopy: 150 40% 20%;
+    --ghibli-sunlight: 45 85% 70%;
+    --ghibli-amber: 28 70% 55%;
+    --ghibli-mist: 120 15% 90%;
+    --ghibli-bark: 30 30% 35%;
+    --ghibli-petal: 350 50% 75%;
   }
 
   .dark {
@@ -178,3 +214,65 @@
   outline-offset: 2px;
   border-radius: 4px;
 }
+
+/* ── Ghibli: Parchment grain texture overlay ── */
+.parchment-texture {
+  position: relative;
+}
+.parchment-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='noise'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Ghibli: Mist overlay ── */
+.mist-overlay {
+  background: radial-gradient(
+    ellipse at center,
+    transparent 40%,
+    hsl(120 15% 90% / 0.4) 70%,
+    hsl(120 20% 85% / 0.6) 100%
+  );
+}
+
+/* ── Ghibli animations ── */
+@keyframes float-leaf {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-15px) rotate(5deg); }
+  50% { transform: translateY(-8px) rotate(-3deg); }
+  75% { transform: translateY(-20px) rotate(4deg); }
+}
+@keyframes drift {
+  0%, 100% { transform: translateX(0) translateY(0); }
+  33% { transform: translateX(10px) translateY(-5px); }
+  66% { transform: translateX(-5px) translateY(5px); }
+}
+@keyframes shimmer {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+@keyframes pulse-soft {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+@keyframes drop-fall {
+  0% { transform: translateY(-10px); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(8px); opacity: 0.6; }
+}
+@keyframes scale-in-bounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-float-leaf { animation: float-leaf 8s ease-in-out infinite; }
+.animate-drift { animation: drift 12s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 4s ease-in-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+.animate-drop { animation: drop-fall 0.6s ease-in forwards; }
+.animate-scale-in { animation: scale-in-bounce 0.5s ease-out forwards; }

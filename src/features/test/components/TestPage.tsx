@@ -3,15 +3,10 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { CircularProgress } from "@/components/ui/circular-progress";
 import {
   Loader2,
   AlertCircle,
   RefreshCw,
-  CheckCircle2,
-  XCircle,
   ArrowRight,
   X,
   RotateCcw,
@@ -27,10 +22,12 @@ import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
-import { VineDecoration } from "@/components/garden/VineDecoration";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
-import { Neko } from "@/components/garden/Neko";
+import { ParchmentCard } from "@/components/garden/ParchmentCard";
+import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import type { AnswerFeedback } from "../types";
+
+const stoneLetters = ["A", "B", "C", "D"];
 
 export function TestPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -45,7 +42,7 @@ export function TestPage() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<AnswerFeedback | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
-  const [answeredCount, setAnsweredCount] = useState(0);
+  const [, setAnsweredCount] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
   const [passChance, setPassChance] = useState<number | null>(null);
   const [targetGrade, setTargetGrade] = useState<number>(1.0);
@@ -175,7 +172,7 @@ export function TestPage() {
     navigate(`/course/${courseId}`);
   }, [navigate, courseId]);
 
-  // ── Loading — sprinkler cat video ──
+  // ── Loading ──
   if (isLoading) {
     return (
       <GardenVideoLoader
@@ -187,49 +184,53 @@ export function TestPage() {
   // ── Error ──
   if (error) {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+      <GhibliScenery>
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
         </button>
-        <div className="text-center space-y-4">
-          <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
-          <p className="text-sm text-muted-foreground">Failed to load quiz</p>
-          <Button variant="outline" size="sm" onClick={() => refetch()}>
-            <RefreshCw className="w-4 h-4 mr-2" /> Retry
-          </Button>
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
+            <AlertCircle className="w-10 h-10 text-destructive" />
+            <p className="text-sm text-muted-foreground">Failed to load quiz</p>
+            <Button variant="outline" size="sm" onClick={() => refetch()}>
+              <RefreshCw className="w-4 h-4 mr-2" /> Retry
+            </Button>
+          </ParchmentCard>
         </div>
-      </div>
+      </GhibliScenery>
     );
   }
 
   // ── No questions ──
   if (!questions.length) {
     return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
+      <GhibliScenery>
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
         </button>
-        <div className="text-center space-y-4 max-w-sm">
-          <img src="/plant-young-raw.png" alt="" className="w-20 h-20 object-contain mx-auto" style={{ mixBlendMode: "darken" }} />
-          <div>
-            <h2 className="text-lg font-semibold mb-1">No Questions Available</h2>
-            <p className="text-sm text-muted-foreground">
-              {testData?.message || "Your documents may still be processing. Check back in a moment."}
-            </p>
-          </div>
-          <Button variant="outline" onClick={handleExit}>
-            Back to Garden
-          </Button>
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm">
+            <PlantIndicator probability={20} size="lg" />
+            <div>
+              <h2 className="font-serif text-lg font-semibold mb-1">No Questions Available</h2>
+              <p className="text-sm text-muted-foreground">
+                {testData?.message || "Your documents may still be processing. Check back in a moment."}
+              </p>
+            </div>
+            <Button variant="outline" className="rounded-parchment" onClick={handleExit}>
+              Back to Garden
+            </Button>
+          </ParchmentCard>
         </div>
-      </div>
+      </GhibliScenery>
     );
   }
 
@@ -241,277 +242,322 @@ export function TestPage() {
     const passPercent = passChance !== null ? Math.round(passChance * 100) : null;
 
     return (
-      <div className="fixed inset-0 bg-background z-50 flex items-center justify-center">
-        <VineDecoration />
+      <GhibliScenery>
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
         </button>
-        <div className="w-full max-w-lg px-6">
-          <Card
-            className="rounded-2xl overflow-hidden"
-            style={{ borderTop: "3px solid rgba(64,145,108,0.4)" }}
-          >
-            <CardContent className="pt-10 pb-8 px-8">
-              <div className="flex flex-col items-center text-center space-y-6">
-                {loadingPassChance ? (
-                  <div className="space-y-3">
-                    <img src="/plant-young-raw.png" alt="" className="w-16 h-16 object-contain mx-auto" style={{ mixBlendMode: "darken" }} />
-                    <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                    <p className="text-sm text-muted-foreground">
-                      Reading the garden...
-                    </p>
-                  </div>
-                ) : passPercent !== null ? (
-                  <div className="space-y-3">
-                    <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider">
-                      Your Garden
-                    </p>
-                    <CircularProgress
-                      value={passPercent}
-                      size={160}
-                      strokeWidth={12}
-                      labelClassName="text-3xl font-bold"
-                    />
-                    <p className={`text-sm font-semibold ${getGardenStatus(passPercent).color}`}>
-                      {getGardenStatus(passPercent).label}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {getGardenStatus(passPercent).description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Growing toward{" "}
-                      {getGradeLabel(profileData?.curriculum ?? "percentage", targetGrade)}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <p className="text-sm text-muted-foreground">Could not calculate passing chance</p>
-                  </div>
-                )}
-
-                {/* Score */}
-                <div className="space-y-1">
-                  <p className="text-lg font-semibold">
-                    {correctCount} of {totalQuestions} seeds took root
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {scorePercent >= 80
-                      ? "Your garden flourished today."
-                      : scorePercent >= 60
-                      ? "Good growth today."
-                      : scorePercent >= 40
-                      ? "The soil is getting richer."
-                      : "Every garden has days like this."}
-                  </p>
-                </div>
-
-                {/* Sleeping cat */}
-                <Neko size={80} className="opacity-60 mx-auto" />
-              {/* Actions */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
-                  <Button size="lg" className="flex-1 gap-2" onClick={handleRetake}>
-                    <RotateCcw className="w-4 h-4" />
-                    Walk the Path Again
-                  </Button>
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="flex-1 gap-2 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
-                    onClick={handleExit}
-                  >
-                    <X className="w-4 h-4" />
-                    Return to Garden
-                  </Button>
-                </div>
+        <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
+          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-6 w-full max-w-lg">
+            {loadingPassChance ? (
+              <div className="space-y-3">
+                <PlantIndicator probability={40} size="lg" />
+                <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
+                <p className="text-sm font-sans text-muted-foreground">Reading the garden...</p>
               </div>
-            </CardContent>
-          </Card>
+            ) : passPercent !== null ? (
+              <div className="space-y-3 flex flex-col items-center">
+                <p className="text-xs font-semibold text-ghibli-forest uppercase tracking-wider">
+                  Garden Walk Complete
+                </p>
+                <PlantIndicator probability={passPercent} size="xl" />
+                <p className={`text-sm font-semibold ${getGardenStatus(passPercent).color}`}>
+                  {getGardenStatus(passPercent).label}
+                </p>
+                <p className="text-sm font-sans text-muted-foreground">
+                  {getGardenStatus(passPercent).description}
+                </p>
+                <p className="text-xs font-sans text-muted-foreground">
+                  Growing toward{" "}
+                  {getGradeLabel(profileData?.curriculum ?? "percentage", targetGrade)}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Could not calculate passing chance</p>
+              </div>
+            )}
+
+            <div className="space-y-1">
+              <p className="font-serif text-lg font-semibold">
+                {correctCount} of {totalQuestions} seeds took root
+              </p>
+              <p className="text-sm font-sans text-muted-foreground">
+                {scorePercent >= 80
+                  ? "A perfect bloom! Your garden flourishes."
+                  : scorePercent >= 60
+                  ? "Your garden is growing well. Keep tending to it!"
+                  : scorePercent >= 40
+                  ? "The soil is getting richer."
+                  : "Every garden needs patience. Water your knowledge and try again."}
+              </p>
+            </div>
+
+            <img
+              src="/sleeping-cat.png"
+              alt="Sleeping cat"
+              className="w-20 h-20 object-contain select-none opacity-60"
+            />
+
+            <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
+              <Button size="lg" className="flex-1 gap-2 rounded-parchment" onClick={handleRetake}>
+                <RotateCcw className="w-4 h-4" />
+                Walk the Path Again
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="flex-1 gap-2 rounded-parchment border-ghibli-moss/30 hover:border-ghibli-forest hover:text-ghibli-forest"
+                onClick={handleExit}
+              >
+                <X className="w-4 h-4" />
+                Return to Garden
+              </Button>
+            </div>
+          </ParchmentCard>
         </div>
-      </div>
+      </GhibliScenery>
     );
   }
 
   // ── Active question ──
-  const progressPercent = ((currentIndex + 1) / totalQuestions) * 100;
-  const atMidpoint = currentIndex > 0 && Math.abs((currentIndex + 1) / totalQuestions - 0.5) < 0.1;
+  const progress = (currentIndex + (feedback ? 1 : 0)) / totalQuestions;
 
   return (
-    <div className="fixed inset-0 bg-background z-50 overflow-y-auto">
-      <VineDecoration />
-      {/* Top garden stripe */}
-      <div
-        className="absolute top-0 left-0 right-0 h-0.5"
-        style={{
-          background:
-            "linear-gradient(to right, transparent, rgba(64,145,108,0.4), rgba(13,115,119,0.5), rgba(64,145,108,0.4), transparent)",
-        }}
-      />
-
+    <GhibliScenery>
       <button
         onClick={handleExit}
-        className="absolute top-5 right-5 z-10 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        className="absolute top-5 right-5 z-30 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         aria-label="Exit quiz"
       >
         <X className="w-6 h-6" />
       </button>
 
-      <div className="min-h-full flex flex-col justify-center py-12">
+      <div className="relative z-10 min-h-screen flex flex-col justify-center py-12">
         <div className="max-w-2xl w-full mx-auto px-6">
 
-          {/* Progress */}
-          <div className="mb-8">
-            <p className="text-sm font-semibold mb-2 text-foreground">
-              {testData?.course_name ?? "Quiz"}
-            </p>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-muted-foreground">
-                Step {currentIndex + 1} of {totalQuestions}
-              </p>
-              <p className="text-sm text-muted-foreground">
-                {correctCount}/{answeredCount} took root
-              </p>
+          {/* Garden path progress bar */}
+          <div className="w-full mb-6">
+            <div className="flex items-center justify-between mb-3 px-1">
+              <span className="font-serif text-sm font-semibold text-primary">
+                {testData?.course_name ?? "Quiz"}
+              </span>
+              <span className="font-sans text-xs text-muted-foreground">
+                Step {currentIndex + 1} of {totalQuestions} &middot; {correctCount} took root
+              </span>
             </div>
-            <Progress
-              value={progressPercent}
-              className="h-1.5"
-              style={{ background: "rgba(64,145,108,0.12)" }}
-            />
+            <div className="relative h-5 rounded-full bg-card border border-border/60 overflow-hidden parchment-texture">
+              <div
+                className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out"
+                style={{
+                  width: `${progress * 100}%`,
+                  background: "linear-gradient(90deg, hsl(var(--ghibli-moss)), hsl(var(--ghibli-forest)))",
+                }}
+              />
+              <div className="absolute inset-0 flex items-center justify-between px-2">
+                {Array.from({ length: totalQuestions }, (_, i) => (
+                  <div
+                    key={i}
+                    className={`w-2.5 h-2.5 rounded-full border transition-colors duration-300 ${
+                      i < currentIndex + (feedback ? 1 : 0)
+                        ? "bg-ghibli-sunlight border-ghibli-amber"
+                        : "bg-card/80 border-border"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Mid-quiz nudge */}
-          {atMidpoint && !feedback && (
+          {/* Question scroll card */}
+          <ParchmentCard className="p-8 md:p-10 mb-6">
+            {/* Scroll ornament top */}
+            <div className="flex justify-center mb-4">
+              <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
+                <path
+                  d="M0 6 Q10 0 20 6 Q30 12 40 6 Q50 0 60 6 Q70 12 80 6"
+                  stroke="currentColor"
+                  fill="none"
+                  strokeWidth="1.5"
+                />
+              </svg>
+            </div>
+
+            <h2 className="font-serif text-xl md:text-2xl font-semibold text-foreground text-center leading-relaxed">
+              {currentQuestion.question}
+            </h2>
+
+            {/* Scroll ornament bottom */}
+            <div className="flex justify-center mt-4">
+              <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
+                <path
+                  d="M0 6 Q10 12 20 6 Q30 0 40 6 Q50 12 60 6 Q70 0 80 6"
+                  stroke="currentColor"
+                  fill="none"
+                  strokeWidth="1.5"
+                />
+              </svg>
+            </div>
+          </ParchmentCard>
+
+          {/* Feedback banner */}
+          {feedback && (
             <div
-              className="text-center p-3 rounded-xl mb-4"
-              style={{
-                background: "rgba(64,145,108,0.07)",
-                border: "1px solid rgba(64,145,108,0.15)",
-              }}
+              className={`flex items-start gap-3 p-4 rounded-parchment mb-4 ${
+                feedback.is_correct
+                  ? "bg-ghibli-moss/15 border border-ghibli-moss/30 text-ghibli-forest"
+                  : "bg-ghibli-petal/10 border border-ghibli-petal/30 text-foreground/80"
+              }`}
             >
-              <img src="/plant-seedling-raw.png" alt="" className="w-8 h-8 object-contain inline-block" style={{ mixBlendMode: "darken" }} />
-              <p className="text-sm text-[#2D6A4F] mt-1 font-medium">
-                Along the way. Keep walking.
-              </p>
+              <img
+                src={feedback.is_correct ? "/leaf-sprout.png" : "/water-drop.png"}
+                alt=""
+                className={`w-8 h-8 object-contain shrink-0 ${
+                  feedback.is_correct ? "animate-scale-in" : "animate-drop"
+                }`}
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-sans font-medium">
+                  {feedback.is_correct ? "That one took root." : "That seed needs more light."}
+                </p>
+                {!feedback.is_correct && (
+                  <p className="text-sm font-sans mt-0.5 opacity-80">
+                    The correct answer is: {feedback.correct_option_text}
+                  </p>
+                )}
+                {feedback.explanation && (
+                  <p className="text-sm font-sans mt-1 opacity-70">{feedback.explanation}</p>
+                )}
+              </div>
             </div>
           )}
 
-          {/* Question card */}
-          <Card
-            className="rounded-2xl overflow-hidden"
-            style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
-          >
-            <CardContent className="pt-8 pb-6 px-8">
-              <h2 className="quiz-question text-xl leading-relaxed mb-8">
-                {currentQuestion.question}
-              </h2>
+          {/* Answer options — stone markers */}
+          <div className="flex flex-col gap-3">
+            {currentQuestion.options.map((option) => {
+              const isSelected = selectedOption === option.index;
+              const showFeedback = feedback !== null;
+              const isCorrect = showFeedback && feedback.correct_option_index === option.index;
+              const isWrong = showFeedback && isSelected && !feedback.is_correct;
 
-              {/* Feedback */}
-              {feedback && (
-                <div
-                  className={`flex items-start gap-3 p-4 rounded-xl mb-6 ${
-                    feedback.is_correct
-                      ? "bg-[rgba(64,145,108,0.1)] text-[#1B4332]"
-                      : "bg-red-500/10 text-red-700 dark:text-red-400"
-                  }`}
+              let optionClasses =
+                "relative w-full text-left rounded-parchment border-2 px-5 py-4 font-sans text-sm font-medium transition-all duration-300 cursor-pointer select-none flex items-center gap-3";
+
+              if (showFeedback) {
+                if (isCorrect) {
+                  optionClasses += " bg-ghibli-moss/15 border-ghibli-moss text-primary";
+                } else if (isWrong) {
+                  optionClasses += " bg-ghibli-petal/10 border-ghibli-petal/40 text-foreground/70";
+                } else {
+                  optionClasses += " bg-card border-border/60 opacity-50";
+                }
+              } else if (isSelected) {
+                optionClasses += " border-primary bg-primary/5";
+              } else {
+                optionClasses += " bg-card border-border/60 text-foreground hover:border-ghibli-amber/60 hover:shadow-glow";
+              }
+
+              if (showFeedback && !isCorrect && !isWrong) {
+                optionClasses += " cursor-default";
+              }
+
+              const letter = stoneLetters[option.index] ?? String.fromCharCode(65 + option.index);
+
+              return (
+                <button
+                  key={option.id}
+                  className={optionClasses}
+                  onClick={() => handleSelectOption(option.index)}
+                  disabled={showFeedback}
                 >
-                  {feedback.is_correct ? (
-                    <CheckCircle2 className="w-5 h-5 shrink-0 mt-0.5 text-[#40916C]" />
-                  ) : (
-                    <XCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                  <span
+                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-serif font-bold text-xs ${
+                      isCorrect
+                        ? "bg-primary text-primary-foreground"
+                        : isWrong
+                        ? "bg-ghibli-petal/30 text-ghibli-bark"
+                        : "bg-secondary text-foreground"
+                    }`}
+                  >
+                    {letter}
+                  </span>
+                  <span className="flex-1">{option.text}</span>
+                  {isCorrect && (
+                    <img
+                      src="/leaf-sprout.png"
+                      alt="Correct!"
+                      className="w-8 h-8 object-contain animate-scale-in"
+                    />
                   )}
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium">
-                      {feedback.is_correct ? "That one took root." : "That seed needs more light."}
-                    </p>
-                    {!feedback.is_correct && (
-                      <p className="text-sm mt-0.5 opacity-80">
-                        The correct answer is: {feedback.correct_option_text}
-                      </p>
-                    )}
-                    {feedback.explanation && (
-                      <p className="text-sm mt-1 opacity-70">{feedback.explanation}</p>
-                    )}
-                  </div>
-                </div>
-              )}
+                  {isWrong && (
+                    <img
+                      src="/water-drop.png"
+                      alt="Incorrect"
+                      className="w-7 h-7 object-contain animate-drop"
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
 
-              {/* Options */}
-              <div className="space-y-3">
-                {currentQuestion.options.map((option) => {
-                  const isSelected = selectedOption === option.index;
-                  const showFeedback = feedback !== null;
-                  const isCorrect = showFeedback && feedback.correct_option_index === option.index;
-                  const isWrong = showFeedback && isSelected && !feedback.is_correct;
-
-                  let optionClasses =
-                    "w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all duration-150";
-
-                  if (showFeedback) {
-                    if (isCorrect) {
-                      optionClasses += " border-[#40916C] bg-[rgba(64,145,108,0.08)]";
-                    } else if (isWrong) {
-                      optionClasses += " border-red-500 bg-red-500/10";
-                    } else {
-                      optionClasses += " border-border opacity-40";
-                    }
-                  } else if (isSelected) {
-                    optionClasses += " border-primary bg-primary/5";
-                  } else {
-                    optionClasses +=
-                      " border-border hover:border-[rgba(64,145,108,0.4)] hover:bg-[rgba(64,145,108,0.04)] cursor-pointer";
-                  }
-
-                  const letter = String.fromCharCode(65 + option.index);
-
-                  return (
-                    <button
-                      key={option.id}
-                      className={optionClasses}
-                      onClick={() => handleSelectOption(option.index)}
-                      disabled={showFeedback}
-                    >
-                      <span
-                        className={`flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold shrink-0 ${
-                          showFeedback && isCorrect
-                            ? "bg-[#40916C] text-white"
-                            : showFeedback && isWrong
-                            ? "bg-red-500 text-white"
-                            : isSelected
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {letter}
-                      </span>
-                      <span className="flex-1 text-sm font-medium">{option.text}</span>
-                      {showFeedback && isCorrect && (
-                        <CheckCircle2 className="w-5 h-5 text-[#40916C] shrink-0" />
-                      )}
-                      {showFeedback && isWrong && (
-                        <XCircle className="w-5 h-5 text-red-500 shrink-0" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              {/* Next */}
-              {feedback && (
-                <div className="mt-8 flex justify-end">
-                  <Button size="lg" className="gap-2" onClick={handleNext}>
-                    {currentIndex + 1 >= totalQuestions ? "See What Grew" : "Next"}
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
+          {/* Next button */}
+          {feedback && (
+            <div className="mt-8 flex justify-end">
+              <Button size="lg" className="gap-2 rounded-parchment" onClick={handleNext}>
+                {currentIndex + 1 >= totalQuestions ? "See What Grew" : "Next"}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </div>
+    </GhibliScenery>
+  );
+}
+
+/* ── Shared Ghibli background scenery wrapper ── */
+function GhibliScenery({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      {/* Background */}
+      <div
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url(/ghibli-bg.jpg)" }}
+      />
+      <div className="fixed inset-0 bg-background/40" />
+      <div className="fixed inset-0 mist-overlay pointer-events-none" />
+
+      {/* Foliage */}
+      <img
+        src="/foliage-left.png"
+        alt=""
+        className="fixed left-0 bottom-0 w-64 lg:w-80 xl:w-96 pointer-events-none z-20 animate-drift select-none"
+        style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.2))" }}
+      />
+      <img
+        src="/foliage-right.png"
+        alt=""
+        className="fixed right-0 top-0 w-56 lg:w-72 xl:w-80 pointer-events-none z-20 animate-drift select-none"
+        style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.2))" }}
+      />
+
+      {/* Dappled light */}
+      <div className="fixed top-20 left-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none" />
+      <div className="fixed bottom-40 right-1/4 w-56 h-56 rounded-full bg-ghibli-sunlight/8 blur-3xl animate-shimmer pointer-events-none" style={{ animationDelay: "2s" }} />
+
+      {/* Sleeping cat */}
+      <img
+        src="/sleeping-cat.png"
+        alt="Sleeping tabby cat"
+        className="fixed bottom-4 right-6 w-28 lg:w-36 pointer-events-none z-30 select-none animate-pulse-soft"
+        style={{ animationDuration: "5s" }}
+      />
+
+      {children}
     </div>
   );
 }

@@ -4,7 +4,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "../hooks/useAuth";
-import { Neko } from "@/components/garden/Neko";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -13,6 +12,10 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+/**
+ * Login form component with email/password authentication.
+ * Ghibli garden visual layer — wooden frame card on garden background.
+ */
 export function LoginForm() {
   const navigate = useNavigate();
   const { signIn } = useAuth();
@@ -52,327 +55,180 @@ export function LoginForm() {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center relative overflow-hidden"
-      style={{
-        // Layered forest gradient — warm amber center, forest green mist at edges
-        background: `
-          radial-gradient(ellipse at 15% 10%, rgba(27,67,50,0.35) 0%, transparent 45%),
-          radial-gradient(ellipse at 85% 5%, rgba(45,106,79,0.28) 0%, transparent 40%),
-          radial-gradient(ellipse at 10% 90%, rgba(64,145,108,0.22) 0%, transparent 40%),
-          radial-gradient(ellipse at 90% 85%, rgba(27,67,50,0.25) 0%, transparent 40%),
-          radial-gradient(ellipse at 50% 40%, rgba(212,160,23,0.18) 0%, rgba(250,243,224,0.9) 55%, transparent 80%),
-          linear-gradient(160deg, #2a4a2e 0%, #3d6b3a 15%, #c8d89a 35%, #FAF3E0 55%, #f0d890 75%, #d4950a 95%)
-        `,
-      }}
-    >
-      {/* Left vine edge */}
+    <div className="relative min-h-screen overflow-hidden flex items-center justify-center">
+      {/* Background */}
       <div
-        className="absolute left-0 top-0 bottom-0 pointer-events-none"
-        style={{
-          width: 90,
-          backgroundImage: "url(/vine-border.png)",
-          backgroundRepeat: "repeat-y",
-          backgroundSize: "90px auto",
-          opacity: 0.85,
-          mixBlendMode: "multiply",
-        }}
+        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url(/garden-login-bg.jpg)" }}
       />
-      {/* Right vine edge */}
+
+      {/* Golden hour overlay */}
       <div
-        className="absolute right-0 top-0 bottom-0 pointer-events-none"
+        className="fixed inset-0"
         style={{
-          width: 90,
-          backgroundImage: "url(/vine-border.png)",
-          backgroundRepeat: "repeat-y",
-          backgroundSize: "90px auto",
-          opacity: 0.75,
-          mixBlendMode: "multiply",
-          transform: "scaleX(-1)",
+          background:
+            "radial-gradient(ellipse at 50% 30%, hsl(45 85% 70% / 0.2) 0%, transparent 60%), linear-gradient(to bottom, hsl(45 60% 50% / 0.08), hsl(33 30% 20% / 0.25))",
         }}
       />
 
-      {/* Dappled light circles */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[
-          { x: "20%", y: "15%", r: 80, o: 0.12 },
-          { x: "75%", y: "25%", r: 60, o: 0.09 },
-          { x: "45%", y: "70%", r: 100, o: 0.08 },
-          { x: "10%", y: "60%", r: 50, o: 0.1 },
-        ].map((d, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full"
-            style={{
-              left: d.x,
-              top: d.y,
-              width: d.r * 2,
-              height: d.r * 2,
-              marginLeft: -d.r,
-              marginTop: -d.r,
-              background: `radial-gradient(circle, rgba(255,220,100,${d.o}) 0%, transparent 70%)`,
-            }}
-          />
-        ))}
-      </div>
+      {/* Mist edges */}
+      <div className="fixed inset-0 mist-overlay pointer-events-none" />
 
-      {/* Sleeping cat — peek from bottom-left behind foliage */}
-      <Neko placement="bottom-left" width={130} />
+      {/* Foliage */}
+      <img
+        src="/foliage-left.png"
+        alt=""
+        className="fixed left-0 bottom-0 w-72 lg:w-96 pointer-events-none z-20 animate-drift select-none"
+        style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
+      />
+      <img
+        src="/foliage-right.png"
+        alt=""
+        className="fixed right-0 top-0 w-64 lg:w-80 pointer-events-none z-20 animate-drift select-none"
+        style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
+      />
 
-      {/* Login card — wooden notice board / parchment */}
-      <div className="relative z-10 w-full max-w-md mx-4 sm:mx-auto">
+      {/* Dappled light */}
+      <div className="fixed top-16 left-1/3 w-48 h-48 rounded-full bg-ghibli-sunlight/15 blur-3xl animate-shimmer pointer-events-none" />
+      <div className="fixed bottom-32 right-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none" style={{ animationDelay: "2.5s" }} />
+
+      {/* Login card — wooden notice board */}
+      <div className="relative z-10 w-full max-w-md mx-4">
+        {/* Outer wood frame */}
         <div
+          className="rounded-[1.5rem] p-[10px]"
           style={{
-            // Wooden frame outer
-            background: "linear-gradient(145deg, #7a5c3a 0%, #5c3d1e 30%, #6b4c28 60%, #8a6a42 100%)",
-            borderRadius: 20,
-            padding: 6,
-            boxShadow: "0 20px 60px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2)",
+            background:
+              "linear-gradient(145deg, hsl(30 35% 38%), hsl(25 30% 28%))",
+            boxShadow:
+              "0 12px 40px -8px hsl(30 30% 15% / 0.5), inset 0 1px 0 hsl(35 40% 50% / 0.3), inset 0 -1px 0 hsl(25 25% 18% / 0.5)",
           }}
         >
-          {/* Inner parchment */}
+          {/* Wood grain texture line */}
           <div
+            className="absolute inset-0 rounded-[1.5rem] opacity-10 pointer-events-none"
             style={{
-              background: "linear-gradient(160deg, #FEFAE0 0%, #FDF5D0 40%, #FAF0C0 100%)",
-              borderRadius: 15,
-              padding: "36px 32px 28px",
-              position: "relative",
-              overflow: "hidden",
+              backgroundImage:
+                "repeating-linear-gradient(90deg, transparent, transparent 8px, hsl(30 20% 60% / 0.3) 8px, hsl(30 20% 60% / 0.3) 9px)",
             }}
-          >
-            {/* Subtle paper grain texture overlay */}
-            <div
-              style={{
-                position: "absolute",
-                inset: 0,
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`,
-                pointerEvents: "none",
-                opacity: 0.6,
-              }}
-            />
+          />
 
-            {/* Heading */}
-            <div className="text-center mb-7">
-              <h1
-                style={{
-                  fontFamily: "'Lora', Georgia, serif",
-                  fontSize: 26,
-                  fontWeight: 600,
-                  color: "#1B4332",
-                  lineHeight: 1.3,
-                  marginBottom: 6,
-                }}
-              >
-                Welcome back to your garden
-              </h1>
-              <p style={{ color: "#5a7a5a", fontSize: 14 }}>
-                Your knowledge awaits
-              </p>
-            </div>
-
-            {/* Error */}
-            {error && (
-              <div
-                className="mb-4 p-3 text-sm rounded-xl"
-                style={{
-                  background: "rgba(180,60,40,0.08)",
-                  border: "1px solid rgba(180,60,40,0.2)",
-                  color: "#8B2500",
-                }}
-              >
-                {error}
+          {/* Inner parchment */}
+          <div className="relative bg-card rounded-[1.1rem] parchment-texture p-8">
+            <div className="relative z-10">
+              {/* Heading */}
+              <div className="text-center mb-6">
+                <h1 className="font-serif text-2xl font-bold text-primary mb-1">
+                  Welcome back to your garden
+                </h1>
+                <p className="font-sans text-sm text-muted-foreground">
+                  Your knowledge awaits
+                </p>
               </div>
-            )}
 
-            {/* Form */}
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Email */}
-              <div className="space-y-1.5">
-                <label
-                  htmlFor="email"
-                  style={{ fontSize: 13, fontWeight: 500, color: "#3a5a3a", display: "block" }}
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="gardener@passai.app"
-                  {...register("email")}
-                  disabled={loading}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    borderRadius: 10,
-                    border: "1.5px solid rgba(64,145,108,0.35)",
-                    background: "rgba(255,255,255,0.7)",
-                    color: "#1B4332",
-                    fontSize: 14,
-                    outline: "none",
-                    boxSizing: "border-box",
-                    transition: "border-color 0.2s",
-                  }}
-                  onFocus={(e) => { e.target.style.borderColor = "rgba(27,67,50,0.6)"; }}
-                  onBlur={(e) => { e.target.style.borderColor = "rgba(64,145,108,0.35)"; }}
-                />
-                {errors.email && (
-                  <p style={{ fontSize: 12, color: "#8B2500" }}>{errors.email.message}</p>
+              {/* Form */}
+              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+                {error && (
+                  <div className="p-3 text-sm rounded-parchment bg-destructive/10 text-destructive border border-destructive/20">
+                    {error}
+                  </div>
                 )}
-              </div>
 
-              {/* Password */}
-              <div className="space-y-1.5">
-                <div className="flex justify-between items-center">
-                  <label
-                    htmlFor="password"
-                    style={{ fontSize: 13, fontWeight: 500, color: "#3a5a3a" }}
-                  >
+                {/* Email */}
+                <div>
+                  <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="gardener@passai.app"
+                    {...register("email")}
+                    disabled={loading}
+                    className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                  />
+                  {errors.email && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.email.message}
+                    </p>
+                  )}
+                </div>
+
+                {/* Password */}
+                <div>
+                  <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
                     Password
                   </label>
-                  <Link
-                    to="/forgot-password"
-                    style={{ fontSize: 12, color: "#40916C", textDecoration: "none" }}
-                  >
-                    Forgot your path?
-                  </Link>
+                  <input
+                    type="password"
+                    placeholder="••••••••"
+                    {...register("password")}
+                    disabled={loading}
+                    className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                  />
+                  {errors.password && (
+                    <p className="text-sm text-destructive mt-1">
+                      {errors.password.message}
+                    </p>
+                  )}
                 </div>
-                <input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  {...register("password")}
+
+                {/* Submit */}
+                <button
+                  type="submit"
                   disabled={loading}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    borderRadius: 10,
-                    border: "1.5px solid rgba(64,145,108,0.35)",
-                    background: "rgba(255,255,255,0.7)",
-                    color: "#1B4332",
-                    fontSize: 14,
-                    outline: "none",
-                    boxSizing: "border-box",
-                    transition: "border-color 0.2s",
-                  }}
-                  onFocus={(e) => { e.target.style.borderColor = "rgba(27,67,50,0.6)"; }}
-                  onBlur={(e) => { e.target.style.borderColor = "rgba(64,145,108,0.35)"; }}
-                />
-                {errors.password && (
-                  <p style={{ fontSize: 12, color: "#8B2500" }}>{errors.password.message}</p>
-                )}
-              </div>
+                  className="w-full rounded-parchment bg-primary text-primary-foreground py-3 font-sans font-semibold text-sm tracking-wide transition-all duration-300 hover:shadow-glow hover:brightness-110 relative overflow-hidden disabled:opacity-50"
+                >
+                  <span className="relative z-10">
+                    {loading ? "Entering..." : "Enter the Garden"}
+                  </span>
+                  <div
+                    className="absolute inset-0 opacity-[0.07] pointer-events-none"
+                    style={{
+                      backgroundImage:
+                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 Q40 15 35 30 Q30 20 25 30 Q20 15 30 5Z' fill='%23fff' opacity='0.5'/%3E%3C/svg%3E\")",
+                    }}
+                  />
+                </button>
 
-              {/* Enter the Garden button */}
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  marginTop: 4,
-                  background: loading
-                    ? "rgba(27,67,50,0.5)"
-                    : "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-                  color: "#FEFAE0",
-                  border: "none",
-                  borderRadius: 11,
-                  fontSize: 15,
-                  fontWeight: 600,
-                  fontFamily: "'Nunito', sans-serif",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  letterSpacing: "0.01em",
-                  boxShadow: "0 4px 16px rgba(27,67,50,0.3)",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  if (!loading) {
-                    (e.target as HTMLButtonElement).style.transform = "translateY(-1px)";
-                    (e.target as HTMLButtonElement).style.boxShadow = "0 6px 20px rgba(27,67,50,0.4)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLButtonElement).style.transform = "";
-                  (e.target as HTMLButtonElement).style.boxShadow = "0 4px 16px rgba(27,67,50,0.3)";
-                }}
-              >
-                {loading ? "Opening the gate..." : "Enter the Garden"}
-              </button>
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px bg-border" />
+                  <span className="font-sans text-xs text-muted-foreground">or continue with</span>
+                  <div className="flex-1 h-px bg-border" />
+                </div>
 
-              {/* Divider */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 12,
-                  margin: "4px 0",
-                }}
-              >
-                <div style={{ flex: 1, height: 1, background: "rgba(64,145,108,0.2)" }} />
-                <span style={{ fontSize: 12, color: "#7a9a7a" }}>or continue with</span>
-                <div style={{ flex: 1, height: 1, background: "rgba(64,145,108,0.2)" }} />
-              </div>
-
-              {/* Google sign-in */}
-              <button
-                type="button"
-                style={{
-                  width: "100%",
-                  padding: "10px 14px",
-                  background: "rgba(255,255,255,0.65)",
-                  border: "1.5px solid rgba(64,145,108,0.25)",
-                  borderRadius: 11,
-                  fontSize: 14,
-                  fontWeight: 500,
-                  color: "#2D4A2D",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 10,
-                  fontFamily: "'Nunito', sans-serif",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.9)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(64,145,108,0.4)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.65)";
-                  (e.currentTarget as HTMLButtonElement).style.borderColor = "rgba(64,145,108,0.25)";
-                }}
-              >
-                {/* Four-petal flower icon instead of Google G */}
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <ellipse cx="9" cy="5" rx="3.5" ry="5" fill="#4285F4" opacity="0.85" />
-                  <ellipse cx="9" cy="13" rx="3.5" ry="5" fill="#34A853" opacity="0.85" />
-                  <ellipse cx="5" cy="9" rx="5" ry="3.5" fill="#EA4335" opacity="0.85" />
-                  <ellipse cx="13" cy="9" rx="5" ry="3.5" fill="#FBBC05" opacity="0.85" />
-                  <circle cx="9" cy="9" r="2.5" fill="white" />
-                </svg>
-                Continue with Google
-              </button>
+                {/* Google sign-in — organic 4-petal style */}
+                <button
+                  type="button"
+                  className="w-full rounded-parchment border-2 border-border/60 bg-card py-3 font-sans font-medium text-sm text-foreground transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
+                >
+                  <svg width="18" height="18" viewBox="0 0 18 18" className="flex-shrink-0">
+                    <circle cx="9" cy="9" r="3" fill="hsl(var(--ghibli-amber))" />
+                    <ellipse cx="9" cy="3" rx="2.5" ry="3" fill="hsl(0 65% 55%)" opacity="0.85" />
+                    <ellipse cx="15" cy="9" rx="3" ry="2.5" fill="hsl(45 80% 55%)" opacity="0.85" />
+                    <ellipse cx="9" cy="15" rx="2.5" ry="3" fill="hsl(140 45% 40%)" opacity="0.85" />
+                    <ellipse cx="3" cy="9" rx="3" ry="2.5" fill="hsl(210 55% 50%)" opacity="0.85" />
+                  </svg>
+                  Continue with Google
+                </button>
+              </form>
 
               {/* Sign up link */}
-              <p style={{ textAlign: "center", fontSize: 13, color: "#7a9a7a", marginTop: 4 }}>
+              <p className="text-center font-sans text-xs text-muted-foreground mt-5">
                 New to the garden?{" "}
-                <Link
-                  to="/signup"
-                  style={{ color: "#2D6A4F", fontWeight: 600, textDecoration: "none" }}
-                >
+                <Link to="/signup" className="text-primary font-medium hover:underline">
                   Plant your first seed
                 </Link>
               </p>
-            </form>
 
-            {/* Cat paw print at bottom */}
-            <div style={{ textAlign: "center", marginTop: 16, opacity: 0.3 }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#40916C">
-                <ellipse cx="12" cy="16" rx="5" ry="4" />
-                <ellipse cx="6" cy="11" rx="2.5" ry="2" />
-                <ellipse cx="18" cy="11" rx="2.5" ry="2" />
-                <ellipse cx="9" cy="8.5" rx="2" ry="1.8" />
-                <ellipse cx="15" cy="8.5" rx="2" ry="1.8" />
-              </svg>
+              {/* Cat paw print */}
+              <div className="flex justify-center mt-4">
+                <img
+                  src="/cat-pawprint.png"
+                  alt="Cat paw print"
+                  className="w-8 h-8 object-contain opacity-40 select-none"
+                />
+              </div>
             </div>
           </div>
         </div>

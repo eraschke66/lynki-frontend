@@ -83,6 +83,20 @@ export async function resendVerificationEmail(
 }
 
 /**
+ * Sign in with Google OAuth.
+ * Redirects to Google for authentication.
+ */
+export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`,
+    },
+  });
+  return { error: error as AuthError | null };
+}
+
+/**
  * Get the current session.
  * @returns Promise with session data or null
  */

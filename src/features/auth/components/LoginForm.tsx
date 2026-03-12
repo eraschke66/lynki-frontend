@@ -18,7 +18,7 @@ type LoginFormData = z.infer<typeof loginSchema>;
  */
 export function LoginForm() {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -200,6 +200,10 @@ export function LoginForm() {
                 {/* Google sign-in — organic 4-petal style */}
                 <button
                   type="button"
+                  onClick={async () => {
+                    const { error: gError } = await signInWithGoogle();
+                    if (gError) setError(gError.message);
+                  }}
                   className="w-full rounded-parchment border-2 border-border/60 bg-card py-3 font-sans font-medium text-sm text-foreground transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
                 >
                   <svg width="18" height="18" viewBox="0 0 18 18" className="flex-shrink-0">

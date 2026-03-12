@@ -47,6 +47,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     signIn: authService.signIn,
     signOut: authService.signOut,
     resendVerificationEmail: authService.resendVerificationEmail,
+    signInWithGoogle: authService.signInWithGoogle,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

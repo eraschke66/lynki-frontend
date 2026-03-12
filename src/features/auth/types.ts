@@ -34,4 +34,5 @@ export interface AuthContextType {
   resendVerificationEmail: (
     email: string,
   ) => Promise<{ error: AuthError | null }>;
+  signInWithGoogle: () => Promise<{ error: AuthError | null }>;
 }

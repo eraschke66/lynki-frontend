@@ -25,6 +25,7 @@ import { getGardenStatus } from "@/lib/garden";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
+import GhibliBackground from "@/components/garden/GhibliBackground";
 import type { AnswerFeedback } from "../types";
 
 const stoneLetters = ["A", "B", "C", "D"];
@@ -184,7 +185,7 @@ export function TestPage() {
   // ── Error ──
   if (error) {
     return (
-      <GhibliScenery>
+      <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
         <button
           onClick={handleExit}
           className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
@@ -201,14 +202,14 @@ export function TestPage() {
             </Button>
           </ParchmentCard>
         </div>
-      </GhibliScenery>
+      </div>
     );
   }
 
   // ── No questions ──
   if (!questions.length) {
     return (
-      <GhibliScenery>
+      <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
         <button
           onClick={handleExit}
           className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
@@ -230,7 +231,7 @@ export function TestPage() {
             </Button>
           </ParchmentCard>
         </div>
-      </GhibliScenery>
+      </div>
     );
   }
 
@@ -242,7 +243,7 @@ export function TestPage() {
     const passPercent = passChance !== null ? Math.round(passChance * 100) : null;
 
     return (
-      <GhibliScenery>
+      <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
         <button
           onClick={handleExit}
           className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
@@ -319,7 +320,7 @@ export function TestPage() {
             </div>
           </ParchmentCard>
         </div>
-      </GhibliScenery>
+      </div>
     );
   }
 
@@ -327,7 +328,7 @@ export function TestPage() {
   const progress = (currentIndex + (feedback ? 1 : 0)) / totalQuestions;
 
   return (
-    <GhibliScenery>
+    <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
       <button
         onClick={handleExit}
         className="absolute top-5 right-5 z-30 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
@@ -515,49 +516,7 @@ export function TestPage() {
           )}
         </div>
       </div>
-    </GhibliScenery>
-  );
-}
-
-/* ── Shared Ghibli background scenery wrapper ── */
-function GhibliScenery({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      {/* Background */}
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url(/ghibli-bg.jpg)" }}
-      />
-      <div className="fixed inset-0 bg-background/40" />
-      <div className="fixed inset-0 mist-overlay pointer-events-none" />
-
-      {/* Foliage */}
-      <img
-        src="/foliage-left.png"
-        alt=""
-        className="fixed left-0 bottom-0 w-64 lg:w-80 xl:w-96 pointer-events-none z-20 animate-drift select-none"
-        style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.2))" }}
-      />
-      <img
-        src="/foliage-right.png"
-        alt=""
-        className="fixed right-0 top-0 w-56 lg:w-72 xl:w-80 pointer-events-none z-20 animate-drift select-none"
-        style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.2))" }}
-      />
-
-      {/* Dappled light */}
-      <div className="fixed top-20 left-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none" />
-      <div className="fixed bottom-40 right-1/4 w-56 h-56 rounded-full bg-ghibli-sunlight/8 blur-3xl animate-shimmer pointer-events-none" style={{ animationDelay: "2s" }} />
-
-      {/* Sleeping cat */}
-      <img
-        src="/sleeping-cat.png"
-        alt="Sleeping tabby cat"
-        className="fixed bottom-4 right-6 w-28 lg:w-36 pointer-events-none z-30 select-none animate-pulse-soft"
-        style={{ animationDuration: "5s" }}
-      />
-
-      {children}
     </div>
   );
 }
+

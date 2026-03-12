@@ -20,8 +20,8 @@ const GhibliBackground = () => (
     <img
       src="/sleeping-cat.png"
       alt=""
-      className="fixed bottom-4 right-6 w-28 lg:w-36 pointer-events-none z-30 select-none animate-drift"
-      style={{ animationDelay: "1.5s", animationDuration: "7s", filter: "drop-shadow(0 4px 12px rgba(27,67,50,0.18))" }}
+      className="fixed bottom-4 right-6 w-28 lg:w-36 pointer-events-none z-30 select-none animate-pulse-soft"
+      style={{ animationDuration: "6s", filter: "drop-shadow(0 4px 12px rgba(27,67,50,0.18))" }}
     />
   </>
 );

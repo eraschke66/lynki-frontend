@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "../hooks/useAuth";
 import { Neko } from "@/components/garden/Neko";
 

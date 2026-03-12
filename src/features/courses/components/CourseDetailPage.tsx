@@ -5,10 +5,10 @@ import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { Neko } from "@/components/garden/Neko";
 import { GardenInlineIcon } from "@/components/garden/GardenIcons";
+import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CircularProgress } from "@/components/ui/circular-progress";
 import {
   AlertCircle,
   RefreshCw,
@@ -198,37 +198,22 @@ export function CourseDetailPage() {
           >
             <CardContent className="pt-8 pb-8 px-8">
               <div className="flex flex-col sm:flex-row items-center gap-8">
-                {/* Garden status ring */}
-                <div className="flex flex-col items-center text-center">
+                {/* Plant indicator */}
+                <div className="flex flex-col items-center text-center shrink-0">
+                  <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-3">
+                    Your Garden
+                  </p>
                   {passPercent !== null ? (
                     <>
-                      <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-3">
-                        Your Garden
-                      </p>
-                      <CircularProgress
-                        value={passPercent}
-                        size={120}
-                        strokeWidth={10}
-                        labelClassName="text-2xl font-bold"
-                      />
-                      <p className={`text-sm font-medium mt-2 ${getGardenStatus(passPercent).color}`}>
-                        {getGardenStatus(passPercent).label}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <PlantIndicator probability={passPercent} size="lg" showPercent={true} />
+                      <p className={`text-xs text-muted-foreground mt-2`}>
                         growing toward {targetLabel}
                       </p>
                     </>
                   ) : (
-                    <div
-                      className="flex flex-col items-center justify-center w-24 h-24 rounded-full"
-                      style={{
-                        background: "rgba(64,145,108,0.07)",
-                        border: "1.5px solid rgba(64,145,108,0.18)",
-                        boxShadow: "0 0 0 4px rgba(64,145,108,0.06)",
-                      }}
-                    >
-                      <img src="/growing-icon.png" alt="" className="w-20 h-20 object-contain" />
-                      <p className="text-xs text-muted-foreground mt-2 text-center leading-tight max-w-[120px]">
+                    <div className="flex flex-col items-center gap-2">
+                      <PlantIndicator probability={0} size="lg" showPercent={false} />
+                      <p className="text-xs text-muted-foreground text-center leading-tight max-w-[120px]">
                         Walk the path to see your garden
                       </p>
                     </div>
@@ -294,9 +279,10 @@ export function CourseDetailPage() {
               >
                 <CardContent className="py-12 text-center">
                   <img
-                    src="/growing-icon.png"
+                    src="/plant-stage-1.png"
                     alt=""
                     className="w-16 h-16 object-contain mx-auto mb-3"
+                    style={{ mixBlendMode: "darken" }}
                   />
                   <p className="text-sm text-muted-foreground">
                     No quizzes taken yet. Start your first quiz above!
@@ -346,8 +332,14 @@ function SessionCard({
   const passPercent =
     session.pass_chance != null ? Math.round(session.pass_chance * 100) : null;
   const date = new Date(session.created_at);
-  const formattedDate = date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-  const formattedTime = date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+  const formattedDate = date.toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  });
+  const formattedTime = date.toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
   return (
     <Card

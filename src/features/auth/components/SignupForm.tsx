@@ -102,13 +102,13 @@ export function SignupForm() {
 
   if (success) {
     return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+      <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
         <Background />
         <div className="relative z-10 w-full max-w-md mx-4 sm:mx-auto">
           <div style={{ background: "linear-gradient(145deg, #7a5c3a 0%, #5c3d1e 30%, #6b4c28 60%, #8a6a42 100%)", borderRadius: 20, padding: 6, boxShadow: "0 20px 60px rgba(0,0,0,0.35)" }}>
             <div style={{ background: "linear-gradient(160deg, #FEFAE0 0%, #FDF5D0 40%, #FAF0C0 100%)", borderRadius: 15, padding: "40px 32px 32px", position: "relative", overflow: "hidden" }}>
               <div className="text-center">
-                <div style={{ fontSize: 48, marginBottom: 12 }}>🌱</div>
+                <img src="/plant-stage-1.png" alt="" style={{ width: 64, height: 64, objectFit: "contain", mixBlendMode: "darken", marginBottom: 12 }} />
                 <h1 style={{ fontFamily: "'Lora', Georgia, serif", fontSize: 24, fontWeight: 600, color: "#1B4332", marginBottom: 8 }}>
                   Your seed has been planted
                 </h1>
@@ -142,7 +142,7 @@ export function SignupForm() {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
       <Background />
 
       <div className="relative z-10 w-full max-w-md mx-4 sm:mx-auto">

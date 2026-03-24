@@ -27,7 +27,7 @@ function getConceptIcon(status: ConceptMastery["status"]): string {
 
 function TopicCard({
   topic,
-  courseId,
+  courseId: _courseId,
   onStudy,
 }: {
   topic: TopicMastery;

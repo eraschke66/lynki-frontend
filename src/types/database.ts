@@ -21,6 +21,7 @@ export interface Database {
           title: string;
           description: string | null;
           target_grade: number;
+          test_date: string | null;
           created_at: string;
           updated_at: string | null;
         };
@@ -30,6 +31,7 @@ export interface Database {
           title: string;
           description?: string | null;
           target_grade?: number;
+          test_date?: string | null;
           created_at?: string;
           updated_at?: string | null;
         };
@@ -39,6 +41,7 @@ export interface Database {
           title?: string;
           description?: string | null;
           target_grade?: number;
+          test_date?: string | null;
           created_at?: string;
           updated_at?: string | null;
         };
@@ -491,6 +494,77 @@ export interface Database {
             foreignKeyName: "user_concept_mastery_concept_id_fkey";
             columns: ["concept_id"];
             referencedRelation: "concepts";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      user_profiles: {
+        Row: {
+          id: string;
+          user_id: string;
+          curriculum: string;
+          created_at: string;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          curriculum?: string;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          curriculum?: string;
+          created_at?: string;
+          updated_at?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "user_profiles_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      study_plans: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          plan_text: string | null;
+          plan_json: Json | null;
+          generated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_id: string;
+          plan_text?: string | null;
+          plan_json?: Json | null;
+          generated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_id?: string;
+          plan_text?: string | null;
+          plan_json?: Json | null;
+          generated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "study_plans_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "study_plans_course_id_fkey";
+            columns: ["course_id"];
+            referencedRelation: "courses";
             referencedColumns: ["id"];
           },
         ];

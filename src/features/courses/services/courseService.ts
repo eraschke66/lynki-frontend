@@ -63,6 +63,7 @@ export async function createCourse(
     title: data.title,
     description: data.description,
     targetGrade: data.target_grade ?? 1.0,
+    testDate: null,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
   };

@@ -21,7 +21,10 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchCourseGardenData, updateCourseTestDate } from "@/features/courses/services/courseService";
+import {
+  fetchCourseGardenData,
+  updateCourseTestDate,
+} from "@/features/courses/services/courseService";
 import { fetchPassChance } from "@/features/test/services/testService";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
@@ -56,7 +59,9 @@ function DateSetupCard({
         <Calendar className="w-7 h-7 text-[#2D6A4F]" />
       </div>
       <div>
-        <h2 className="font-serif text-lg font-semibold mb-1">When is your exam?</h2>
+        <h2 className="font-serif text-lg font-semibold mb-1">
+          When is your exam?
+        </h2>
         <p className="text-sm text-muted-foreground">
           Set your exam date so the garden can map the path ahead.
         </p>
@@ -122,8 +127,12 @@ function SessionCard({
           <div key={i} className="flex gap-3">
             <span className="text-base shrink-0 mt-0.5">🌱</span>
             <div>
-              <p className="text-sm font-medium leading-snug">{activity.concept_name}</p>
-              <p className="text-xs text-muted-foreground">{activity.topic_name}</p>
+              <p className="text-sm font-medium leading-snug">
+                {activity.concept_name}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {activity.topic_name}
+              </p>
               <p className="text-xs text-muted-foreground mt-0.5 italic leading-relaxed">
                 {activity.guidance}
               </p>
@@ -137,7 +146,8 @@ function SessionCard({
         <div className="border-t border-[rgba(64,145,108,0.1)] pt-4">
           <div className="flex items-start justify-between gap-4">
             <p className="text-xs text-muted-foreground leading-relaxed max-w-xs">
-              A short adaptive quiz on these concepts — answers count toward your mastery and pass chance.
+              A short adaptive quiz on these concepts — answers count toward
+              your mastery and pass chance.
             </p>
             <Button
               size="sm"
@@ -186,12 +196,15 @@ function TopicBreakdownRow({
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-sm font-semibold">{topic.topic_name}</p>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${status.bgColor} ${status.color}`}>
+            <span
+              className={`text-xs px-2 py-0.5 rounded-full ${status.bgColor} ${status.color}`}
+            >
               {status.label}
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {topic.mastered_concepts} of {topic.total_concepts} concepts mastered
+            {topic.mastered_concepts} of {topic.total_concepts} concepts
+            mastered
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
@@ -224,15 +237,24 @@ function TopicBreakdownRow({
             const m = Math.round(concept.p_mastery * 100);
             const s = getGardenStatus(m);
             return (
-              <div key={concept.concept_id} className="flex items-center gap-2.5 py-1">
+              <div
+                key={concept.concept_id}
+                className="flex items-center gap-2.5 py-1"
+              >
                 <span className="text-base shrink-0">
                   {concept.status === "in_progress" ? "🌿" : "🌱"}
                 </span>
-                <span className="text-sm flex-1 min-w-0 truncate">{concept.concept_name}</span>
+                <span className="text-sm flex-1 min-w-0 truncate">
+                  {concept.concept_name}
+                </span>
                 {concept.n_attempts > 0 ? (
-                  <span className={`text-xs font-medium shrink-0 ${s.color}`}>{m}%</span>
+                  <span className={`text-xs font-medium shrink-0 ${s.color}`}>
+                    {m}%
+                  </span>
                 ) : (
-                  <span className="text-xs text-muted-foreground shrink-0">Not yet explored</span>
+                  <span className="text-xs text-muted-foreground shrink-0">
+                    Not yet explored
+                  </span>
                 )}
               </div>
             );
@@ -294,7 +316,8 @@ export function StudyPlanPage() {
   const hasDocuments = (gardenData?.total_concepts ?? 0) > 0;
   const testDate: string | null = course?.test_date ?? null;
   const isTestDatePast =
-    testDate !== null && new Date(testDate) < new Date(new Date().toDateString());
+    testDate !== null &&
+    new Date(testDate) < new Date(new Date().toDateString());
 
   // ── Saved plan (direct Supabase read) ─────────────────────────────────────
   const { data: savedPlan, isLoading: planLoading } = useQuery({
@@ -307,9 +330,14 @@ export function StudyPlanPage() {
         .eq("course_id", courseId!)
         .maybeSingle();
       if (error) throw error;
-      return data as { id: string; plan_json: StructuredPlan; generated_at: string } | null;
+      return data as {
+        id: string;
+        plan_json: StructuredPlan;
+        generated_at: string;
+      } | null;
     },
-    enabled: !!user && !!courseId && hasDocuments && !!testDate && !isTestDatePast,
+    enabled:
+      !!user && !!courseId && hasDocuments && !!testDate && !isTestDatePast,
     staleTime: 5 * 60_000,
   });
 
@@ -317,7 +345,9 @@ export function StudyPlanPage() {
   const testDateMutation = useMutation({
     mutationFn: (date: string) => updateCourseTestDate(courseId!, date),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["courses", "detail", courseId] });
+      queryClient.invalidateQueries({
+        queryKey: ["courses", "detail", courseId],
+      });
       toast.success("Exam date saved");
     },
     onError: () => toast.error("Failed to save exam date"),
@@ -332,7 +362,8 @@ export function StudyPlanPage() {
       });
       toast.success("Your study plan has been grown!");
     },
-    onError: () => toast.error("Something went wrong. The garden needs a moment."),
+    onError: () =>
+      toast.error("Something went wrong. The garden needs a moment."),
   });
 
   // ── Guards ─────────────────────────────────────────────────────────────────
@@ -356,7 +387,8 @@ export function StudyPlanPage() {
     ? Math.max(
         0,
         Math.round(
-          (new Date(testDate).getTime() - new Date(new Date().toDateString()).getTime()) /
+          (new Date(testDate).getTime() -
+            new Date(new Date().toDateString()).getTime()) /
             86_400_000,
         ),
       )
@@ -371,7 +403,6 @@ export function StudyPlanPage() {
       <VineDecoration />
       <div className="relative z-10 min-h-screen pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-6">
-
           {/* Back link */}
           <button
             onClick={() => navigate(`/course/${courseId}`)}
@@ -385,16 +416,21 @@ export function StudyPlanPage() {
           <div
             className="mb-8 p-6 rounded-2xl"
             style={{
-              background: "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
+              background:
+                "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
               border: "1px solid rgba(64,145,108,0.12)",
             }}
           >
             <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-1">
               Study Plan
             </p>
-            <h1 className="text-2xl font-bold">{course?.title ?? "Your Course"}</h1>
+            <h1 className="text-2xl font-bold">
+              {course?.title ?? "Your Course"}
+            </h1>
             {targetLabel && (
-              <p className="text-sm text-muted-foreground mt-1">Target: {targetLabel}</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Target: {targetLabel}
+              </p>
             )}
           </div>
 
@@ -431,8 +467,9 @@ export function StudyPlanPage() {
             <>
               {isTestDatePast && testDate && (
                 <div className="mb-4 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
-                  Your previous exam date ({new Date(testDate).toLocaleDateString()}) has passed.
-                  Set a new one to update your plan.
+                  Your previous exam date (
+                  {new Date(testDate).toLocaleDateString()}) has passed. Set a
+                  new one to update your plan.
                 </div>
               )}
               <DateSetupCard
@@ -445,12 +482,13 @@ export function StudyPlanPage() {
           {/* ── State C: Has documents + valid test date ───────────────────── */}
           {hasDocuments && testDate && !isTestDatePast && (
             <div className="space-y-6">
-
               {/* Hero row */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <ParchmentCard className="p-6 flex flex-col items-center text-center gap-2">
                   <Calendar className="w-6 h-6 text-[#40916C]" />
-                  <p className="text-4xl font-bold text-[#1B4332]">{daysRemaining}</p>
+                  <p className="text-4xl font-bold text-[#1B4332]">
+                    {daysRemaining}
+                  </p>
                   <p className="text-sm text-muted-foreground">
                     {daysRemaining === 1 ? "day" : "days"} until your exam
                   </p>
@@ -466,7 +504,8 @@ export function StudyPlanPage() {
                     onClick={() => {
                       queryClient.setQueryData(
                         ["courses", "detail", courseId],
-                        (old: typeof course) => (old ? { ...old, test_date: null } : old),
+                        (old: typeof course) =>
+                          old ? { ...old, test_date: null } : old,
                       );
                     }}
                   >
@@ -478,15 +517,23 @@ export function StudyPlanPage() {
                   <Target className="w-6 h-6 text-[#40916C]" />
                   {passPercent !== null ? (
                     <>
-                      <PlantIndicator probability={passPercent} size="lg" showPercent={true} />
+                      <PlantIndicator
+                        probability={passPercent}
+                        size="lg"
+                        showPercent={true}
+                      />
                       <p className="text-xs text-muted-foreground mt-1">
                         growing toward {targetLabel}
                       </p>
                     </>
                   ) : (
                     <>
-                      <PlantIndicator probability={0} size="lg" showPercent={false} />
-                      <p className="text-xs text-muted-foreground text-center max-w-[140px]">
+                      <PlantIndicator
+                        probability={0}
+                        size="lg"
+                        showPercent={false}
+                      />
+                      <p className="text-xs text-muted-foreground text-center max-w-35">
                         Take your first quiz to see your pass chance
                       </p>
                     </>
@@ -504,10 +551,13 @@ export function StudyPlanPage() {
                   <div className="flex items-center gap-3">
                     <p className="text-xs text-muted-foreground hidden sm:block">
                       Generated{" "}
-                      {new Date(savedPlan!.generated_at).toLocaleDateString(undefined, {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                      {new Date(savedPlan!.generated_at).toLocaleDateString(
+                        undefined,
+                        {
+                          month: "short",
+                          day: "numeric",
+                        },
+                      )}
                     </p>
                     <Button
                       variant="ghost"
@@ -542,10 +592,12 @@ export function StudyPlanPage() {
                     style={{ mixBlendMode: "darken" }}
                   />
                   <div>
-                    <p className="text-sm font-semibold mb-1">Ready to map your path?</p>
+                    <p className="text-sm font-semibold mb-1">
+                      Ready to map your path?
+                    </p>
                     <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                      Claude will look at your quiz history and weak areas to write a
-                      personalised plan — with quizzes for each session.
+                      Claude will look at your quiz history and weak areas to
+                      write a personalised plan — with quizzes for each session.
                     </p>
                   </div>
                   <Button
@@ -605,10 +657,8 @@ export function StudyPlanPage() {
                   </div>
                 </div>
               )}
-
             </div>
           )}
-
         </div>
       </div>
     </>

@@ -32,3 +32,15 @@ export const profileQueryKeys = {
   detail: (userId: string) =>
     [...profileQueryKeys.all, "detail", userId] as const,
 };
+
+export const gardenQueryKeys = {
+  all: ["garden"] as const,
+  progress: (courseId: string, userId: string) =>
+    [...gardenQueryKeys.all, "progress", courseId, userId] as const,
+};
+
+export const studyPlanQueryKeys = {
+  all: ["studyPlan"] as const,
+  detail: (courseId: string, userId: string) =>
+    [...studyPlanQueryKeys.all, "detail", courseId, userId] as const,
+};

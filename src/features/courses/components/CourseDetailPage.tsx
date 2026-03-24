@@ -18,6 +18,8 @@ import {
   CheckCircle2,
   FileText,
   Play,
+  Leaf,
+  CalendarDays,
 } from "lucide-react";
 import { fetchPassChance, fetchTestHistory } from "@/features/test/services/testService";
 import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
@@ -188,6 +190,28 @@ export function CourseDetailPage() {
                 {completedSessions.length}{" "}
                 {completedSessions.length === 1 ? "quiz" : "quizzes"} completed
               </span>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+                onClick={() => navigate(`/course/${courseId}/garden`)}
+                disabled={!docCount || docCount === 0}
+              >
+                <Leaf className="w-4 h-4" />
+                View Knowledge Garden
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-2 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+                onClick={() => navigate(`/course/${courseId}/study-plan`)}
+                disabled={!docCount || docCount === 0}
+              >
+                <CalendarDays className="w-4 h-4" />
+                Study Plan
+              </Button>
             </div>
           </div>
 

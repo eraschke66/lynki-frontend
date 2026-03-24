@@ -15,10 +15,12 @@ import {
   fetchTest,
   fetchResumeTest,
   submitAnswer,
+  submitBktAnswer,
+  fetchBktSession,
   fetchPassChance,
   completeTest,
 } from "../services/testService";
-import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
+import { testQueryKeys, profileQueryKeys, gardenQueryKeys } from "@/lib/queryKeys";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
@@ -34,6 +36,8 @@ export function TestPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const [searchParams] = useSearchParams();
   const sessionId = searchParams.get("session");
+  const topicId = searchParams.get("topicId");
+  const conceptIds = searchParams.get("conceptIds");
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -50,11 +54,19 @@ export function TestPage() {
   const [loadingPassChance, setLoadingPassChance] = useState(false);
 
   const { data: testData, isLoading, error, refetch } = useQuery({
-    queryKey: sessionId
+    queryKey: conceptIds
+      ? [...testQueryKeys.all, "focused", courseId, "concepts", conceptIds]
+      : topicId
+      ? [...testQueryKeys.all, "focused", courseId, topicId]
+      : sessionId
       ? [...testQueryKeys.all, "resume", sessionId]
       : testQueryKeys.quiz(courseId ?? "", user?.id ?? ""),
     queryFn: () =>
-      sessionId
+      conceptIds
+        ? fetchBktSession(user!.id, courseId!, null, conceptIds)
+        : topicId
+        ? fetchBktSession(user!.id, courseId!, topicId)
+        : sessionId
         ? fetchResumeTest(user!.id, sessionId)
         : fetchTest(user!.id, courseId!),
     enabled: !!user && !!courseId,
@@ -114,11 +126,17 @@ export function TestPage() {
       setAnsweredCount((prev) => prev + 1);
       if (isCorrect) setCorrectCount((prev) => prev + 1);
 
-      submitAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
-        (err) => console.error("Background BKT update failed:", err),
-      );
+      if (topicId) {
+        submitBktAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
+          (err) => console.error("Background BKT update failed:", err),
+        );
+      } else {
+        submitAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
+          (err) => console.error("Background BKT update failed:", err),
+        );
+      }
     },
-    [feedback, currentQuestion, user, courseId, testData?.test_id],
+    [feedback, currentQuestion, user, courseId, topicId, testData?.test_id],
   );
 
   const handleNext = useCallback(async () => {
@@ -126,7 +144,7 @@ export function TestPage() {
       setQuizComplete(true);
       setLoadingPassChance(true);
       try {
-        if (testData?.test_id) {
+        if (!topicId && testData?.test_id) {
           completeTest(user!.id, courseId!, testData.test_id).catch((err) =>
             console.error("Failed to complete test session:", err),
           );
@@ -142,12 +160,13 @@ export function TestPage() {
       }
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       queryClient.invalidateQueries({ queryKey: testQueryKeys.history(courseId!, user!.id) });
+      queryClient.invalidateQueries({ queryKey: gardenQueryKeys.progress(courseId!, user!.id) });
     } else {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setFeedback(null);
     }
-  }, [currentIndex, totalQuestions, user, courseId, queryClient, testData?.test_id]);
+  }, [currentIndex, totalQuestions, user, courseId, topicId, queryClient, testData?.test_id]);
 
   const handleRetake = useCallback(() => {
     setCurrentIndex(0);
@@ -163,9 +182,14 @@ export function TestPage() {
     if (sessionId) {
       queryClient.removeQueries({ queryKey: [...testQueryKeys.all, "resume", sessionId] });
     }
-    navigate(`/test/${courseId}`, { replace: true });
+    if (topicId) {
+      queryClient.removeQueries({ queryKey: [...testQueryKeys.all, "focused", courseId, topicId] });
+      navigate(`/test/${courseId}?topicId=${topicId}`, { replace: true });
+    } else {
+      navigate(`/test/${courseId}`, { replace: true });
+    }
     refetch();
-  }, [courseId, user, queryClient, refetch, sessionId, navigate]);
+  }, [courseId, user, topicId, queryClient, refetch, sessionId, navigate]);
 
   if (!user || !courseId) { navigate("/home"); return null; }
 
@@ -177,7 +201,7 @@ export function TestPage() {
   if (isLoading) {
     return (
       <GardenVideoLoader
-        message={sessionId ? "Resuming your walk..." : "Preparing the path..."}
+        message={topicId ? "Tending this patch..." : sessionId ? "Resuming your walk..." : "Preparing the path..."}
       />
     );
   }
@@ -306,16 +330,16 @@ export function TestPage() {
             <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
               <Button size="lg" className="flex-1 gap-2 rounded-parchment" onClick={handleRetake}>
                 <RotateCcw className="w-4 h-4" />
-                Walk the Path Again
+                {topicId ? "Study Again" : "Walk the Path Again"}
               </Button>
               <Button
                 size="lg"
                 variant="outline"
                 className="flex-1 gap-2 rounded-parchment border-ghibli-moss/30 hover:border-ghibli-forest hover:text-ghibli-forest"
-                onClick={handleExit}
+                onClick={topicId ? () => navigate(`/course/${courseId}/garden`) : handleExit}
               >
                 <X className="w-4 h-4" />
-                Return to Garden
+                {topicId ? "Return to Knowledge Garden" : "Return to Garden"}
               </Button>
             </div>
           </ParchmentCard>

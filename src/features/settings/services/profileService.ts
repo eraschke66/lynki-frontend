@@ -1,8 +1,8 @@
 /**
- * Profile service — communicates with /api/v1/profile endpoints.
+ * Profile service — direct Supabase queries on user_profiles table.
  */
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
+import { supabase } from "@/lib/supabase";
 
 export interface UserProfile {
   curriculum: string;
@@ -10,31 +10,29 @@ export interface UserProfile {
 
 /**
  * Get user profile (curriculum setting).
+ * Returns default "percentage" if no row exists yet.
  */
 export async function fetchProfile(userId: string): Promise<UserProfile> {
-  const res = await fetch(`${API_URL}/profile/${userId}`);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to load profile");
-  }
-  return res.json();
+  const { data } = await supabase
+    .from("user_profiles")
+    .select("curriculum")
+    .eq("user_id", userId)
+    .maybeSingle();
+  return { curriculum: data?.curriculum ?? "percentage" };
 }
 
 /**
- * Update user profile (curriculum setting).
+ * Create or update user profile (curriculum setting).
  */
 export async function updateProfile(
   userId: string,
-  data: { curriculum: string },
+  update: { curriculum: string },
 ): Promise<UserProfile> {
-  const res = await fetch(`${API_URL}/profile/${userId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to update profile");
-  }
-  return res.json();
+  const { data, error } = await supabase
+    .from("user_profiles")
+    .upsert({ user_id: userId, curriculum: update.curriculum }, { onConflict: "user_id" })
+    .select("curriculum")
+    .single();
+  if (error) throw new Error(error.message);
+  return { curriculum: data.curriculum };
 }

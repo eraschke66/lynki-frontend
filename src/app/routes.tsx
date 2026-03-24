@@ -9,7 +9,8 @@ import {
 import { DocumentsPage } from "@/features/documents";
 import { TestPage } from "@/features/test";
 import { Dashboard } from "@/features/dashboard";
-import { CourseDetailPage } from "@/features/courses";
+import { CourseDetailPage, KnowledgeGardenPage } from "@/features/courses";
+import { StudyPlanPage } from "@/features/study-plan";
 import { SettingsPage } from "@/features/settings";
 import { AdminPage } from "@/features/admin/AdminPage";
 
@@ -41,6 +42,22 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <CourseDetailPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/course/:courseId/study-plan"
+        element={
+          <ProtectedRoute>
+            <StudyPlanPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/course/:courseId/garden"
+        element={
+          <ProtectedRoute>
+            <KnowledgeGardenPage />
           </ProtectedRoute>
         }
       />

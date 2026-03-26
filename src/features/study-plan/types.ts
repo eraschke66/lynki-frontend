@@ -1,37 +1,56 @@
 import type { TopicMastery } from "@/features/courses/types";
 
-// ── AI-generated plan (stored as plan_json in Supabase) ──────────────────────
+// ── Version 2: markdown growth guide ────────────────────────────────────────
 
-export interface SessionActivity {
-  concept_name: string;
-  topic_name: string;
-  concept_id: string;  // enriched by backend after name-matching
-  topic_id: string;    // enriched by backend after name-matching
-  guidance: string;
+export interface MarkdownPlan {
+  markdown: string;
+  version: 2;
 }
 
-export interface StudySession {
-  label: string;   // e.g. "Day 1", "Week 1"
-  theme: string;   // e.g. "Laser Fundamentals"
-  activities: SessionActivity[];
+// ── Version 1: legacy JSON sessions (pre-overhaul) ──────────────────────────
+
+export interface LegacyPlan {
+  overview?: string;
+  sessions?: unknown[];
+  tip?: string;
 }
 
-export interface StructuredPlan {
-  overview: string;
-  sessions: StudySession[];
-  tip: string;
+// ── Union stored in plan_json JSONB column ───────────────────────────────────
+
+export type PlanJson = MarkdownPlan | LegacyPlan;
+
+export function isMarkdownPlan(p: PlanJson): p is MarkdownPlan {
+  return (p as MarkdownPlan).version === 2 && typeof (p as MarkdownPlan).markdown === "string";
 }
 
-// Row from study_plans table
+// ── Row from study_plans table ───────────────────────────────────────────────
+
 export interface AiStudyPlan {
   id: string;
   user_id: string;
   course_id: string;
-  plan_json: StructuredPlan;
+  plan_json: PlanJson;
   generated_at: string;
 }
 
-// Legacy — kept to avoid breaking imports
+// ── Legacy types kept to avoid breaking existing imports ─────────────────────
+
+export type StructuredPlan = LegacyPlan;
+
+export interface SessionActivity {
+  concept_name: string;
+  topic_name: string;
+  concept_id: string;
+  topic_id: string;
+  guidance: string;
+}
+
+export interface StudySession {
+  label: string;
+  theme: string;
+  activities: SessionActivity[];
+}
+
 export interface StudyPlan {
   courseId: string;
   courseTitle: string;

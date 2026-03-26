@@ -4,12 +4,13 @@ const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://
 
 /**
  * Call FastAPI to generate (or regenerate) an AI study plan for a user+course.
- * The backend fetches BKT data, calls Claude Haiku, and upserts into study_plans.
+ * The backend fetches BKT data, calls Claude Sonnet, and upserts into study_plans.
+ * Returns plan_json: { markdown: string, version: 2 }
  */
 export async function generateStudyPlan(
   userId: string,
   courseId: string,
-): Promise<{ plan_text: string; generated_at: string }> {
+): Promise<{ plan_json: Record<string, unknown>; generated_at: string }> {
   const controller = new AbortController();
   // 90s timeout to survive Render cold starts
   const timer = setTimeout(() => controller.abort(), 90_000);

@@ -10,6 +10,7 @@ import { DocumentsPage } from "@/features/documents";
 import { TestPage } from "@/features/test";
 import { Dashboard } from "@/features/dashboard";
 import { CourseDetailPage, KnowledgeGardenPage } from "@/features/courses";
+import { TopicQuizPage } from "@/features/topic-quiz";
 import { StudyPlanPage } from "@/features/study-plan";
 import { SettingsPage } from "@/features/settings";
 import { AdminPage } from "@/features/admin/AdminPage";
@@ -66,6 +67,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <TestPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/course/:courseId/topic-quiz/:topicId"
+        element={
+          <ProtectedRoute>
+            <TopicQuizPage />
           </ProtectedRoute>
         }
       />

@@ -1,10 +1,10 @@
 import { useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, RefreshCw, BookOpen } from "lucide-react";
-import { gardenQueryKeys, testQueryKeys } from "@/lib/queryKeys";
+import { gardenQueryKeys } from "@/lib/queryKeys";
 import { getGardenStatus } from "@/lib/garden";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
@@ -133,7 +133,6 @@ export function KnowledgeGardenPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const {
     data: gardenData,
@@ -149,12 +148,9 @@ export function KnowledgeGardenPage() {
 
   const handleStudyTopic = useCallback(
     (topicId: string) => {
-      queryClient.removeQueries({
-        queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? ""),
-      });
-      navigate(`/test/${courseId}?topicId=${topicId}`);
+      navigate(`/course/${courseId}/topic-quiz/${topicId}`);
     },
-    [courseId, user, queryClient, navigate],
+    [courseId, navigate],
   );
 
   if (!user || !courseId) {

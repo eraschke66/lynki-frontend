@@ -44,3 +44,9 @@ export const studyPlanQueryKeys = {
   detail: (courseId: string, userId: string) =>
     [...studyPlanQueryKeys.all, "detail", courseId, userId] as const,
 };
+
+export const topicQuizQueryKeys = {
+  all: ["topicQuiz"] as const,
+  session: (courseId: string, topicId: string, userId: string) =>
+    [...topicQuizQueryKeys.all, "session", courseId, topicId, userId] as const,
+};

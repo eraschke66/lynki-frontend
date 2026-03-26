@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
+import type { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { BookOpen, Clock, RefreshCw, Sparkles } from "lucide-react";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
@@ -82,22 +83,22 @@ function splitIntoSections(markdown: string): Section[] {
 
 // ── Custom markdown components (used inside section bodies) ───────────────────
 
-function buildMarkdownComponents() {
+function buildMarkdownComponents(): Components {
   return {
     // Suppress h1/h2/h3 inside section bodies — we handle headings ourselves
     h1: () => null,
     h2: () => null,
     h3: () => null,
 
-    p: ({ children }: { children: React.ReactNode }) => (
+    p: ({ children }) => (
       <p className="text-sm text-[#3d2b1f]/80 leading-relaxed">{children}</p>
     ),
 
-    ul: ({ children }: { children: React.ReactNode }) => (
+    ul: ({ children }) => (
       <ul className="space-y-2 mt-2">{children}</ul>
     ),
 
-    li: ({ children }: { children: React.ReactNode }) => {
+    li: ({ children }) => {
       // Extract the raw text to check for time badges and "After" lines
       const text = extractText(children);
 
@@ -132,11 +133,11 @@ function buildMarkdownComponents() {
       );
     },
 
-    strong: ({ children }: { children: React.ReactNode }) => (
+    strong: ({ children }) => (
       <strong className="font-semibold text-[#1B4332]">{children}</strong>
     ),
 
-    em: ({ children }: { children: React.ReactNode }) => (
+    em: ({ children }) => (
       <em className="italic text-[#3d2b1f]/70">{children}</em>
     ),
   };
@@ -147,7 +148,8 @@ function extractText(node: React.ReactNode): string {
   if (typeof node === "number") return String(node);
   if (Array.isArray(node)) return node.map(extractText).join("");
   if (node && typeof node === "object" && "props" in (node as object)) {
-    return extractText((node as React.ReactElement).props?.children);
+    const el = node as React.ReactElement<{ children?: React.ReactNode }>;
+    return extractText(el.props?.children);
   }
   return "";
 }

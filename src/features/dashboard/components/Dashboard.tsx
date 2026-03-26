@@ -256,7 +256,7 @@ function HeroSection({ data, onStartStudying, onUpload }: {
       <h2 className="font-serif text-xl font-semibold text-primary mb-1">
         {name ? `Welcome back, ${name}` : "Your Learning Garden"}
       </h2>
-      <PlantIndicator probability={data.overallPassProbability} size="xl" />
+      <PlantIndicator probability={data.overallProgress} size="xl" />
       <p className="text-sm font-sans text-muted-foreground mt-2 text-center max-w-md">
         {subtitle}
       </p>
@@ -340,12 +340,12 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <PlantIndicator probability={course.passProbability} size="md" />
+          <PlantIndicator probability={course.progressPercent} size="md" />
         )}
         <p className="text-xs font-sans text-muted-foreground">
           {course.totalConcepts > 0 ? (
-            <span className={`font-medium ${getGardenStatus(course.passProbability).color}`}>
-              {getGardenStatus(course.passProbability).label}
+            <span className={`font-medium ${getGardenStatus(course.progressPercent).color}`}>
+              {getGardenStatus(course.progressPercent).label}
             </span>
           ) : isProcessing ? (
             <span className="text-primary">Processing...</span>

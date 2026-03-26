@@ -209,6 +209,7 @@ export async function fetchCourseGardenData(
   // 8. Build aggregated topic list
   let totalConcepts = 0;
   let masteredConcepts = 0;
+  let totalMasterySum = 0;
 
   const topicList: TopicMastery[] = (topics ?? []).map((topic) => {
     const topicConcepts: ConceptMastery[] = (conceptsByTopic.get(topic.id) ?? []).map((c) => {
@@ -237,8 +238,10 @@ export async function fetchCourseGardenData(
 
     const mastered = topicConcepts.filter((c) => c.is_mastered).length;
     const total = topicConcepts.length;
+    const masterySum = topicConcepts.reduce((sum, c) => sum + c.p_mastery, 0);
     totalConcepts += total;
     masteredConcepts += mastered;
+    totalMasterySum += masterySum;
 
     const topic_status: TopicMastery["status"] =
       mastered === total && total > 0
@@ -254,7 +257,7 @@ export async function fetchCourseGardenData(
       concepts: topicConcepts,
       total_concepts: total,
       mastered_concepts: mastered,
-      overall_progress: total > 0 ? Math.round((mastered / total) * 100) : 0,
+      overall_progress: total > 0 ? Math.round((masterySum / total) * 100) : 0,
     };
   });
 
@@ -265,7 +268,7 @@ export async function fetchCourseGardenData(
     total_concepts: totalConcepts,
     mastered_concepts: masteredConcepts,
     overall_progress:
-      totalConcepts > 0 ? Math.round((masteredConcepts / totalConcepts) * 100) : 0,
+      totalConcepts > 0 ? Math.round((totalMasterySum / totalConcepts) * 100) : 0,
     mastery_threshold: MASTERY_THRESHOLD,
   };
 }

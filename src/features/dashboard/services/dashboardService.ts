@@ -130,6 +130,8 @@ export async function fetchDashboardData(
 
   // Aggregate mastery per course
   const masteredByCourse = new Map<string, number>();
+  const masterySumByCourse = new Map<string, number>();
+  const masteryCountByCourse = new Map<string, number>();
   const hasActivityByCourse = new Map<string, boolean>();
   const activeCourseIds = new Set<string>();
 
@@ -139,6 +141,8 @@ export async function fetchDashboardData(
     if (row.p_mastery >= MASTERY_THRESHOLD) {
       masteredByCourse.set(cid, (masteredByCourse.get(cid) || 0) + 1);
     }
+    masterySumByCourse.set(cid, (masterySumByCourse.get(cid) || 0) + row.p_mastery);
+    masteryCountByCourse.set(cid, (masteryCountByCourse.get(cid) || 0) + 1);
     if (row.n_attempts > 0) {
       hasActivityByCourse.set(cid, true);
       activeCourseIds.add(cid);
@@ -173,10 +177,11 @@ export async function fetchDashboardData(
       targetGrade: c.target_grade ?? 1.0,
       totalConcepts,
       masteredConcepts,
-      progressPercent:
-        totalConcepts > 0
-          ? Math.round((masteredConcepts / totalConcepts) * 100)
-          : 0,
+      progressPercent: (() => {
+        const sum = masterySumByCourse.get(c.id) || 0;
+        const count = masteryCountByCourse.get(c.id) || 0;
+        return count > 0 ? Math.round((sum / count) * 100) : 0;
+      })(),
       hasProcessing: processingByCourse.get(c.id) || false,
       createdAt: c.created_at,
       updatedAt: c.updated_at || c.created_at,
@@ -192,9 +197,11 @@ export async function fetchDashboardData(
     (sum, c) => sum + c.totalConcepts,
     0,
   );
+  const totalMasterySum = Array.from(masterySumByCourse.values()).reduce((a, b) => a + b, 0);
+  const totalMasteryCount = Array.from(masteryCountByCourse.values()).reduce((a, b) => a + b, 0);
   const overallProgress =
-    totalConcepts > 0
-      ? Math.round((totalConceptsMastered / totalConcepts) * 100)
+    totalMasteryCount > 0
+      ? Math.round((totalMasterySum / totalMasteryCount) * 100)
       : 0;
 
   // Overall pass probability — weighted average by concept count (only courses with data)

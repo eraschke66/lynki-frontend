@@ -1,3 +1,5 @@
+import { supabase } from "@/lib/supabase";
+
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 export interface TopicQuizOption {
@@ -74,9 +76,11 @@ export async function submitTopicQuizAnswer(
 }
 
 export async function completeTopicQuiz(sessionId: string): Promise<void> {
-  await fetch(`${API_URL}/topic-quiz/complete`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ session_id: sessionId }),
-  });
+  const now = new Date().toISOString();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any)
+    .from("topic_quiz_sessions")
+    .update({ status: "completed", completed_at: now, updated_at: now })
+    .eq("id", sessionId);
+  // Fire-and-forget — caller already silences errors
 }

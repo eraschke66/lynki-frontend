@@ -1,11 +1,10 @@
 import { supabase } from "@/lib/supabase";
 import { retryDocumentProcessing as retryDocProcessing } from "@/features/documents/services/documentService";
+import { computePassProbability } from "@/lib/passProbability";
 import type { DashboardData, CourseSummary } from "../types";
 
 /** BKT mastery threshold — concept is considered mastered above this */
 const MASTERY_THRESHOLD = 0.85;
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 /**
  * Retry processing a failed or stuck document
@@ -15,28 +14,6 @@ export async function retryDocumentProcessing(
 ): Promise<boolean> {
   const result = await retryDocProcessing(documentId);
   return result.success;
-}
-
-/**
- * Fetch pass chance for a single course from the backend.
- * Returns null if no data available or on error.
- */
-async function fetchCoursePassChance(
-  userId: string,
-  courseId: string,
-): Promise<number | null> {
-  try {
-    const res = await fetch(
-      `${API_URL}/test/pass-chance/${userId}/${courseId}`,
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-    // Only return a meaningful pass chance if the user has actually attempted questions
-    if (data.total_skills === 0) return null;
-    return data.pass_probability ?? null;
-  } catch {
-    return null;
-  }
 }
 
 /**
@@ -132,8 +109,8 @@ export async function fetchDashboardData(
   const masteredByCourse = new Map<string, number>();
   const masterySumByCourse = new Map<string, number>();
   const masteryCountByCourse = new Map<string, number>();
+  const masteryValuesByCourse = new Map<string, number[]>();
   const hasActivityByCourse = new Map<string, boolean>();
-  const activeCourseIds = new Set<string>();
 
   masteryRows?.forEach((row) => {
     const cid = row.course_id as string | null;
@@ -143,27 +120,24 @@ export async function fetchDashboardData(
     }
     masterySumByCourse.set(cid, (masterySumByCourse.get(cid) || 0) + row.p_mastery);
     masteryCountByCourse.set(cid, (masteryCountByCourse.get(cid) || 0) + 1);
+    const vals = masteryValuesByCourse.get(cid) ?? [];
+    vals.push(row.p_mastery);
+    masteryValuesByCourse.set(cid, vals);
     if (row.n_attempts > 0) {
       hasActivityByCourse.set(cid, true);
-      activeCourseIds.add(cid);
     }
   });
 
-  // 5. Fetch pass chances per course from backend (active courses only)
-  const passChanceByCourse = new Map<string, number | null>();
-  if (activeCourseIds.size > 0) {
-    const promises = Array.from(activeCourseIds).map(async (cid) => {
-      const pc = await fetchCoursePassChance(userId, cid);
-      passChanceByCourse.set(cid, pc);
-    });
-    await Promise.all(promises);
-  }
-
-  // 6. Build course summaries
+  // 5. Build course summaries (pass probability computed inline from mastery already in memory)
   const courseSummaries: CourseSummary[] = courses.map((c) => {
     const totalConcepts = conceptCountByCourse.get(c.id) || 0;
     const masteredConcepts = masteredByCourse.get(c.id) || 0;
-    const passChance = passChanceByCourse.get(c.id) ?? null;
+    const hasActivity = hasActivityByCourse.get(c.id) ?? false;
+    const masteryValues = masteryValuesByCourse.get(c.id) ?? [];
+    const passChance =
+      hasActivity && masteryValues.length > 0
+        ? computePassProbability(masteryValues, c.target_grade ?? 1.0)
+        : null;
     const passProbability =
       passChance !== null ? Math.round(passChance * 100) : 0;
 

@@ -113,9 +113,18 @@ export function DocumentsPage() {
           description: `${updatedDoc.title} has been processed successfully.`,
         });
       } else if (updatedDoc.status === "failed") {
-        toast.error("Processing failed", {
-          description: updatedDoc.errorMessage || `Failed to process ${updatedDoc.title}`,
-        });
+        const isContentIssue =
+          updatedDoc.errorMessage?.toLowerCase().includes("too little text") ||
+          updatedDoc.errorMessage?.toLowerCase().includes("not enough learning material");
+        if (isContentIssue) {
+          toast.warning("Document has limited content", {
+            description: updatedDoc.errorMessage ?? undefined,
+          });
+        } else {
+          toast.error("Processing failed", {
+            description: updatedDoc.errorMessage || `Failed to process ${updatedDoc.title}`,
+          });
+        }
       }
     },
     [queryClient, user],

@@ -1,6 +1,7 @@
 /**
  * Service layer for the Test feature.
- * Communicates with the backend /api/v1/test endpoints.
+ * Communicates with the backend /api/v1/test endpoints, or Supabase directly
+ * for operations that don't require server-side computation.
  */
 
 import type {
@@ -10,6 +11,8 @@ import type {
   TestHistoryData,
   TestQuestion,
 } from "../types";
+import { supabase } from "@/lib/supabase";
+import { computePassProbability } from "@/lib/passProbability";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
@@ -73,32 +76,73 @@ export async function submitAnswer(
 
 /**
  * Fetch the current pass chance for a course.
+ * Reads mastery directly from Supabase and computes the normal approximation client-side.
  */
 export async function fetchPassChance(
   userId: string,
   courseId: string,
 ): Promise<PassChanceData> {
-  const res = await fetch(`${API_URL}/test/pass-chance/${userId}/${courseId}`);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to load pass chance");
+  const [masteryResult, courseResult] = await Promise.all([
+    supabase
+      .from("bkt_mastery")
+      .select("p_mastery, n_attempts")
+      .eq("user_id", userId)
+      .eq("course_id", courseId),
+    supabase
+      .from("courses")
+      .select("target_grade")
+      .eq("id", courseId)
+      .maybeSingle(),
+  ]);
+
+  if (masteryResult.error) throw new Error(masteryResult.error.message);
+
+  const rows = masteryResult.data ?? [];
+  const targetGrade = (courseResult.data?.target_grade ?? 1.0) as number;
+  const totalAttempts = rows.reduce((s, r) => s + (r.n_attempts ?? 0), 0);
+
+  if (totalAttempts === 0 || rows.length === 0) {
+    return {
+      course_id: courseId,
+      pass_probability: null,
+      target_grade: targetGrade,
+      total_skills: rows.length,
+    };
   }
-  return res.json();
+
+  return {
+    course_id: courseId,
+    pass_probability: computePassProbability(
+      rows.map((r) => r.p_mastery),
+      targetGrade,
+    ),
+    target_grade: targetGrade,
+    total_skills: rows.length,
+  };
 }
 
 /**
- * Fetch quiz history for a course.
+ * Fetch quiz history for a course directly from Supabase.
  */
 export async function fetchTestHistory(
   userId: string,
   courseId: string,
 ): Promise<TestHistoryData> {
-  const res = await fetch(`${API_URL}/test/history/${userId}/${courseId}`);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to load test history");
-  }
-  return res.json();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from("test_sessions")
+    .select(
+      "id, status, total_questions, correct_count, answered_count, pass_chance, created_at, completed_at",
+    )
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (error) throw new Error(error.message || "Failed to load test history");
+
+  const sessions = (data ?? []) as TestHistoryData["sessions"];
+  return { sessions, total: sessions.length };
 }
 
 /**

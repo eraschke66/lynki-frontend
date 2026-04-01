@@ -7,7 +7,7 @@ import {
   CheckCircle,
   XCircle,
   RefreshCw,
-  AlertCircle,
+  AlertTriangle,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState, useEffect, useMemo, useCallback } from "react";
@@ -36,6 +36,17 @@ import {
 import type { Document } from "../types";
 import { supabase } from "@/lib/supabase";
 import type { Database } from "@/types/database";
+
+// Content-quality failures mean the document itself needs changing — retrying won't help.
+// Technical failures are transient and worth retrying.
+function classifyDocumentError(msg: string | null | undefined): "content" | "technical" {
+  if (!msg) return "technical";
+  const lower = msg.toLowerCase();
+  if (lower.includes("too little text") || lower.includes("not enough learning material")) {
+    return "content";
+  }
+  return "technical";
+}
 
 interface DocumentsListProps {
   documents: Document[];
@@ -206,16 +217,27 @@ export function DocumentsList({
                         <CheckCircle className="w-3 h-3 mr-1" />
                         Ready
                       </div>
+                    ) : classifyDocumentError(doc.errorMessage) === "content" ? (
+                      // Content-quality failure — document needs a better upload, not a retry
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center text-amber-600 text-xs cursor-help gap-1">
+                            <AlertTriangle className="w-3 h-3 shrink-0" />
+                            Limited content
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          <p className="text-xs">{doc.errorMessage}</p>
+                        </TooltipContent>
+                      </Tooltip>
                     ) : (
+                      // Technical failure — worth retrying
                       <div className="flex items-center gap-2">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex items-center text-red-500 text-xs cursor-help">
-                              <XCircle className="w-3 h-3 mr-1" />
+                            <div className="flex items-center text-red-500 text-xs cursor-help gap-1">
+                              <XCircle className="w-3 h-3 shrink-0" />
                               Failed
-                              {doc.errorMessage && (
-                                <AlertCircle className="w-3 h-3 ml-1" />
-                              )}
                             </div>
                           </TooltipTrigger>
                           {doc.errorMessage && (

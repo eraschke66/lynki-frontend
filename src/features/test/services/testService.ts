@@ -101,10 +101,16 @@ export async function fetchPassChance(
   const targetGrade = (courseResult.data?.target_grade ?? 1.0) as number;
   const totalAttempts = rows.reduce((s, r) => s + (r.n_attempts ?? 0), 0);
 
+  const avgMastery =
+    rows.length > 0
+      ? rows.reduce((s, r) => s + (r.p_mastery as number), 0) / rows.length
+      : null;
+
   if (totalAttempts === 0 || rows.length === 0) {
     return {
       course_id: courseId,
       pass_probability: null,
+      avg_mastery: null,
       target_grade: targetGrade,
       total_skills: rows.length,
     };
@@ -116,6 +122,7 @@ export async function fetchPassChance(
       rows.map((r) => r.p_mastery),
       targetGrade,
     ),
+    avg_mastery: avgMastery,
     target_grade: targetGrade,
     total_skills: rows.length,
   };

@@ -90,8 +90,8 @@ export function CourseDetailPage() {
   }
 
   const passPercent =
-    passChanceData?.pass_probability != null
-      ? Math.round(passChanceData.pass_probability * 100)
+    passChanceData?.avg_mastery != null
+      ? Math.round(passChanceData.avg_mastery * 100)
       : null;
   const curriculum = profileData?.curriculum ?? "percentage";
   const targetGrade = course?.target_grade ?? 1.0;
@@ -408,11 +408,9 @@ function SessionCard({
                 {session.correct_count}/{session.total_questions}
               </p>
               <p className="text-xs text-muted-foreground">{scorePercent}% score</p>
-              {passPercent !== null && (
-                <p className={`text-xs font-medium ${getGardenStatus(passPercent).color}`}>
-                  {getGardenStatus(passPercent).label}
-                </p>
-              )}
+              <p className={`text-xs font-medium ${getGardenStatus(scorePercent).color}`}>
+                {getGardenStatus(scorePercent).label}
+              </p>
             </div>
           )}
           {!isCompleted && (

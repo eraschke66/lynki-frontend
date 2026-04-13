@@ -40,7 +40,7 @@ export function getGardenStatus(percentage: number): GardenStatus {
   }
   if (percentage >= 40) {
     return {
-      label: "Finding its rhythm",
+      label: "Putting down roots",
       japanese: "成長",
       description: "Steady growth. The roots are strong.",
       color: "text-green-700",

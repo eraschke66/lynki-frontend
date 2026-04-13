@@ -134,9 +134,7 @@ export function StudyPlanPage() {
   const targetGrade = course?.target_grade ?? 1.0;
   const targetLabel = getGradeLabel(curriculum, targetGrade);
   const passPercent =
-    passChanceData?.pass_probability != null
-      ? Math.round(passChanceData.pass_probability * 100)
-      : null;
+    gardenData != null ? gardenData.overall_progress : null;
   const daysRemaining = testDate
     ? Math.max(
         0,

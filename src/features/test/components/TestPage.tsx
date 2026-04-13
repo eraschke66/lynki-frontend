@@ -150,7 +150,7 @@ export function TestPage() {
           );
         }
         const pc = await fetchPassChance(user!.id, courseId!);
-        setPassChance(pc.pass_probability);
+        setPassChance(pc.avg_mastery);
         setTargetGrade(pc.target_grade ?? 1.0);
       } catch (err) {
         console.error("Failed to fetch pass chance:", err);

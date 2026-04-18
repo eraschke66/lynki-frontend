@@ -50,3 +50,9 @@ export const topicQuizQueryKeys = {
   session: (courseId: string, topicId: string, userId: string) =>
     [...topicQuizQueryKeys.all, "session", courseId, topicId, userId] as const,
 };
+
+export const subscriptionQueryKeys = {
+  all: ["subscription"] as const,
+  status: (userId: string) =>
+    [...subscriptionQueryKeys.all, "status", userId] as const,
+};

@@ -3,13 +3,15 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import LogoSvg from "@/assets/logo.svg?react";
-import { Home, FileText, Settings, Volume2, VolumeOff } from "lucide-react";
+import { Home, FileText, Settings, Volume2, VolumeOff, Sparkles } from "lucide-react";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
+import { useSubscription } from "@/features/subscription/hooks/useSubscription";
 
 export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { playing, toggle: toggleMusic } = useAmbientMusic();
+  const { isPremium, isLoading: subLoading } = useSubscription();
 
   const handleLogout = async () => {
     await signOut();
@@ -95,6 +97,31 @@ export function Header() {
           </button>
           {user && (
             <>
+              {/* Upgrade CTA — only shown for free users once subscription status is known */}
+              {!subLoading && !isPremium && (
+                <Button
+                  size="sm"
+                  onClick={() => navigate("/pricing")}
+                  className="gap-1.5 shadow-[0_1px_6px_rgba(13,115,119,0.18)]"
+                  style={{
+                    background: "linear-gradient(135deg, #40916C 0%, #1B4332 100%)",
+                    color: "white",
+                  }}
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Upgrade
+                </Button>
+              )}
+              {/* Subtle premium badge */}
+              {!subLoading && isPremium && (
+                <span
+                  className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full"
+                  style={{ background: "rgba(64,145,108,0.1)", color: "#2D6A4F" }}
+                >
+                  <Sparkles className="w-3 h-3" />
+                  Premium
+                </span>
+              )}
               <p className="text-xs text-muted-foreground hidden sm:block">
                 {user.email}
               </p>

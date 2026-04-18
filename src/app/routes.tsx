@@ -14,6 +14,8 @@ import { TopicQuizPage } from "@/features/topic-quiz";
 import { StudyPlanPage } from "@/features/study-plan";
 import { SettingsPage } from "@/features/settings";
 import { AdminPage } from "@/features/admin/AdminPage";
+import { PricingPage } from "@/features/subscription/components/PricingPage";
+import { SubscriptionSuccess } from "@/features/subscription/components/SubscriptionSuccess";
 
 export function AppRoutes() {
   return (
@@ -91,6 +93,15 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <AdminPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route
+        path="/subscription/success"
+        element={
+          <ProtectedRoute>
+            <SubscriptionSuccess />
           </ProtectedRoute>
         }
       />

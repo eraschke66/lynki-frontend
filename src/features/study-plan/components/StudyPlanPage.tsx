@@ -8,6 +8,7 @@ import { VineDecoration } from "@/components/garden/VineDecoration";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
+import { PremiumGate } from "@/features/subscription/components/PremiumGate";
 import { Button } from "@/components/ui/button";
 import {
   fetchCourseGardenData,
@@ -156,6 +157,10 @@ export function StudyPlanPage() {
       <GhibliBackground />
       <Header />
       <VineDecoration />
+      <PremiumGate
+        featureName="Study Plan"
+        featureDescription="An AI growth guide tailored to your weakest areas, exam date, and pass probability."
+      >
       <div className="relative z-10 min-h-screen pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-6">
           {/* Back link */}
@@ -316,6 +321,7 @@ export function StudyPlanPage() {
           )}
         </div>
       </div>
+      </PremiumGate>
     </>
   );
 }

@@ -14,6 +14,7 @@ import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { fetchCourseGardenData } from "../services/courseService";
 import type { TopicMastery, ConceptMastery } from "../types";
+import { PremiumGate } from "@/features/subscription/components/PremiumGate";
 
 function getConceptIcon(status: ConceptMastery["status"]): string {
   if (status === "mastered") return "🌸";
@@ -158,29 +159,6 @@ export function KnowledgeGardenPage() {
     return null;
   }
 
-  if (isLoading) {
-    return <GardenVideoLoader message="Reading the garden..." />;
-  }
-
-  if (error) {
-    return (
-      <>
-        <GhibliBackground />
-        <Header />
-        <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
-          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm w-full">
-            <AlertCircle className="w-10 h-10 text-destructive" />
-            <p className="text-sm text-muted-foreground">Could not load your garden</p>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Try again
-            </Button>
-          </ParchmentCard>
-        </div>
-      </>
-    );
-  }
-
   const topics = gardenData?.topics ?? [];
   const overallProgress = gardenData?.overall_progress ?? 0;
   const gardenStatus = getGardenStatus(overallProgress);
@@ -190,87 +168,107 @@ export function KnowledgeGardenPage() {
       <GhibliBackground />
       <Header />
       <VineDecoration />
-      <div className="relative z-10 min-h-screen pt-24 pb-16">
-        <div className="max-w-3xl mx-auto px-6">
-          {/* Back link */}
-          <button
-            onClick={() => navigate(`/course/${courseId}`)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Course
-          </button>
-
-          {/* Garden header */}
-          <div
-            className="mb-8 p-6 rounded-2xl text-center"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
-              border: "1px solid rgba(64,145,108,0.12)",
-            }}
-          >
-            <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-2">
-              Knowledge Garden
-            </p>
-            <h1 className="text-2xl font-bold mb-4">
-              {gardenData?.course_title ?? "Your Course"}
-            </h1>
-            <PlantIndicator probability={overallProgress} size="xl" showPercent={true} />
-            <p className={`text-sm font-semibold mt-3 ${gardenStatus.color}`}>
-              {gardenStatus.label}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts mastered
-            </p>
-          </div>
-
-          {/* Topics */}
-          {topics.length === 0 ? (
-            <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
-              <img
-                src="/plant-stage-1.png"
-                alt=""
-                className="w-16 h-16 object-contain"
-                style={{ mixBlendMode: "darken" }}
-              />
-              <div>
-                <h2 className="font-serif text-base font-semibold mb-1">
-                  Your garden is still taking shape
-                </h2>
-                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                  Your materials are being processed. Check back soon to see your topics bloom.
-                </p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2"
-                onClick={() => navigate(`/course/${courseId}`)}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Course
+      <PremiumGate
+        featureName="Study Garden"
+        featureDescription="Watch your knowledge bloom — a visual map of every topic and concept you've mastered."
+      >
+        {isLoading ? (
+          <GardenVideoLoader message="Reading the garden..." />
+        ) : error ? (
+          <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
+            <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm w-full">
+              <AlertCircle className="w-10 h-10 text-destructive" />
+              <p className="text-sm text-muted-foreground">Could not load your garden</p>
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Try again
               </Button>
             </ParchmentCard>
-          ) : (
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <p className="text-sm font-semibold text-foreground">
-                  {topics.length} {topics.length === 1 ? "topic" : "topics"} in your garden
+          </div>
+        ) : (
+          <div className="relative z-10 min-h-screen pt-24 pb-16">
+            <div className="max-w-3xl mx-auto px-6">
+              {/* Back link */}
+              <button
+                onClick={() => navigate(`/course/${courseId}`)}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Course
+              </button>
+
+              {/* Garden header */}
+              <div
+                className="mb-8 p-6 rounded-2xl text-center"
+                style={{
+                  background:
+                    "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
+                  border: "1px solid rgba(64,145,108,0.12)",
+                }}
+              >
+                <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-2">
+                  Knowledge Garden
+                </p>
+                <h1 className="text-2xl font-bold mb-4">
+                  {gardenData?.course_title ?? "Your Course"}
+                </h1>
+                <PlantIndicator probability={overallProgress} size="xl" showPercent={true} />
+                <p className={`text-sm font-semibold mt-3 ${gardenStatus.color}`}>
+                  {gardenStatus.label}
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts mastered
                 </p>
               </div>
-              {topics.map((topic) => (
-                <TopicCard
-                  key={topic.topic_id}
-                  topic={topic}
-                  courseId={courseId}
-                  onStudy={handleStudyTopic}
-                />
-              ))}
+
+              {/* Topics */}
+              {topics.length === 0 ? (
+                <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
+                  <img
+                    src="/plant-stage-1.png"
+                    alt=""
+                    className="w-16 h-16 object-contain"
+                    style={{ mixBlendMode: "darken" }}
+                  />
+                  <div>
+                    <h2 className="font-serif text-base font-semibold mb-1">
+                      Your garden is still taking shape
+                    </h2>
+                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                      Your materials are being processed. Check back soon to see your topics bloom.
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="mt-2"
+                    onClick={() => navigate(`/course/${courseId}`)}
+                  >
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Course
+                  </Button>
+                </ParchmentCard>
+              ) : (
+                <div>
+                  <div className="flex items-center gap-2 mb-4">
+                    <p className="text-sm font-semibold text-foreground">
+                      {topics.length} {topics.length === 1 ? "topic" : "topics"} in your garden
+                    </p>
+                  </div>
+                  {topics.map((topic) => (
+                    <TopicCard
+                      key={topic.topic_id}
+                      topic={topic}
+                      courseId={courseId}
+                      onStudy={handleStudyTopic}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        )}
+      </PremiumGate>
     </>
   );
 }

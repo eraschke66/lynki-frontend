@@ -16,11 +16,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, Sparkles, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { fetchProfile, updateProfile } from "../services/profileService";
 import { profileQueryKeys } from "@/lib/queryKeys";
 import { CURRICULA, getCurriculum } from "@/lib/curricula";
+import { useSubscription } from "@/features/subscription/hooks/useSubscription";
+import { createPortalSession } from "@/features/subscription/services/subscriptionService";
 
 const gardenLevels = [
   { img: "/plant-stage-4.png", label: "Thriving",    range: "85%+",   color: "text-emerald-700" },
@@ -31,9 +33,23 @@ const gardenLevels = [
 ];
 
 export function SettingsPage() {
-  const { user } = useAuth();
+  const { user, session } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { isPremium, currentPeriodEnd, isLoading: subLoading } = useSubscription();
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const handleManageSubscription = async () => {
+    if (!session?.access_token) return;
+    setPortalLoading(true);
+    try {
+      const url = await createPortalSession();
+      window.location.href = url;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to open billing portal");
+      setPortalLoading(false);
+    }
+  };
 
   const { data: profile, isLoading } = useQuery({
     queryKey: profileQueryKeys.detail(user?.id ?? ""),
@@ -136,6 +152,70 @@ export function SettingsPage() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Subscription / Billing */}
+              {!subLoading && (
+                <Card
+                  className="rounded-2xl overflow-hidden"
+                  style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
+                >
+                  <CardContent className="pt-8 pb-8 px-8 space-y-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Sparkles className="w-4 h-4 text-[#40916C]" />
+                      <p className="text-base font-medium">Subscription</p>
+                    </div>
+
+                    {isPremium ? (
+                      <>
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
+                            style={{ background: "rgba(64,145,108,0.12)", color: "#2D6A4F" }}
+                          >
+                            Premium
+                          </span>
+                          {currentPeriodEnd && (
+                            <span className="text-xs text-muted-foreground">
+                              Active until{" "}
+                              {currentPeriodEnd.toLocaleDateString(undefined, {
+                                day: "numeric",
+                                month: "long",
+                                year: "numeric",
+                              })}
+                            </span>
+                          )}
+                        </div>
+                        <Button
+                          variant="outline"
+                          onClick={handleManageSubscription}
+                          disabled={portalLoading}
+                          className="border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          {portalLoading ? "Opening…" : "Manage Subscription"}
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <p className="text-sm text-muted-foreground">
+                          You're on the <strong>Free</strong> plan. Upgrade to unlock the Study Garden and Smart Study Plan.
+                        </p>
+                        <Button
+                          onClick={() => navigate("/pricing")}
+                          className="shadow-[0_2px_8px_rgba(13,115,119,0.2)]"
+                          style={{
+                            background: "linear-gradient(135deg, #40916C 0%, #1B4332 100%)",
+                            color: "white",
+                          }}
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Upgrade to Premium
+                        </Button>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Garden Growth Guide */}
               <Card

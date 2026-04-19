@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { subscriptionQueryKeys } from "@/lib/queryKeys";
 import { useAuth } from "@/features/auth";
 import { useSubscription } from "../hooks/useSubscription";
+import { posthog } from "@/lib/posthog";
 
 const POLL_INTERVAL_MS = 2_000;
 const MAX_WAIT_MS = 30_000;
@@ -35,6 +36,7 @@ export function SubscriptionSuccess() {
   useEffect(() => {
     if (isPremium) {
       if (intervalRef.current) clearInterval(intervalRef.current);
+      posthog.capture("subscription_activated");
       toast.success("Welcome to Premium! Your garden is now unlocked.");
       navigate("/home", { replace: true });
       return;

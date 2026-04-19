@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "../hooks/useAuth";
 
+import { Eye, EyeOff } from "lucide-react";
+
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
@@ -21,6 +23,7 @@ export function LoginForm() {
   const { signIn, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -37,7 +40,9 @@ export function LoginForm() {
       const { error: signInError } = await signIn(data);
       if (signInError) {
         if (signInError.message.includes("Email not confirmed")) {
-          setError("Please verify your email before logging in. Check your inbox for the verification link.");
+          setError(
+            "Please verify your email before logging in. Check your inbox for the verification link.",
+          );
         } else if (signInError.message.includes("Invalid login credentials")) {
           setError("Invalid email or password. Please try again.");
         } else {
@@ -79,18 +84,26 @@ export function LoginForm() {
         src="/foliage-left.png"
         alt=""
         className="fixed left-0 bottom-0 w-72 lg:w-96 pointer-events-none z-20 animate-drift select-none"
-        style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
+        style={{
+          filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.3))",
+        }}
       />
       <img
         src="/foliage-right.png"
         alt=""
         className="fixed right-0 top-0 w-64 lg:w-80 pointer-events-none z-20 animate-drift select-none"
-        style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
+        style={{
+          animationDelay: "3s",
+          filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.3))",
+        }}
       />
 
       {/* Dappled light */}
       <div className="fixed top-16 left-1/3 w-48 h-48 rounded-full bg-ghibli-sunlight/15 blur-3xl animate-shimmer pointer-events-none" />
-      <div className="fixed bottom-32 right-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none" style={{ animationDelay: "2.5s" }} />
+      <div
+        className="fixed bottom-32 right-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none"
+        style={{ animationDelay: "2.5s" }}
+      />
 
       {/* Login card — wooden notice board */}
       <div className="relative z-10 w-full max-w-md mx-4">
@@ -127,7 +140,10 @@ export function LoginForm() {
               </div>
 
               {/* Form */}
-              <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+              <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex flex-col gap-4"
+              >
                 {error && (
                   <div className="p-3 text-sm rounded-parchment bg-destructive/10 text-destructive border border-destructive/20">
                     {error}
@@ -158,13 +174,22 @@ export function LoginForm() {
                   <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
                     Password
                   </label>
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    {...register("password")}
-                    disabled={loading}
-                    className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="••••••••"
+                      {...register("password")}
+                      disabled={loading}
+                      className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {errors.password && (
                     <p className="text-sm text-destructive mt-1">
                       {errors.password.message}
@@ -193,7 +218,9 @@ export function LoginForm() {
                 {/* Divider */}
                 <div className="flex items-center gap-3 my-1">
                   <div className="flex-1 h-px bg-border" />
-                  <span className="font-sans text-xs text-muted-foreground">or continue with</span>
+                  <span className="font-sans text-xs text-muted-foreground">
+                    or continue with
+                  </span>
                   <div className="flex-1 h-px bg-border" />
                 </div>
 
@@ -206,12 +233,50 @@ export function LoginForm() {
                   }}
                   className="w-full rounded-parchment border-2 border-border/60 bg-card py-3 font-sans font-medium text-sm text-foreground transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
                 >
-                  <svg width="18" height="18" viewBox="0 0 18 18" className="flex-shrink-0">
-                    <circle cx="9" cy="9" r="3" fill="hsl(var(--ghibli-amber))" />
-                    <ellipse cx="9" cy="3" rx="2.5" ry="3" fill="hsl(0 65% 55%)" opacity="0.85" />
-                    <ellipse cx="15" cy="9" rx="3" ry="2.5" fill="hsl(45 80% 55%)" opacity="0.85" />
-                    <ellipse cx="9" cy="15" rx="2.5" ry="3" fill="hsl(140 45% 40%)" opacity="0.85" />
-                    <ellipse cx="3" cy="9" rx="3" ry="2.5" fill="hsl(210 55% 50%)" opacity="0.85" />
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 18"
+                    className="flex-shrink-0"
+                  >
+                    <circle
+                      cx="9"
+                      cy="9"
+                      r="3"
+                      fill="hsl(var(--ghibli-amber))"
+                    />
+                    <ellipse
+                      cx="9"
+                      cy="3"
+                      rx="2.5"
+                      ry="3"
+                      fill="hsl(0 65% 55%)"
+                      opacity="0.85"
+                    />
+                    <ellipse
+                      cx="15"
+                      cy="9"
+                      rx="3"
+                      ry="2.5"
+                      fill="hsl(45 80% 55%)"
+                      opacity="0.85"
+                    />
+                    <ellipse
+                      cx="9"
+                      cy="15"
+                      rx="2.5"
+                      ry="3"
+                      fill="hsl(140 45% 40%)"
+                      opacity="0.85"
+                    />
+                    <ellipse
+                      cx="3"
+                      cy="9"
+                      rx="3"
+                      ry="2.5"
+                      fill="hsl(210 55% 50%)"
+                      opacity="0.85"
+                    />
                   </svg>
                   Continue with Google
                 </button>
@@ -220,7 +285,10 @@ export function LoginForm() {
               {/* Sign up link */}
               <p className="text-center font-sans text-xs text-muted-foreground mt-5">
                 New to the garden?{" "}
-                <Link to="/signup" className="text-primary font-medium hover:underline">
+                <Link
+                  to="/signup"
+                  className="text-primary font-medium hover:underline"
+                >
                   Plant your first seed
                 </Link>
               </p>

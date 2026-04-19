@@ -25,6 +25,7 @@ import {
 } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
 import { generateStudyPlan, getWeakTopics } from "../services/studyPlanService";
+import { posthog } from "@/lib/posthog";
 import { isMarkdownPlan, type PlanJson } from "../types";
 import { DateSetupCard } from "./DateSetupCard";
 import { StudyPlanHero } from "./StudyPlanHero";
@@ -112,6 +113,10 @@ export function StudyPlanPage() {
   const generateMutation = useMutation({
     mutationFn: () => generateStudyPlan(user!.id, courseId!),
     onSuccess: () => {
+      posthog.capture("study_plan_generated", {
+        course_id: courseId,
+        regenerated: !!savedPlan,
+      });
       queryClient.invalidateQueries({
         queryKey: studyPlanQueryKeys.detail(courseId ?? "", user?.id ?? ""),
       });

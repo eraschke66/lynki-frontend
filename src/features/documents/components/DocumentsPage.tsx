@@ -17,6 +17,7 @@ import { DocumentsList } from "./DocumentsList";
 import type { Document } from "../types";
 import { toast } from "sonner";
 import { documentQueryKeys } from "@/lib/queryKeys";
+import { posthog } from "@/lib/posthog";
 
 export function DocumentsPage() {
   const { user } = useAuth();
@@ -73,6 +74,7 @@ export function DocumentsPage() {
 
   const handleUploadComplete = () => {
     queryClient.invalidateQueries({ queryKey: documentQueryKeys.all });
+    posthog.capture("document_uploaded");
     toast.success("Upload complete", {
       description: "Your document is now being processed. This may take a few minutes.",
     });
@@ -82,6 +84,7 @@ export function DocumentsPage() {
     toast.loading("Retrying processing...", { id: `retry-${doc.id}` });
     const result = await retryDocumentProcessing(doc.id);
     if (result.success) {
+      posthog.capture("document_processing_retried", { document_id: doc.id });
       toast.success("Processing restarted", {
         id: `retry-${doc.id}`,
         description: `${doc.title} is being processed again.`,

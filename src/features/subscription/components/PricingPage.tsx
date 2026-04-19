@@ -10,6 +10,7 @@ import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { useSubscription } from "../hooks/useSubscription";
 import { createCheckoutSession } from "../services/subscriptionService";
+import { posthog } from "@/lib/posthog";
 
 const FREE_FEATURES = [
   "Unlimited courses",
@@ -40,6 +41,7 @@ export function PricingPage() {
     }
 
     setLoading(true);
+    posthog.capture("checkout_initiated", { plan: "premium" });
     try {
       const url = await createCheckoutSession();
       // Hard redirect — Stripe Checkout is an external page

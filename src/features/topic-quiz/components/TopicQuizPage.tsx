@@ -8,6 +8,7 @@ import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { topicQuizQueryKeys, gardenQueryKeys } from "@/lib/queryKeys";
+import { posthog } from "@/lib/posthog";
 import {
   fetchTopicQuizSession,
   submitTopicQuizAnswer,
@@ -27,6 +28,7 @@ export function TopicQuizPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const resumeApplied = useRef(false);
+  const quizStartedRef = useRef(false);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
@@ -56,6 +58,14 @@ export function TopicQuizPage() {
       }
       if (!sessionId && data.id) {
         setSessionId(data.id);
+      }
+      if (!quizStartedRef.current && data.questions?.length) {
+        quizStartedRef.current = true;
+        posthog.capture("topic_quiz_started", {
+          course_id: courseId,
+          topic_id: topicId,
+          resumed: data.current_index > 0,
+        });
       }
       return data;
     },
@@ -90,6 +100,12 @@ export function TopicQuizPage() {
 
   const handleNext = useCallback(async () => {
     if (currentIndex + 1 >= totalQuestions) {
+      posthog.capture("topic_quiz_completed", {
+        course_id: courseId,
+        topic_id: topicId,
+        questions_answered: totalQuestions,
+        correct_count: correctCount,
+      });
       // Complete the session
       if (sessionId) {
         completeTopicQuiz(sessionId).catch((err) =>

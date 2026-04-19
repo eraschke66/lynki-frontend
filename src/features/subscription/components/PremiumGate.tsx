@@ -1,10 +1,11 @@
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import { Sprout, BookOpenCheck, Sparkles, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { useSubscription } from "../hooks/useSubscription";
+import { posthog } from "@/lib/posthog";
 
 interface PremiumGateProps {
   children: ReactNode;
@@ -110,6 +111,12 @@ function UpgradeWall({
  */
 export function PremiumGate({ children, featureName, featureDescription }: PremiumGateProps) {
   const { isPremium, isLoading } = useSubscription();
+
+  useEffect(() => {
+    if (!isLoading && !isPremium) {
+      posthog.capture("premium_gate_shown", { feature: featureName });
+    }
+  }, [isLoading, isPremium, featureName]);
 
   if (isLoading) {
     return <GardenVideoLoader />;

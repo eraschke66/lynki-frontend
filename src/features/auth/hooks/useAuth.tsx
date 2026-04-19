@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { supabase } from "@/lib/supabase";
 import * as authService from "../services/authService";
 import type { AuthContextType, AuthUser, AuthSession } from "../types";
+import { posthog } from "@/lib/posthog";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -34,6 +35,11 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      if (session?.user) {
+        posthog.identify(session.user.id, { email: session.user.email });
+      } else {
+        posthog.reset();
+      }
     });
 
     return () => subscription.unsubscribe();

@@ -5,6 +5,7 @@ import type {
   AuthResponse,
 } from "../types";
 import type { AuthError } from "@supabase/supabase-js";
+import { posthog } from "@/lib/posthog";
 
 /**
  * Sign up a new user with email and password.
@@ -22,6 +23,10 @@ export async function signUp(
       emailRedirectTo: `${window.location.origin}/auth/callback`,
     },
   });
+
+  if (!error && data.user) {
+    posthog.capture("sign_up_completed", { method: "email" });
+  }
 
   return {
     user: data.user,
@@ -42,6 +47,10 @@ export async function signIn(
     email: credentials.email,
     password: credentials.password,
   });
+
+  if (!error && data.user) {
+    posthog.capture("sign_in", { method: "email" });
+  }
 
   return {
     user: data.user,
@@ -93,6 +102,9 @@ export async function signInWithGoogle(): Promise<{ error: AuthError | null }> {
       redirectTo: `${window.location.origin}/auth/callback`,
     },
   });
+  if (!error) {
+    posthog.capture("sign_in", { method: "google" });
+  }
   return { error: error as AuthError | null };
 }
 

@@ -1,7 +1,9 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { supabase } from "@/lib/supabase";
 import { subscriptionQueryKeys } from "@/lib/queryKeys";
+import { posthog } from "@/lib/posthog";
 
 export type SubscriptionTier = "free" | "premium";
 export type SubscriptionStatus = "active" | "canceled" | "past_due" | "trialing" | null;
@@ -71,6 +73,12 @@ export function useSubscription(): SubscriptionInfo {
     status !== null &&
     premiumStatuses.includes(status) &&
     periodValid;
+
+  useEffect(() => {
+    if (!queryLoading && data) {
+      posthog.setPersonProperties({ subscription_tier: tier, subscription_status: status });
+    }
+  }, [queryLoading, data, tier, status]);
 
   return { tier, status, currentPeriodEnd, isPremium, isLoading };
 }

@@ -21,6 +21,7 @@ import {
   completeTest,
 } from "../services/testService";
 import { testQueryKeys, profileQueryKeys, gardenQueryKeys } from "@/lib/queryKeys";
+import { posthog } from "@/lib/posthog";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
@@ -78,6 +79,19 @@ export function TestPage() {
     enabled: !!user,
   });
 
+  const quizStartedRef = useRef(false);
+  useEffect(() => {
+    if (testData && testData.questions?.length && !quizStartedRef.current) {
+      quizStartedRef.current = true;
+      posthog.capture("quiz_started", {
+        course_id: courseId,
+        mode: conceptIds ? "concept" : topicId ? "topic" : "full",
+        topic_id: topicId ?? undefined,
+        session_resumed: !!sessionId,
+      });
+    }
+  }, [testData, courseId, conceptIds, topicId, sessionId]);
+
   useEffect(() => {
     if (
       testData &&
@@ -125,6 +139,11 @@ export function TestPage() {
       setFeedback(localFeedback);
       setAnsweredCount((prev) => prev + 1);
       if (isCorrect) setCorrectCount((prev) => prev + 1);
+      posthog.capture("quiz_question_answered", {
+        course_id: courseId,
+        question_id: currentQuestion.id,
+        correct: isCorrect,
+      });
 
       if (topicId) {
         submitBktAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
@@ -141,6 +160,11 @@ export function TestPage() {
 
   const handleNext = useCallback(async () => {
     if (currentIndex + 1 >= totalQuestions) {
+      posthog.capture("quiz_completed", {
+        course_id: courseId,
+        questions_answered: totalQuestions,
+        correct_count: correctCount,
+      });
       setQuizComplete(true);
       setLoadingPassChance(true);
       try {

@@ -46,7 +46,9 @@ export function PricingPage() {
       window.location.href = url;
     } catch (err) {
       toast.error(
-        err instanceof Error ? err.message : "Something went wrong. Please try again."
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
       );
       setLoading(false);
     }
@@ -66,7 +68,8 @@ export function PricingPage() {
               Grow further with Premium
             </h1>
             <p className="text-muted-foreground max-w-md mx-auto">
-              Unlock the full garden — visual mastery tracking and AI-guided study plans, built around your exam date.
+              Unlock the full garden — visual mastery tracking and AI-guided
+              study plans, built around your exam date.
             </p>
           </div>
 
@@ -78,15 +81,15 @@ export function PricingPage() {
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                   Free
                 </p>
-                <p className="text-3xl font-bold text-foreground">
-                  £0
-                  <span className="text-sm font-normal text-muted-foreground ml-1">/ month</span>
-                </p>
+                <p className="text-3xl font-bold text-foreground">$0</p>
               </div>
 
               <ul className="space-y-2.5 mb-8 flex-1">
                 {FREE_FEATURES.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm text-foreground">
+                  <li
+                    key={f}
+                    className="flex items-start gap-2 text-sm text-foreground"
+                  >
                     <Check className="w-4 h-4 text-[#40916C] mt-0.5 shrink-0" />
                     {f}
                   </li>
@@ -114,7 +117,10 @@ export function PricingPage() {
               {/* "Most popular" badge */}
               <div
                 className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
-                style={{ background: "rgba(64,145,108,0.12)", color: "#2D6A4F" }}
+                style={{
+                  background: "rgba(64,145,108,0.12)",
+                  color: "#2D6A4F",
+                }}
               >
                 Recommended
               </div>
@@ -124,8 +130,10 @@ export function PricingPage() {
                   Premium
                 </p>
                 <p className="text-3xl font-bold text-foreground">
-                  £5
-                  <span className="text-sm font-normal text-muted-foreground ml-1">/ month</span>
+                  $79
+                  <span className="text-sm font-normal text-muted-foreground ml-1">
+                    / year
+                  </span>
                 </p>
               </div>
 
@@ -141,7 +149,13 @@ export function PricingPage() {
                     ) : (
                       <Sparkles className="w-4 h-4 text-[#40916C] mt-0.5 shrink-0" />
                     )}
-                    <span className={i === 0 ? "text-muted-foreground" : "text-foreground font-medium"}>
+                    <span
+                      className={
+                        i === 0
+                          ? "text-muted-foreground"
+                          : "text-foreground font-medium"
+                      }
+                    >
                       {f}
                     </span>
                   </li>

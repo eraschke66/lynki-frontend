@@ -1,0 +1,4 @@
+[functions.stripe-webhook]
+# Stripe sends its own signature header — no Supabase JWT.
+# Signature verification is handled inside the function via constructEventAsync.
+verify_jwt = false

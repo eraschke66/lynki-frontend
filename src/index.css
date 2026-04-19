@@ -167,6 +167,10 @@
     letter-spacing: -0.01em;
     line-height: 1.6;
   }
+
+  button {
+    @apply cursor-pointer;
+  }
 }
 
 @layer components {

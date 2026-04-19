@@ -17,7 +17,7 @@ export interface SubscriptionInfo {
 
 /**
  * Reads the current user's subscription state from user_profiles.
- * The source of truth is written by the FastAPI webhook handler.
+ * The source of truth is written by the stripe-webhook edge function.
  *
  * isPremium is true when:
  *   - tier === "premium"
@@ -25,9 +25,9 @@ export interface SubscriptionInfo {
  *   - currentPeriodEnd is in the future (belt-and-suspenders check)
  */
 export function useSubscription(): SubscriptionInfo {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading: queryLoading } = useQuery({
     queryKey: subscriptionQueryKeys.status(user?.id ?? ""),
     queryFn: async () => {
       const { data, error } = await supabase
@@ -47,6 +47,9 @@ export function useSubscription(): SubscriptionInfo {
     staleTime: 30_000,
     refetchInterval: 30_000,
   });
+
+  // Include auth loading so consumers never flash "free" while the session is resolving
+  const isLoading = authLoading || queryLoading;
 
   const tier: SubscriptionTier = (data?.subscription_tier as SubscriptionTier) ?? "free";
   const status: SubscriptionStatus = (data?.subscription_status as SubscriptionStatus) ?? null;

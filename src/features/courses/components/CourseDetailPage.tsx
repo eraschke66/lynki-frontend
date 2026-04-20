@@ -21,7 +21,10 @@ import {
   Leaf,
   CalendarDays,
 } from "lucide-react";
-import { fetchPassChance, fetchTestHistory } from "@/features/test/services/testService";
+import {
+  fetchPassChance,
+  fetchTestHistory,
+} from "@/features/test/services/testService";
 import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
 import { fetchProfile } from "@/features/settings";
@@ -100,7 +103,9 @@ export function CourseDetailPage() {
   const completedSessions = sessions.filter((s) => s.status === "completed");
 
   const handleStartQuiz = () => {
-    queryClient.removeQueries({ queryKey: testQueryKeys.quiz(courseId, user.id) });
+    queryClient.removeQueries({
+      queryKey: testQueryKeys.quiz(courseId, user.id),
+    });
     navigate(`/test/${courseId}`);
   };
 
@@ -119,7 +124,10 @@ export function CourseDetailPage() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0" style={{ background: "rgba(27,67,50,0.18)" }} />
+        <div
+          className="absolute inset-0"
+          style={{ background: "rgba(27,67,50,0.18)" }}
+        />
         <div className="relative z-10 text-center pb-16 space-y-3">
           <p
             className="text-white text-base font-medium tracking-wide"
@@ -183,7 +191,8 @@ export function CourseDetailPage() {
             <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <FileText className="w-4 h-4" />
-                {docCount ?? 0} {(docCount ?? 0) === 1 ? "document" : "documents"}
+                {docCount ?? 0}{" "}
+                {(docCount ?? 0) === 1 ? "document" : "documents"}
               </span>
               <span className="flex items-center gap-1.5">
                 <ClipboardCheck className="w-4 h-4" />
@@ -229,15 +238,23 @@ export function CourseDetailPage() {
                   </p>
                   {passPercent !== null ? (
                     <>
-                      <PlantIndicator probability={passPercent} size="lg" showPercent={true} />
+                      <PlantIndicator
+                        probability={passPercent}
+                        size="lg"
+                        showPercent={true}
+                      />
                       <p className={`text-xs text-muted-foreground mt-2`}>
                         growing toward {targetLabel}
                       </p>
                     </>
                   ) : (
                     <div className="flex flex-col items-center gap-2">
-                      <PlantIndicator probability={0} size="lg" showPercent={false} />
-                      <p className="text-xs text-muted-foreground text-center leading-tight max-w-[120px]">
+                      <PlantIndicator
+                        probability={0}
+                        size="lg"
+                        showPercent={false}
+                      />
+                      <p className="text-xs text-muted-foreground text-center leading-tight max-w-30">
                         Walk the path to see your garden
                       </p>
                     </div>
@@ -248,7 +265,9 @@ export function CourseDetailPage() {
                 <div className="flex-1 flex flex-col items-center sm:items-start gap-3">
                   <div>
                     <h2 className="text-lg font-semibold">
-                      {sessions.length > 0 ? "Keep Tending" : "Plant Your First Seeds"}
+                      {sessions.length > 0
+                        ? "Keep Tending"
+                        : "Plant Your First Seeds"}
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
                       {sessions.length > 0
@@ -320,7 +339,11 @@ export function CourseDetailPage() {
                     key={session.id}
                     session={session}
                     number={sessions.length - idx}
-                    onResume={session.status === "in_progress" ? handleResumeQuiz : undefined}
+                    onResume={
+                      session.status === "in_progress"
+                        ? handleResumeQuiz
+                        : undefined
+                    }
                   />
                 ))}
               </div>
@@ -405,8 +428,12 @@ function SessionCard({
               <p className="text-sm font-bold">
                 {session.correct_count}/{session.total_questions}
               </p>
-              <p className="text-xs text-muted-foreground">{scorePercent}% score</p>
-              <p className={`text-xs font-medium ${getGardenStatus(scorePercent).color}`}>
+              <p className="text-xs text-muted-foreground">
+                {scorePercent}% score
+              </p>
+              <p
+                className={`text-xs font-medium ${getGardenStatus(scorePercent).color}`}
+              >
                 {getGardenStatus(scorePercent).label}
               </p>
             </div>

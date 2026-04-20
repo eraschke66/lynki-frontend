@@ -1,6 +1,9 @@
 import posthog from "posthog-js";
 
+let initialized = false;
+
 export function initPostHog() {
+  if (initialized) return;
   const key = import.meta.env.VITE_POSTHOG_KEY;
   if (!key) return;
 
@@ -10,6 +13,7 @@ export function initPostHog() {
     capture_pageleave: true,
     session_recording: { maskAllInputs: true },
   });
+  initialized = true;
 }
 
 export { posthog };

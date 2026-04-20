@@ -5,6 +5,8 @@ import { AuthProvider } from "@/features/auth";
 import { AppRoutes } from "./routes";
 import { queryClient } from "@/lib/queryClient";
 import { posthog } from "@/lib/posthog";
+import { Sentry } from "@/lib/sentry";
+import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 
 function PageViewTracker() {
   const location = useLocation();
@@ -20,7 +22,10 @@ export default function App() {
       <BrowserRouter>
         <PageViewTracker />
         <AuthProvider>
-          <AppRoutes />
+          <Sentry.ErrorBoundary fallback={<p>Something went wrong.</p>}>
+            <AppRoutes />
+            <CookieConsentBanner />
+          </Sentry.ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>
     </QueryClientProvider>

@@ -17,6 +17,9 @@ const signupSchema = z
       .regex(/[a-z]/, "Password must contain at least one lowercase letter")
       .regex(/[0-9]/, "Password must contain at least one number"),
     confirmPassword: z.string(),
+    ageConfirmed: z.literal(true, {
+      errorMap: () => ({ message: "You must confirm you are at least 13 years old" }),
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -466,6 +469,41 @@ export function SignupForm() {
                     {errors.confirmPassword.message}
                   </p>
                 )}
+              </div>
+
+              {/* Age confirmation */}
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                  <input
+                    id="ageConfirmed"
+                    type="checkbox"
+                    {...register("ageConfirmed")}
+                    disabled={loading}
+                    style={{ marginTop: 2, accentColor: "#1B4332", width: 15, height: 15, flexShrink: 0, cursor: "pointer" }}
+                  />
+                  <label
+                    htmlFor="ageConfirmed"
+                    style={{ fontSize: 13, color: "#3a5a3a", lineHeight: 1.4, cursor: "pointer" }}
+                  >
+                    I confirm that I am at least 13 years old
+                  </label>
+                </div>
+                {errors.ageConfirmed && (
+                  <p style={{ fontSize: 12, color: "#8B2500", marginLeft: 25 }}>
+                    {errors.ageConfirmed.message}
+                  </p>
+                )}
+                <p style={{ fontSize: 12, color: "#7a9a7a", textAlign: "center", lineHeight: 1.4 }}>
+                  By signing up, you agree to our{" "}
+                  <Link to="/terms" style={{ color: "#2D6A4F", fontWeight: 600, textDecoration: "none" }}>
+                    Terms of Service
+                  </Link>{" "}
+                  and{" "}
+                  <Link to="/privacy" style={{ color: "#2D6A4F", fontWeight: 600, textDecoration: "none" }}>
+                    Privacy Policy
+                  </Link>
+                  .
+                </p>
               </div>
 
               {/* Submit */}

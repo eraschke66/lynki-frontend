@@ -3,9 +3,11 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Neko } from "@/components/garden/Neko";
 import { GardenIcon } from "@/components/garden/GardenIcons";
+import { useCookieConsent } from "@/hooks/useCookieConsent";
 
 export function LandingPage() {
   const { user } = useAuth();
+  const { clearConsent } = useCookieConsent();
   if (user) return <Navigate to="/home" replace />;
 
   return (
@@ -181,11 +183,21 @@ export function LandingPage() {
 
       {/* Footer */}
       <footer className="py-8 px-6 border-t border-border/30">
-        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="text-sm text-muted-foreground">© 2026 PassAI. Built by a teacher, for students.</span>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <span>IB</span><span>AP</span><span>GCSE</span><span>A-Level</span>
-          </div>
+        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+          <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+          <span aria-hidden>·</span>
+          <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+          <span aria-hidden>·</span>
+          <Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
+          <span aria-hidden>·</span>
+          <button
+            onClick={clearConsent}
+            className="hover:text-foreground transition-colors hover:underline underline-offset-2 cursor-pointer"
+          >
+            Cookie Settings
+          </button>
+          <span aria-hidden>·</span>
+          <span>© 2026 Shryn, Inc.</span>
         </div>
       </footer>
     </div>

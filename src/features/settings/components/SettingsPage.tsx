@@ -16,13 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Check, Sparkles, ExternalLink } from "lucide-react";
+import { ArrowLeft, Check, Sparkles, ExternalLink, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { fetchProfile, updateProfile } from "../services/profileService";
 import { profileQueryKeys } from "@/lib/queryKeys";
 import { CURRICULA, getCurriculum } from "@/lib/curricula";
 import { useSubscription } from "@/features/subscription/hooks/useSubscription";
 import { createPortalSession } from "@/features/subscription/services/subscriptionService";
+import { useCookieConsent } from "@/hooks/useCookieConsent";
+import { Link } from "react-router-dom";
 
 const gardenLevels = [
   { img: "/plant-stage-4.png", label: "Thriving",    range: "85%+",   color: "text-emerald-700" },
@@ -37,6 +39,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isPremium, currentPeriodEnd, isLoading: subLoading } = useSubscription();
+  const { consent, clearConsent } = useCookieConsent();
   const [portalLoading, setPortalLoading] = useState(false);
 
   const handleManageSubscription = async () => {
@@ -216,6 +219,43 @@ export function SettingsPage() {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Privacy & Cookies */}
+              <Card
+                className="rounded-2xl overflow-hidden"
+                style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
+              >
+                <CardContent className="pt-8 pb-8 px-8 space-y-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Shield className="w-4 h-4 text-[#40916C]" />
+                    <p className="text-base font-medium">Privacy & Cookies</p>
+                  </div>
+                  <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
+                    <Link to="/privacy" className="text-[#2D6A4F] hover:underline underline-offset-2">
+                      Privacy Policy
+                    </Link>
+                    <Link to="/terms" className="text-[#2D6A4F] hover:underline underline-offset-2">
+                      Terms of Service
+                    </Link>
+                    <Link to="/cookies" className="text-[#2D6A4F] hover:underline underline-offset-2">
+                      Cookie Policy
+                    </Link>
+                  </div>
+                  <div className="pt-1">
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Analytics cookies are currently{" "}
+                      <strong>{consent === "all" ? "enabled" : "disabled"}</strong>.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={clearConsent}
+                      className="border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+                    >
+                      Change cookie preferences
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Garden Growth Guide */}
               <Card

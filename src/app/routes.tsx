@@ -16,6 +16,7 @@ import { SettingsPage } from "@/features/settings";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { PricingPage } from "@/features/subscription/components/PricingPage";
 import { SubscriptionSuccess } from "@/features/subscription/components/SubscriptionSuccess";
+import { PrivacyPolicyPage, TermsOfServicePage, CookiePolicyPage } from "@/features/legal";
 
 export function AppRoutes() {
   return (
@@ -105,6 +106,9 @@ export function AppRoutes() {
           </ProtectedRoute>
         }
       />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsOfServicePage />} />
+      <Route path="/cookies" element={<CookiePolicyPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

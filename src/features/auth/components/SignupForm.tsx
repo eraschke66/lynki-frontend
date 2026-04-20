@@ -18,7 +18,7 @@ const signupSchema = z
       .regex(/[0-9]/, "Password must contain at least one number"),
     confirmPassword: z.string(),
     ageConfirmed: z.literal(true, {
-      errorMap: () => ({ message: "You must confirm you are at least 13 years old" }),
+      message: "You must confirm you are at least 13 years old",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

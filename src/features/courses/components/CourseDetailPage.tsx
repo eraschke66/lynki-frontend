@@ -353,8 +353,6 @@ function SessionCard({
     session.total_questions > 0
       ? Math.round((session.correct_count / session.total_questions) * 100)
       : 0;
-  const passPercent =
-    session.pass_chance != null ? Math.round(session.pass_chance * 100) : null;
   const date = new Date(session.created_at);
   const formattedDate = date.toLocaleDateString(undefined, {
     month: "short",

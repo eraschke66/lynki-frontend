@@ -64,7 +64,7 @@ export function StudyPlanPage() {
   });
 
   // ── Pass probability ───────────────────────────────────────────────────────
-  const { data: passChanceData } = useQuery({
+  useQuery({
     queryKey: testQueryKeys.passChance(courseId ?? "", user?.id ?? ""),
     queryFn: () => fetchPassChance(user!.id, courseId!),
     enabled: !!user && !!courseId,

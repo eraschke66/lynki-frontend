@@ -30,7 +30,7 @@ import { supabase } from "@/lib/supabase";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
 import { getGardenStatus } from "@/lib/garden";
-import type { CourseQuiz, QuizAttemptSummary } from "@/features/test/types";
+import type { CourseQuiz } from "@/features/test/types";
 
 export function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();

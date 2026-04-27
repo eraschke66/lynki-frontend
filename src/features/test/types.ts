@@ -21,14 +21,13 @@ export interface TestQuestion {
 
 export interface TestData {
   test_id: string;
+  quiz_id?: string;
   course_id: string;
   course_name: string;
   questions: TestQuestion[];
   total_questions: number;
   message?: string;
-  /** Present when resuming — number of questions already answered */
   answered_count?: number;
-  /** Present when resuming — number already correct */
   correct_count?: number;
 }
 
@@ -54,6 +53,35 @@ export interface PassChanceData {
   total_skills: number;
 }
 
+/** A generated quiz belonging to a course+user. */
+export interface CourseQuiz {
+  id: string;
+  name: string;
+  total_questions: number;
+  created_at: string;
+  quiz_attempts: QuizAttemptSummary[];
+}
+
+/** Summary of a single attempt on a quiz (used in CourseDetailPage list). */
+export interface QuizAttemptSummary {
+  id: string;
+  status: "in_progress" | "completed";
+  answered_count: number;
+  correct_count: number;
+  pass_chance: number | null;
+  started_at: string;
+  completed_at: string | null;
+}
+
+/** Response from POST /quiz-sessions/generate */
+export interface GeneratedQuizInfo {
+  quiz_id: string;
+  name: string;
+  total_questions: number;
+  course_id: string;
+}
+
+/** Legacy — used by test_sessions-backed history (deprecated, kept for compatibility) */
 export interface TestSession {
   id: string;
   status: "in_progress" | "completed";

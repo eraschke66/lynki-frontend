@@ -21,10 +21,16 @@ export const testQueryKeys = {
   all: ["test"] as const,
   quiz: (courseId: string, userId: string) =>
     [...testQueryKeys.all, "quiz", courseId, userId] as const,
+  quizAttempt: (quizId: string, userId: string) =>
+    [...testQueryKeys.all, "quiz-attempt", quizId, userId] as const,
+  resumeAttempt: (attemptId: string) =>
+    [...testQueryKeys.all, "resume-attempt", attemptId] as const,
   passChance: (courseId: string, userId: string) =>
     [...testQueryKeys.all, "passChance", courseId, userId] as const,
   history: (courseId: string, userId: string) =>
     [...testQueryKeys.all, "history", courseId, userId] as const,
+  quizzes: (courseId: string, userId: string) =>
+    [...testQueryKeys.all, "quizzes", courseId, userId] as const,
 };
 
 export const profileQueryKeys = {

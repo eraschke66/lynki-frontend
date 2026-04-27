@@ -10,6 +10,7 @@ import type {
   PassChanceData,
   TestHistoryData,
   TestQuestion,
+  GeneratedQuizInfo,
 } from "../types";
 import { supabase } from "@/lib/supabase";
 import { computePassProbability } from "@/lib/passProbability";
@@ -210,6 +211,117 @@ export async function submitBktAnswer(
     throw new Error(err.detail || "Failed to submit answer");
   }
   return res.json();
+}
+
+/**
+ * Generate a fresh named quiz (BKT-guided, ~20-30s).
+ * Returns quiz metadata — use startQuizAttempt to actually take it.
+ */
+export async function generateQuiz(
+  userId: string,
+  courseId: string,
+  quizSize = 10,
+): Promise<GeneratedQuizInfo> {
+  const res = await fetch(`${API_URL}/quiz-sessions/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      course_id: courseId,
+      quiz_size: quizSize,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to generate quiz");
+  }
+  return res.json();
+}
+
+/**
+ * Start a new attempt on a quiz. Returns TestData so TestPage can render it.
+ */
+export async function startQuizAttempt(
+  userId: string,
+  quizId: string,
+  courseId: string,
+): Promise<TestData> {
+  const res = await fetch(`${API_URL}/quiz-attempts/start`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_id: userId, quiz_id: quizId, course_id: courseId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to start quiz");
+  }
+  return res.json();
+}
+
+/**
+ * Resume an in-progress quiz attempt. Returns TestData with answered_count set.
+ */
+export async function resumeQuizAttempt(
+  userId: string,
+  attemptId: string,
+): Promise<TestData> {
+  const res = await fetch(`${API_URL}/quiz-attempts/resume/${userId}/${attemptId}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to resume quiz");
+  }
+  return res.json();
+}
+
+/**
+ * Submit an answer within a quiz attempt.
+ */
+export async function submitQuizAnswer(
+  userId: string,
+  courseId: string,
+  quizAttemptId: string,
+  questionId: string,
+  selectedOptionIndex: number,
+): Promise<AnswerFeedback> {
+  const res = await fetch(`${API_URL}/quiz-attempts/answer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      course_id: courseId,
+      quiz_attempt_id: quizAttemptId,
+      question_id: questionId,
+      selected_option_index: selectedOptionIndex,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to submit answer");
+  }
+  return res.json();
+}
+
+/**
+ * Explicitly complete a quiz attempt.
+ */
+export async function completeQuizAttempt(
+  userId: string,
+  courseId: string,
+  quizAttemptId: string,
+): Promise<void> {
+  const res = await fetch(`${API_URL}/quiz-attempts/complete`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      user_id: userId,
+      course_id: courseId,
+      quiz_attempt_id: quizAttemptId,
+    }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || "Failed to complete quiz attempt");
+  }
 }
 
 /**

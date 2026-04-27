@@ -12,7 +12,10 @@ import {
   RotateCcw,
 } from "lucide-react";
 import {
-  fetchTest,
+  startQuizAttempt,
+  resumeQuizAttempt,
+  submitQuizAnswer,
+  completeQuizAttempt,
   fetchResumeTest,
   submitAnswer,
   submitBktAnswer,
@@ -36,6 +39,8 @@ const stoneLetters = ["A", "B", "C", "D"];
 export function TestPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const [searchParams] = useSearchParams();
+  const quizId = searchParams.get("quiz");
+  const attemptId = searchParams.get("attempt");
   const sessionId = searchParams.get("session");
   const topicId = searchParams.get("topicId");
   const conceptIds = searchParams.get("conceptIds");
@@ -54,23 +59,33 @@ export function TestPage() {
   const [targetGrade, setTargetGrade] = useState<number>(1.0);
   const [loadingPassChance, setLoadingPassChance] = useState(false);
 
+  // Determine query key and fetcher based on params
+  const queryKey = conceptIds
+    ? [...testQueryKeys.all, "focused", courseId, "concepts", conceptIds]
+    : topicId
+    ? [...testQueryKeys.all, "focused", courseId, topicId]
+    : sessionId
+    ? [...testQueryKeys.all, "resume", sessionId]
+    : quizId && attemptId
+    ? testQueryKeys.resumeAttempt(attemptId)
+    : quizId
+    ? testQueryKeys.quizAttempt(quizId, user?.id ?? "")
+    : testQueryKeys.quiz(courseId ?? "", user?.id ?? "");
+
+  const queryFn = () => {
+    if (conceptIds) return fetchBktSession(user!.id, courseId!, null, conceptIds);
+    if (topicId) return fetchBktSession(user!.id, courseId!, topicId);
+    if (sessionId) return fetchResumeTest(user!.id, sessionId);
+    if (quizId && attemptId) return resumeQuizAttempt(user!.id, attemptId);
+    if (quizId) return startQuizAttempt(user!.id, quizId, courseId!);
+    // Legacy fallback (old test endpoint — not used by new flow)
+    return fetchResumeTest(user!.id, sessionId!);
+  };
+
   const { data: testData, isLoading, error, refetch } = useQuery({
-    queryKey: conceptIds
-      ? [...testQueryKeys.all, "focused", courseId, "concepts", conceptIds]
-      : topicId
-      ? [...testQueryKeys.all, "focused", courseId, topicId]
-      : sessionId
-      ? [...testQueryKeys.all, "resume", sessionId]
-      : testQueryKeys.quiz(courseId ?? "", user?.id ?? ""),
-    queryFn: () =>
-      conceptIds
-        ? fetchBktSession(user!.id, courseId!, null, conceptIds)
-        : topicId
-        ? fetchBktSession(user!.id, courseId!, topicId)
-        : sessionId
-        ? fetchResumeTest(user!.id, sessionId)
-        : fetchTest(user!.id, courseId!),
-    enabled: !!user && !!courseId,
+    queryKey,
+    queryFn,
+    enabled: !!user && !!courseId && (!!quizId || !!topicId || !!conceptIds || !!sessionId),
   });
 
   const { data: profileData } = useQuery({
@@ -85,17 +100,18 @@ export function TestPage() {
       quizStartedRef.current = true;
       posthog.capture("quiz_started", {
         course_id: courseId,
-        mode: conceptIds ? "concept" : topicId ? "topic" : "full",
+        mode: conceptIds ? "concept" : topicId ? "topic" : quizId ? "quiz" : "session",
         topic_id: topicId ?? undefined,
-        session_resumed: !!sessionId,
+        quiz_id: quizId ?? undefined,
+        attempt_id: testData.test_id,
+        session_resumed: !!(sessionId || attemptId),
       });
     }
-  }, [testData, courseId, conceptIds, topicId, sessionId]);
+  }, [testData, courseId, conceptIds, topicId, quizId, sessionId, attemptId]);
 
   useEffect(() => {
     if (
       testData &&
-      sessionId &&
       !resumeApplied.current &&
       testData.answered_count != null &&
       testData.answered_count > 0
@@ -105,7 +121,7 @@ export function TestPage() {
       setAnsweredCount(testData.answered_count);
       setCorrectCount(testData.correct_count ?? 0);
     }
-  }, [testData, sessionId]);
+  }, [testData]);
 
   const questions = testData?.questions ?? [];
   const currentQuestion = questions[currentIndex] ?? null;
@@ -145,7 +161,11 @@ export function TestPage() {
         correct: isCorrect,
       });
 
-      if (topicId) {
+      if (quizId && testData?.test_id) {
+        submitQuizAnswer(user.id, courseId, testData.test_id, currentQuestion.id, optionIndex).catch(
+          (err) => console.error("Background quiz answer failed:", err),
+        );
+      } else if (topicId) {
         submitBktAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
           (err) => console.error("Background BKT update failed:", err),
         );
@@ -155,7 +175,7 @@ export function TestPage() {
         );
       }
     },
-    [feedback, currentQuestion, user, courseId, topicId, testData?.test_id],
+    [feedback, currentQuestion, user, courseId, quizId, topicId, testData?.test_id],
   );
 
   const handleNext = useCallback(async () => {
@@ -168,7 +188,11 @@ export function TestPage() {
       setQuizComplete(true);
       setLoadingPassChance(true);
       try {
-        if (!topicId && testData?.test_id) {
+        if (quizId && testData?.test_id) {
+          completeQuizAttempt(user!.id, courseId!, testData.test_id).catch((err) =>
+            console.error("Failed to complete quiz attempt:", err),
+          );
+        } else if (!topicId && testData?.test_id) {
           completeTest(user!.id, courseId!, testData.test_id).catch((err) =>
             console.error("Failed to complete test session:", err),
           );
@@ -183,14 +207,14 @@ export function TestPage() {
         setLoadingPassChance(false);
       }
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      queryClient.invalidateQueries({ queryKey: testQueryKeys.history(courseId!, user!.id) });
+      queryClient.invalidateQueries({ queryKey: testQueryKeys.quizzes(courseId!, user!.id) });
       queryClient.invalidateQueries({ queryKey: gardenQueryKeys.progress(courseId!, user!.id) });
     } else {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setFeedback(null);
     }
-  }, [currentIndex, totalQuestions, user, courseId, topicId, queryClient, testData?.test_id]);
+  }, [currentIndex, totalQuestions, user, courseId, quizId, topicId, queryClient, testData?.test_id]);
 
   const handleRetake = useCallback(() => {
     setCurrentIndex(0);
@@ -202,18 +226,24 @@ export function TestPage() {
     setPassChance(null);
     setTargetGrade(1.0);
     resumeApplied.current = false;
-    queryClient.removeQueries({ queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? "") });
-    if (sessionId) {
-      queryClient.removeQueries({ queryKey: [...testQueryKeys.all, "resume", sessionId] });
-    }
-    if (topicId) {
+    quizStartedRef.current = false;
+
+    if (quizId) {
+      // Retake same quiz — start a fresh attempt
+      queryClient.removeQueries({ queryKey: testQueryKeys.quizAttempt(quizId, user?.id ?? "") });
+      if (attemptId) {
+        queryClient.removeQueries({ queryKey: testQueryKeys.resumeAttempt(attemptId) });
+      }
+      navigate(`/test/${courseId}?quiz=${quizId}`, { replace: true });
+    } else if (topicId) {
       queryClient.removeQueries({ queryKey: [...testQueryKeys.all, "focused", courseId, topicId] });
       navigate(`/test/${courseId}?topicId=${topicId}`, { replace: true });
     } else {
+      queryClient.removeQueries({ queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? "") });
       navigate(`/test/${courseId}`, { replace: true });
     }
     refetch();
-  }, [courseId, user, topicId, queryClient, refetch, sessionId, navigate]);
+  }, [courseId, user, quizId, topicId, attemptId, queryClient, refetch, navigate]);
 
   if (!user || !courseId) { navigate("/home"); return null; }
 
@@ -221,16 +251,16 @@ export function TestPage() {
     navigate(`/course/${courseId}`);
   }, [navigate, courseId]);
 
-  // ── Loading ──
+  const loadingMessage = quizId && !attemptId
+    ? "Growing your questions..."
+    : topicId
+    ? "Tending this patch..."
+    : "Resuming your walk...";
+
   if (isLoading) {
-    return (
-      <GardenVideoLoader
-        message={topicId ? "Tending this patch..." : sessionId ? "Resuming your walk..." : "Preparing the path..."}
-      />
-    );
+    return <GardenVideoLoader message={loadingMessage} />;
   }
 
-  // ── Error ──
   if (error) {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
@@ -254,7 +284,6 @@ export function TestPage() {
     );
   }
 
-  // ── No questions ──
   if (!questions.length) {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
@@ -354,7 +383,7 @@ export function TestPage() {
             <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
               <Button size="lg" className="flex-1 gap-2 rounded-parchment" onClick={handleRetake}>
                 <RotateCcw className="w-4 h-4" />
-                {topicId ? "Study Again" : "Walk the Path Again"}
+                {topicId ? "Study Again" : "Retake Quiz"}
               </Button>
               <Button
                 size="lg"
@@ -388,7 +417,7 @@ export function TestPage() {
       <div className="relative z-10 min-h-screen flex flex-col justify-center py-12">
         <div className="max-w-2xl w-full mx-auto px-6">
 
-          {/* Garden path progress bar */}
+          {/* Progress bar */}
           <div className="w-full mb-6">
             <div className="flex items-center justify-between mb-3 px-1">
               <span className="font-serif text-sm font-semibold text-primary">
@@ -423,7 +452,6 @@ export function TestPage() {
 
           {/* Question scroll card */}
           <ParchmentCard className="p-8 md:p-10 mb-6">
-            {/* Scroll ornament top */}
             <div className="flex justify-center mb-4">
               <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
                 <path
@@ -434,12 +462,9 @@ export function TestPage() {
                 />
               </svg>
             </div>
-
             <h2 className="font-serif text-xl md:text-2xl font-semibold text-foreground text-center leading-relaxed">
               {currentQuestion.question}
             </h2>
-
-            {/* Scroll ornament bottom */}
             <div className="flex justify-center mt-4">
               <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
                 <path
@@ -484,7 +509,7 @@ export function TestPage() {
             </div>
           )}
 
-          {/* Answer options — stone markers */}
+          {/* Answer options */}
           <div className="flex flex-col gap-3">
             {currentQuestion.options.map((option) => {
               const isSelected = selectedOption === option.index;
@@ -567,4 +592,3 @@ export function TestPage() {
     </div>
   );
 }
-

@@ -158,8 +158,8 @@ export function UploadModal({
         <DialogHeader>
           <DialogTitle>Upload Study Materials</DialogTitle>
           <DialogDescription>
-            Select a course, then upload your materials (PDF, DOCX, PPTX,
-            images). Max 10MB per file.
+            Select a course, then upload your materials (PDF, DOCX, PPTX, PNG,
+            JPEG). Max 10 MB per file, up to 5 files.
           </DialogDescription>
         </DialogHeader>
 
@@ -292,7 +292,7 @@ export function UploadModal({
                       : "Click to upload or drag and drop"}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PDF, DOCX, PPTX, Images (Max 5 files)
+                    PDF, DOCX, PPTX, PNG, JPEG — up to 5 files, 10 MB each
                   </p>
                 </div>
               </div>

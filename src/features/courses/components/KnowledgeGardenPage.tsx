@@ -186,7 +186,7 @@ export function KnowledgeGardenPage() {
             </ParchmentCard>
           </div>
         ) : (
-          <div className="relative z-10 min-h-screen pt-24 pb-16">
+          <div className="relative z-10 pt-24 pb-16">
             <div className="max-w-3xl mx-auto px-6">
               {/* Back link */}
               <button

@@ -3,15 +3,13 @@ import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Neko } from "@/components/garden/Neko";
 import { GardenIcon } from "@/components/garden/GardenIcons";
-import { useCookieConsent } from "@/hooks/useCookieConsent";
 
 export function LandingPage() {
   const { user } = useAuth();
-  const { clearConsent } = useCookieConsent();
   if (user) return <Navigate to="/home" replace />;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground">
       {/* Nav */}
       <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-sm border-b border-border/30">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
@@ -180,26 +178,8 @@ export function LandingPage() {
           </Button>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="py-8 px-6 border-t border-border/30">
-        <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-          <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
-          <span aria-hidden>·</span>
-          <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
-          <span aria-hidden>·</span>
-          <Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
-          <span aria-hidden>·</span>
-          <button
-            onClick={clearConsent}
-            className="hover:text-foreground transition-colors hover:underline underline-offset-2 cursor-pointer"
-          >
-            Cookie Settings
-          </button>
-          <span aria-hidden>·</span>
-          <span>© 2026 Shryn, Inc.</span>
-        </div>
-      </footer>
     </div>
   );
 }
+
+

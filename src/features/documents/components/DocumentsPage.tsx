@@ -147,7 +147,7 @@ export function DocumentsPage() {
     <>
       <GhibliBackground />
       <Header />
-      <div className="relative z-10 min-h-screen p-6 md:p-12 pt-28">
+      <div className="relative z-10 p-6 md:p-12 pt-28">
         <div className="max-w-6xl mx-auto space-y-8">
           <div className="flex flex-col md:flex-row gap-6">
             {/* Stats Card */}

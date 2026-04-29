@@ -85,9 +85,10 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Upload Materials</CardTitle>
+        <CardTitle>Upload Study Materials</CardTitle>
         <CardDescription>
-          PDF, DOCX, PPTX, Images — up to 5 files, 10MB each
+          Select a course, then upload your materials (PDF, DOCX, PPTX, PNG,
+            JPEG). Max 10 MB per file, up to 5 files.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">

@@ -7,6 +7,7 @@ import { queryClient } from "@/lib/queryClient";
 import { posthog } from "@/lib/posthog";
 import { Sentry } from "@/lib/sentry";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
+import { Footer } from "@/components/layout/Footer";
 
 function PageViewTracker() {
   const location = useLocation();
@@ -23,7 +24,10 @@ export default function App() {
         <PageViewTracker />
         <AuthProvider>
           <Sentry.ErrorBoundary fallback={<p>Something went wrong.</p>}>
-            <AppRoutes />
+            <div className="flex flex-col min-h-screen">
+              <AppRoutes />
+              <Footer />
+            </div>
             <CookieConsentBanner />
           </Sentry.ErrorBoundary>
         </AuthProvider>

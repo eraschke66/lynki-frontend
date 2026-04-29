@@ -128,7 +128,7 @@ export function AdminPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-background pt-24 pb-16">
+      <div className="bg-background pt-24 pb-16">
         <div className="max-w-5xl mx-auto px-6">
 
           <div className="flex items-center justify-between mb-8">

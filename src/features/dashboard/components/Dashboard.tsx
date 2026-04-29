@@ -148,9 +148,8 @@ export function Dashboard() {
   return (
     <>
       <Header />
-      <div className="relative min-h-screen overflow-hidden">
-        <GhibliBackground />
-
+      <GhibliBackground />
+      <div className="relative overflow-x-hidden">
         {/* Content */}
         <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-16">
           {hasNoCourses ? (

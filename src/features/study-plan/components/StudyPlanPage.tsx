@@ -166,7 +166,7 @@ export function StudyPlanPage() {
         featureName="Study Plan"
         featureDescription="An AI growth guide tailored to your weakest areas, exam date, and pass probability."
       >
-      <div className="relative z-10 min-h-screen pt-24 pb-16">
+      <div className="relative z-10 pt-24 pb-16">
         <div className="max-w-3xl mx-auto px-6">
           {/* Back link */}
           <button

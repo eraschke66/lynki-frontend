@@ -90,7 +90,7 @@ export function SettingsPage() {
       <GhibliBackground />
       <Header />
       <VineDecoration />
-      <div className="relative z-10 min-h-screen pt-24 pb-16">
+      <div className="relative z-10 pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-6">
           <button
             onClick={() => navigate("/home")}

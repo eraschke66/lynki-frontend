@@ -56,6 +56,22 @@ Deno.serve(async (req) => {
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
 
+  // Determine which plan the user selected — defaults to "annual"
+  let plan: "monthly" | "annual" = "annual";
+  try {
+    const body = await req.json();
+    if (body?.plan === "monthly" || body?.plan === "annual") {
+      plan = body.plan;
+    }
+  } catch {
+    // No body or invalid JSON — use default
+  }
+
+  const priceId =
+    plan === "monthly"
+      ? Deno.env.get("STRIPE_MONTHLY_PRICE_ID")!
+      : Deno.env.get("STRIPE_ANNUAL_PRICE_ID")!;
+
   // Get or create Stripe customer — never create duplicates
   const { data: profile } = await supabaseAdmin
     .from("user_profiles")
@@ -89,8 +105,12 @@ Deno.serve(async (req) => {
       customer: customerId,
       client_reference_id: user.id,
       mode: "subscription",
-      line_items: [{ price: Deno.env.get("STRIPE_PRICE_ID")!, quantity: 1 }],
-      success_url: `${Deno.env.get("FRONTEND_URL")}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+      line_items: [{ price: priceId, quantity: 1 }],
+      // Attach plan to the Stripe Subscription metadata so the webhook can read it
+      subscription_data: {
+        metadata: { plan },
+      },
+      success_url: `${Deno.env.get("FRONTEND_URL")}/subscription/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url: `${Deno.env.get("FRONTEND_URL")}/pricing`,
       automatic_tax: { enabled: false },
     });

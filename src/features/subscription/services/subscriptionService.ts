@@ -9,16 +9,19 @@ async function getAccessToken(): Promise<string> {
 }
 
 /**
- * Creates a Stripe Checkout session for the Premium subscription.
- * Explicitly fetches the session JWT and passes it as the Authorization header.
+ * Creates a Stripe Checkout session for the chosen plan.
+ * Passes `plan` in the POST body so the edge function picks the correct Price ID.
  *
  * Returns the Stripe-hosted checkout URL to redirect to.
  */
-export async function createCheckoutSession(): Promise<string> {
+export async function createCheckoutSession(
+  plan: "monthly" | "annual" = "annual",
+): Promise<string> {
   const token = await getAccessToken();
   const { data, error } = await supabase.functions.invoke("stripe-checkout", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
+    body: { plan },
   });
   if (error) throw new Error(error.message ?? "Failed to start checkout");
   return (data as { url: string }).url;

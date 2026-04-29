@@ -91,6 +91,22 @@ function tsToIso(ts: number | null | undefined): string | null {
   return ts == null ? null : new Date(ts * 1000).toISOString();
 }
 
+/**
+ * Derive the billing interval from a Stripe Subscription.
+ * Prefers the plan metadata we set at checkout; falls back to the price
+ * recurring interval (month → "monthly", year → "annual").
+ */
+function resolveInterval(
+  subscription: Stripe.Subscription,
+): "monthly" | "annual" {
+  const meta = subscription.metadata?.plan;
+  if (meta === "monthly" || meta === "annual") return meta;
+
+  // Fallback: inspect the first line-item's recurring interval
+  const interval = subscription.items.data[0]?.price?.recurring?.interval;
+  return interval === "month" ? "monthly" : "annual";
+}
+
 async function onCheckoutCompleted(session: Stripe.Checkout.Session) {
   const customerId = session.customer as string;
   const subscriptionId = session.subscription as string;
@@ -102,13 +118,18 @@ async function onCheckoutCompleted(session: Stripe.Checkout.Session) {
     return;
   }
   const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+  const interval = resolveInterval(subscription);
+
   await upsertByCustomer(customerId, {
     subscription_tier: "premium",
     subscription_status: "active",
     stripe_subscription_id: subscriptionId,
     current_period_end: tsToIso(subscription.current_period_end),
+    subscription_interval: interval,
   });
-  console.log(`User upgraded to premium (customer=${customerId})`);
+  console.log(
+    `User upgraded to premium (customer=${customerId}, interval=${interval})`,
+  );
 }
 
 async function onSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -117,10 +138,13 @@ async function onSubscriptionUpdated(subscription: Stripe.Subscription) {
     subscription.status === "active" || subscription.status === "trialing"
       ? "premium"
       : "free";
+  const interval = resolveInterval(subscription);
+
   await upsertByCustomer(customerId, {
     subscription_tier: tier,
     subscription_status: subscription.status,
     current_period_end: tsToIso(subscription.current_period_end),
+    subscription_interval: tier === "premium" ? interval : null,
   });
 }
 
@@ -130,6 +154,7 @@ async function onSubscriptionDeleted(subscription: Stripe.Subscription) {
     subscription_status: "canceled",
     stripe_subscription_id: null,
     current_period_end: null,
+    subscription_interval: null,
   });
 }
 

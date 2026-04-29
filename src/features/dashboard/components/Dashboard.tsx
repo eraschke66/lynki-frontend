@@ -299,42 +299,40 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 
   return (
     <ParchmentCard
-      className={`p-5 flex flex-col items-center gap-4 text-center relative ${
+      className={`p-5 flex flex-col gap-3 text-center ${
         isClickable ? "cursor-pointer" : "opacity-80"
       } ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
       hover={isClickable}
     >
-      {isRecommended && (
-        <div className="absolute top-2.5 left-2.5 z-10">
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-ghibli-forest bg-ghibli-moss/12 px-2 py-0.5 rounded-full border border-ghibli-moss/20">
-            Next up
-          </span>
-        </div>
-      )}
-      <div className="absolute top-2.5 right-2.5 z-10" onClick={(e) => e.stopPropagation()}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
-              <MoreVertical className="w-4 h-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-36">
-            <DropdownMenuItem onClick={onEdit}>
-              <Pencil className="w-4 h-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
-      <div onClick={isClickable ? onClick : undefined} className="flex flex-col items-center gap-3 w-full">
-        <h3 className="font-serif text-lg font-semibold text-primary line-clamp-2 min-h-[3rem]">
+      {/* Card header row: title (centered) + menu button (right) */}
+      <div className="flex items-start w-full">
+        <div className="flex-1" />
+        <h3 className="font-serif text-lg font-semibold text-primary line-clamp-2 text-center px-1">
           {course.title}
         </h3>
+        <div className="flex-1 flex justify-end" onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuItem onClick={onEdit}>
+                <Pencil className="w-4 h-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      {/* Card body: plant + stats */}
+      <div onClick={isClickable ? onClick : undefined} className="flex flex-col items-center gap-3 w-full">
         {isProcessing && course.totalConcepts === 0 ? (
           <div className="flex items-center justify-center" style={{ width: 64, height: 64 }}>
             <Loader2 className="w-8 h-8 animate-spin text-primary" />

@@ -7,10 +7,13 @@ import { posthog } from "@/lib/posthog";
 
 export type SubscriptionTier = "free" | "premium";
 export type SubscriptionStatus = "active" | "canceled" | "past_due" | "trialing" | null;
+export type SubscriptionInterval = "monthly" | "annual" | null;
 
 export interface SubscriptionInfo {
   tier: SubscriptionTier;
   status: SubscriptionStatus;
+  /** Billing cadence — null for legacy records and free users. */
+  interval: SubscriptionInterval;
   currentPeriodEnd: Date | null;
   /** True when the user has an active premium subscription. */
   isPremium: boolean;
@@ -35,7 +38,7 @@ export function useSubscription(): SubscriptionInfo {
       const { data, error } = await supabase
         .from("user_profiles")
         .select(
-          "subscription_tier, subscription_status, current_period_end"
+          "subscription_tier, subscription_status, subscription_interval, current_period_end"
         )
         .eq("user_id", user!.id)
         .maybeSingle();
@@ -55,6 +58,7 @@ export function useSubscription(): SubscriptionInfo {
 
   const tier: SubscriptionTier = (data?.subscription_tier as SubscriptionTier) ?? "free";
   const status: SubscriptionStatus = (data?.subscription_status as SubscriptionStatus) ?? null;
+  const interval: SubscriptionInterval = (data?.subscription_interval as SubscriptionInterval) ?? null;
   const currentPeriodEnd = data?.current_period_end
     ? new Date(data.current_period_end)
     : null;
@@ -76,9 +80,9 @@ export function useSubscription(): SubscriptionInfo {
 
   useEffect(() => {
     if (!queryLoading && data) {
-      posthog.setPersonProperties({ subscription_tier: tier, subscription_status: status });
+      posthog.setPersonProperties({ subscription_tier: tier, subscription_status: status, subscription_interval: interval });
     }
-  }, [queryLoading, data, tier, status]);
+  }, [queryLoading, data, tier, status, interval]);
 
-  return { tier, status, currentPeriodEnd, isPremium, isLoading };
+  return { tier, status, interval, currentPeriodEnd, isPremium, isLoading };
 }

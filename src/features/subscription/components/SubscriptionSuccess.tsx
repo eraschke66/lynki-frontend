@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Loader2, Sprout } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Loader2, Sprout, Calendar, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { Header } from "@/components/layout/Header";
@@ -23,21 +23,42 @@ const MAX_WAIT_MS = 30_000;
  * so we poll the subscription status until isPremium flips true (up to 30 s).
  * On success we show a toast and redirect to /home.
  * If the webhook takes longer, we show a reassurance message.
+ *
+ * The `plan` query param (appended by stripe-checkout) lets us show a
+ * personalised message immediately, before the webhook resolves.
  */
 export function SubscriptionSuccess() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const { isPremium } = useSubscription();
+  const { isPremium, interval } = useSubscription();
   const [timedOut, setTimedOut] = useState(false);
   const startedAt = useRef(Date.now());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Prefer the webhook-resolved interval; fall back to the URL param for the
+  // brief window before the webhook fires.
+  const planParam = searchParams.get("plan");
+  const resolvedPlan: "monthly" | "annual" =
+    interval === "monthly" || interval === "annual"
+      ? interval
+      : planParam === "monthly"
+        ? "monthly"
+        : "annual";
+
+  const isMonthly = resolvedPlan === "monthly";
+
   useEffect(() => {
     if (isPremium) {
       if (intervalRef.current) clearInterval(intervalRef.current);
-      posthog.capture("subscription_activated");
-      toast.success("Welcome to Premium! Your garden is now unlocked.");
+      posthog.capture("subscription_activated", { plan: resolvedPlan });
+
+      const toastMsg = isMonthly
+        ? "You're on the Monthly plan — $9.99/month. Welcome to Premium! 🌱"
+        : "You're on the Annual plan — best value. Welcome to Premium! 🌿";
+
+      toast.success(toastMsg);
       navigate("/home", { replace: true });
       return;
     }
@@ -59,7 +80,7 @@ export function SubscriptionSuccess() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPremium, navigate, queryClient, user]);
+  }, [isPremium, navigate, queryClient, user, isMonthly, resolvedPlan]);
 
   return (
     <>
@@ -105,6 +126,28 @@ export function SubscriptionSuccess() {
                 <h2 className="font-serif text-xl font-bold text-[#1B4332] mb-3">
                   Activating your garden…
                 </h2>
+
+                {/* Plan-specific detail shown while we wait for the webhook */}
+                <div
+                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4"
+                  style={{
+                    background: "rgba(64,145,108,0.1)",
+                    color: "#2D6A4F",
+                  }}
+                >
+                  {isMonthly ? (
+                    <>
+                      <Clock className="w-3.5 h-3.5" />
+                      Monthly plan · $9.99/month
+                    </>
+                  ) : (
+                    <>
+                      <Calendar className="w-3.5 h-3.5" />
+                      Annual plan · $79/year
+                    </>
+                  )}
+                </div>
+
                 <p className="text-sm text-muted-foreground">
                   Payment confirmed. Unlocking your premium features now.
                 </p>

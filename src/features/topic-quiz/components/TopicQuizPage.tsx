@@ -3,6 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { AlertCircle, ArrowRight, RefreshCw, RotateCcw, X } from "lucide-react";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
@@ -37,6 +47,7 @@ export function TopicQuizPage() {
   const [correctCount, setCorrectCount] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   const queryKey = topicQuizQueryKeys.session(
     courseId ?? "",
@@ -138,6 +149,14 @@ export function TopicQuizPage() {
   const handleExit = useCallback(() => {
     navigate(`/course/${courseId}/garden`);
   }, [navigate, courseId]);
+
+  const handleExitRequest = useCallback(() => {
+    if (quizComplete) {
+      handleExit();
+    } else {
+      setShowExitConfirm(true);
+    }
+  }, [quizComplete, handleExit]);
 
   if (!user || !courseId || !topicId) {
     navigate("/home");
@@ -286,12 +305,33 @@ export function TopicQuizPage() {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <GhibliBackground />
       <button
-        onClick={handleExit}
+        onClick={handleExitRequest}
         className="absolute top-5 right-5 z-30 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         aria-label="Exit quiz"
       >
         <X className="w-6 h-6" />
       </button>
+
+      {/* Exit confirmation */}
+      <AlertDialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave quiz?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be lost. This session won't be saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleExit}
+            >
+              Leave Quiz
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="relative z-10 min-h-screen flex flex-col justify-center py-12">
         <div className="max-w-2xl w-full mx-auto px-6">

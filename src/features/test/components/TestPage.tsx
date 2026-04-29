@@ -4,6 +4,16 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Loader2,
   AlertCircle,
   RefreshCw,
@@ -58,6 +68,7 @@ export function TestPage() {
   const [passChance, setPassChance] = useState<number | null>(null);
   const [targetGrade, setTargetGrade] = useState<number>(1.0);
   const [loadingPassChance, setLoadingPassChance] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
 
   // Determine query key and fetcher based on params
   const queryKey = conceptIds
@@ -247,6 +258,15 @@ export function TestPage() {
 
   if (!user || !courseId) { navigate("/home"); return null; }
 
+  // Confirm before exiting mid-quiz; results screen exits directly.
+  const handleExitRequest = () => {
+    if (quizComplete) {
+      handleExit();
+    } else {
+      setShowExitConfirm(true);
+    }
+  };
+
   const handleExit = useCallback(() => {
     navigate(`/course/${courseId}`);
   }, [navigate, courseId]);
@@ -407,12 +427,33 @@ export function TestPage() {
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
       <button
-        onClick={handleExit}
+        onClick={handleExitRequest}
         className="absolute top-5 right-5 z-30 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         aria-label="Exit quiz"
       >
         <X className="w-6 h-6" />
       </button>
+
+      {/* Exit confirmation */}
+      <AlertDialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Leave quiz?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your progress will be lost. This session won't be saved.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleExit}
+            >
+              Leave Quiz
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="relative z-10 min-h-screen flex flex-col justify-center py-12">
         <div className="max-w-2xl w-full mx-auto px-6">

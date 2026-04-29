@@ -15,22 +15,21 @@ import {
   AlertCircle,
   ArrowLeft,
   ClipboardCheck,
-  Clock,
   CheckCircle2,
   FileText,
   Play,
   Leaf,
   CalendarDays,
   Sparkles,
-  RotateCcw,
+  ChevronRight,
 } from "lucide-react";
 import { fetchPassChance, generateQuiz } from "@/features/test/services/testService";
 import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
-import { getGardenStatus } from "@/lib/garden";
 import type { CourseQuiz } from "@/features/test/types";
+import { QuizDetailModal } from "@/features/test/components/QuizDetailModal";
 
 export function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -38,6 +37,8 @@ export function CourseDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [generating, setGenerating] = useState(false);
+  const [selectedQuiz, setSelectedQuiz] = useState<CourseQuiz | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const { data: course, isLoading: courseLoading } = useQuery({
     queryKey: ["courses", "detail", courseId],
@@ -129,8 +130,9 @@ export function CourseDetailPage() {
     navigate(`/test/${courseId}?quiz=${quizId}`);
   };
 
-  const handleResumeQuiz = (quizId: string, attemptId: string) => {
-    navigate(`/test/${courseId}?quiz=${quizId}&attempt=${attemptId}`);
+  const handleOpenQuizModal = (quiz: CourseQuiz) => {
+    setSelectedQuiz(quiz);
+    setModalOpen(true);
   };
 
   if (generating) {
@@ -371,8 +373,7 @@ export function CourseDetailPage() {
                   <QuizCard
                     key={quiz.id}
                     quiz={quiz}
-                    onStart={handleStartQuiz}
-                    onResume={handleResumeQuiz}
+                    onClick={() => handleOpenQuizModal(quiz)}
                   />
                 ))}
               </div>
@@ -386,134 +387,94 @@ export function CourseDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Quiz detail modal */}
+      <QuizDetailModal
+        quiz={selectedQuiz}
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        onStart={handleStartQuiz}
+      />
     </>
   );
 }
 
 function QuizCard({
   quiz,
-  onStart,
-  onResume,
+  onClick,
 }: {
   quiz: CourseQuiz;
-  onStart: (quizId: string) => void;
-  onResume: (quizId: string, attemptId: string) => void;
+  onClick: () => void;
 }) {
-  const attempts = quiz.quiz_attempts ?? [];
-  const inProgressAttempt = attempts.find((a) => a.status === "in_progress");
-  const completedAttempts = attempts.filter((a) => a.status === "completed");
-  const latestCompleted = completedAttempts[0] ?? null;
+  const completedAttempts = (quiz.quiz_attempts ?? []).filter(
+    (a) => a.status === "completed",
+  );
+  const hasCompleted = completedAttempts.length > 0;
 
-  const hasAttempts = attempts.length > 0;
-  const scorePercent =
-    latestCompleted && quiz.total_questions > 0
-      ? Math.round((latestCompleted.correct_count / quiz.total_questions) * 100)
-      : null;
+  // Best score across all completed attempts
+  const bestScore = hasCompleted
+    ? Math.max(
+        ...completedAttempts.map((a) =>
+          quiz.total_questions > 0
+            ? Math.round((a.correct_count / quiz.total_questions) * 100)
+            : 0,
+        ),
+      )
+    : null;
 
-  const date = new Date(quiz.created_at);
-  const formattedDate = date.toLocaleDateString(undefined, {
+  const formattedDate = new Date(quiz.created_at).toLocaleDateString(undefined, {
     month: "short",
     day: "numeric",
   });
 
   return (
     <Card
-      className="rounded-xl overflow-hidden transition-all duration-150 hover:shadow-[0_4px_16px_rgba(27,67,50,0.08)] cursor-pointer"
+      className="group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_20px_rgba(27,67,50,0.10)] hover:border-[rgba(64,145,108,0.3)] cursor-pointer"
       style={{
-        borderLeft: inProgressAttempt
-          ? "3px solid rgba(245,158,11,0.4)"
-          : latestCompleted
+        borderLeft: hasCompleted
           ? "3px solid rgba(64,145,108,0.4)"
           : "3px solid rgba(64,145,108,0.15)",
       }}
-      onClick={() => {
-        if (inProgressAttempt) {
-          onResume(quiz.id, inProgressAttempt.id);
-        } else {
-          onStart(quiz.id);
-        }
-      }}
+      onClick={onClick}
     >
       <CardContent className="py-4 px-5">
         <div className="flex items-center gap-4">
+          {/* Status icon */}
           <div
-            className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 ${
-              inProgressAttempt
-                ? "bg-amber-500/10 text-amber-600"
-                : latestCompleted
-                ? "bg-[rgba(64,145,108,0.1)] text-[#2D6A4F]"
-                : "bg-[rgba(64,145,108,0.05)] text-[#40916C]"
+            className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 transition-colors ${
+              hasCompleted
+                ? "bg-[rgba(64,145,108,0.1)] text-[#2D6A4F] group-hover:bg-[rgba(64,145,108,0.18)]"
+                : "bg-[rgba(64,145,108,0.05)] text-[#40916C] group-hover:bg-[rgba(64,145,108,0.10)]"
             }`}
           >
-            {inProgressAttempt ? (
-              <Clock className="w-5 h-5" />
-            ) : latestCompleted ? (
+            {hasCompleted ? (
               <CheckCircle2 className="w-5 h-5" />
             ) : (
               <Play className="w-5 h-5" />
             )}
           </div>
 
+          {/* Name + meta */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-sm font-semibold truncate">{quiz.name}</p>
-              {inProgressAttempt && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 font-medium shrink-0">
-                  In Progress
-                </span>
-              )}
-            </div>
+            <p className="text-sm font-semibold truncate">{quiz.name}</p>
             <p className="text-xs text-muted-foreground mt-0.5">
               {formattedDate} &middot; {quiz.total_questions} questions
-              {completedAttempts.length > 0 && (
-                <> &middot; {completedAttempts.length} {completedAttempts.length === 1 ? "attempt" : "attempts"}</>
+              {hasCompleted && (
+                <>
+                  {" "}&middot;{" "}
+                  {completedAttempts.length}{" "}
+                  {completedAttempts.length === 1 ? "attempt" : "attempts"}
+                </>
               )}
             </p>
           </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            {inProgressAttempt && (
-              <p className="text-xs text-muted-foreground">
-                {inProgressAttempt.answered_count}/{quiz.total_questions} answered
-              </p>
+          {/* Best score + chevron */}
+          <div className="flex items-center gap-2 shrink-0">
+            {bestScore !== null && (
+              <span className="text-sm font-bold text-[#2D6A4F]">{bestScore}%</span>
             )}
-            {scorePercent !== null && !inProgressAttempt && (
-              <div className="text-right">
-                <p className="text-sm font-bold">
-                  {latestCompleted!.correct_count}/{quiz.total_questions}
-                </p>
-                <p className={`text-xs font-medium ${getGardenStatus(scorePercent).color}`}>
-                  {getGardenStatus(scorePercent).label}
-                </p>
-              </div>
-            )}
-            <Button
-              size="sm"
-              variant={inProgressAttempt ? "outline" : hasAttempts ? "ghost" : "default"}
-              className={
-                inProgressAttempt
-                  ? "gap-1.5 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
-                  : hasAttempts
-                  ? "gap-1.5"
-                  : "gap-1.5"
-              }
-              onClick={(e) => {
-                e.stopPropagation();
-                if (inProgressAttempt) {
-                  onResume(quiz.id, inProgressAttempt.id);
-                } else {
-                  onStart(quiz.id);
-                }
-              }}
-            >
-              {inProgressAttempt ? (
-                <><Play className="w-3.5 h-3.5" />Resume</>
-              ) : hasAttempts ? (
-                <><RotateCcw className="w-3.5 h-3.5" />Retake</>
-              ) : (
-                <><Play className="w-3.5 h-3.5" />Start</>
-              )}
-            </Button>
+            <ChevronRight className="w-4 h-4 text-muted-foreground/50 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
           </div>
         </div>
       </CardContent>

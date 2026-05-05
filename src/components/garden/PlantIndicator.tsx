@@ -2,6 +2,7 @@ interface PlantIndicatorProps {
   probability: number;
   size?: "sm" | "md" | "lg" | "xl";
   showPercent?: boolean;
+  glow?: boolean;
 }
 
 const stages = [
@@ -20,18 +21,26 @@ const sizeMap = {
   xl:  { img: "h-48 w-48",  labelPx: 13, pctPx: 13 },
 };
 
-export function PlantIndicator({ probability, size = "md", showPercent = true }: PlantIndicatorProps) {
+export function PlantIndicator({ probability, size = "md", showPercent = true, glow = false }: PlantIndicatorProps) {
   const stageIndex = probability >= 80 ? 3 : probability >= 55 ? 2 : probability >= 30 ? 1 : 0;
   const { img, labelPx, pctPx } = sizeMap[size];
 
   return (
     <div className="flex flex-col items-center gap-1">
-      <img
-        src={stages[stageIndex]}
-        alt={stageLabels[stageIndex]}
-        className={`${img} object-contain select-none animate-pulse-soft`}
-        style={{ mixBlendMode: "darken" }}
-      />
+      <div className="relative">
+        {glow && (
+          <>
+            <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/40 blur-3xl scale-125 animate-shimmer pointer-events-none" />
+            <div className="absolute inset-0 rounded-full bg-ghibli-gold/20 blur-2xl scale-110 pointer-events-none" />
+          </>
+        )}
+        <img
+          src={stages[stageIndex]}
+          alt={stageLabels[stageIndex]}
+          className={`relative ${img} object-contain select-none ${glow ? "animate-glow-soft" : "animate-pulse-soft"}`}
+          style={glow ? undefined : { mixBlendMode: "darken" }}
+        />
+      </div>
       <span
         className="font-sans text-muted-foreground"
         style={{ fontSize: labelPx }}

@@ -36,6 +36,7 @@ import { getGardenStatus, getStudyCTA, getDashboardSubtitle } from "@/lib/garden
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
+import { AddCourseCard } from "@/components/garden/AddCourseCard";
 
 const dashboardQueryKeys = {
   data: (userId: string) => ["dashboard", userId] as const,
@@ -166,19 +167,19 @@ export function Dashboard() {
 
               {/* Course grid */}
               <section>
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="font-serif text-xl font-semibold text-primary">Your Courses</h2>
+                <div className="flex items-end justify-between mb-5 px-1">
+                  <h2 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy">Your Courses</h2>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="gap-2 text-muted-foreground hover:text-ghibli-forest hover:bg-ghibli-moss/10"
+                    className="gap-2 text-ghibli-canopy/70 hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
                     onClick={() => setUploadModalOpen(true)}
                   >
                     <Plus className="w-4 h-4" />
                     Add Material
                   </Button>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {dashboardData!.courses.map((course) => (
                     <CourseCard
                       key={course.id}
@@ -190,24 +191,7 @@ export function Dashboard() {
                     />
                   ))}
                   {/* Add course card */}
-                  <ParchmentCard
-                    className="p-5 flex flex-col items-center justify-center gap-3 cursor-pointer min-h-[200px]"
-                    hover
-                  >
-                    <button
-                      onClick={() => setUploadModalOpen(true)}
-                      className="flex flex-col items-center gap-3 w-full"
-                    >
-                      <img
-                        src="/seedling-add.png"
-                        alt="Plant a new seed"
-                        className="w-12 h-12 object-contain opacity-60 select-none"
-                      />
-                      <span className="font-sans text-sm font-medium text-muted-foreground">
-                        New Course
-                      </span>
-                    </button>
-                  </ParchmentCard>
+                  <AddCourseCard onClick={() => setUploadModalOpen(true)} />
                 </div>
               </section>
             </div>
@@ -251,12 +235,12 @@ function HeroSection({ data, onStartStudying, onUpload }: {
   const subtitle = getDashboardSubtitle(hasStudyable, nextItem?.reason ?? null);
 
   return (
-    <ParchmentCard className="p-8 flex flex-col items-center gap-4">
-      <h2 className="font-serif text-xl font-semibold text-primary mb-1">
+    <ParchmentCard glow className="p-8 md:p-12 flex flex-col items-center gap-4 overflow-hidden">
+      <h2 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy mb-1 text-center">
         {name ? `Welcome back, ${name}` : "Your Learning Garden"}
       </h2>
-      <PlantIndicator probability={data.overallProgress} size="xl" />
-      <p className="text-sm font-sans text-muted-foreground mt-2 text-center max-w-md">
+      <PlantIndicator probability={data.overallProgress} size="xl" glow showPercent />
+      <p className="text-sm md:text-base font-sans text-ghibli-bark/80 mt-2 text-center max-w-md leading-relaxed">
         {subtitle}
       </p>
       {hasStudyable && data.totalConcepts > 0 && (
@@ -270,12 +254,20 @@ function HeroSection({ data, onStartStudying, onUpload }: {
       )}
       <div className="flex flex-wrap gap-3 justify-center mt-2">
         {hasStudyable && nextItem ? (
-          <Button size="lg" className="gap-2 rounded-parchment" onClick={onStartStudying}>
+          <Button
+            size="lg"
+            onClick={onStartStudying}
+            className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+          >
             <Sparkles className="w-4 h-4" />
             {getStudyCTA(nextItem.reason)}
           </Button>
         ) : (
-          <Button size="lg" className="gap-2 rounded-parchment" onClick={onUpload}>
+          <Button
+            size="lg"
+            onClick={onUpload}
+            className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+          >
             <Upload className="w-4 h-4" />
             Plant a Seed
           </Button>
@@ -295,67 +287,106 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 }) {
   const isProcessing = course.hasProcessing;
   const isClickable = course.totalConcepts > 0;
+  const status = getGardenStatus(course.progressPercent);
 
   return (
     <ParchmentCard
-      className={`p-5 flex flex-col gap-3 text-center ${
-        isClickable ? "cursor-pointer" : "opacity-80"
+      className={`p-6 flex flex-col gap-4 group ${
+        isClickable ? "" : "opacity-80"
       } ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
       hover={isClickable}
     >
-      {/* Card header row: title (centered) + menu button (right) */}
-      <div className="flex items-start w-full">
-        <div className="flex-1" />
-        <h3 className="font-serif text-lg font-semibold text-primary line-clamp-2 text-center px-1">
+      {/* Header: title + status badge + menu */}
+      <div className="flex items-start justify-between gap-3">
+        <h3 className="font-serif text-xl font-semibold text-ghibli-canopy leading-snug line-clamp-2 flex-1">
           {course.title}
         </h3>
-        <div className="flex-1 flex justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors flex-shrink-0">
-                <MoreVertical className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              <DropdownMenuItem onClick={onEdit}>
-                <Pencil className="w-4 h-4 mr-2" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+        <div className="flex items-center gap-1 shrink-0">
+          {course.totalConcepts > 0 ? (
+            <span className={`text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/60 ${status.color}`}>
+              {status.label}
+            </span>
+          ) : isProcessing ? (
+            <span className="text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/60 text-primary">
+              Processing…
+            </span>
+          ) : null}
+          <div onClick={(e) => e.stopPropagation()}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-ghibli-ivory/60 transition-colors flex-shrink-0">
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                <DropdownMenuItem onClick={onEdit}>
+                  <Pencil className="w-4 h-4 mr-2" />
+                  Edit
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={onDelete} className="text-destructive focus:text-destructive">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
-      {/* Card body: plant + stats */}
-      <div onClick={isClickable ? onClick : undefined} className="flex flex-col items-center gap-3 w-full">
+      {/* Body: plant + animated vine */}
+      <div
+        onClick={isClickable ? onClick : undefined}
+        className={`flex items-center gap-4 ${isClickable ? "cursor-pointer" : ""}`}
+      >
         {isProcessing && course.totalConcepts === 0 ? (
-          <div className="flex items-center justify-center" style={{ width: 64, height: 64 }}>
+          <div className="flex items-center justify-center shrink-0" style={{ width: 64, height: 64 }}>
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         ) : (
-          <PlantIndicator probability={course.progressPercent} size="md" />
+          <PlantIndicator probability={course.progressPercent} size="md" showPercent />
         )}
-        <p className="text-xs font-sans text-muted-foreground">
+        <div className="flex-1 flex flex-col gap-2 min-w-0">
           {course.totalConcepts > 0 ? (
-            <span className={`font-medium ${getGardenStatus(course.progressPercent).color}`}>
-              {getGardenStatus(course.progressPercent).label}
-            </span>
-          ) : isProcessing ? (
-            <span className="text-primary">Processing...</span>
+            <svg viewBox="0 0 100 8" className="w-full h-2.5 overflow-visible" preserveAspectRatio="none" aria-hidden>
+              <path
+                d="M0 4 Q 25 0, 50 4 T 100 4"
+                fill="none"
+                stroke="hsl(var(--ghibli-mist))"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+              />
+              <path
+                d="M0 4 Q 25 0, 50 4 T 100 4"
+                fill="none"
+                stroke="hsl(var(--ghibli-forest))"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeDasharray="100"
+                strokeDashoffset={100 - course.progressPercent}
+                style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
+              />
+            </svg>
           ) : (
-            <>{course.documentCount} {course.documentCount === 1 ? "doc" : "docs"}</>
+            <p className="text-xs font-sans text-muted-foreground">
+              {course.documentCount} {course.documentCount === 1 ? "doc" : "docs"}
+            </p>
           )}
-        </p>
-        {isClickable && (
-          <div className="mt-1 text-ghibli-moss/50">
-            <ArrowRight className="w-4 h-4" />
-          </div>
-        )}
+          <span className="font-sans text-xs text-muted-foreground italic line-clamp-1">
+            Tend regularly to keep it thriving
+          </span>
+        </div>
       </div>
+
+      {/* CTA */}
+      {isClickable && (
+        <Button
+          onClick={onClick}
+          className="w-full rounded-full font-sans text-sm font-semibold tracking-wide bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-lg transition-all gap-1"
+        >
+          Walk the Path
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+      )}
     </ParchmentCard>
   );
 }
@@ -364,19 +395,26 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 max-w-md mx-auto">
-      <ParchmentCard className="p-10 flex flex-col items-center gap-6">
-        <img
-          src="/seedling-add.png"
-          alt="Plant your first seed"
-          className="w-20 h-20 object-contain select-none"
-        />
+      <ParchmentCard glow className="p-10 md:p-12 flex flex-col items-center gap-6">
+        <div className="relative">
+          <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/30 blur-2xl scale-125" />
+          <img
+            src="/seedling-add.png"
+            alt="Plant your first seed"
+            className="relative w-20 h-20 object-contain select-none animate-glow-soft"
+          />
+        </div>
         <div className="space-y-3">
-          <h1 className="font-serif text-3xl font-bold text-primary">Your garden is ready.</h1>
-          <p className="text-muted-foreground font-sans leading-relaxed">
+          <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ghibli-canopy">Your garden is ready.</h1>
+          <p className="text-ghibli-bark/80 font-sans leading-relaxed">
             Plant your first seed — upload your study materials and we'll show you where you stand before the exam does.
           </p>
         </div>
-        <Button size="lg" className="gap-2 rounded-parchment" onClick={onUpload}>
+        <Button
+          size="lg"
+          onClick={onUpload}
+          className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+        >
           <Upload className="w-5 h-5" />
           Plant a Seed
         </Button>

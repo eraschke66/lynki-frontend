@@ -28,10 +28,10 @@ export function Header() {
 
   const navLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "flex items-center gap-2 text-sm font-medium transition-all duration-150 px-3 py-2 rounded-md",
+      "flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-sans font-medium transition-all duration-200",
       isActive
-        ? "text-[#1B4332] bg-[rgba(64,145,108,0.08)] border-l-2 border-[#40916C] pl-[calc(0.75rem-2px)]"
-        : "text-muted-foreground hover:text-[#2D6A4F] hover:bg-[rgba(64,145,108,0.05)]",
+        ? "bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy text-primary-foreground shadow-md"
+        : "text-ghibli-canopy/70 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60",
     );
 
   return (
@@ -69,7 +69,7 @@ export function Header() {
           </div>
 
           {user && (
-            <nav className="hidden md:flex items-center gap-1">
+            <nav className="hidden md:flex items-center gap-1 p-1.5 rounded-full glass-cream botanical-border shadow-parchment">
               <NavLink to="/home" className={navLinkClass} end>
                 <Home className="w-4 h-4" />
                 Home

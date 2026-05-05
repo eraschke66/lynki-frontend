@@ -21,14 +21,14 @@ export function StudyPlanHero({
   const queryClient = useQueryClient();
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <ParchmentCard className="p-6 flex flex-col items-center text-center gap-2">
-        <Calendar className="w-6 h-6 text-[#40916C]" />
-        <p className="text-4xl font-bold text-[#1B4332]">{daysRemaining}</p>
-        <p className="text-sm text-muted-foreground">
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+      <ParchmentCard className="p-6 md:p-8 flex flex-col items-center text-center gap-2">
+        <Calendar className="w-6 h-6 text-ghibli-forest" />
+        <p className="font-serif text-5xl font-semibold text-ghibli-canopy leading-none">{daysRemaining}</p>
+        <p className="text-sm font-sans text-ghibli-bark/80">
           {daysRemaining === 1 ? "day" : "days"} until your exam
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs font-sans text-muted-foreground italic">
           {new Date(testDate).toLocaleDateString(undefined, {
             weekday: "long",
             month: "long",
@@ -36,7 +36,7 @@ export function StudyPlanHero({
           })}
         </p>
         <button
-          className="text-xs text-muted-foreground hover:text-[#2D6A4F] mt-1 underline underline-offset-2"
+          className="text-xs text-ghibli-moss hover:text-ghibli-forest mt-1 underline underline-offset-2"
           onClick={() => {
             queryClient.setQueryData(
               ["courses", "detail", courseId],
@@ -49,19 +49,19 @@ export function StudyPlanHero({
         </button>
       </ParchmentCard>
 
-      <ParchmentCard className="p-6 flex flex-col items-center text-center gap-2">
-        <Target className="w-6 h-6 text-[#40916C]" />
+      <ParchmentCard glow className="p-6 md:p-8 flex flex-col items-center text-center gap-2">
+        <Target className="w-6 h-6 text-ghibli-forest" />
         {passPercent !== null ? (
           <>
-            <PlantIndicator probability={passPercent} size="lg" showPercent={true} />
-            <p className="text-xs text-muted-foreground mt-1">
+            <PlantIndicator probability={passPercent} size="lg" glow showPercent={true} />
+            <p className="text-xs font-sans text-ghibli-bark/80 mt-1 italic">
               growing toward {targetLabel}
             </p>
           </>
         ) : (
           <>
             <PlantIndicator probability={0} size="lg" showPercent={false} />
-            <p className="text-xs text-muted-foreground text-center max-w-35">
+            <p className="text-xs font-sans text-muted-foreground text-center max-w-[14rem] italic">
               Take your first quiz to see your pass chance
             </p>
           </>

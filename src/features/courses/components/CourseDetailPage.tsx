@@ -9,6 +9,7 @@ import { Neko } from "@/components/garden/Neko";
 import { GardenInlineIcon } from "@/components/garden/GardenIcons";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
+import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -195,26 +196,19 @@ export function CourseDetailPage() {
           {/* Back link */}
           <button
             onClick={() => navigate("/home")}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
 
           {/* Course header */}
-          <div
-            className="mb-8 p-5 rounded-2xl"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
-              border: "1px solid rgba(64,145,108,0.12)",
-            }}
-          >
-            <h1 className="text-2xl font-bold mb-2">{course.title}</h1>
+          <ParchmentCard className="mb-8 p-6">
+            <h1 className="font-serif text-3xl font-semibold text-ghibli-canopy mb-2">{course.title}</h1>
             {course.description && (
-              <p className="text-muted-foreground">{course.description}</p>
+              <p className="font-sans text-ghibli-bark/80 leading-relaxed">{course.description}</p>
             )}
-            <div className="flex items-center gap-4 mt-3 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 mt-3 text-sm font-sans text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <FileText className="w-4 h-4" />
                 {docCount ?? 0}{" "}
@@ -230,7 +224,7 @@ export function CourseDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+                className="gap-2 rounded-full border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
                 onClick={() => navigate(`/course/${courseId}/garden`)}
                 disabled={!docCount || docCount === 0}
               >
@@ -240,7 +234,7 @@ export function CourseDetailPage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-2 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+                className="gap-2 rounded-full border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
                 onClick={() => navigate(`/course/${courseId}/study-plan`)}
                 disabled={!docCount || docCount === 0}
               >
@@ -248,94 +242,83 @@ export function CourseDetailPage() {
                 Study Plan
               </Button>
             </div>
-          </div>
+          </ParchmentCard>
 
           {/* First-quiz banner */}
           {docCount && docCount > 0 && quizzes.length === 0 && (
-            <div
-              className="rounded-2xl p-6 mb-6 flex flex-col sm:flex-row items-center gap-5"
-              style={{
-                background: "linear-gradient(135deg, rgba(64,145,108,0.10) 0%, rgba(250,243,224,0.4) 100%)",
-                border: "1.5px solid rgba(64,145,108,0.25)",
-              }}
-            >
+            <ParchmentCard className="p-6 mb-6 flex flex-col sm:flex-row items-center gap-5">
               <img
                 src="/plant-stage-1.png"
                 alt=""
-                className="w-14 h-14 object-contain shrink-0"
+                className="w-14 h-14 object-contain shrink-0 animate-pulse-soft"
                 style={{ mixBlendMode: "darken" }}
               />
               <div className="flex-1 text-center sm:text-left">
-                <p className="font-serif text-base font-semibold text-[#1B4332]">
+                <p className="font-serif text-lg font-semibold text-ghibli-canopy">
                   Your garden soil is ready
                 </p>
-                <p className="text-sm text-muted-foreground mt-0.5">
+                <p className="font-sans text-sm text-ghibli-bark/80 mt-0.5">
                   Your material has been processed. Generate your first quiz to start tracking mastery.
                 </p>
               </div>
               <Button
                 size="lg"
-                className="gap-2 shrink-0 shadow-[0_4px_12px_rgba(13,115,119,0.2)]"
                 onClick={handleGenerateQuiz}
+                className="gap-2 shrink-0 rounded-full px-6 py-5 font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-md hover:shadow-glow transition-all"
               >
                 <Play className="w-4 h-4" />
                 Generate First Quiz
               </Button>
-            </div>
+            </ParchmentCard>
           )}
 
           {/* Pass chance + Generate quiz */}
-          <Card
-            className="rounded-2xl overflow-hidden mb-8"
-            style={{ borderTop: "3px solid rgba(64,145,108,0.3)" }}
-          >
-            <CardContent className="pt-8 pb-8 px-8">
-              <div className="flex flex-col sm:flex-row items-center gap-8">
-                <div className="flex flex-col items-center text-center shrink-0">
-                  <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-3">
-                    Your Garden
-                  </p>
-                  {passPercent !== null ? (
-                    <>
-                      <PlantIndicator probability={passPercent} size="lg" showPercent={true} />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        growing toward {targetLabel}
-                      </p>
-                    </>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <PlantIndicator probability={0} size="lg" showPercent={false} />
-                      <p className="text-xs text-muted-foreground text-center leading-tight max-w-30">
-                        Generate a quiz to see your garden
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-1 flex flex-col items-center sm:items-start gap-3">
-                  <div>
-                    <h2 className="text-lg font-semibold">
-                      {quizzes.length > 0 ? "Keep Tending" : "Plant Your First Seeds"}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {quizzes.length > 0
-                        ? "Each quiz generates 10 fresh questions tailored to your weakest areas."
-                        : "Generate a quiz to plant seeds and see what grows."}
+          <ParchmentCard glow className="mb-8 p-8">
+            <div className="flex flex-col sm:flex-row items-center gap-8">
+              <div className="flex flex-col items-center text-center shrink-0">
+                <p className="font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
+                  Your Garden
+                </p>
+                {passPercent !== null ? (
+                  <>
+                    <PlantIndicator probability={passPercent} size="lg" glow showPercent={true} />
+                    <p className="font-sans text-xs text-ghibli-bark/80 mt-2 italic">
+                      growing toward {targetLabel}
+                    </p>
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <PlantIndicator probability={0} size="lg" showPercent={false} />
+                    <p className="font-sans text-xs text-muted-foreground text-center leading-tight max-w-[8rem] italic">
+                      Generate a quiz to see your garden
                     </p>
                   </div>
-                  <Button
-                    size="lg"
-                    className="gap-2 shadow-[0_4px_12px_rgba(13,115,119,0.2)]"
-                    onClick={handleGenerateQuiz}
-                    disabled={!docCount || docCount === 0}
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    {quizzes.length > 0 ? "Generate New Quiz" : "Begin Growing"}
-                  </Button>
-                </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+
+              <div className="flex-1 flex flex-col items-center sm:items-start gap-3">
+                <div>
+                  <h2 className="font-serif text-xl font-semibold text-ghibli-canopy">
+                    {quizzes.length > 0 ? "Keep Tending" : "Plant Your First Seeds"}
+                  </h2>
+                  <p className="font-sans text-sm text-ghibli-bark/80 mt-1 leading-relaxed">
+                    {quizzes.length > 0
+                      ? "Each quiz generates 10 fresh questions tailored to your weakest areas."
+                      : "Generate a quiz to plant seeds and see what grows."}
+                  </p>
+                </div>
+                <Button
+                  size="lg"
+                  onClick={handleGenerateQuiz}
+                  disabled={!docCount || docCount === 0}
+                  className="gap-2 rounded-full px-6 py-5 font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-md hover:shadow-glow transition-all"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  {quizzes.length > 0 ? "Generate New Quiz" : "Begin Growing"}
+                </Button>
+              </div>
+            </div>
+          </ParchmentCard>
 
           {/* Quizzes list */}
           <div>

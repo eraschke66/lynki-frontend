@@ -191,35 +191,28 @@ export function KnowledgeGardenPage() {
               {/* Back link */}
               <button
                 onClick={() => navigate(`/course/${courseId}`)}
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
+                className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-6"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Course
               </button>
 
               {/* Garden header */}
-              <div
-                className="mb-8 p-6 rounded-2xl text-center"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
-                  border: "1px solid rgba(64,145,108,0.12)",
-                }}
-              >
-                <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-2">
+              <ParchmentCard glow className="mb-8 p-8 md:p-10 text-center flex flex-col items-center">
+                <span className="font-sans text-[10px] font-semibold uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
                   Knowledge Garden
-                </p>
-                <h1 className="text-2xl font-bold mb-4">
+                </span>
+                <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ghibli-canopy mb-4">
                   {gardenData?.course_title ?? "Your Course"}
                 </h1>
-                <PlantIndicator probability={overallProgress} size="xl" showPercent={true} />
-                <p className={`text-sm font-semibold mt-3 ${gardenStatus.color}`}>
+                <PlantIndicator probability={overallProgress} size="xl" glow showPercent={true} />
+                <p className={`font-sans text-sm font-semibold mt-3 ${gardenStatus.color}`}>
                   {gardenStatus.label}
                 </p>
-                <p className="text-xs text-muted-foreground mt-1">
+                <p className="font-sans text-xs text-ghibli-bark/80 mt-1 italic">
                   {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts mastered
                 </p>
-              </div>
+              </ParchmentCard>
 
               {/* Topics */}
               {topics.length === 0 ? (

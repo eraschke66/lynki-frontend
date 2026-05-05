@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { Calendar, Target } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 
@@ -20,53 +20,60 @@ export function StudyPlanHero({
 }: StudyPlanHeroProps) {
   const queryClient = useQueryClient();
 
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <ParchmentCard className="p-6 md:p-8 flex flex-col items-center text-center gap-2">
-        <Calendar className="w-6 h-6 text-ghibli-forest" />
-        <p className="font-serif text-5xl font-semibold text-ghibli-canopy leading-none">{daysRemaining}</p>
-        <p className="text-sm font-sans text-ghibli-bark/80">
-          {daysRemaining === 1 ? "day" : "days"} until your exam
-        </p>
-        <p className="text-xs font-sans text-muted-foreground italic">
-          {new Date(testDate).toLocaleDateString(undefined, {
-            weekday: "long",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
-        <button
-          className="text-xs text-ghibli-moss hover:text-ghibli-forest mt-1 underline underline-offset-2"
-          onClick={() => {
-            queryClient.setQueryData(
-              ["courses", "detail", courseId],
-              (old: { test_date: string | null } | undefined) =>
-                old ? { ...old, test_date: null } : old,
-            );
-          }}
-        >
-          Change date
-        </button>
-      </ParchmentCard>
+  const formattedDate = new Date(testDate).toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  });
 
-      <ParchmentCard glow className="p-6 md:p-8 flex flex-col items-center text-center gap-2">
-        <Target className="w-6 h-6 text-ghibli-forest" />
-        {passPercent !== null ? (
-          <>
-            <PlantIndicator probability={passPercent} size="lg" glow showPercent={true} />
-            <p className="text-xs font-sans text-ghibli-bark/80 mt-1 italic">
-              growing toward {targetLabel}
-            </p>
-          </>
-        ) : (
-          <>
-            <PlantIndicator probability={0} size="lg" showPercent={false} />
-            <p className="text-xs font-sans text-muted-foreground text-center max-w-[14rem] italic">
-              Take your first quiz to see your pass chance
-            </p>
-          </>
-        )}
-      </ParchmentCard>
-    </div>
+  return (
+    <ParchmentCard glow className="p-8 md:p-12 mb-10 overflow-hidden">
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="text-center md:text-left order-2 md:order-1">
+          <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
+            <Calendar className="inline w-3 h-3 mr-1 -mt-0.5" />
+            Until Your Exam
+          </span>
+          <h2 className="font-serif text-6xl md:text-7xl font-semibold text-ghibli-canopy leading-none mb-3">
+            {daysRemaining}
+          </h2>
+          <p className="font-sans text-lg text-ghibli-canopy/80 mb-2">
+            {daysRemaining === 1 ? "day" : "days"} of growing time
+          </p>
+          <p className="font-sans text-sm text-ghibli-bark/70 italic mb-4">
+            {formattedDate}
+          </p>
+          <button
+            onClick={() => {
+              queryClient.setQueryData(
+                ["courses", "detail", courseId],
+                (old: { test_date: string | null } | undefined) =>
+                  old ? { ...old, test_date: null } : old,
+              );
+            }}
+            className="font-sans text-xs text-ghibli-moss hover:text-ghibli-forest underline underline-offset-2 transition-colors"
+          >
+            Change date
+          </button>
+        </div>
+        <div className="order-1 md:order-2 flex flex-col items-center gap-2">
+          {passPercent !== null ? (
+            <>
+              <PlantIndicator probability={passPercent} size="xl" glow showPercent />
+              <p className="font-sans text-xs text-ghibli-bark/80 italic">
+                growing toward {targetLabel}
+              </p>
+            </>
+          ) : (
+            <>
+              <PlantIndicator probability={0} size="xl" showPercent={false} />
+              <p className="font-sans text-xs text-ghibli-bark/70 italic max-w-[14rem] text-center leading-relaxed">
+                Take your first quiz to see your pass chance
+              </p>
+            </>
+          )}
+        </div>
+      </div>
+    </ParchmentCard>
   );
 }

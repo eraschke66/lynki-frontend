@@ -12,12 +12,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Sparkles,
-  Plus,
   Loader2,
   AlertCircle,
   RefreshCw,
   Upload,
-  ArrowRight,
   MoreVertical,
   Pencil,
   Trash2,
@@ -127,19 +125,25 @@ export function Dashboard() {
 
   if (error) {
     return (
-      <>
+      <div className="relative min-h-screen overflow-hidden">
+        <GhibliBackground />
         <Header />
-        <div className="min-h-screen bg-background flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
-            <p className="text-sm text-muted-foreground">Failed to load dashboard</p>
-            <Button variant="outline" size="sm" onClick={() => queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.data(user.id) })}>
+        <div className="relative z-10 max-w-6xl mx-auto px-6 py-16 flex items-center justify-center">
+          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm w-full">
+            <AlertCircle className="w-10 h-10 text-destructive" />
+            <p className="font-sans text-sm text-ghibli-bark/80">Failed to load dashboard</p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.data(user.id) })}
+              className="rounded-full border-ghibli-moss/40 hover:border-ghibli-forest hover:bg-ghibli-ivory/60"
+            >
               <RefreshCw className="w-4 h-4 mr-2" />
               Retry
             </Button>
-          </div>
+          </ParchmentCard>
         </div>
-      </>
+      </div>
     );
   }
 
@@ -147,56 +151,57 @@ export function Dashboard() {
   const nextItem = dashboardData?.nextStudyItem;
 
   return (
-    <>
-      <Header />
+    <div className="relative min-h-screen overflow-hidden">
       <GhibliBackground />
-      <div className="relative overflow-x-hidden">
-        {/* Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-6 pt-24 pb-16">
-          {hasNoCourses ? (
-            <EmptyState onUpload={() => setUploadModalOpen(true)} />
-          ) : (
-            <div className="space-y-10">
-              <HeroSection
-                data={dashboardData!}
-                onStartStudying={() => {
-                  if (nextItem) navigate(`/course/${nextItem.courseId}`);
-                }}
-                onUpload={() => setUploadModalOpen(true)}
-              />
+      <Header />
 
-              {/* Course grid */}
-              <section>
-                <div className="flex items-end justify-between mb-5 px-1">
-                  <h2 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy">Your Courses</h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="gap-2 text-ghibli-canopy/70 hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
-                    onClick={() => setUploadModalOpen(true)}
-                  >
-                    <Plus className="w-4 h-4" />
-                    Add Material
-                  </Button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {dashboardData!.courses.map((course) => (
-                    <CourseCard
-                      key={course.id}
-                      course={course}
-                      isRecommended={nextItem?.courseId === course.id}
-                      onClick={() => navigate(`/course/${course.id}`)}
-                      onEdit={() => setEditingCourse(course)}
-                      onDelete={() => setDeletingCourse(course)}
-                    />
-                  ))}
-                  {/* Add course card */}
-                  <AddCourseCard onClick={() => setUploadModalOpen(true)} />
-                </div>
-              </section>
+      {/* Content */}
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-6 md:pt-8 pb-16">
+        {hasNoCourses ? (
+          <EmptyState onUpload={() => setUploadModalOpen(true)} />
+        ) : (
+          <>
+            <HeroSection
+              data={dashboardData!}
+              onStartStudying={() => {
+                if (nextItem) navigate(`/course/${nextItem.courseId}`);
+              }}
+              onUpload={() => setUploadModalOpen(true)}
+            />
+
+            {/* Section heading */}
+            <div className="flex items-end justify-between mb-5 px-1">
+              <div>
+                <h3 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy">
+                  Your Study Garden
+                </h3>
+                <p className="font-sans text-sm text-ghibli-bark/70 italic mt-1">
+                  {dashboardData!.courses.length} {dashboardData!.courses.length === 1 ? "course" : "courses"} planted • last tended today
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Course grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {dashboardData!.courses.map((course) => (
+                <CourseCard
+                  key={course.id}
+                  course={course}
+                  isRecommended={nextItem?.courseId === course.id}
+                  onClick={() => navigate(`/course/${course.id}`)}
+                  onEdit={() => setEditingCourse(course)}
+                  onDelete={() => setDeletingCourse(course)}
+                />
+              ))}
+              <AddCourseCard onClick={() => setUploadModalOpen(true)} />
+            </div>
+
+            {/* Footer */}
+            <p className="text-center text-ghibli-bark/50 text-xs font-sans italic mt-16 mb-4 tracking-wide">
+              🌿 Study gently · grow steadily · breathe deeply 🌿
+            </p>
+          </>
+        )}
       </div>
 
       <UploadModal
@@ -218,66 +223,60 @@ export function Dashboard() {
         course={deletingCourse}
         onConfirm={handleDeleteCourse}
       />
-    </>
+    </div>
   );
 }
 
-/* ── Hero Section ── */
+/* ── Hero Section — oasis "Tend Your Study Garden" two-column ── */
 function HeroSection({ data, onStartStudying, onUpload }: {
   data: DashboardData;
   onStartStudying: () => void;
   onUpload: () => void;
 }) {
-  const { user } = useAuth();
-  const name = user?.email?.split("@")[0] ?? "";
   const hasStudyable = data.courses.some((c) => c.totalConcepts > 0);
   const nextItem = data.nextStudyItem;
   const subtitle = getDashboardSubtitle(hasStudyable, nextItem?.reason ?? null);
 
+  const primaryAction = hasStudyable && nextItem ? onStartStudying : onUpload;
+  const ctaLabel = hasStudyable && nextItem
+    ? getStudyCTA(nextItem.reason)
+    : "Plant a Seed";
+
   return (
-    <ParchmentCard glow className="p-8 md:p-12 flex flex-col items-center gap-4 overflow-hidden">
-      <h2 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy mb-1 text-center">
-        {name ? `Welcome back, ${name}` : "Your Learning Garden"}
-      </h2>
-      <PlantIndicator probability={data.overallProgress} size="xl" glow showPercent />
-      <p className="text-sm md:text-base font-sans text-ghibli-bark/80 mt-2 text-center max-w-md leading-relaxed">
-        {subtitle}
-      </p>
-      {hasStudyable && data.totalConcepts > 0 && (
-        <p className="text-sm font-sans text-muted-foreground">
-          Studying{" "}
-          <span className="font-semibold text-foreground">{data.totalConcepts}</span>{" "}
-          concepts across{" "}
-          <span className="font-semibold text-foreground">{data.totalCourses}</span>{" "}
-          {data.totalCourses === 1 ? "course" : "courses"}
-        </p>
-      )}
-      <div className="flex flex-wrap gap-3 justify-center mt-2">
-        {hasStudyable && nextItem ? (
+    <ParchmentCard className="p-8 md:p-12 mb-10 overflow-hidden" glow>
+      <div className="grid md:grid-cols-2 gap-8 items-center">
+        <div className="text-center md:text-left order-2 md:order-1">
+          <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
+            Your Sanctuary
+          </span>
+          <h2 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight mb-4">
+            Tend Your<br />Study Garden
+          </h2>
+          <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed mb-6 max-w-md mx-auto md:mx-0">
+            {subtitle}
+          </p>
           <Button
             size="lg"
-            onClick={onStartStudying}
+            onClick={primaryAction}
             className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
           >
-            <Sparkles className="w-4 h-4" />
-            {getStudyCTA(nextItem.reason)}
+            {hasStudyable && nextItem ? (
+              <Sparkles className="w-4 h-4" />
+            ) : (
+              <Upload className="w-4 h-4" />
+            )}
+            {ctaLabel}
           </Button>
-        ) : (
-          <Button
-            size="lg"
-            onClick={onUpload}
-            className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
-          >
-            <Upload className="w-4 h-4" />
-            Plant a Seed
-          </Button>
-        )}
+        </div>
+        <div className="order-1 md:order-2 flex justify-center">
+          <PlantIndicator probability={data.overallProgress} size="xl" glow showPercent />
+        </div>
       </div>
     </ParchmentCard>
   );
 }
 
-/* ── Course Card ── */
+/* ── Course Card — oasis arched parchment frame ── */
 function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
   course: CourseSummary;
   isRecommended: boolean;
@@ -291,12 +290,10 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 
   return (
     <ParchmentCard
-      className={`p-6 flex flex-col gap-4 group ${
-        isClickable ? "" : "opacity-80"
-      } ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
       hover={isClickable}
+      className={`p-6 flex flex-col gap-4 group ${isClickable ? "" : "opacity-80"} ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
     >
-      {/* Header: title + status badge + menu */}
+      {/* Header row: title + status pill + 3-dot menu */}
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-serif text-xl font-semibold text-ghibli-canopy leading-snug line-clamp-2 flex-1">
           {course.title}
@@ -314,7 +311,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
           <div onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-muted-foreground hover:text-foreground hover:bg-ghibli-ivory/60 transition-colors flex-shrink-0">
+                <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-ghibli-canopy/60 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors flex-shrink-0">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
@@ -333,60 +330,49 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
         </div>
       </div>
 
-      {/* Body: plant + animated vine */}
-      <div
-        onClick={isClickable ? onClick : undefined}
-        className={`flex items-center gap-4 ${isClickable ? "cursor-pointer" : ""}`}
-      >
+      {/* Plant + progress vine */}
+      <div className="flex items-center gap-4">
         {isProcessing && course.totalConcepts === 0 ? (
-          <div className="flex items-center justify-center shrink-0" style={{ width: 64, height: 64 }}>
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+          <div className="flex items-center justify-center shrink-0" style={{ width: 80, height: 80 }}>
+            <Loader2 className="w-8 h-8 animate-spin text-ghibli-forest" />
           </div>
         ) : (
-          <PlantIndicator probability={course.progressPercent} size="md" showPercent />
+          <PlantIndicator probability={course.progressPercent} size="md" showPercent={false} />
         )}
         <div className="flex-1 flex flex-col gap-2 min-w-0">
-          {course.totalConcepts > 0 ? (
-            <svg viewBox="0 0 100 8" className="w-full h-2.5 overflow-visible" preserveAspectRatio="none" aria-hidden>
-              <path
-                d="M0 4 Q 25 0, 50 4 T 100 4"
-                fill="none"
-                stroke="hsl(var(--ghibli-mist))"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-              />
-              <path
-                d="M0 4 Q 25 0, 50 4 T 100 4"
-                fill="none"
-                stroke="hsl(var(--ghibli-forest))"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeDasharray="100"
-                strokeDashoffset={100 - course.progressPercent}
-                style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
-              />
-            </svg>
-          ) : (
-            <p className="text-xs font-sans text-muted-foreground">
-              {course.documentCount} {course.documentCount === 1 ? "doc" : "docs"}
-            </p>
-          )}
-          <span className="font-sans text-xs text-muted-foreground italic line-clamp-1">
+          <svg viewBox="0 0 100 8" className="w-full h-2.5 overflow-visible" preserveAspectRatio="none" aria-hidden>
+            <path
+              d="M0 4 Q 25 0, 50 4 T 100 4"
+              fill="none"
+              stroke="hsl(var(--ghibli-mist))"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <path
+              d="M0 4 Q 25 0, 50 4 T 100 4"
+              fill="none"
+              stroke="hsl(var(--ghibli-forest))"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeDasharray="100"
+              strokeDashoffset={100 - course.progressPercent}
+              style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
+            />
+          </svg>
+          <span className="font-sans text-xs text-muted-foreground italic">
             Tend regularly to keep it thriving
           </span>
         </div>
       </div>
 
-      {/* CTA */}
-      {isClickable && (
-        <Button
-          onClick={onClick}
-          className="w-full rounded-full font-sans text-sm font-semibold tracking-wide bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-lg transition-all gap-1"
-        >
-          Walk the Path
-          <ArrowRight className="w-4 h-4" />
-        </Button>
-      )}
+      {/* Walk the Path CTA */}
+      <Button
+        onClick={onClick}
+        disabled={!isClickable}
+        className="w-full rounded-full font-sans text-sm font-semibold tracking-wide bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-lg transition-all disabled:opacity-60"
+      >
+        Walk the Path →
+      </Button>
     </ParchmentCard>
   );
 }
@@ -394,7 +380,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 /* ── Empty State ── */
 function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-8 max-w-md mx-auto">
+    <div className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-md mx-auto">
       <ParchmentCard glow className="p-10 md:p-12 flex flex-col items-center gap-6">
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/30 blur-2xl scale-125" />

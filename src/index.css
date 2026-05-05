@@ -118,7 +118,7 @@
     --ghibli-petal: 350 55% 78%;
 
     /* Premium gradients */
-    --gradient-cream: linear-gradient(135deg, hsl(48 80% 97% / 0.92), hsl(45 70% 92% / 0.78));
+    --gradient-cream: linear-gradient(135deg, hsl(48 80% 97% / 0.72), hsl(45 70% 92% / 0.58));
     --gradient-leaf: linear-gradient(180deg, hsl(148 42% 28%), hsl(148 50% 18%));
     --gradient-gold: linear-gradient(135deg, hsl(42 90% 72%), hsl(36 75% 58%));
     --gradient-mist: radial-gradient(ellipse at 50% 30%, transparent 0%, hsl(130 18% 92% / 0.45) 70%, hsl(130 22% 80% / 0.65) 100%);
@@ -258,14 +258,14 @@
 
 /* ── Ghibli: Scene vignette (deep canopy edges) ── */
 .scene-vignette {
-  background: radial-gradient(ellipse at center, transparent 45%, hsl(148 42% 14% / 0.18) 85%, hsl(148 42% 12% / 0.32) 100%);
+  background: radial-gradient(ellipse at center, transparent 45%, hsl(148 42% 14% / 0.08) 85%, hsl(148 42% 12% / 0.18) 100%);
 }
 
 /* ── Ghibli: Glass cream card surface ── */
 .glass-cream {
   background: var(--gradient-cream);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid hsl(140 25% 70% / 0.35);
   box-shadow: var(--shadow-parchment);
 }

@@ -4,7 +4,7 @@ const GhibliBackground = () => (
       className="fixed inset-0 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url(/garden-bg-v2.jpg)" }}
     />
-    <div className="fixed inset-0 bg-ghibli-cream/35" />
+    <div className="fixed inset-0 bg-ghibli-cream/15" />
     <div className="fixed inset-0 mist-overlay pointer-events-none" />
     <div className="fixed inset-0 scene-vignette pointer-events-none" />
 

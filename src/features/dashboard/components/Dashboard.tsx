@@ -291,20 +291,20 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
   return (
     <ParchmentCard
       hover={isClickable}
-      className={`p-6 flex flex-col gap-4 group ${isClickable ? "" : "opacity-80"} ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
+      className={`relative p-6 flex flex-col gap-3 group overflow-hidden ${isClickable ? "" : "opacity-80"} ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
     >
-      {/* Header row: title + status pill + 3-dot menu */}
-      <div className="flex items-start justify-between gap-3">
+      {/* Header: title + status pill + 3-dot */}
+      <div className="flex items-start justify-between gap-3 relative z-10">
         <h3 className="font-serif text-xl font-semibold text-ghibli-canopy leading-snug line-clamp-2 flex-1">
           {course.title}
         </h3>
         <div className="flex items-center gap-1 shrink-0">
           {course.totalConcepts > 0 ? (
-            <span className={`text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/60 ${status.color}`}>
+            <span className={`text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 ${status.color}`}>
               {status.label}
             </span>
           ) : isProcessing ? (
-            <span className="text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/60 text-primary">
+            <span className="text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 text-primary">
               Processing…
             </span>
           ) : null}
@@ -330,46 +330,52 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
         </div>
       </div>
 
-      {/* Plant + progress vine */}
-      <div className="flex items-center gap-4">
+      {/* Centerpiece: large plant illustration */}
+      <div className="flex justify-center py-4 relative z-10">
         {isProcessing && course.totalConcepts === 0 ? (
-          <div className="flex items-center justify-center shrink-0" style={{ width: 80, height: 80 }}>
-            <Loader2 className="w-8 h-8 animate-spin text-ghibli-forest" />
+          <div className="flex items-center justify-center" style={{ width: 140, height: 140 }}>
+            <Loader2 className="w-12 h-12 animate-spin text-ghibli-forest" />
           </div>
         ) : (
-          <PlantIndicator probability={course.progressPercent} size="md" showPercent={false} />
+          <div className="relative">
+            {/* Soft glow halo behind plant */}
+            <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/30 blur-2xl scale-110 -z-10" />
+            <PlantIndicator probability={course.progressPercent} size="lg" showPercent={false} />
+          </div>
         )}
-        <div className="flex-1 flex flex-col gap-2 min-w-0">
-          <svg viewBox="0 0 100 8" className="w-full h-2.5 overflow-visible" preserveAspectRatio="none" aria-hidden>
-            <path
-              d="M0 4 Q 25 0, 50 4 T 100 4"
-              fill="none"
-              stroke="hsl(var(--ghibli-mist))"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-            />
-            <path
-              d="M0 4 Q 25 0, 50 4 T 100 4"
-              fill="none"
-              stroke="hsl(var(--ghibli-forest))"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeDasharray="100"
-              strokeDashoffset={100 - course.progressPercent}
-              style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
-            />
-          </svg>
-          <span className="font-sans text-xs text-muted-foreground italic">
-            Tend regularly to keep it thriving
-          </span>
-        </div>
+      </div>
+
+      {/* Progress vine */}
+      <div className="flex flex-col gap-2 relative z-10">
+        <svg viewBox="0 0 100 8" className="w-full h-2.5 overflow-visible" preserveAspectRatio="none" aria-hidden>
+          <path
+            d="M0 4 Q 25 0, 50 4 T 100 4"
+            fill="none"
+            stroke="hsl(var(--ghibli-mist))"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M0 4 Q 25 0, 50 4 T 100 4"
+            fill="none"
+            stroke="hsl(var(--ghibli-forest))"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeDasharray="100"
+            strokeDashoffset={100 - course.progressPercent}
+            style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
+          />
+        </svg>
+        <span className="font-sans text-xs text-muted-foreground italic text-center">
+          Tend regularly to keep it thriving
+        </span>
       </div>
 
       {/* Walk the Path CTA */}
       <Button
         onClick={onClick}
         disabled={!isClickable}
-        className="w-full rounded-full font-sans text-sm font-semibold tracking-wide bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-lg transition-all disabled:opacity-60"
+        className="w-full rounded-full font-sans text-sm font-semibold tracking-wide bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-lg transition-all disabled:opacity-60 relative z-10"
       >
         Walk the Path →
       </Button>

@@ -13,14 +13,14 @@ const GhibliBackground = () => (
       src="/foliage-left-v2.png"
       alt=""
       aria-hidden
-      className="fixed -left-8 -bottom-8 w-72 lg:w-96 xl:w-[28rem] pointer-events-none z-20 animate-drift select-none"
+      className="fixed -left-8 -bottom-8 w-72 lg:w-96 xl:w-[28rem] pointer-events-none z-0 animate-drift select-none"
       style={{ filter: "drop-shadow(6px 0 24px hsl(var(--ghibli-canopy) / 0.25))" }}
     />
     <img
       src="/foliage-right-v2.png"
       alt=""
       aria-hidden
-      className="fixed -right-10 -top-10 w-64 lg:w-80 xl:w-[26rem] pointer-events-none z-20 animate-drift select-none"
+      className="fixed -right-10 -top-10 w-64 lg:w-80 xl:w-[26rem] pointer-events-none z-0 animate-drift select-none"
       style={{ animationDelay: "3s", filter: "drop-shadow(-6px 0 24px hsl(var(--ghibli-canopy) / 0.25))" }}
     />
 
@@ -36,7 +36,7 @@ const GhibliBackground = () => (
     />
 
     {/* Sleeping cat — calm garden companion */}
-    <div className="fixed bottom-6 right-8 z-30 pointer-events-none select-none">
+    <div className="fixed bottom-6 right-8 z-0 pointer-events-none select-none">
       <div className="absolute inset-0 -bottom-2 bg-ghibli-canopy/25 blur-2xl rounded-full scale-90" />
       <img
         src="/sleeping-cat.png"

@@ -6,10 +6,10 @@ export function Footer() {
 
   return (
     <footer
-      className="relative z-50 mt-auto w-full"
+      className="relative z-50 mt-auto w-full glass-cream"
       style={{
-        background: "rgba(250, 243, 224, 0.95)",
-        borderTop: "1px solid rgba(64, 145, 108, 0.2)",
+        borderTop: "1px solid hsl(140 25% 70% / 0.25)",
+        borderRadius: "0",
       }}
     >
       <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">

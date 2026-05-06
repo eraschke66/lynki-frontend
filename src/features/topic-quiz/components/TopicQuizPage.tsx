@@ -275,12 +275,6 @@ export function TopicQuizPage() {
                 : "Every garden starts from a single seed. Try again!"}
             </p>
 
-            <img
-              src="/sleeping-cat.png"
-              alt="Sleeping cat"
-              className="w-20 h-20 object-contain select-none"
-            />
-
             <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
               <Button
                 size="lg"
@@ -421,21 +415,21 @@ export function TopicQuizPage() {
                 }`}
               />
               <div className="flex-1 min-w-0">
-                <p className="font-sans font-semibold text-ghibli-canopy text-base">
+                <p className="font-serif font-semibold text-ghibli-canopy text-base">
                   {feedback.is_correct ? "That one took root." : "That seed needs more light."}
                 </p>
                 {!feedback.is_correct && (
-                  <p className="font-sans font-medium text-ghibli-bark text-base mt-1">
+                  <p className="font-serif font-medium text-ghibli-bark text-base mt-1">
                     The correct answer is: {feedback.correct_option_text}
                   </p>
                 )}
                 {(feedback.is_correct ? feedback.selected_explanation : feedback.correct_explanation) && (
-                  <p className="font-sans text-ghibli-bark text-base mt-1.5 leading-relaxed">
+                  <p className="font-serif text-ghibli-bark text-base mt-1.5 leading-relaxed">
                     {feedback.is_correct ? feedback.selected_explanation : feedback.correct_explanation}
                   </p>
                 )}
                 {feedback.hint && !feedback.is_correct && (
-                  <p className="font-sans text-sm text-ghibli-bark mt-1.5 italic">
+                  <p className="font-serif text-sm text-ghibli-bark mt-1.5 italic">
                     Hint: {feedback.hint}
                   </p>
                 )}
@@ -452,7 +446,7 @@ export function TopicQuizPage() {
               const isWrong = showFeedback && isSelected && !feedback.is_correct;
 
               let optionClasses =
-                "relative w-full text-left rounded-parchment border-2 px-6 py-5 font-sans text-base font-semibold transition-all duration-300 flex items-center gap-4 parchment-solid text-ghibli-canopy";
+                "relative w-full text-left rounded-parchment border-2 px-6 py-5 font-serif text-base font-semibold transition-all duration-300 flex items-center gap-4 parchment-solid text-ghibli-canopy";
 
               if (submitting && isSelected) {
                 optionClasses += " border-ghibli-jungle bg-ghibli-moss/15 cursor-wait";

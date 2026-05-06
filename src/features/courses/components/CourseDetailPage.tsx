@@ -5,7 +5,6 @@ import { useAuth } from "@/features/auth";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
-import { GardenInlineIcon } from "@/components/garden/GardenIcons";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
@@ -305,8 +304,8 @@ export function CourseDetailPage() {
           {/* Quizzes list */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <GardenInlineIcon type="blossom" size={22} />
-              <h2 className="text-lg font-semibold">Quizzes</h2>
+              <Sparkles className="w-5 h-5 text-ghibli-jungle" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-ghibli-canopy">Quizzes</h2>
             </div>
 
             {quizzesLoading ? (

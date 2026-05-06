@@ -403,12 +403,6 @@ export function TestPage() {
               </p>
             </div>
 
-            <img
-              src="/sleeping-cat.png"
-              alt="Sleeping cat"
-              className="w-20 h-20 object-contain select-none"
-            />
-
             <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
               <Button size="lg" className="flex-1 gap-2 rounded-parchment" onClick={handleRetake}>
                 <RotateCcw className="w-4 h-4" />
@@ -544,16 +538,16 @@ export function TestPage() {
                 }`}
               />
               <div className="flex-1 min-w-0">
-                <p className="font-sans font-semibold text-ghibli-canopy text-base">
+                <p className="font-serif font-semibold text-ghibli-canopy text-base">
                   {feedback.is_correct ? "That one took root." : "That seed needs more light."}
                 </p>
                 {!feedback.is_correct && (
-                  <p className="font-sans font-medium text-ghibli-bark text-base mt-1">
+                  <p className="font-serif font-medium text-ghibli-bark text-base mt-1">
                     The correct answer is: {feedback.correct_option_text}
                   </p>
                 )}
                 {feedback.explanation && (
-                  <p className="font-sans text-ghibli-bark text-base mt-1.5 leading-relaxed">{feedback.explanation}</p>
+                  <p className="font-serif text-ghibli-bark text-base mt-1.5 leading-relaxed">{feedback.explanation}</p>
                 )}
               </div>
             </div>
@@ -568,7 +562,7 @@ export function TestPage() {
               const isWrong = showFeedback && isSelected && !feedback.is_correct;
 
               let optionClasses =
-                "relative w-full text-left rounded-parchment border-2 px-6 py-5 font-sans text-base font-semibold transition-all duration-300 cursor-pointer select-none flex items-center gap-4 parchment-solid text-ghibli-canopy";
+                "relative w-full text-left rounded-parchment border-2 px-6 py-5 font-serif text-base font-semibold transition-all duration-300 cursor-pointer select-none flex items-center gap-4 parchment-solid text-ghibli-canopy";
 
               if (showFeedback) {
                 if (isCorrect) {

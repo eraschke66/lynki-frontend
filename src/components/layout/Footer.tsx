@@ -19,8 +19,12 @@ export function Footer() {
     <footer
       className="relative z-40 mt-auto w-full"
       style={{
-        background: "transparent",
-        borderTop: "1px solid hsl(140 25% 60% / 0.15)",
+        // Barely-there frosted strip — enough to lift text off busy tropical bg, not a brown bar.
+        // 35% cream tint with strong blur so foliage shows through but text reads.
+        background: "hsl(48 70% 94% / 0.35)",
+        backdropFilter: "blur(12px) saturate(1.1)",
+        WebkitBackdropFilter: "blur(12px) saturate(1.1)",
+        borderTop: "1px solid hsl(140 25% 55% / 0.25)",
         borderRadius: "0",
       }}
     >
@@ -42,7 +46,7 @@ export function Footer() {
         {/* Right: legal links */}
         <nav
           aria-label="Legal links"
-          className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-xs text-ghibli-bark"
+          className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 text-[13px] font-medium text-ghibli-bark"
         >
           <Link
             to="/privacy"

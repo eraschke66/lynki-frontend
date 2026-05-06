@@ -423,10 +423,10 @@ export function TestPage() {
     <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
       <button
         onClick={handleExitRequest}
-        className="absolute top-5 right-5 z-30 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors"
+        className="absolute top-5 right-5 z-30 p-2.5 rounded-full text-ghibli-canopy bg-ghibli-cream/85 backdrop-blur-sm border border-ghibli-moss/40 shadow-sm hover:bg-ghibli-cream hover:border-ghibli-jungle hover:shadow-md transition-all"
         aria-label="Exit quiz"
       >
-        <X className="w-6 h-6" />
+        <X className="w-5 h-5" strokeWidth={2.5} />
       </button>
 
       {/* Exit confirmation */}

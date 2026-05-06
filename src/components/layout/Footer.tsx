@@ -1,18 +1,33 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 
 export function Footer() {
   const { clearConsent } = useCookieConsent();
+  const { pathname } = useLocation();
+
+  // Hide footer on quiz pages so legal links don't compete with questions for attention.
+  // Routes: /test/:courseId  and  /course/:courseId/topic-quiz/:topicId
+  const isQuizPage =
+    /^\/test\/[^/]+$/.test(pathname) ||
+    /^\/course\/[^/]+\/topic-quiz\/[^/]+$/.test(pathname);
+
+  if (isQuizPage) {
+    return null;
+  }
 
   return (
     <footer
-      className="relative z-50 mt-auto w-full glass-cream"
+      className="relative z-40 mt-auto w-full"
       style={{
-        borderTop: "1px solid hsl(140 25% 70% / 0.25)",
+        background: "transparent",
+        borderTop: "1px solid hsl(140 25% 60% / 0.15)",
         borderRadius: "0",
       }}
     >
-      <div className="max-w-5xl mx-auto px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div
+        className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
+        style={{ textShadow: "0 1px 2px hsl(48 80% 97% / 0.7)" }}
+      >
 
         {/* Left: wordmark + copyright */}
         <div className="flex flex-col items-center sm:items-start gap-0.5">

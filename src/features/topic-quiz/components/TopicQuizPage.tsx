@@ -17,7 +17,6 @@ import { AlertCircle, ArrowRight, RefreshCw, RotateCcw, X } from "lucide-react";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import GhibliBackground from "@/components/garden/GhibliBackground";
-import { AmbientCat } from "@/components/garden/AmbientCat";
 import { topicQuizQueryKeys, gardenQueryKeys } from "@/lib/queryKeys";
 import { posthog } from "@/lib/posthog";
 import {
@@ -49,7 +48,6 @@ export function TopicQuizPage() {
   const [quizComplete, setQuizComplete] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
-  const [catTrigger, setCatTrigger] = useState(false);
 
   const queryKey = topicQuizQueryKeys.session(
     courseId ?? "",
@@ -100,12 +98,6 @@ export function TopicQuizPage() {
         const localFeedback: LocalFeedback = { ...result, selected_option: optionIndex };
         setFeedback(localFeedback);
         if (result.is_correct) setCorrectCount((prev) => prev + 1);
-
-        // Trigger the ambient cat at the halfway point of the quiz, once per attempt
-        const halfwayIndex = Math.floor(questions.length / 2) - 1;
-        if (currentIndex === halfwayIndex && !catTrigger) {
-          setCatTrigger(true);
-        }
       } catch (err) {
         console.error("Failed to submit answer:", err);
         // Allow retry
@@ -114,7 +106,7 @@ export function TopicQuizPage() {
         setSubmitting(false);
       }
     },
-    [feedback, submitting, currentQuestion, sessionId, currentIndex, questions.length, catTrigger],
+    [feedback, submitting, currentQuestion, sessionId, currentIndex, questions.length],
   );
 
   const handleNext = useCallback(async () => {
@@ -515,7 +507,6 @@ export function TopicQuizPage() {
           )}
         </div>
       </div>
-      <AmbientCat trigger={catTrigger} />
     </div>
   );
 }

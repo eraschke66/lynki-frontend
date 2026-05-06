@@ -349,37 +349,68 @@
 .animate-drop { animation: drop-fall 0.6s ease-in forwards; }
 .animate-scale-in { animation: scale-in-bounce 0.5s ease-out forwards; }
 
-/* ── Ambient cat — gentle peek-in/peek-out ── */
-@keyframes ambient-cat-peek {
+/* ── Roaming cat — walks across the page, stops to groom, walks off ── */
+
+@keyframes roaming-cat-walk-in {
   0% {
+    right: -150px;
     opacity: 0;
-    transform: translateY(8px);
   }
-  18% {
+  8% {
     opacity: 1;
-    transform: translateY(0);
-  }
-  /* Subtle idle bob during hold */
-  35% { transform: translateY(-2px); }
-  50% { transform: translateY(0); }
-  65% { transform: translateY(-2px); }
-  82% {
-    opacity: 1;
-    transform: translateY(0);
   }
   100% {
-    opacity: 0;
-    transform: translateY(8px);
+    right: 30vw;
+    opacity: 1;
   }
 }
 
-.ambient-cat-image {
-  animation: ambient-cat-peek 6.9s ease-in-out forwards;
+@keyframes roaming-cat-walk-out {
+  0% {
+    right: 30vw;
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    right: calc(100vw + 150px);
+    opacity: 0;
+  }
+}
+
+@keyframes roaming-cat-groom-bob {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-1px); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-1px); }
+}
+
+.roaming-cat-container {
+  right: -150px;
+}
+
+.roaming-cat-walking-in {
+  animation: roaming-cat-walk-in 8s linear forwards;
+}
+
+.roaming-cat-sitting-pre,
+.roaming-cat-grooming,
+.roaming-cat-sitting-post {
+  right: 30vw;
+  opacity: 1;
+}
+
+.roaming-cat-grooming .roaming-cat-image {
+  animation: roaming-cat-groom-bob 1.2s ease-in-out infinite;
+}
+
+.roaming-cat-walking-out {
+  animation: roaming-cat-walk-out 12s linear forwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ambient-cat-image {
-    animation: none;
-    opacity: 0;
+  .roaming-cat-container {
+    display: none;
   }
 }

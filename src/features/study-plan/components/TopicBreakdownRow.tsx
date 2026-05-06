@@ -51,7 +51,7 @@ export function TopicBreakdownRow({
               queryClient.removeQueries({
                 queryKey: testQueryKeys.quiz(courseId, user?.id ?? ""),
               });
-              navigate(`/test/${courseId}?topicId=${topic.topic_id}`);
+              navigate(`/test/${courseId}?topicId=${topic.topic_id}&from=study-plan`);
             }}
           >
             <BookOpen className="w-3.5 h-3.5" />

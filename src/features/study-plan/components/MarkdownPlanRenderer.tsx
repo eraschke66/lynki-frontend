@@ -222,7 +222,7 @@ function TopicSection({
               queryClient.removeQueries({
                 queryKey: testQueryKeys.quiz(courseId, user?.id ?? ""),
               });
-              navigate(`/test/${courseId}?topicId=${topicId}`);
+              navigate(`/test/${courseId}?topicId=${topicId}&from=study-plan`);
             }}
           >
             <BookOpen className="w-3.5 h-3.5" />

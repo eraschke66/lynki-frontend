@@ -282,8 +282,10 @@
 
 /* Variant — flatter, no inner highlight, for nested rows inside parchment-solid containers */
 .parchment-row {
-  background: hsl(48 78% 95% / 0.85);
-  border: 1px solid hsl(140 25% 65% / 0.35);
+  background: hsl(48 78% 95% / 0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid hsl(140 25% 65% / 0.4);
 }
 
 /* ── Ghibli: Botanical border (subtle leaf-edge gradient ring) ── */

@@ -54,6 +54,7 @@ export function TestPage() {
   const sessionId = searchParams.get("session");
   const topicId = searchParams.get("topicId");
   const conceptIds = searchParams.get("conceptIds");
+  const fromParam = searchParams.get("from"); // V13: source page so X button returns there
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -246,16 +247,21 @@ export function TestPage() {
       if (attemptId) {
         queryClient.removeQueries({ queryKey: testQueryKeys.resumeAttempt(attemptId) });
       }
-      navigate(`/test/${courseId}?quiz=${quizId}`, { replace: true });
+      // V13: preserve from param across retake URL replacements
+      const fromSuffix = fromParam ? `&from=${fromParam}` : "";
+      navigate(`/test/${courseId}?quiz=${quizId}${fromSuffix}`, { replace: true });
     } else if (topicId) {
       queryClient.removeQueries({ queryKey: [...testQueryKeys.all, "focused", courseId, topicId] });
-      navigate(`/test/${courseId}?topicId=${topicId}`, { replace: true });
+      // V13: preserve the from param so X button continues to route correctly
+      const fromSuffix = fromParam ? `&from=${fromParam}` : "";
+      navigate(`/test/${courseId}?topicId=${topicId}${fromSuffix}`, { replace: true });
     } else {
       queryClient.removeQueries({ queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? "") });
-      navigate(`/test/${courseId}`, { replace: true });
+      // V13: preserve from param even when no topic/quiz scoping
+      navigate(`/test/${courseId}${fromParam ? `?from=${fromParam}` : ""}`, { replace: true });
     }
     refetch();
-  }, [courseId, user, quizId, topicId, attemptId, queryClient, refetch, navigate]);
+  }, [courseId, user, quizId, topicId, attemptId, queryClient, refetch, navigate, fromParam]);
 
   if (!user || !courseId) { navigate("/home"); return null; }
 
@@ -269,8 +275,20 @@ export function TestPage() {
   };
 
   const handleExit = useCallback(() => {
+    // V13: respect the source page so X button returns where the user came from.
+    // - from=study-plan → back to /course/:id/study-plan
+    // - from=garden    → back to /course/:id/garden
+    // - default        → back to course detail (legacy behavior)
+    if (fromParam === "study-plan") {
+      navigate(`/course/${courseId}/study-plan`);
+      return;
+    }
+    if (fromParam === "garden") {
+      navigate(`/course/${courseId}/garden`);
+      return;
+    }
     navigate(`/course/${courseId}`);
-  }, [navigate, courseId]);
+  }, [navigate, courseId, fromParam]);
 
   const loadingMessage = quizId && !attemptId
     ? "Growing your questions..."

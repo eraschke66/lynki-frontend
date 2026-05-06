@@ -333,7 +333,7 @@ export function TopicQuizPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="relative z-10 min-h-screen flex flex-col justify-center py-12">
+      <div className="relative z-10 min-h-screen flex flex-col py-12 pb-32">
         <div className="max-w-2xl w-full mx-auto px-6">
 
           {/* Progress bar */}

@@ -4,7 +4,6 @@ import { useAuth } from "@/features/auth";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
-import { Neko } from "@/components/garden/Neko";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -287,10 +286,6 @@ export function SettingsPage() {
                 </CardContent>
               </Card>
 
-              {/* Neko */}
-              <div className="flex justify-start mt-4 ml-2 opacity-50 hover:opacity-80 transition-opacity duration-500">
-                <Neko />
-              </div>
             </div>
           )}
         </div>

@@ -5,7 +5,6 @@ import { useAuth } from "@/features/auth";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
-import { Neko } from "@/components/garden/Neko";
 import { GardenInlineIcon } from "@/components/garden/GardenIcons";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
@@ -349,11 +348,6 @@ export function CourseDetailPage() {
             )}
           </div>
 
-        <div className="flex justify-end mt-10 mb-4 pr-2 opacity-50 hover:opacity-80 transition-opacity duration-500">
-          <div style={{ transform: "scaleX(-1) rotate(-8deg)" }}>
-            <Neko />
-          </div>
-        </div>
       </div>
 
       {/* Quiz detail modal */}

@@ -348,3 +348,38 @@
 .animate-glow-soft { animation: glow-soft 4s ease-in-out infinite; }
 .animate-drop { animation: drop-fall 0.6s ease-in forwards; }
 .animate-scale-in { animation: scale-in-bounce 0.5s ease-out forwards; }
+
+/* ── Ambient cat — gentle peek-in/peek-out ── */
+@keyframes ambient-cat-peek {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* Subtle idle bob during hold */
+  35% { transform: translateY(-2px); }
+  50% { transform: translateY(0); }
+  65% { transform: translateY(-2px); }
+  82% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.ambient-cat-image {
+  animation: ambient-cat-peek 6.9s ease-in-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-cat-image {
+    animation: none;
+    opacity: 0;
+  }
+}

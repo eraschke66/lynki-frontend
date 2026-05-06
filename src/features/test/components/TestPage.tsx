@@ -42,6 +42,7 @@ import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
+import { AmbientCat } from "@/components/garden/AmbientCat";
 import type { AnswerFeedback } from "../types";
 
 const stoneLetters = ["A", "B", "C", "D"];
@@ -69,6 +70,7 @@ export function TestPage() {
   const [targetGrade, setTargetGrade] = useState<number>(1.0);
   const [loadingPassChance, setLoadingPassChance] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [catTrigger, setCatTrigger] = useState(false);
 
   // Determine query key and fetcher based on params
   const queryKey = conceptIds
@@ -166,6 +168,13 @@ export function TestPage() {
       setFeedback(localFeedback);
       setAnsweredCount((prev) => prev + 1);
       if (isCorrect) setCorrectCount((prev) => prev + 1);
+
+      // Trigger the ambient cat at the halfway point of the quiz, once per attempt
+      const halfwayIndex = Math.floor(questions.length / 2) - 1;
+      if (currentIndex === halfwayIndex && !catTrigger) {
+        setCatTrigger(true);
+      }
+
       posthog.capture("quiz_question_answered", {
         course_id: courseId,
         question_id: currentQuestion.id,
@@ -186,7 +195,7 @@ export function TestPage() {
         );
       }
     },
-    [feedback, currentQuestion, user, courseId, quizId, topicId, testData?.test_id],
+    [feedback, currentQuestion, user, courseId, quizId, topicId, testData?.test_id, questions.length, currentIndex, catTrigger],
   );
 
   const handleNext = useCallback(async () => {
@@ -630,6 +639,7 @@ export function TestPage() {
           )}
         </div>
       </div>
+      <AmbientCat trigger={catTrigger} />
     </div>
   );
 }

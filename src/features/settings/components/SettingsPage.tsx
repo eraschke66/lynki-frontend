@@ -93,37 +93,34 @@ export function SettingsPage() {
         <div className="max-w-2xl mx-auto px-6">
           <button
             onClick={() => navigate("/home")}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-ghibli-canopy/70 hover:text-ghibli-jungle transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
           </button>
 
-          <h1 className="text-2xl font-bold mb-8">Settings</h1>
+          <h1 className="text-2xl font-bold text-ghibli-canopy mb-8">Settings</h1>
 
           {isLoading ? (
             <div className="flex items-center justify-center py-16">
-              <p className="text-sm text-muted-foreground animate-pulse">Tending the garden…</p>
+              <p className="text-sm text-ghibli-bark animate-pulse">Tending the garden…</p>
             </div>
           ) : (
             <div className="space-y-4">
               {/* Curriculum card */}
-              <Card
-                className="rounded-2xl overflow-hidden"
-                style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
-              >
+              <Card className="rounded-2xl overflow-hidden border-t-[3px] border-ghibli-moss/40">
                 <CardContent className="pt-8 pb-8 px-8 space-y-6">
                   <div className="space-y-3">
-                    <Label htmlFor="curriculum" className="text-base font-medium">
+                    <Label htmlFor="curriculum" className="text-base font-medium text-ghibli-canopy">
                       Curriculum
                     </Label>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-ghibli-bark">
                       Choose the grading system used by your school or exam board.
                     </p>
                     <Select value={activeCurriculum} onValueChange={setSelectedCurriculum}>
                       <SelectTrigger
                         id="curriculum"
-                        className="w-full max-w-xs border-[rgba(64,145,108,0.2)] focus:border-[#40916C]"
+                        className="w-full max-w-xs"
                       >
                         <SelectValue placeholder="Select curriculum" />
                       </SelectTrigger>
@@ -136,20 +133,20 @@ export function SettingsPage() {
                       </SelectContent>
                     </Select>
                     {activeCurriculum && (
-                      <p className="text-xs text-muted-foreground">{curriculumInfo.description}</p>
+                      <p className="text-xs text-ghibli-bark">{curriculumInfo.description}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-3 pt-2">
                     <Button
                       onClick={() => mutation.mutate()}
                       disabled={!hasChanged || mutation.isPending}
-                      className="shadow-[0_2px_8px_rgba(13,115,119,0.2)]"
+                      className="shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)]"
                     >
                       <Check className="w-4 h-4 mr-2" />
                       {mutation.isPending ? "Saving…" : "Save Changes"}
                     </Button>
                     {hasChanged && (
-                      <p className="text-xs text-muted-foreground">Unsaved changes</p>
+                      <p className="text-xs text-ghibli-bark">Unsaved changes</p>
                     )}
                   </div>
                 </CardContent>
@@ -157,27 +154,21 @@ export function SettingsPage() {
 
               {/* Subscription / Billing */}
               {!subLoading && (
-                <Card
-                  className="rounded-2xl overflow-hidden"
-                  style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
-                >
+                <Card className="rounded-2xl overflow-hidden border-t-[3px] border-ghibli-moss/40">
                   <CardContent className="pt-8 pb-8 px-8 space-y-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <Sparkles className="w-4 h-4 text-[#40916C]" />
-                      <p className="text-base font-medium">Subscription</p>
+                      <Sparkles className="w-4 h-4 text-ghibli-moss" />
+                      <p className="text-base font-medium text-ghibli-canopy">Subscription</p>
                     </div>
 
                     {isPremium ? (
                       <>
                         <div className="flex items-center gap-2">
-                          <span
-                            className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                            style={{ background: "rgba(64,145,108,0.12)", color: "#2D6A4F" }}
-                          >
+                          <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-moss/12 text-ghibli-jungle">
                             Premium
                           </span>
                           {currentPeriodEnd && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-ghibli-bark">
                               Active until{" "}
                               {currentPeriodEnd.toLocaleDateString(undefined, {
                                 day: "numeric",
@@ -191,7 +182,6 @@ export function SettingsPage() {
                           variant="outline"
                           onClick={handleManageSubscription}
                           disabled={portalLoading}
-                          className="border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />
                           {portalLoading ? "Opening…" : "Manage Subscription"}
@@ -199,16 +189,12 @@ export function SettingsPage() {
                       </>
                     ) : (
                       <>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-ghibli-bark">
                           You're on the <strong>Free</strong> plan. Upgrade to unlock the Study Garden and Smart Study Plan.
                         </p>
                         <Button
                           onClick={() => navigate("/pricing")}
-                          className="shadow-[0_2px_8px_rgba(13,115,119,0.2)]"
-                          style={{
-                            background: "linear-gradient(135deg, #40916C 0%, #1B4332 100%)",
-                            color: "white",
-                          }}
+                          className="shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)] bg-gradient-to-br from-ghibli-moss to-ghibli-canopy text-primary-foreground hover:from-ghibli-jungle hover:to-ghibli-canopy"
                         >
                           <Sparkles className="w-4 h-4 mr-2" />
                           Upgrade to Premium
@@ -220,36 +206,29 @@ export function SettingsPage() {
               )}
 
               {/* Privacy & Cookies */}
-              <Card
-                className="rounded-2xl overflow-hidden"
-                style={{ borderTop: "3px solid rgba(64,145,108,0.25)" }}
-              >
+              <Card className="rounded-2xl overflow-hidden border-t-[3px] border-ghibli-moss/40">
                 <CardContent className="pt-8 pb-8 px-8 space-y-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <Shield className="w-4 h-4 text-[#40916C]" />
-                    <p className="text-base font-medium">Privacy & Cookies</p>
+                    <Shield className="w-4 h-4 text-ghibli-moss" />
+                    <p className="text-base font-medium text-ghibli-canopy">Privacy & Cookies</p>
                   </div>
                   <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-                    <Link to="/privacy" className="text-[#2D6A4F] hover:underline underline-offset-2">
+                    <Link to="/privacy" className="text-ghibli-jungle hover:underline underline-offset-2">
                       Privacy Policy
                     </Link>
-                    <Link to="/terms" className="text-[#2D6A4F] hover:underline underline-offset-2">
+                    <Link to="/terms" className="text-ghibli-jungle hover:underline underline-offset-2">
                       Terms of Service
                     </Link>
-                    <Link to="/cookies" className="text-[#2D6A4F] hover:underline underline-offset-2">
+                    <Link to="/cookies" className="text-ghibli-jungle hover:underline underline-offset-2">
                       Cookie Policy
                     </Link>
                   </div>
                   <div className="pt-1">
-                    <p className="text-sm text-muted-foreground mb-3">
+                    <p className="text-sm text-ghibli-bark mb-3">
                       Analytics cookies are currently{" "}
                       <strong>{consent === "all" ? "enabled" : "disabled"}</strong>.
                     </p>
-                    <Button
-                      variant="outline"
-                      onClick={clearConsent}
-                      className="border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
-                    >
+                    <Button variant="outline" onClick={clearConsent}>
                       Change cookie preferences
                     </Button>
                   </div>
@@ -257,16 +236,9 @@ export function SettingsPage() {
               </Card>
 
               {/* Garden Growth Guide */}
-              <Card
-                className="rounded-2xl overflow-hidden"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(64,145,108,0.05) 0%, rgba(250,243,224,0) 100%)",
-                  border: "1px solid rgba(64,145,108,0.12)",
-                }}
-              >
+              <Card className="rounded-2xl overflow-hidden bg-gradient-to-br from-ghibli-moss/8 to-transparent border border-ghibli-moss/20">
                 <CardContent className="pt-6 pb-6 px-8">
-                  <p className="text-sm font-semibold mb-5 text-[#2D6A4F]">Garden Growth Guide</p>
+                  <p className="text-sm font-semibold mb-5 text-ghibli-jungle">Garden Growth Guide</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {gardenLevels.map(({ img, label, range, color }) => (
                       <div key={label} className="flex items-center gap-3">
@@ -278,7 +250,7 @@ export function SettingsPage() {
                         />
                         <div>
                           <p className={`text-sm font-medium ${color}`}>{label}</p>
-                          <p className="text-xs text-muted-foreground">{range} pass probability</p>
+                          <p className="text-xs text-ghibli-bark">{range} pass probability</p>
                         </div>
                       </div>
                     ))}

@@ -177,7 +177,7 @@ export function TopicQuizPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
@@ -187,7 +187,7 @@ export function TopicQuizPage() {
             <AlertCircle className="w-10 h-10 text-destructive" />
             <div>
               <p className="font-serif font-semibold mb-1">The seeds are resting</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ghibli-bark">
                 {(error as Error).message || "Failed to load quiz. Please try again."}
               </p>
             </div>
@@ -207,7 +207,7 @@ export function TopicQuizPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit"
         >
           <X className="w-6 h-6" />
@@ -215,7 +215,7 @@ export function TopicQuizPage() {
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm">
             <p className="font-serif text-lg font-semibold">No questions could be grown</p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-ghibli-bark">
               This topic may not have enough material yet.
             </p>
             <Button variant="outline" className="rounded-parchment" onClick={handleExit}>
@@ -238,7 +238,7 @@ export function TopicQuizPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit"
         >
           <X className="w-6 h-6" />
@@ -254,10 +254,10 @@ export function TopicQuizPage() {
               <p className="font-serif text-base font-semibold">
                 {correctCount} of {totalQuestions} seeds took root
               </p>
-              <p className="text-xs text-muted-foreground italic">{session?.topic_name}</p>
+              <p className="text-xs text-ghibli-bark italic">{session?.topic_name}</p>
             </div>
 
-            <p className="text-sm font-sans text-muted-foreground">
+            <p className="text-sm font-sans text-ghibli-bark">
               {scorePercent >= 80
                 ? "Wonderful! This topic is blossoming beautifully."
                 : scorePercent >= 60
@@ -270,7 +270,7 @@ export function TopicQuizPage() {
             <img
               src="/sleeping-cat.png"
               alt="Sleeping cat"
-              className="w-20 h-20 object-contain select-none opacity-60"
+              className="w-20 h-20 object-contain select-none"
             />
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
@@ -306,7 +306,7 @@ export function TopicQuizPage() {
       <GhibliBackground />
       <button
         onClick={handleExitRequest}
-        className="absolute top-5 right-5 z-30 p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+        className="absolute top-5 right-5 z-30 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors"
         aria-label="Exit quiz"
       >
         <X className="w-6 h-6" />
@@ -342,11 +342,11 @@ export function TopicQuizPage() {
               <span className="font-serif text-sm font-semibold text-primary">
                 {session?.topic_name ?? "Topic Study"}
               </span>
-              <span className="font-sans text-xs text-muted-foreground">
+              <span className="font-sans text-xs text-ghibli-bark">
                 Step {currentIndex + 1} of {totalQuestions} &middot; {correctCount} took root
               </span>
             </div>
-            <div className="relative h-5 rounded-full bg-card border border-border/60 overflow-hidden parchment-texture">
+            <div className="relative h-5 rounded-full bg-ghibli-mist/70 border border-ghibli-moss/40 overflow-hidden parchment-texture">
               <div
                 className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out"
                 style={{
@@ -361,7 +361,7 @@ export function TopicQuizPage() {
                     className={`w-2.5 h-2.5 rounded-full border transition-colors duration-300 ${
                       i < currentIndex + (feedback ? 1 : 0)
                         ? "bg-ghibli-sunlight border-ghibli-amber"
-                        : "bg-card/80 border-border"
+                        : "bg-ghibli-ivory border-ghibli-moss/45"
                     }`}
                   />
                 ))}
@@ -381,7 +381,7 @@ export function TopicQuizPage() {
                 />
               </svg>
             </div>
-            <h2 className="font-serif text-xl md:text-2xl font-semibold text-foreground text-center leading-relaxed">
+            <h2 className="font-serif text-xl md:text-2xl font-semibold text-ghibli-canopy text-center leading-relaxed">
               {currentQuestion.question}
             </h2>
             <div className="flex justify-center mt-4">
@@ -401,8 +401,8 @@ export function TopicQuizPage() {
             <div
               className={`flex items-start gap-3 p-4 rounded-parchment mb-4 ${
                 feedback.is_correct
-                  ? "bg-ghibli-moss/15 border border-ghibli-moss/30 text-ghibli-forest"
-                  : "bg-ghibli-petal/10 border border-ghibli-petal/30 text-foreground/80"
+                  ? "bg-ghibli-moss/15 border border-ghibli-moss/30"
+                  : "bg-ghibli-petal/15 border border-ghibli-petal/40"
               }`}
             >
               <img
@@ -413,21 +413,21 @@ export function TopicQuizPage() {
                 }`}
               />
               <div className="flex-1 min-w-0">
-                <p className="font-sans font-medium">
+                <p className="font-sans font-semibold text-ghibli-canopy text-base">
                   {feedback.is_correct ? "That one took root." : "That seed needs more light."}
                 </p>
                 {!feedback.is_correct && (
-                  <p className="text-sm font-sans mt-0.5 opacity-80">
+                  <p className="font-sans font-medium text-ghibli-bark text-base mt-1">
                     The correct answer is: {feedback.correct_option_text}
                   </p>
                 )}
                 {(feedback.is_correct ? feedback.selected_explanation : feedback.correct_explanation) && (
-                  <p className="text-sm font-sans mt-1 opacity-70">
+                  <p className="font-sans text-ghibli-bark text-base mt-1.5 leading-relaxed">
                     {feedback.is_correct ? feedback.selected_explanation : feedback.correct_explanation}
                   </p>
                 )}
                 {feedback.hint && !feedback.is_correct && (
-                  <p className="text-xs font-sans mt-1 opacity-60 italic">
+                  <p className="font-sans text-sm text-ghibli-bark mt-1.5 italic">
                     Hint: {feedback.hint}
                   </p>
                 )}
@@ -444,23 +444,22 @@ export function TopicQuizPage() {
               const isWrong = showFeedback && isSelected && !feedback.is_correct;
 
               let optionClasses =
-                "relative w-full text-left rounded-parchment border-2 px-5 py-4 font-sans text-sm font-medium transition-all duration-300 flex items-center gap-3";
+                "relative w-full text-left rounded-parchment border-2 px-6 py-5 font-sans text-base font-semibold transition-all duration-300 flex items-center gap-4 parchment-solid text-ghibli-canopy";
 
               if (submitting && isSelected) {
-                optionClasses += " border-primary/50 bg-primary/5 opacity-80 cursor-wait";
+                optionClasses += " border-ghibli-jungle bg-ghibli-moss/15 cursor-wait";
               } else if (showFeedback) {
                 if (isCorrect) {
-                  optionClasses += " bg-ghibli-moss/15 border-ghibli-moss text-primary cursor-default";
+                  optionClasses += " border-ghibli-moss bg-ghibli-moss/20 shadow-md cursor-default";
                 } else if (isWrong) {
-                  optionClasses += " bg-ghibli-petal/10 border-ghibli-petal/40 text-foreground/70 cursor-default";
+                  optionClasses += " border-ghibli-petal bg-ghibli-petal/20 text-ghibli-bark cursor-default";
                 } else {
-                  optionClasses += " bg-card border-border/60 opacity-50 cursor-default";
+                  optionClasses += " border-ghibli-moss/40 text-ghibli-bark cursor-default";
                 }
               } else if (isSelected) {
-                optionClasses += " border-primary bg-primary/5 cursor-wait";
+                optionClasses += " border-ghibli-jungle bg-ghibli-moss/15 shadow-md cursor-wait";
               } else {
-                optionClasses +=
-                  " bg-card border-border/60 text-foreground hover:border-ghibli-amber/60 hover:shadow-glow cursor-pointer select-none";
+                optionClasses += " border-ghibli-moss/50 hover:border-ghibli-jungle hover:shadow-lg cursor-pointer select-none";
               }
 
               const letter = STONE_LETTERS[option.index] ?? String.fromCharCode(65 + option.index);
@@ -473,12 +472,12 @@ export function TopicQuizPage() {
                   disabled={showFeedback || submitting}
                 >
                   <span
-                    className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-serif font-bold text-xs ${
+                    className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center font-serif font-bold text-sm ${
                       isCorrect
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-gradient-to-br from-ghibli-jungle to-ghibli-canopy text-primary-foreground shadow-sm"
                         : isWrong
-                        ? "bg-ghibli-petal/30 text-ghibli-bark"
-                        : "bg-secondary text-foreground"
+                        ? "bg-ghibli-petal/45 text-ghibli-bark"
+                        : "bg-gradient-to-br from-ghibli-ivory to-ghibli-mist text-ghibli-canopy border border-ghibli-moss/45"
                     }`}
                   >
                     {letter}

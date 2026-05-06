@@ -41,7 +41,7 @@ export function CircularProgress({
   // Color based on progress
   const ringColor =
     clamped === 0
-      ? "stroke-muted-foreground/20"
+      ? "stroke-ghibli-bark/20"
       : clamped < 33
         ? "stroke-blue-500"
         : clamped < 67
@@ -70,7 +70,7 @@ export function CircularProgress({
           r={radius}
           fill="none"
           strokeWidth={strokeWidth}
-          className={cn("stroke-muted", trackClassName)}
+          className={cn("stroke-ghibli-mist", trackClassName)}
         />
         {/* Progress arc */}
         <circle

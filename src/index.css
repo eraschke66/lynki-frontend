@@ -166,10 +166,10 @@
     color: var(--foreground);
     font-family: 'DM Sans', system-ui, sans-serif;
     background-image:
-      repeating-linear-gradient(45deg, rgba(140, 95, 40, 0.030) 0px, rgba(140, 95, 40, 0.030) 1px, transparent 1px, transparent 6px),
-      repeating-linear-gradient(-45deg, rgba(140, 95, 40, 0.022) 0px, rgba(140, 95, 40, 0.022) 1px, transparent 1px, transparent 6px),
-      radial-gradient(ellipse 80% 60% at 75% 0%, rgba(245, 220, 160, 0.18) 0%, transparent 65%),
-      radial-gradient(ellipse 60% 30% at 50% 100%, rgba(64, 145, 108, 0.06) 0%, transparent 70%);
+      repeating-linear-gradient(45deg, hsl(var(--ghibli-bark) / 0.030) 0px, hsl(var(--ghibli-bark) / 0.030) 1px, transparent 1px, transparent 6px),
+      repeating-linear-gradient(-45deg, hsl(var(--ghibli-bark) / 0.022) 0px, hsl(var(--ghibli-bark) / 0.022) 1px, transparent 1px, transparent 6px),
+      radial-gradient(ellipse 80% 60% at 75% 0%, hsl(var(--ghibli-sunlight) / 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 30% at 50% 100%, hsl(var(--ghibli-moss) / 0.06) 0%, transparent 70%);
   }
 
   h1, h2 {
@@ -205,7 +205,7 @@
   .garden-divider {
     border: none;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(64, 145, 108, 0.25) 20%, rgba(64, 145, 108, 0.35) 50%, rgba(64, 145, 108, 0.25) 80%, transparent);
+    background: linear-gradient(to right, transparent, hsl(var(--ghibli-moss) / 0.25) 20%, hsl(var(--ghibli-moss) / 0.35) 50%, hsl(var(--ghibli-moss) / 0.25) 80%, transparent);
     margin: 0;
     position: relative;
   }
@@ -225,13 +225,13 @@
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(64, 145, 108, 0.25); border-radius: 100px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(64, 145, 108, 0.45); }
+::-webkit-scrollbar-thumb { background: hsl(var(--ghibli-moss) / 0.25); border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--ghibli-moss) / 0.45); }
 
-::selection { background: rgba(64, 145, 108, 0.20); color: #1B4332; }
+::selection { background: hsl(var(--ghibli-moss) / 0.20); color: hsl(var(--ghibli-canopy)); }
 
 :focus-visible {
-  outline: 2px solid rgba(64, 145, 108, 0.6);
+  outline: 2px solid hsl(var(--ghibli-moss) / 0.6);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -267,6 +267,23 @@
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid hsl(140 25% 70% / 0.35);
   box-shadow: var(--shadow-parchment);
+}
+
+/* ── Parchment-solid — opaque reading surface ── */
+.parchment-solid {
+  background: linear-gradient(180deg, hsl(48 80% 97% / 0.96), hsl(45 70% 93% / 0.94));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid hsl(140 25% 65% / 0.5);
+  box-shadow:
+    0 2px 8px hsl(152 45% 16% / 0.08),
+    inset 0 1px 0 hsl(48 90% 99% / 0.6);
+}
+
+/* Variant — flatter, no inner highlight, for nested rows inside parchment-solid containers */
+.parchment-row {
+  background: hsl(48 78% 95% / 0.85);
+  border: 1px solid hsl(140 25% 65% / 0.35);
 }
 
 /* ── Ghibli: Botanical border (subtle leaf-edge gradient ring) ── */

@@ -51,14 +51,14 @@ function TopicCard({
               {gardenStatus.label}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-ghibli-bark mt-1">
             {topic.mastered_concepts} of {topic.total_concepts} concepts mastered
           </p>
         </div>
         <Button
           size="sm"
           variant="outline"
-          className="shrink-0 gap-1.5 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+          className="shrink-0 gap-1.5"
           onClick={() => onStudy(topic.topic_id)}
           disabled={topic.total_concepts === 0}
         >
@@ -68,7 +68,7 @@ function TopicCard({
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-2 rounded-full bg-secondary overflow-hidden mb-4">
+      <div className="w-full h-2 rounded-full bg-ghibli-mist overflow-hidden mb-4">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{
@@ -85,7 +85,7 @@ function TopicCard({
             {topic.concepts.map((concept) => (
               <div
                 key={concept.concept_id}
-                className="flex items-center gap-2.5 py-1 px-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                className="flex items-center gap-2.5 py-1 px-2 rounded-lg hover:bg-ghibli-ivory/70 transition-colors"
               >
                 <span className="text-base shrink-0" role="img" aria-label={concept.status}>
                   {getConceptIcon(concept.status)}
@@ -99,7 +99,7 @@ function TopicCard({
                   </span>
                 )}
                 {concept.n_attempts === 0 && (
-                  <span className="text-xs text-muted-foreground shrink-0">
+                  <span className="text-xs text-ghibli-bark shrink-0">
                     Not yet explored
                   </span>
                 )}
@@ -113,7 +113,7 @@ function TopicCard({
           {topic.concepts.length > 4 && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="mt-2 text-xs text-muted-foreground hover:text-[#2D6A4F] transition-colors flex items-center gap-1"
+              className="mt-2 text-xs text-ghibli-canopy/70 hover:text-ghibli-jungle transition-colors flex items-center gap-1"
             >
               {expanded
                 ? "Show less"
@@ -178,7 +178,7 @@ export function KnowledgeGardenPage() {
           <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
             <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm w-full">
               <AlertCircle className="w-10 h-10 text-destructive" />
-              <p className="text-sm text-muted-foreground">Could not load your garden</p>
+              <p className="text-sm text-ghibli-bark">Could not load your garden</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try again

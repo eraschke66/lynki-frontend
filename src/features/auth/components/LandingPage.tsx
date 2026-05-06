@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link, Navigate } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
-import { Neko } from "@/components/garden/Neko";
 import { GardenIcon } from "@/components/garden/GardenIcons";
 
 export function LandingPage() {
@@ -11,7 +10,7 @@ export function LandingPage() {
   return (
     <div className="bg-background text-foreground">
       {/* Nav */}
-      <nav className="fixed top-0 w-full z-50 bg-background/80 backdrop-blur-sm border-b border-border/30">
+      <nav className="fixed top-0 w-full z-50 glass-cream border-b border-ghibli-moss/25">
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
           <span className="text-xl font-bold text-primary tracking-tight">PassAI</span>
           <div className="flex items-center gap-3">
@@ -30,7 +29,7 @@ export function LandingPage() {
             <span className="text-primary">Find out if you'll actually pass.</span>
           </h1>
 
-          <p className="text-lg text-muted-foreground max-w-xl mx-auto leading-relaxed">
+          <p className="text-lg text-ghibli-bark max-w-xl mx-auto leading-relaxed">
             No streaks. No leaderboards. No stress. Just focus.
           </p>
 
@@ -62,7 +61,7 @@ export function LandingPage() {
               <img src="/plant-seedling-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'darken'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Upload your notes</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-ghibli-bark leading-relaxed">
                   PDFs, slides, whatever you actually study from. PassAI reads it and builds quizzes from the real material.
                 </p>
               </div>
@@ -71,7 +70,7 @@ export function LandingPage() {
               <img src="/plant-young-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'darken'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">Take a real quiz</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-ghibli-bark leading-relaxed">
                   Questions come from your own material, not some generic database. If it's not in your notes, it's not in the quiz.
                 </p>
               </div>
@@ -80,7 +79,7 @@ export function LandingPage() {
               <img src="/plant-flower-raw.png" alt="" className="w-20 h-20 object-contain shrink-0" style={{mixBlendMode:'darken'}} />
               <div>
                 <h3 className="text-lg font-semibold mb-2">See where you stand</h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-ghibli-bark leading-relaxed">
                   A real pass probability, before the exam tells you. Powered by the same knowledge tracking used in academic research.
                 </p>
               </div>
@@ -90,31 +89,31 @@ export function LandingPage() {
       </section>
 
       {/* What makes this different */}
-      <section className="py-12 px-6 bg-secondary/30 border-y border-border/30">
+      <section className="py-12 px-6 bg-ghibli-mist/50 border-y border-ghibli-moss/25">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-4">This isn't Quizlet</h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-xl mx-auto">
+          <p className="text-center text-ghibli-bark mb-10 max-w-xl mx-auto">
             Quizlet tests what you remember. PassAI tells you if you'll pass.
           </p>
           <div className="grid sm:grid-cols-3 gap-6">
-            <div className="p-6 bg-card rounded-2xl border border-border/50">
+            <div className="p-6 parchment-solid rounded-2xl">
               <div className="mb-3"><GardenIcon type="seedling" size={28} /></div>
               <h3 className="font-semibold mb-2">Your materials only</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ghibli-bark">
                 Upload what you actually study. Quizzes come from your notes, not a generic question bank.
               </p>
             </div>
-            <div className="p-6 bg-card rounded-2xl border border-border/50">
+            <div className="p-6 parchment-solid rounded-2xl">
               <div className="mb-3"><GardenIcon type="potted" size={28} /></div>
               <h3 className="font-semibold mb-2">Tracks what you know</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ghibli-bark">
                 Not just what you got right once. The same knowledge tracking model used in academic research.
               </p>
             </div>
-            <div className="p-6 bg-card rounded-2xl border border-border/50">
+            <div className="p-6 parchment-solid rounded-2xl">
               <div className="mb-3"><GardenIcon type="leaf" size={28} /></div>
               <h3 className="font-semibold mb-2">Built for calm</h3>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-ghibli-bark">
                 No streaks. No rankings. No panic. Built by a teacher who knows anxiety gets in the way of learning.
               </p>
             </div>
@@ -126,14 +125,14 @@ export function LandingPage() {
       <section className="py-12 px-6">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-2">Simple pricing</h2>
-          <p className="text-center text-muted-foreground mb-10">
+          <p className="text-center text-ghibli-bark mb-10">
             Start free. Upgrade when you want the full picture.
           </p>
           <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div className="p-8 bg-card rounded-2xl border border-border/50">
-              <h3 className="text-lg font-semibold mb-1">Starter</h3>
-              <p className="text-3xl font-bold mb-6">Free</p>
-              <ul className="space-y-3 text-sm text-muted-foreground">
+            <div className="p-8 parchment-solid rounded-2xl">
+              <h3 className="text-lg font-semibold mb-1 text-ghibli-canopy">Starter</h3>
+              <p className="text-3xl font-bold mb-6 text-ghibli-canopy">Free</p>
+              <ul className="space-y-3 text-sm text-ghibli-bark">
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Upload your study materials</li>
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>AI quizzes from your notes</li>
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Pass probability after each quiz</li>
@@ -143,15 +142,15 @@ export function LandingPage() {
                 <Link to="/signup">Get started</Link>
               </Button>
             </div>
-            <div className="p-8 bg-card rounded-2xl border-2 border-primary/40 relative">
+            <div className="p-8 parchment-solid rounded-2xl border-2 border-primary/40 relative">
               <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-xs font-semibold text-primary-foreground bg-primary px-3 py-1 rounded-full">Most popular</span>
-              <h3 className="text-lg font-semibold mb-1">Pass Pro</h3>
+              <h3 className="text-lg font-semibold mb-1 text-ghibli-canopy">Pass Pro</h3>
               <div className="mb-6">
-                <span className="text-3xl font-bold">$79</span>
-                <span className="text-muted-foreground">/year</span>
-                <p className="text-xs text-muted-foreground mt-1">about $6.58 a month</p>
+                <span className="text-3xl font-bold text-ghibli-canopy">$79</span>
+                <span className="text-ghibli-bark">/year</span>
+                <p className="text-xs text-ghibli-bark mt-1">about $6.58 a month</p>
               </div>
-              <ul className="space-y-3 text-sm text-muted-foreground">
+              <ul className="space-y-3 text-sm text-ghibli-bark">
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Everything in Starter</li>
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Unlimited subjects</li>
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Knowledge garden with topic breakdown</li>
@@ -167,10 +166,9 @@ export function LandingPage() {
       </section>
 
       {/* Closing */}
-      <section className="py-12 px-6 border-t border-border/30 bg-secondary/20">
+      <section className="py-12 px-6 border-t border-ghibli-moss/25 bg-ghibli-mist/40">
         <div className="max-w-2xl mx-auto text-center space-y-6">
-          <Neko size={64} className="mx-auto opacity-40" />
-          <p className="text-muted-foreground text-sm italic">
+          <p className="text-ghibli-bark text-sm italic">
             Your notes. Your quiz. Your honest shot at passing.
           </p>
           <Button asChild size="lg">

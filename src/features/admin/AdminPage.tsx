@@ -106,7 +106,7 @@ export function AdminPage() {
       <>
         <Header />
         <div className="min-h-screen bg-background flex items-center justify-center">
-          <p className="text-muted-foreground">Not authorized.</p>
+          <p className="text-ghibli-bark">Not authorized.</p>
         </div>
       </>
     );
@@ -135,7 +135,7 @@ export function AdminPage() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => navigate("/home")}
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-1.5 text-sm text-ghibli-bark hover:text-foreground transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
@@ -156,12 +156,12 @@ export function AdminPage() {
             {stats.map((s) => (
               <Card key={s.label} className="rounded-xl">
                 <CardContent className="py-5 px-4 flex items-center gap-3">
-                  <div className="p-2 rounded-lg" style={{ background: "rgba(64,145,108,0.1)" }}>
+                  <div className="p-2 rounded-lg bg-ghibli-moss/12">
                     {s.icon}
                   </div>
                   <div>
                     <p className="text-2xl font-bold">{s.value}</p>
-                    <p className="text-xs text-muted-foreground">{s.label}</p>
+                    <p className="text-xs text-ghibli-bark">{s.label}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -176,17 +176,17 @@ export function AdminPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="py-3 px-4 font-medium text-muted-foreground">User ID</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">User ID</th>
                     </tr>
                   </thead>
                   <tbody>
                     {users.map((u) => (
-                      <tr key={u.user_id} className="border-b last:border-0 hover:bg-muted/30">
+                      <tr key={u.user_id} className="border-b last:border-0 hover:bg-ghibli-mist/50">
                         <td className="py-3 px-4 font-mono text-xs">{u.user_id}</td>
                       </tr>
                     ))}
                     {users.length === 0 && (
-                      <tr><td colSpan={1} className="py-8 text-center text-muted-foreground">
+                      <tr><td colSpan={1} className="py-8 text-center text-ghibli-bark">
                         {loading ? "Loading..." : "No users found"}
                       </td></tr>
                     )}
@@ -204,15 +204,15 @@ export function AdminPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Course</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Status</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Score</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Date</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Course</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Status</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Score</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentQuizzes.map((q: any) => (
-                      <tr key={q.id} className="border-b last:border-0 hover:bg-muted/30">
+                      <tr key={q.id} className="border-b last:border-0 hover:bg-ghibli-mist/50">
                         <td className="py-3 px-4 font-medium">{q.courses?.title ?? "—"}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
@@ -223,16 +223,16 @@ export function AdminPage() {
                             {q.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-muted-foreground">
+                        <td className="py-3 px-4 text-ghibli-bark">
                           {q.status === "completed"
                             ? `${q.correct_count}/${q.total_questions}`
                             : "—"}
                         </td>
-                        <td className="py-3 px-4 text-muted-foreground">{formatDate(q.created_at)}</td>
+                        <td className="py-3 px-4 text-ghibli-bark">{formatDate(q.created_at)}</td>
                       </tr>
                     ))}
                     {recentQuizzes.length === 0 && (
-                      <tr><td colSpan={4} className="py-8 text-center text-muted-foreground">
+                      <tr><td colSpan={4} className="py-8 text-center text-ghibli-bark">
                         {loading ? "Loading..." : "No quizzes yet"}
                       </td></tr>
                     )}
@@ -250,21 +250,21 @@ export function AdminPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left">
-                      <th className="py-3 px-4 font-medium text-muted-foreground">File</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Course</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Size</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Status</th>
-                      <th className="py-3 px-4 font-medium text-muted-foreground">Date</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">File</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Course</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Size</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Status</th>
+                      <th className="py-3 px-4 font-medium text-ghibli-bark">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recentDocs.map((d: any) => (
-                      <tr key={d.id} className="border-b last:border-0 hover:bg-muted/30">
+                      <tr key={d.id} className="border-b last:border-0 hover:bg-ghibli-mist/50">
                         <td className="py-3 px-4 font-medium maw-w-[200px] truncate" title={d.title}>
                           {d.title}
                         </td>
-                        <td className="py-3 px-4 text-muted-foreground">{d.courses?.title ?? "—"}</td>
-                        <td className="py-3 px-4 text-muted-foreground">{formatBytes(d.file_size)}</td>
+                        <td className="py-3 px-4 text-ghibli-bark">{d.courses?.title ?? "—"}</td>
+                        <td className="py-3 px-4 text-ghibli-bark">{formatBytes(d.file_size)}</td>
                         <td className="py-3 px-4">
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                             d.status === "processed"
@@ -276,11 +276,11 @@ export function AdminPage() {
                             {d.status}
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-muted-foreground">{formatDate(d.created_at)}</td>
+                        <td className="py-3 px-4 text-ghibli-bark">{formatDate(d.created_at)}</td>
                       </tr>
                     ))}
                     {recentDocs.length === 0 && (
-                      <tr><td colSpan={5} className="py-8 text-center text-muted-foreground">
+                      <tr><td colSpan={5} className="py-8 text-center text-ghibli-bark">
                         {loading ? "Loading..." : "No uploads yet"}
                       </td></tr>
                     )}

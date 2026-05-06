@@ -23,21 +23,21 @@ export function TopicBreakdownRow({
   const unmasteredConcepts = topic.concepts.filter((c) => !c.is_mastered);
 
   return (
-    <div className="border border-[rgba(64,145,108,0.12)] rounded-xl overflow-hidden">
+    <div className="border border-ghibli-moss/20 rounded-xl overflow-hidden">
       <button
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-[rgba(64,145,108,0.03)] transition-colors"
+        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-ghibli-moss/8 transition-colors"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-sm font-semibold">{topic.topic_name}</p>
+            <p className="text-sm font-semibold text-ghibli-canopy">{topic.topic_name}</p>
             <span
               className={`text-xs px-2 py-0.5 rounded-full ${status.bgColor} ${status.color}`}
             >
               {status.label}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-ghibli-bark mt-0.5">
             {topic.mastered_concepts} of {topic.total_concepts} concepts mastered
           </p>
         </div>
@@ -45,7 +45,7 @@ export function TopicBreakdownRow({
           <Button
             size="sm"
             variant="outline"
-            className="gap-1.5 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+            className="gap-1.5"
             onClick={(e) => {
               e.stopPropagation();
               queryClient.removeQueries({
@@ -58,15 +58,15 @@ export function TopicBreakdownRow({
             Study
           </Button>
           {expanded ? (
-            <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            <ChevronUp className="w-4 h-4 text-ghibli-canopy/65" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            <ChevronDown className="w-4 h-4 text-ghibli-canopy/65" />
           )}
         </div>
       </button>
 
       {expanded && (
-        <div className="px-5 pb-4 space-y-1.5 border-t border-[rgba(64,145,108,0.08)] pt-3">
+        <div className="px-5 pb-4 space-y-1.5 border-t border-ghibli-moss/15 pt-3">
           {unmasteredConcepts.map((concept) => {
             const m = Math.round(concept.p_mastery * 100);
             const s = getGardenStatus(m);
@@ -75,7 +75,7 @@ export function TopicBreakdownRow({
                 <span className="text-base shrink-0">
                   {concept.status === "in_progress" ? "🌿" : "🌱"}
                 </span>
-                <span className="text-sm flex-1 min-w-0 truncate">
+                <span className="text-sm flex-1 min-w-0 truncate text-ghibli-canopy">
                   {concept.concept_name}
                 </span>
                 {concept.n_attempts > 0 ? (
@@ -83,7 +83,7 @@ export function TopicBreakdownRow({
                     {m}%
                   </span>
                 ) : (
-                  <span className="text-xs text-muted-foreground shrink-0">
+                  <span className="text-xs text-ghibli-bark shrink-0">
                     Not yet explored
                   </span>
                 )}

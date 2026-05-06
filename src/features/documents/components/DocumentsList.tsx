@@ -155,14 +155,14 @@ export function DocumentsList({
 
   if (documents.length === 0) {
     return (
-      <Card className="text-center p-8 bg-muted/20 border-dashed">
+      <Card className="text-center p-8 border-2 border-dashed border-ghibli-moss/45">
         <CardContent className="space-y-4 pt-6">
-          <div className="mx-auto w-12 h-12 bg-muted rounded-full flex items-center justify-center">
-            <HardDrive className="text-muted-foreground w-6 h-6" />
+          <div className="mx-auto w-12 h-12 bg-ghibli-mist border border-ghibli-moss/40 rounded-full flex items-center justify-center">
+            <HardDrive className="text-ghibli-bark w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-medium">No documents yet</h3>
-            <p className="text-sm text-muted-foreground">
+            <h3 className="text-lg font-medium text-ghibli-canopy">No documents yet</h3>
+            <p className="text-sm text-ghibli-bark">
               Upload your course materials to get started.
             </p>
           </div>
@@ -266,7 +266,7 @@ export function DocumentsList({
                     )}
                   </TooltipProvider>
                 </TableCell>
-                <TableCell className="text-muted-foreground">
+                <TableCell className="text-ghibli-bark">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
                     {formatDistanceToNow(new Date(doc.createdAt), {

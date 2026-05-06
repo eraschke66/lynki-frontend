@@ -17,12 +17,12 @@ export function StudyPlanHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-[#40916C]" />
-        <h2 className="text-base font-semibold">Your Growth Guide</h2>
+        <Sparkles className="w-4 h-4 text-ghibli-moss" />
+        <h2 className="text-base font-semibold text-ghibli-canopy">Your Growth Guide</h2>
       </div>
       {hasPlan && !isGenerating && generatedAt && (
         <div className="flex items-center gap-3">
-          <p className="text-xs text-muted-foreground hidden sm:block">
+          <p className="text-xs text-ghibli-bark hidden sm:block">
             Generated{" "}
             {new Date(generatedAt).toLocaleDateString(undefined, {
               month: "short",
@@ -32,7 +32,7 @@ export function StudyPlanHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1.5 text-xs text-muted-foreground hover:text-[#2D6A4F]"
+            className="gap-1.5 text-xs text-ghibli-canopy/70 hover:text-ghibli-jungle"
             onClick={onRegenerate}
           >
             <RefreshCw className="w-3.5 h-3.5" />

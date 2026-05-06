@@ -91,7 +91,7 @@ function buildMarkdownComponents(): Components {
     h3: () => null,
 
     p: ({ children }) => (
-      <p className="text-sm text-[#3d2b1f]/80 leading-relaxed">{children}</p>
+      <p className="text-sm text-ghibli-bark leading-relaxed">{children}</p>
     ),
 
     ul: ({ children }) => (
@@ -108,37 +108,37 @@ function buildMarkdownComponents(): Components {
         const action = timeMatch[2];
         return (
           <li className="flex items-start gap-3">
-            <span className="inline-flex items-center gap-1 shrink-0 mt-0.5 text-xs font-semibold bg-[rgba(64,145,108,0.12)] text-[#2D6A4F] px-2 py-0.5 rounded-full">
+            <span className="inline-flex items-center gap-1 shrink-0 mt-0.5 text-xs font-semibold bg-ghibli-moss/15 text-ghibli-jungle px-2 py-0.5 rounded-full">
               <Clock className="w-3 h-3" />
               {mins} min
             </span>
-            <span className="text-sm text-[#3d2b1f]/80 leading-relaxed">{action}</span>
+            <span className="text-sm text-ghibli-bark leading-relaxed">{action}</span>
           </li>
         );
       }
 
       if (AFTER_LINE_RE.test(text.trim())) {
         return (
-          <li className="flex items-start gap-2 mt-1 border-l-2 border-[#52b788] pl-3 py-0.5">
-            <span className="text-xs text-[#2D6A4F] italic leading-relaxed">{children}</span>
+          <li className="flex items-start gap-2 mt-1 border-l-2 border-[hsl(155_43%_48%)] pl-3 py-0.5">
+            <span className="text-xs text-ghibli-jungle italic leading-relaxed">{children}</span>
           </li>
         );
       }
 
       return (
         <li className="flex items-start gap-2.5">
-          <span className="shrink-0 mt-0.5 text-[#52b788]">🌱</span>
-          <span className="text-sm text-[#3d2b1f]/80 leading-relaxed">{children}</span>
+          <span className="shrink-0 mt-0.5 text-[hsl(155_43%_48%)]">🌱</span>
+          <span className="text-sm text-ghibli-bark leading-relaxed">{children}</span>
         </li>
       );
     },
 
     strong: ({ children }) => (
-      <strong className="font-semibold text-[#1B4332]">{children}</strong>
+      <strong className="font-semibold text-ghibli-canopy">{children}</strong>
     ),
 
     em: ({ children }) => (
-      <em className="italic text-[#3d2b1f]/70">{children}</em>
+      <em className="italic text-ghibli-bark">{children}</em>
     ),
   };
 }
@@ -188,36 +188,36 @@ function TopicSection({
   // Progress bar colour based on mastery level
   const barColor =
     pct >= 75
-      ? "bg-[#40916C]"
+      ? "bg-ghibli-moss"
       : pct >= 50
-        ? "bg-[#52b788]"
+        ? "bg-[hsl(155_43%_48%)]"
         : pct >= 30
-          ? "bg-[#74c69d]"
-          : "bg-[#b7e4c7]";
+          ? "bg-[hsl(146_42%_62%)]"
+          : "bg-[hsl(140_38%_84%)]";
 
   return (
     <ParchmentCard className="p-6">
       {/* Header row */}
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="flex-1 min-w-0">
-          <h3 className="font-serif font-semibold text-[#1B4332] text-base leading-snug">
+          <h3 className="font-serif font-semibold text-ghibli-canopy text-base leading-snug">
             {section.topicName}
           </h3>
           <div className="flex items-center gap-2 mt-1.5">
-            <div className="flex-1 h-1.5 rounded-full bg-[rgba(64,145,108,0.12)] overflow-hidden">
+            <div className="flex-1 h-1.5 rounded-full bg-ghibli-moss/15 overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all ${barColor}`}
                 style={{ width: `${pct}%` }}
               />
             </div>
-            <span className="text-xs font-medium text-[#40916C] shrink-0">{pct}%</span>
+            <span className="text-xs font-medium text-ghibli-moss shrink-0">{pct}%</span>
           </div>
         </div>
         {topicId && (
           <Button
             size="sm"
             variant="outline"
-            className="shrink-0 gap-1.5 text-xs border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+            className="shrink-0 gap-1.5 text-xs"
             onClick={() => {
               queryClient.removeQueries({
                 queryKey: testQueryKeys.quiz(courseId, user?.id ?? ""),
@@ -244,10 +244,10 @@ function TopicSection({
 function RhythmSection({ body }: { body: string }) {
   const components = buildMarkdownComponents();
   return (
-    <ParchmentCard className="p-6 bg-[rgba(64,145,108,0.04)]">
+    <ParchmentCard className="p-6 bg-ghibli-moss/5">
       <div className="flex items-center gap-2 mb-3">
         <span className="text-lg">🌿</span>
-        <h3 className="font-serif font-semibold text-[#1B4332] text-sm uppercase tracking-wide">
+        <h3 className="font-serif font-semibold text-ghibli-canopy text-sm uppercase tracking-wide">
           Your rhythm
         </h3>
       </div>
@@ -297,14 +297,14 @@ export function MarkdownPlanRenderer({
     return (
       <ParchmentCard className="p-10 text-center flex flex-col items-center gap-3">
         <span className="text-3xl">🌾</span>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-ghibli-bark">
           Something went wrong growing this plan.
         </p>
         {onRegenerate && (
           <Button
             size="sm"
             variant="outline"
-            className="gap-1.5 border-[rgba(64,145,108,0.3)]"
+            className="gap-1.5"
             onClick={onRegenerate}
           >
             <RefreshCw className="w-3.5 h-3.5" />
@@ -324,8 +324,8 @@ export function MarkdownPlanRenderer({
       {/* Plan title card */}
       {planTitle && (
         <div className="flex items-center gap-2 px-1">
-          <Sparkles className="w-4 h-4 text-[#40916C] shrink-0" />
-          <h2 className="font-serif text-lg font-bold text-[#1B4332]">{planTitle}</h2>
+          <Sparkles className="w-4 h-4 text-ghibli-moss shrink-0" />
+          <h2 className="font-serif text-lg font-bold text-ghibli-canopy">{planTitle}</h2>
         </div>
       )}
 

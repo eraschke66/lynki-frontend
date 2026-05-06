@@ -21,7 +21,7 @@ export function AddCourseCard({ onClick }: AddCourseCardProps) {
         <span className="block font-serif text-lg font-semibold text-ghibli-canopy">
           Plant a New Course
         </span>
-        <span className="block font-sans text-xs text-muted-foreground mt-1 italic">
+        <span className="block font-sans text-xs text-ghibli-bark mt-1 italic">
           Drop a seed into your garden
         </span>
       </div>

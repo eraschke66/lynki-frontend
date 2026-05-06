@@ -113,7 +113,7 @@ export function Dashboard() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-0" style={{ background: "rgba(27,67,50,0.18)" }} />
+        <div className="absolute inset-0 bg-ghibli-canopy/20" />
         <div className="relative z-10 text-center pb-16 space-y-3">
           <p className="text-white text-base font-medium tracking-wide" style={{ textShadow: "0 1px 4px rgba(0,0,0,0.4)" }}>
             Getting your materials together...
@@ -291,7 +291,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
   return (
     <ParchmentCard
       hover={isClickable}
-      className={`relative p-6 flex flex-col gap-3 group overflow-hidden ${isClickable ? "" : "opacity-80"} ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
+      className={`relative p-6 flex flex-col gap-3 group overflow-hidden ${isClickable ? "" : "pointer-events-none"} ${isRecommended ? "ring-2 ring-ghibli-moss/40" : ""}`}
     >
       {/* Header: title + status pill + 3-dot */}
       <div className="flex items-start justify-between gap-3 relative z-10">
@@ -366,7 +366,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
             style={{ transition: "stroke-dashoffset 1.2s ease-out" }}
           />
         </svg>
-        <span className="font-sans text-xs text-muted-foreground italic text-center">
+        <span className="font-sans text-xs text-ghibli-bark italic text-center">
           Tend regularly to keep it thriving
         </span>
       </div>

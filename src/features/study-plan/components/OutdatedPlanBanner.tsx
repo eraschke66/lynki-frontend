@@ -7,16 +7,16 @@ export function OutdatedPlanBanner({ onRegenerate }: { onRegenerate: () => void 
     <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
       <span className="text-4xl">🌱</span>
       <div>
-        <p className="text-sm font-semibold mb-1">
+        <p className="text-sm font-semibold text-ghibli-canopy mb-1">
           Your plan was made before the garden got an upgrade.
         </p>
-        <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+        <p className="text-sm text-ghibli-bark max-w-xs mx-auto">
           Generate a new one to see your personalized growth guide — with time
           estimates, projected outcomes, and your study rhythm.
         </p>
       </div>
       <Button
-        className="gap-2 shadow-[0_2px_8px_rgba(13,115,119,0.2)]"
+        className="gap-2 shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)]"
         onClick={onRegenerate}
       >
         <Sparkles className="w-4 h-4" />

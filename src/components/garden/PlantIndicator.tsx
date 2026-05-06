@@ -42,7 +42,7 @@ export function PlantIndicator({ probability, size = "md", showPercent = true, g
         />
       </div>
       <span
-        className="font-sans text-muted-foreground"
+        className="font-sans text-ghibli-bark"
         style={{ fontSize: labelPx }}
       >
         {stageLabels[stageIndex]}

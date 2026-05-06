@@ -146,7 +146,7 @@ export function SignupForm() {
               "repeating-linear-gradient(90deg, transparent, transparent 8px, hsl(30 20% 60% / 0.3) 8px, hsl(30 20% 60% / 0.3) 9px)",
           }}
         />
-        <div className="relative bg-card rounded-[1.1rem] parchment-texture p-8">
+        <div className="relative parchment-solid rounded-[1.1rem] p-8">
           <div className="relative z-10">{children}</div>
         </div>
       </div>
@@ -169,11 +169,11 @@ export function SignupForm() {
             <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
               Your seed has been planted
             </h1>
-            <p className="font-sans text-sm text-ghibli-bark/80 mb-2">
+            <p className="font-sans text-sm text-ghibli-bark mb-2">
               We sent a verification link to{" "}
               <strong className="text-ghibli-forest">{registeredEmail}</strong>
             </p>
-            <p className="font-sans text-xs text-muted-foreground italic mb-6">
+            <p className="font-sans text-xs text-ghibli-bark italic mb-6">
               Click the link in the email to begin tending your garden.
             </p>
             {error && (
@@ -214,7 +214,7 @@ export function SignupForm() {
           <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-1">
             Plant your first seed
           </h1>
-          <p className="font-sans text-sm text-ghibli-bark/70">
+          <p className="font-sans text-sm text-ghibli-bark">
             Your knowledge garden awaits 🌿
           </p>
         </div>
@@ -228,16 +228,17 @@ export function SignupForm() {
 
           {/* Email */}
           <div>
-            <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
+            <label htmlFor="email" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
               Email
             </label>
             <input
               id="email"
               type="email"
+              autoComplete="username"
               placeholder="gardener@passai.app"
               {...register("email")}
               disabled={loading}
-              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
             />
             {errors.email && (
               <p className="font-sans text-xs text-destructive mt-1">{errors.email.message}</p>
@@ -246,22 +247,23 @@ export function SignupForm() {
 
           {/* Password */}
           <div>
-            <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
+            <label htmlFor="password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
               Password
             </label>
             <div className="relative">
               <input
                 id="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
                 placeholder="••••••••"
                 {...register("password")}
                 disabled={loading}
-                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -273,22 +275,23 @@ export function SignupForm() {
 
           {/* Confirm Password */}
           <div>
-            <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
+            <label htmlFor="confirmPassword" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
               Confirm Password
             </label>
             <div className="relative">
               <input
                 id="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
+                autoComplete="new-password"
                 placeholder="••••••••"
                 {...register("confirmPassword")}
                 disabled={loading}
-                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
               />
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword((prev) => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
               >
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -302,7 +305,7 @@ export function SignupForm() {
 
           {/* Age confirmation */}
           <div className="flex flex-col gap-1.5">
-            <label className="flex items-start gap-2.5 cursor-pointer">
+            <label htmlFor="ageConfirmed" className="flex items-start gap-2.5 cursor-pointer">
               <input
                 id="ageConfirmed"
                 type="checkbox"
@@ -310,7 +313,7 @@ export function SignupForm() {
                 disabled={loading}
                 className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
               />
-              <span className="font-sans text-xs text-foreground/80 leading-snug">
+              <span className="font-sans text-xs text-ghibli-bark leading-snug">
                 I confirm that I am at least 13 years old
               </span>
             </label>
@@ -319,7 +322,7 @@ export function SignupForm() {
                 {errors.ageConfirmed.message}
               </p>
             )}
-            <p className="font-sans text-[11px] text-muted-foreground text-center leading-relaxed mt-1">
+            <p className="font-sans text-[11px] text-ghibli-bark text-center leading-relaxed mt-1">
               By signing up, you agree to our{" "}
               <Link to="/terms" className="text-primary font-semibold hover:underline">
                 Terms of Service
@@ -351,7 +354,7 @@ export function SignupForm() {
           </button>
 
           {/* Sign in link */}
-          <p className="text-center font-sans text-xs text-muted-foreground mt-1">
+          <p className="text-center font-sans text-xs text-ghibli-bark mt-1">
             Already have an account?{" "}
             <Link to="/login" className="text-primary font-medium hover:underline">
               Return to the garden

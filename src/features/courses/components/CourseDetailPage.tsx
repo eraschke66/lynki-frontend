@@ -150,10 +150,7 @@ export function CourseDetailPage() {
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div
-          className="absolute inset-0"
-          style={{ background: "rgba(27,67,50,0.18)" }}
-        />
+        <div className="absolute inset-0 bg-ghibli-canopy/20" />
         <div className="relative z-10 text-center pb-16 space-y-3">
           <p
             className="text-white text-base font-medium tracking-wide"
@@ -174,7 +171,7 @@ export function CourseDetailPage() {
         <div className="relative z-10 min-h-screen flex items-center justify-center">
           <div className="text-center space-y-4">
             <AlertCircle className="w-10 h-10 mx-auto text-destructive" />
-            <p className="text-sm text-muted-foreground">Course not found</p>
+            <p className="text-sm text-ghibli-bark">Course not found</p>
             <Button variant="outline" onClick={() => navigate("/home")}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Dashboard
@@ -314,15 +311,12 @@ export function CourseDetailPage() {
 
             {quizzesLoading ? (
               <div className="flex items-center justify-center py-12">
-                <p className="text-sm text-muted-foreground animate-pulse">
+                <p className="text-sm text-ghibli-bark animate-pulse">
                   Reading the garden path…
                 </p>
               </div>
             ) : quizzes.length === 0 ? (
-              <Card
-                className="rounded-2xl"
-                style={{ borderTop: "2px solid rgba(64,145,108,0.12)" }}
-              >
+              <Card className="rounded-2xl border-t-2 border-ghibli-moss/15">
                 <CardContent className="py-12 text-center">
                   <img
                     src="/plant-stage-1.png"
@@ -330,7 +324,7 @@ export function CourseDetailPage() {
                     className="w-16 h-16 object-contain mx-auto mb-3"
                     style={{ mixBlendMode: "darken" }}
                   />
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-ghibli-bark">
                     No quizzes yet. Generate your first one above!
                   </p>
                 </CardContent>
@@ -391,12 +385,9 @@ function QuizCard({
 
   return (
     <Card
-      className="group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_20px_rgba(27,67,50,0.10)] hover:border-[rgba(64,145,108,0.3)] cursor-pointer"
-      style={{
-        borderLeft: hasCompleted
-          ? "3px solid rgba(64,145,108,0.4)"
-          : "3px solid rgba(64,145,108,0.15)",
-      }}
+      className={`group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_20px_hsl(var(--ghibli-canopy)/0.10)] hover:border-ghibli-moss/45 cursor-pointer border-l-[3px] ${
+        hasCompleted ? "border-l-ghibli-moss/55" : "border-l-ghibli-moss/20"
+      }`}
       onClick={onClick}
     >
       <CardContent className="py-4 px-5">
@@ -405,8 +396,8 @@ function QuizCard({
           <div
             className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 transition-colors ${
               hasCompleted
-                ? "bg-[rgba(64,145,108,0.1)] text-[#2D6A4F] group-hover:bg-[rgba(64,145,108,0.18)]"
-                : "bg-[rgba(64,145,108,0.05)] text-[#40916C] group-hover:bg-[rgba(64,145,108,0.10)]"
+                ? "bg-ghibli-moss/12 text-ghibli-jungle group-hover:bg-ghibli-moss/20"
+                : "bg-ghibli-moss/8 text-ghibli-moss group-hover:bg-ghibli-moss/12"
             }`}
           >
             {hasCompleted ? (
@@ -419,7 +410,7 @@ function QuizCard({
           {/* Name + meta */}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold truncate">{quiz.name}</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-xs text-ghibli-bark mt-0.5">
               {formattedDate} &middot; {quiz.total_questions} questions
               {hasCompleted && (
                 <>
@@ -434,9 +425,9 @@ function QuizCard({
           {/* Best score + chevron */}
           <div className="flex items-center gap-2 shrink-0">
             {bestScore !== null && (
-              <span className="text-sm font-bold text-[#2D6A4F]">{bestScore}%</span>
+              <span className="text-sm font-bold text-ghibli-jungle">{bestScore}%</span>
             )}
-            <ChevronRight className="w-4 h-4 text-muted-foreground/50 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-muted-foreground" />
+            <ChevronRight className="w-4 h-4 text-ghibli-canopy/65 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ghibli-canopy" />
           </div>
         </div>
       </CardContent>

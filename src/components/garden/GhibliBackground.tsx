@@ -35,16 +35,6 @@ const GhibliBackground = () => (
       style={{ animationDelay: "4s" }}
     />
 
-    {/* Sleeping cat — calm garden companion */}
-    <div className="fixed bottom-6 right-8 z-0 pointer-events-none select-none">
-      <div className="absolute inset-0 -bottom-2 bg-ghibli-canopy/25 blur-2xl rounded-full scale-90" />
-      <img
-        src="/sleeping-cat.png"
-        alt=""
-        className="relative w-28 lg:w-36 animate-pulse-soft drop-shadow-lg"
-        style={{ animationDuration: "6s" }}
-      />
-    </div>
   </>
 );
 

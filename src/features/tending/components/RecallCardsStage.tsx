@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
+import { CardPlant, MAX_PLANT_TIER } from "./CardPlant";
 import { SkipStageLink } from "./SkipStageLink";
 import type { RecallCard, RecallResult } from "../types";
 
@@ -14,6 +15,10 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
   const [idx, setIdx] = useState(0);
   const [flipped, setFlipped] = useState(false);
   const [results, setResults] = useState<RecallResult[]>([]);
+  // Plant tier grows with card progress. "Got it" = +1 tier.
+  // "Show me again" partial growth treatment is intentionally not picked yet —
+  // currently no-op for the plant. Erik to choose a treatment before V1.
+  const [plantTier, setPlantTier] = useState(0);
 
   // Empty / error fallback
   if (cards.length === 0) {
@@ -36,6 +41,11 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
 
   const rate = (rating: RecallResult["rating"]) => {
     const next = [...results, { id: card.id, rating }];
+    if (rating === "got_it") {
+      setPlantTier((t) => Math.min(MAX_PLANT_TIER, t + 1));
+    }
+    // "again" rating: plant tier stays put for now — partial-grow visual is
+    // open for Erik to pick (half-step pose / desaturated / delayed advance).
     if (isLast) {
       onComplete(next);
       return;
@@ -54,7 +64,7 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
       </div>
 
       <ParchmentCard
-        className="p-8 md:p-10 min-h-[280px] flex flex-col items-center justify-center cursor-pointer select-none"
+        className="p-8 md:p-10 min-h-[280px] flex flex-col items-center justify-center cursor-pointer select-none relative"
         hover={false}
       >
         <button
@@ -81,6 +91,11 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
             </>
           )}
         </button>
+
+        {/* Lower-right corner growth indicator. The only decoration on this card. */}
+        <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4">
+          <CardPlant tier={plantTier} />
+        </div>
       </ParchmentCard>
 
       {flipped && (

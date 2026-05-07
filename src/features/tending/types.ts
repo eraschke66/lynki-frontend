@@ -34,7 +34,7 @@ export const STAGE_LABEL: Record<Stage, string> = {
   active_recall: "Active Recall",
   mnemonics: "Mnemonics",
   connections: "Connections",
-  quiz: "Quiz",
+  quiz: "Practice Quiz",
   mastery_delta: "Mastery Delta",
   done: "Done",
 };

@@ -13,7 +13,7 @@ export function QuizStage({ onComplete, onSkip }: QuizStageProps) {
   return (
     <div className="max-w-2xl mx-auto w-full">
       <ParchmentCard className="p-8 md:p-10">
-        <h2 className="font-serif text-2xl text-ghibli-canopy mb-4">Adaptive Quiz</h2>
+        <h2 className="font-serif text-2xl text-ghibli-canopy mb-4">Practice Quiz</h2>
         <p className="text-sm text-gray-500 italic">
           [Day 5 — embed existing topic-scoped quiz here]
         </p>

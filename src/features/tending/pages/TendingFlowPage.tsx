@@ -158,8 +158,13 @@ function TendingFlowInner() {
 
         {state.currentStage === "active_recall" && state.payload && (
           <ActiveRecallStage
+            sessionId={state.sessionId}
             prompt={state.payload.active_recall.prompt}
-            onComplete={machine.advance}
+            sourceParagraphFallback={state.payload.active_recall.source_paragraph}
+            onComplete={(result) => {
+              machine.recordActiveRecall(result);
+              machine.advance();
+            }}
             onSkip={machine.skip}
           />
         )}
@@ -167,7 +172,10 @@ function TendingFlowInner() {
         {state.currentStage === "mnemonics" && state.payload && (
           <MnemonicStage
             mnemonics={state.payload.mnemonics.mnemonics}
-            onComplete={machine.advance}
+            onComplete={(results) => {
+              machine.recordMnemonics(results);
+              machine.advance();
+            }}
             onSkip={machine.skip}
           />
         )}
@@ -175,7 +183,11 @@ function TendingFlowInner() {
         {state.currentStage === "connections" && state.payload && (
           <ConnectionsStage
             pairs={state.payload.connections.pairs}
-            onComplete={machine.advance}
+            type={state.payload.connections.type}
+            onComplete={(results) => {
+              machine.recordConnections(results);
+              machine.advance();
+            }}
             onSkip={machine.skip}
           />
         )}

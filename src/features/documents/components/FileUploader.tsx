@@ -96,27 +96,23 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
         {/* ── STEP 1: Course selection — always visible ── */}
         {!hasUploads && (
           <div
-            className="rounded-xl p-4 space-y-3"
-            style={{
-              background: courseReady
-                ? "rgba(64,145,108,0.06)"
-                : "rgba(250,243,224,0.6)",
-              border: courseReady
-                ? "1.5px solid rgba(64,145,108,0.3)"
-                : "1.5px solid rgba(64,145,108,0.15)",
-            }}
+            className={`rounded-xl p-4 space-y-3 border-[1.5px] ${
+              courseReady
+                ? "bg-ghibli-moss/8 border-ghibli-moss/45"
+                : "bg-ghibli-ivory/60 border-ghibli-moss/20"
+            }`}
           >
             <div className="flex items-center gap-2">
               <div
-                className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                style={{
-                  background: courseReady ? "hsl(140,35%,40%)" : "rgba(64,145,108,0.2)",
-                  color: courseReady ? "white" : "hsl(140,35%,35%)",
-                }}
+                className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                  courseReady
+                    ? "bg-ghibli-jungle text-primary-foreground"
+                    : "bg-ghibli-moss/20 text-ghibli-canopy"
+                }`}
               >
                 {courseReady ? "✓" : "1"}
               </div>
-              <Label className="text-sm font-semibold text-[#2D6A4F]">
+              <Label className="text-sm font-semibold text-ghibli-jungle">
                 Choose a course for these materials
               </Label>
             </div>
@@ -159,7 +155,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                   size="sm"
                   variant="outline"
                   onClick={() => setCreatingNew(true)}
-                  className="gap-1 border-[rgba(64,145,108,0.3)] text-[#2D6A4F] hover:border-[#40916C]"
+                  className="gap-1"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   New
@@ -168,12 +164,12 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
             )}
 
             {!courseReady && !creatingNew && (
-              <p className="text-xs text-muted-foreground pl-8">
+              <p className="text-xs text-ghibli-bark pl-8">
                 Materials must belong to a course so your garden can track progress.
               </p>
             )}
             {courseReady && selectedCourse && (
-              <p className="text-xs text-[#40916C] pl-8 font-medium">
+              <p className="text-xs text-ghibli-moss pl-8 font-medium">
                 Planting into: {selectedCourse.title}
               </p>
             )}
@@ -184,9 +180,9 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
         {!hasUploads && (
           <>
             <div className="flex items-center gap-2 opacity-40 select-none pointer-events-none" style={{ transition: "opacity 0.3s" }}>
-              <div className="flex-1 h-px bg-border" />
-              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-              <div className="flex-1 h-px bg-border" />
+              <div className="flex-1 h-px bg-ghibli-moss/30" />
+              <ChevronRight className="w-3.5 h-3.5 text-ghibli-bark" />
+              <div className="flex-1 h-px bg-ghibli-moss/30" />
             </div>
 
             <div
@@ -194,14 +190,14 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                 !courseReady
                   ? "opacity-30 pointer-events-none select-none"
                   : uploading
-                  ? "opacity-50 pointer-events-none"
-                  : "cursor-pointer hover:border-[rgba(64,145,108,0.6)] hover:bg-[rgba(64,145,108,0.03)]"
+                  ? "pointer-events-none bg-ghibli-mist/40 text-ghibli-bark/65"
+                  : "cursor-pointer hover:border-ghibli-jungle hover:bg-ghibli-moss/8"
               }`}
               style={{
                 border: courseReady
-                  ? "2px dashed rgba(64,145,108,0.35)"
-                  : "2px dashed rgba(64,145,108,0.15)",
-                background: courseReady ? "transparent" : "rgba(0,0,0,0.02)",
+                  ? "2px dashed hsl(var(--ghibli-moss) / 0.35)"
+                  : "2px dashed hsl(var(--ghibli-moss) / 0.15)",
+                background: courseReady ? "transparent" : "hsl(var(--ghibli-bark) / 0.02)",
               }}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -209,16 +205,10 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
-                    style={{
-                      background: "rgba(64,145,108,0.2)",
-                      color: "hsl(140,35%,35%)",
-                    }}
-                  >
+                  <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-ghibli-moss/20 text-ghibli-canopy">
                     2
                   </div>
-                  <span className="text-sm font-semibold text-[#2D6A4F]">
+                  <span className="text-sm font-semibold text-ghibli-jungle">
                     {courseReady ? "Drop files here or click to upload" : "Select a course above first"}
                   </span>
                 </div>
@@ -228,7 +218,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                   className="w-14 h-14 object-contain"
                   style={{ mixBlendMode: "darken", opacity: courseReady ? 0.85 : 0.3 }}
                 />
-                <p className="text-xs text-muted-foreground">PDF, DOCX, PPTX, PNG, JPEG</p>
+                <p className="text-xs text-ghibli-bark">PDF, DOCX, PPTX, PNG, JPEG</p>
               </div>
               <Input
                 ref={fileInputRef}
@@ -255,7 +245,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
         {hasUploads && (
           <div className="space-y-4">
             <div className="flex justify-between items-center text-sm font-medium">
-              <span className="text-[#2D6A4F]">
+              <span className="text-ghibli-jungle">
                 {uploading ? "Planting your materials…" : "Materials planted"}
               </span>
               {!uploading && (
@@ -269,33 +259,31 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
               {uploads.map((upload, index) => (
                 <div
                   key={`${upload.fileName}-${index}`}
-                  className="rounded-xl p-4 border"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(64,145,108,0.04) 0%, rgba(250,243,224,0.3) 100%)",
-                    borderColor: upload.error
-                      ? "rgba(239,68,68,0.3)"
+                  className={`rounded-xl p-4 border bg-gradient-to-br from-ghibli-moss/6 to-ghibli-ivory/30 ${
+                    upload.error
+                      ? "border-destructive/30"
                       : upload.complete
-                      ? "rgba(64,145,108,0.3)"
-                      : "rgba(64,145,108,0.15)",
-                  }}
+                      ? "border-ghibli-moss/45"
+                      : "border-ghibli-moss/20"
+                  }`}
                 >
                   <div className="flex items-center gap-3 mb-2">
-                    <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <FileText className="h-4 w-4 text-ghibli-bark shrink-0" />
                     <span className="text-sm font-medium truncate flex-1" title={upload.fileName}>
                       {upload.fileName}
                     </span>
                     {upload.error ? (
                       <X className="h-4 w-4 text-destructive shrink-0" />
                     ) : upload.complete ? (
-                      <CheckCircle className="h-4 w-4 text-[#40916C] shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-ghibli-moss shrink-0" />
                     ) : (
-                      <span className="text-xs text-muted-foreground shrink-0">{upload.progress}%</span>
+                      <span className="text-xs text-ghibli-bark shrink-0">{upload.progress}%</span>
                     )}
                   </div>
                   {upload.error ? (
                     <p className="text-xs text-destructive">{upload.error}</p>
                   ) : (
-                    <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "rgba(64,145,108,0.12)" }}>
+                    <div className="relative h-2 rounded-full overflow-hidden bg-ghibli-moss/15">
                       <div
                         className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out"
                         style={{
@@ -312,13 +300,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
             </div>
 
             {allDone && !uploads.some((u) => u.error) && (
-              <div
-                className="flex items-start gap-3 rounded-xl p-4"
-                style={{
-                  background: "rgba(64,145,108,0.06)",
-                  border: "1px solid rgba(64,145,108,0.18)",
-                }}
-              >
+              <div className="flex items-start gap-3 rounded-xl p-4 bg-ghibli-moss/8 border border-ghibli-moss/30">
                 <img
                   src="/plant-stage-1.png"
                   alt=""
@@ -326,8 +308,8 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                   style={{ mixBlendMode: "darken" }}
                 />
                 <div>
-                  <p className="text-sm font-medium text-[#2D6A4F]">Your garden is growing</p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <p className="text-sm font-medium text-ghibli-jungle">Your garden is growing</p>
+                  <p className="text-xs text-ghibli-bark mt-0.5">
                     Materials are being processed — this takes 2–5 minutes. Your quiz will be ready shortly.
                   </p>
                 </div>

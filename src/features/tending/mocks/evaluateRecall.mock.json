@@ -1,0 +1,13 @@
+{
+  "got_right": [
+    "Identified ATP production",
+    "Mentioned two membranes",
+    "Noted inner membrane is folded (cristae)"
+  ],
+  "missed": [
+    "Did not mention the matrix or its enzymes",
+    "Did not connect cristae to increased surface area for ATP synthesis",
+    "Did not mention this is the site of the Krebs cycle"
+  ],
+  "source_paragraph": "Mitochondria are double-membrane organelles found in eukaryotic cells. The outer membrane is smooth and permeable to small molecules. The inner membrane is folded into structures called cristae, which dramatically increase its surface area to host the electron transport chain. Inside the inner membrane lies the matrix — the site of the Krebs cycle. Together these structures convert nutrients into ATP, the energy currency of the cell."
+}

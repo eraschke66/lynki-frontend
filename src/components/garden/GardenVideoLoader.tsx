@@ -52,7 +52,7 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
         style={{
           position: "absolute",
           inset: 0,
-          background: "linear-gradient(to bottom, rgba(27,67,50,0.35) 0%, rgba(27,67,50,0.55) 100%)",
+          background: "linear-gradient(to bottom, hsl(var(--ghibli-canopy) / 0.35) 0%, hsl(var(--ghibli-canopy) / 0.55) 100%)",
         }}
       />
 
@@ -65,12 +65,12 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
           alignItems: "center",
           gap: "1.5rem",
           padding: "2.5rem 3rem",
-          background: "rgba(250, 243, 224, 0.12)",
+          background: "hsl(var(--ghibli-ivory) / 0.12)",
           backdropFilter: "blur(12px)",
           WebkitBackdropFilter: "blur(12px)",
           borderRadius: "1.25rem",
-          border: "1px solid rgba(250, 243, 224, 0.25)",
-          boxShadow: "0 8px 40px rgba(27,67,50,0.3)",
+          border: "1px solid hsl(var(--ghibli-ivory) / 0.25)",
+          boxShadow: "0 8px 40px hsl(var(--ghibli-canopy) / 0.3)",
         }}
       >
         {/* Spinning leaf SVG — replaces Unicode emoji */}
@@ -82,19 +82,19 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
           <svg width={40} height={40} viewBox="0 0 32 32" fill="none">
             <path
               d="M8 26C8 26 6 18 10 12C14 6 22 4 26 6C26 6 28 14 24 20C20 26 12 28 8 26Z"
-              fill="#B7E4C7"
+              fill="hsl(140 38% 84%)"
               opacity={0.7}
             />
             <path
               d="M8 26C8 26 6 18 10 12C14 6 22 4 26 6C26 6 28 14 24 20C20 26 12 28 8 26Z"
-              stroke="#74C69D"
+              stroke="hsl(146 42% 62%)"
               strokeWidth={1.5}
               strokeLinecap="round"
               strokeLinejoin="round"
             />
             <path
               d="M10 24C12 20 15 16 18 13C21 10 24 8 26 6"
-              stroke="#95D5B2"
+              stroke="hsl(140 40% 71%)"
               strokeWidth={1}
               strokeLinecap="round"
               opacity={0.6}
@@ -108,9 +108,9 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
             margin: 0,
             fontSize: "1rem",
             fontWeight: 500,
-            color: "rgba(250, 243, 224, 0.92)",
+            color: "hsl(var(--ghibli-ivory) / 0.92)",
             letterSpacing: "0.03em",
-            textShadow: "0 1px 4px rgba(0,0,0,0.3)",
+            textShadow: "0 1px 4px hsl(var(--ghibli-canopy) / 0.4)",
           }}
         >
           {message}
@@ -125,7 +125,7 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
                 width: 7,
                 height: 7,
                 borderRadius: "50%",
-                background: "rgba(116, 198, 157, 0.85)",
+                background: "hsl(146 42% 62% / 0.85)",
                 animation: `gardenPulse 1.2s ease-in-out ${i * 0.2}s infinite`,
               }}
             />

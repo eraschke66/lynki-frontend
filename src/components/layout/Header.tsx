@@ -26,116 +26,98 @@ export function Header() {
     }
   };
 
-  const navLinkClass = ({ isActive }: { isActive: boolean }) =>
+  const pillClass = ({ isActive }: { isActive: boolean }) =>
     cn(
-      "flex items-center gap-2 text-sm font-medium transition-all duration-150 px-3 py-2 rounded-md",
+      "flex items-center gap-2 px-5 py-2 rounded-full text-sm font-sans font-medium transition-all",
       isActive
-        ? "text-[#1B4332] bg-[rgba(64,145,108,0.08)] border-l-2 border-[#40916C] pl-[calc(0.75rem-2px)]"
-        : "text-muted-foreground hover:text-[#2D6A4F] hover:bg-[rgba(64,145,108,0.05)]",
+        ? "bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy text-primary-foreground shadow-md"
+        : "text-ghibli-canopy/70 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60",
     );
 
   return (
-    <header
-      className="sticky top-0 left-0 right-0 z-50 backdrop-blur-sm border-b"
-      style={{
-        background: "rgba(250, 243, 224, 0.88)",
-        borderBottomColor: "rgba(64, 145, 108, 0.2)",
-        borderBottomWidth: "1px",
-      }}
-    >
-      <div
-        className="absolute top-0 left-0 right-0 h-0.5"
-        style={{
-          background:
-            "linear-gradient(to right, transparent, rgba(64,145,108,0.4), rgba(13,115,119,0.5), rgba(64,145,108,0.4), transparent)",
-        }}
-      />
-
-      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <div
-            className="flex items-center gap-3 cursor-pointer group"
-            onClick={handleLogoClick}
-          >
-            <div className="w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 group-hover:shadow-[0_0_0_2px_rgba(64,145,108,0.3)]">
-              <LogoSvg className="w-full h-full" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight">PassAI</h1>
-              <p className="text-[10px] text-[#40916C] font-medium leading-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 -mt-0.5">
-                your garden of knowledge
-              </p>
+    <header className="relative z-40 max-w-6xl mx-auto px-6 pt-6 md:pt-8">
+      <nav className="flex items-center justify-between gap-4">
+        {/* Logo block */}
+        <div
+          className="flex items-center gap-3 cursor-pointer group"
+          onClick={handleLogoClick}
+        >
+          <div className="relative shrink-0">
+            <div className="absolute inset-0 bg-ghibli-sunlight/40 blur-xl rounded-full" />
+            <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-ghibli-jungle to-ghibli-canopy flex items-center justify-center shadow-md overflow-hidden">
+              <LogoSvg className="w-7 h-7 text-ghibli-sunlight" />
             </div>
           </div>
-
-          {user && (
-            <nav className="hidden md:flex items-center gap-1">
-              <NavLink to="/home" className={navLinkClass} end>
-                <Home className="w-4 h-4" />
-                Home
-              </NavLink>
-              <NavLink to="/documents" className={navLinkClass}>
-                <FileText className="w-4 h-4" />
-                Materials
-              </NavLink>
-              <NavLink to="/settings" className={navLinkClass}>
-                <Settings className="w-4 h-4" />
-                Settings
-              </NavLink>
-            </nav>
-          )}
+          <div className="leading-none">
+            <h1 className="font-serif text-2xl md:text-[1.75rem] font-semibold text-ghibli-canopy tracking-tight">
+              Pass<span className="italic text-ghibli-forest">AI</span>
+            </h1>
+            <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-ghibli-moss/80">
+              a quiet study garden
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-4">
+        {/* Cream pill nav */}
+        {user && (
+          <div className="hidden md:flex items-center gap-1 p-1.5 rounded-full glass-cream botanical-border shadow-parchment">
+            <NavLink to="/home" className={pillClass} end>
+              <Home className="w-4 h-4" />
+              Home
+            </NavLink>
+            <NavLink to="/documents" className={pillClass}>
+              <FileText className="w-4 h-4" />
+              Materials
+            </NavLink>
+            <NavLink to="/settings" className={pillClass}>
+              <Settings className="w-4 h-4" />
+              Settings
+            </NavLink>
+          </div>
+        )}
+
+        {/* Right cluster */}
+        <div className="flex items-center gap-3">
           <button
             onClick={toggleMusic}
             aria-label={playing ? "Pause ambient music" : "Play ambient music"}
             title={playing ? "Pause ambient music" : "Play ambient music"}
-            className="p-1.5 rounded-md text-muted-foreground hover:text-[#2D6A4F] hover:bg-[rgba(64,145,108,0.08)] transition-colors"
+            className="p-2 rounded-full text-ghibli-canopy/70 hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
           >
             {playing ? <Volume2 className="w-4 h-4" /> : <VolumeOff className="w-4 h-4" />}
           </button>
           {user && (
             <>
-              {/* Upgrade CTA — only shown for free users once subscription status is known */}
               {!subLoading && !isPremium && (
                 <Button
                   size="sm"
                   onClick={() => navigate("/pricing")}
-                  className="gap-1.5 shadow-[0_1px_6px_rgba(13,115,119,0.18)]"
-                  style={{
-                    background: "linear-gradient(135deg, #40916C 0%, #1B4332 100%)",
-                    color: "white",
-                  }}
+                  className="gap-1.5 rounded-full px-4 font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-glow transition-all"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   Upgrade
                 </Button>
               )}
-              {/* Subtle premium badge */}
               {!subLoading && isPremium && (
-                <span
-                  className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full"
-                  style={{ background: "rgba(64,145,108,0.1)", color: "#2D6A4F" }}
-                >
+                <span className="hidden sm:inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-ghibli-gold/15 text-ghibli-bark">
                   <Sparkles className="w-3 h-3" />
                   Premium
                 </span>
               )}
-              <p className="text-xs text-muted-foreground hidden sm:block">
+              <p className="text-xs font-sans text-ghibli-canopy/70 hidden lg:block max-w-[12rem] truncate">
                 {user.email}
               </p>
               <Button
                 variant="outline"
                 onClick={handleLogout}
-                className="border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332] hover:bg-[rgba(64,145,108,0.05)] transition-colors"
+                className="rounded-full border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
               >
                 Log Out
               </Button>
             </>
           )}
         </div>
-      </div>
+      </nav>
     </header>
   );
 }

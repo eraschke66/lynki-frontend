@@ -1,0 +1,82 @@
+{
+  "session_id": "mock-session-mitochondria-001",
+  "course_id": "mock-course-id",
+  "topic_id": "mock-topic-mitochondria",
+  "topic_title": "Mitochondria",
+  "recall_cards": {
+    "stage": "recall_cards",
+    "cards": [
+      {
+        "id": "rc_1",
+        "front": "What is the main function of mitochondria?",
+        "back": "ATP production through cellular respiration."
+      },
+      {
+        "id": "rc_2",
+        "front": "How many membranes do mitochondria have?",
+        "back": "Two — an outer membrane (smooth, permeable) and an inner membrane (folded into cristae)."
+      },
+      {
+        "id": "rc_3",
+        "front": "What are cristae and why do they matter?",
+        "back": "The folds of the inner membrane. They massively increase surface area for the electron transport chain."
+      },
+      {
+        "id": "rc_4",
+        "front": "Where does the Krebs cycle take place?",
+        "back": "In the mitochondrial matrix — the gel-like fluid inside the inner membrane."
+      }
+    ]
+  },
+  "active_recall": {
+    "stage": "active_recall",
+    "prompt": "Type everything you remember about the structure and function of mitochondria.",
+    "source_paragraph": "Mitochondria are double-membrane organelles found in eukaryotic cells. The outer membrane is smooth and permeable to small molecules. The inner membrane is folded into structures called cristae, which dramatically increase its surface area to host the electron transport chain. Inside the inner membrane lies the matrix — the site of the Krebs cycle. Together these structures convert nutrients into ATP, the energy currency of the cell."
+  },
+  "mnemonics": {
+    "stage": "mnemonics",
+    "mnemonics": [
+      {
+        "id": "mn_1",
+        "hook": "Mighty Mitochondria Make Many Molecules of ATP",
+        "explanation": "All four M's tie back to the function. Use this when you blank on what mitochondria do."
+      },
+      {
+        "id": "mn_2",
+        "hook": "Cristae = Crinkles = Crammed surface area",
+        "explanation": "The folds of the inner membrane (cristae) cram more surface area into the same space — that's where the electron transport chain lives."
+      },
+      {
+        "id": "mn_3",
+        "hook": "Matrix = the gel where the Krebs cycle goes",
+        "explanation": "The matrix is inside the inner membrane. Krebs cycle happens here. Same word, easy to remember together."
+      }
+    ]
+  },
+  "connections": {
+    "stage": "connections",
+    "type": "term_to_definition",
+    "pairs": [
+      {
+        "id": "cn_1",
+        "left": "Outer membrane",
+        "right": "Smooth and permeable to small molecules"
+      },
+      {
+        "id": "cn_2",
+        "left": "Inner membrane (cristae)",
+        "right": "Site of the electron transport chain"
+      },
+      {
+        "id": "cn_3",
+        "left": "Matrix",
+        "right": "Site of the Krebs cycle"
+      },
+      {
+        "id": "cn_4",
+        "left": "ATP",
+        "right": "The energy currency the mitochondria produce"
+      }
+    ]
+  }
+}

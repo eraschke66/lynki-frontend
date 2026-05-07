@@ -68,7 +68,7 @@ export function GardenLoader({ message, size = "md" }: GardenLoaderProps) {
           cy="56"
           rx="14"
           ry="4"
-          fill="#40916C"
+          fill="hsl(var(--ghibli-moss))"
           opacity="0.18"
         />
 
@@ -76,7 +76,7 @@ export function GardenLoader({ message, size = "md" }: GardenLoaderProps) {
         <path
           className="stem"
           d="M32 54 C32 44 30 36 32 20"
-          stroke="#40916C"
+          stroke="hsl(var(--ghibli-moss))"
           strokeWidth="2.5"
           strokeLinecap="round"
         />
@@ -88,7 +88,7 @@ export function GardenLoader({ message, size = "md" }: GardenLoaderProps) {
           cy="38"
           rx="10"
           ry="5"
-          fill="#52B788"
+          fill="hsl(155 43% 48%)"
           opacity="0.85"
         />
 
@@ -99,7 +99,7 @@ export function GardenLoader({ message, size = "md" }: GardenLoaderProps) {
           cy="30"
           rx="9"
           ry="4.5"
-          fill="#40916C"
+          fill="hsl(var(--ghibli-moss))"
           opacity="0.85"
         />
 
@@ -110,13 +110,13 @@ export function GardenLoader({ message, size = "md" }: GardenLoaderProps) {
           cy="18"
           rx="7"
           ry="10"
-          fill="#74C69D"
+          fill="hsl(146 42% 62%)"
           opacity="0.9"
         />
       </svg>
 
       {message && (
-        <p className="text-sm text-muted-foreground animate-pulse">{message}</p>
+        <p className="text-sm text-ghibli-bark animate-pulse">{message}</p>
       )}
     </div>
   );

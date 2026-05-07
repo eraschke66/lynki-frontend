@@ -154,7 +154,7 @@ export function DocumentsPage() {
             <div className="w-full md:w-1/3">
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
+                  <CardTitle className="text-sm font-medium text-ghibli-bark">
                     Storage Used
                   </CardTitle>
                 </CardHeader>
@@ -167,7 +167,7 @@ export function DocumentsPage() {
                       <div className="text-2xl font-bold">
                         {formatFileSize(stats.usedSpace)}
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-ghibli-bark">
                         {stats.fileCount} files uploaded
                       </p>
                     </div>

@@ -182,7 +182,7 @@ export function UploadModal({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
+                    <Label className="text-xs text-ghibli-bark">
                       Target passing grade
                     </Label>
                     <Select
@@ -270,10 +270,10 @@ export function UploadModal({
             <div
               className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                 !canUpload
-                  ? "border-muted bg-muted/30 opacity-60 cursor-not-allowed"
+                  ? "border-ghibli-moss/40 bg-ghibli-mist/50 cursor-not-allowed text-ghibli-bark/65"
                   : uploading
-                    ? "border-muted bg-muted/50"
-                    : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
+                    ? "border-ghibli-jungle bg-ghibli-moss/20"
+                    : "border-ghibli-moss/45 hover:border-ghibli-jungle hover:bg-ghibli-ivory/70 cursor-pointer"
               }`}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -291,7 +291,7 @@ export function UploadModal({
                       ? "Select a course first"
                       : "Click to upload or drag and drop"}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-ghibli-bark">
                     PDF, DOCX, PPTX, PNG, JPEG — up to 5 files, 10 MB each
                   </p>
                 </div>
@@ -320,11 +320,11 @@ export function UploadModal({
               {uploads.map((upload, index) => (
                 <div
                   key={`${upload.fileName}-${index}`}
-                  className="bg-muted/30 rounded-lg p-3 border"
+                  className="parchment-row rounded-lg p-3"
                 >
                   <div className="flex justify-between items-center mb-2">
                     <div className="flex items-center gap-2 truncate max-w-[80%]">
-                      <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <FileText className="h-4 w-4 text-ghibli-bark shrink-0" />
                       <span
                         className="text-sm truncate"
                         title={upload.fileName}
@@ -337,7 +337,7 @@ export function UploadModal({
                     ) : upload.complete ? (
                       <CheckCircle className="h-4 w-4 text-green-500" />
                     ) : (
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-ghibli-bark">
                         {upload.progress}%
                       </span>
                     )}
@@ -368,7 +368,7 @@ export function UploadModal({
           )}
 
           {!hasUploads && (
-            <p className="text-xs text-center text-muted-foreground">
+            <p className="text-xs text-center text-ghibli-bark">
               Your materials will be analyzed and concepts extracted
               automatically.
             </p>

@@ -28,19 +28,6 @@ const signupSchema = z
 
 type SignupFormData = z.infer<typeof signupSchema>;
 
-const inputStyle = {
-  width: "100%",
-  padding: "10px 14px",
-  borderRadius: 10,
-  border: "1.5px solid rgba(64,145,108,0.35)",
-  background: "rgba(255,255,255,0.7)",
-  color: "#1B4332",
-  fontSize: 14,
-  outline: "none",
-  boxSizing: "border-box" as const,
-  transition: "border-color 0.2s",
-};
-
 export function SignupForm() {
   const navigate = useNavigate();
   const { signUp, resendVerificationEmail } = useAuth();
@@ -82,7 +69,7 @@ export function SignupForm() {
       }
       setRegisteredEmail(data.email);
       setSuccess(true);
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
@@ -93,8 +80,8 @@ export function SignupForm() {
     try {
       setResendingEmail(true);
       setError(null);
-      const { error } = await resendVerificationEmail(registeredEmail);
-      if (error) {
+      const { error: resendError } = await resendVerificationEmail(registeredEmail);
+      if (resendError) {
         setError("Failed to resend verification email. Please try again.");
       } else {
         setError("Verification email resent! Please check your inbox.");
@@ -106,7 +93,7 @@ export function SignupForm() {
     }
   };
 
-  // Shared background wrapper
+  // Shared scene background
   const Background = () => (
     <>
       <div
@@ -117,7 +104,7 @@ export function SignupForm() {
         className="fixed inset-0"
         style={{
           background:
-            "radial-gradient(ellipse at 50% 30%, hsl(45 85% 70% / 0.15) 0%, transparent 60%), linear-gradient(to bottom, hsl(45 60% 50% / 0.05), hsl(33 30% 20% / 0.2))",
+            "radial-gradient(ellipse at 50% 30%, hsl(45 85% 70% / 0.2) 0%, transparent 60%), linear-gradient(to bottom, hsl(45 60% 50% / 0.08), hsl(33 30% 20% / 0.25))",
         }}
       />
       <div className="fixed inset-0 mist-overlay pointer-events-none" />
@@ -125,462 +112,265 @@ export function SignupForm() {
         src="/foliage-left.png"
         alt=""
         className="fixed left-0 bottom-0 w-72 lg:w-96 pointer-events-none z-20 animate-drift select-none"
-        style={{ filter: "drop-shadow(4px 0 15px hsl(150 40% 20% / 0.3))" }}
+        style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
       />
       <img
         src="/foliage-right.png"
         alt=""
         className="fixed right-0 top-0 w-64 lg:w-80 pointer-events-none z-20 animate-drift select-none"
-        style={{
-          animationDelay: "3s",
-          filter: "drop-shadow(-4px 0 15px hsl(150 40% 20% / 0.3))",
-        }}
+        style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
+      />
+      <div className="fixed top-16 left-1/3 w-48 h-48 rounded-full bg-ghibli-sunlight/15 blur-3xl animate-shimmer pointer-events-none" />
+      <div
+        className="fixed bottom-32 right-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none"
+        style={{ animationDelay: "2.5s" }}
       />
     </>
   );
 
+  // Shared wooden notice board frame
+  const WoodenFrame = ({ children }: { children: React.ReactNode }) => (
+    <div className="relative z-10 w-full max-w-md mx-4 sm:mx-auto">
+      <div
+        className="rounded-[1.5rem] p-[10px]"
+        style={{
+          background: "linear-gradient(145deg, hsl(30 35% 38%), hsl(25 30% 28%))",
+          boxShadow:
+            "0 12px 40px -8px hsl(30 30% 15% / 0.5), inset 0 1px 0 hsl(35 40% 50% / 0.3), inset 0 -1px 0 hsl(25 25% 18% / 0.5)",
+        }}
+      >
+        <div
+          className="absolute inset-0 rounded-[1.5rem] opacity-10 pointer-events-none"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(90deg, transparent, transparent 8px, hsl(30 20% 60% / 0.3) 8px, hsl(30 20% 60% / 0.3) 9px)",
+          }}
+        />
+        <div className="relative parchment-solid rounded-[1.1rem] p-8">
+          <div className="relative z-10">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+
   if (success) {
+    const isResent = error?.includes("resent");
     return (
       <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
         <Background />
-        <div className="relative z-10 w-full max-w-md mx-4 sm:mx-auto">
-          <div
-            style={{
-              background:
-                "linear-gradient(145deg, #7a5c3a 0%, #5c3d1e 30%, #6b4c28 60%, #8a6a42 100%)",
-              borderRadius: 20,
-              padding: 6,
-              boxShadow: "0 20px 60px rgba(0,0,0,0.35)",
-            }}
-          >
-            <div
-              style={{
-                background:
-                  "linear-gradient(160deg, #FEFAE0 0%, #FDF5D0 40%, #FAF0C0 100%)",
-                borderRadius: 15,
-                padding: "40px 32px 32px",
-                position: "relative",
-                overflow: "hidden",
-              }}
-            >
-              <div className="text-center">
-                <img
-                  src="/plant-stage-1.png"
-                  alt=""
-                  style={{
-                    width: 64,
-                    height: 64,
-                    objectFit: "contain",
-                    mixBlendMode: "darken",
-                    marginBottom: 12,
-                  }}
-                />
-                <h1
-                  style={{
-                    fontFamily: "'Lora', Georgia, serif",
-                    fontSize: 24,
-                    fontWeight: 600,
-                    color: "#1B4332",
-                    marginBottom: 8,
-                  }}
-                >
-                  Your seed has been planted
-                </h1>
-                <p style={{ color: "#5a7a5a", fontSize: 14, marginBottom: 20 }}>
-                  We sent a verification link to{" "}
-                  <strong>{registeredEmail}</strong>
-                </p>
-                <p style={{ color: "#7a9a7a", fontSize: 13, marginBottom: 24 }}>
-                  Click the link in the email to begin tending your garden.
-                </p>
-                {error && (
-                  <div
-                    style={{
-                      marginBottom: 16,
-                      padding: "10px 14px",
-                      borderRadius: 10,
-                      background: error.includes("resent")
-                        ? "rgba(64,145,108,0.1)"
-                        : "rgba(180,60,40,0.08)",
-                      border: `1px solid ${error.includes("resent") ? "rgba(64,145,108,0.3)" : "rgba(180,60,40,0.2)"}`,
-                      color: error.includes("resent") ? "#1B4332" : "#8B2500",
-                      fontSize: 13,
-                    }}
-                  >
-                    {error}
-                  </div>
-                )}
-                <button
-                  onClick={handleResendEmail}
-                  disabled={resendingEmail}
-                  style={{
-                    width: "100%",
-                    padding: "11px",
-                    marginBottom: 12,
-                    background: "rgba(255,255,255,0.7)",
-                    border: "1.5px solid rgba(64,145,108,0.35)",
-                    borderRadius: 11,
-                    fontSize: 14,
-                    fontWeight: 500,
-                    color: "#2D4A2D",
-                    cursor: "pointer",
-                    fontFamily: "'Nunito', sans-serif",
-                  }}
-                >
-                  {resendingEmail ? "Sending..." : "Resend Verification Email"}
-                </button>
-                <Link
-                  to="/login"
-                  style={{
-                    color: "#2D6A4F",
-                    fontSize: 13,
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
-                >
-                  Back to the garden gate
-                </Link>
+        <WoodenFrame>
+          <div className="text-center">
+            <img
+              src="/plant-stage-1.png"
+              alt=""
+              className="w-16 h-16 object-contain mx-auto mb-3 animate-pulse-soft"
+              style={{ mixBlendMode: "darken" }}
+            />
+            <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
+              Your seed has been planted
+            </h1>
+            <p className="font-sans text-sm text-ghibli-bark mb-2">
+              We sent a verification link to{" "}
+              <strong className="text-ghibli-forest">{registeredEmail}</strong>
+            </p>
+            <p className="font-sans text-xs text-ghibli-bark italic mb-6">
+              Click the link in the email to begin tending your garden.
+            </p>
+            {error && (
+              <div
+                className={`mb-4 p-3 rounded-parchment border text-sm font-sans ${
+                  isResent
+                    ? "bg-ghibli-moss/10 border-ghibli-moss/30 text-ghibli-canopy"
+                    : "bg-destructive/10 border-destructive/20 text-destructive"
+                }`}
+              >
+                {error}
               </div>
-            </div>
+            )}
+            <button
+              onClick={handleResendEmail}
+              disabled={resendingEmail}
+              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory py-3 mb-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-forest hover:shadow-glow disabled:opacity-50"
+            >
+              {resendingEmail ? "Sending..." : "Resend Verification Email"}
+            </button>
+            <Link
+              to="/login"
+              className="font-sans text-sm text-primary font-semibold hover:underline"
+            >
+              Back to the garden gate
+            </Link>
           </div>
-        </div>
+        </WoodenFrame>
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-8">
       <Background />
+      <WoodenFrame>
+        <div className="text-center mb-6">
+          <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-1">
+            Plant your first seed
+          </h1>
+          <p className="font-sans text-sm text-ghibli-bark">
+            Your knowledge garden awaits 🌿
+          </p>
+        </div>
 
-      <div className="relative z-10 w-full max-w-md mx-4 sm:mx-auto">
-        {/* Wooden frame */}
-        <div
-          style={{
-            background:
-              "linear-gradient(145deg, #7a5c3a 0%, #5c3d1e 30%, #6b4c28 60%, #8a6a42 100%)",
-            borderRadius: 20,
-            padding: 6,
-            boxShadow:
-              "0 20px 60px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2)",
-          }}
-        >
-          {/* Parchment interior */}
-          <div
-            style={{
-              background:
-                "linear-gradient(160deg, #FEFAE0 0%, #FDF5D0 40%, #FAF0C0 100%)",
-              borderRadius: 15,
-              padding: "36px 32px 28px",
-              position: "relative",
-              overflow: "hidden",
-            }}
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          {error && (
+            <div className="p-3 text-sm rounded-parchment bg-destructive/10 text-destructive border border-destructive/20 font-sans">
+              {error}
+            </div>
+          )}
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              placeholder="gardener@passai.app"
+              {...register("email")}
+              disabled={loading}
+              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+            />
+            {errors.email && (
+              <p className="font-sans text-xs text-destructive mt-1">{errors.email.message}</p>
+            )}
+          </div>
+
+          {/* Password */}
+          <div>
+            <label htmlFor="password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="••••••••"
+                {...register("password")}
+                disabled={loading}
+                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="font-sans text-xs text-destructive mt-1">{errors.password.message}</p>
+            )}
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label htmlFor="confirmPassword" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
+              Confirm Password
+            </label>
+            <div className="relative">
+              <input
+                id="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                autoComplete="new-password"
+                placeholder="••••••••"
+                {...register("confirmPassword")}
+                disabled={loading}
+                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
+            {errors.confirmPassword && (
+              <p className="font-sans text-xs text-destructive mt-1">
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+
+          {/* Age confirmation */}
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="ageConfirmed" className="flex items-start gap-2.5 cursor-pointer">
+              <input
+                id="ageConfirmed"
+                type="checkbox"
+                {...register("ageConfirmed")}
+                disabled={loading}
+                className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
+              />
+              <span className="font-sans text-xs text-ghibli-bark leading-snug">
+                I confirm that I am at least 13 years old
+              </span>
+            </label>
+            {errors.ageConfirmed && (
+              <p className="font-sans text-xs text-destructive ml-6">
+                {errors.ageConfirmed.message}
+              </p>
+            )}
+            <p className="font-sans text-[11px] text-ghibli-bark text-center leading-relaxed mt-1">
+              By signing up, you agree to our{" "}
+              <Link to="/terms" className="text-primary font-semibold hover:underline">
+                Terms of Service
+              </Link>{" "}
+              and{" "}
+              <Link to="/privacy" className="text-primary font-semibold hover:underline">
+                Privacy Policy
+              </Link>
+              .
+            </p>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-parchment bg-primary text-primary-foreground py-3 font-sans font-semibold text-sm tracking-wide transition-all duration-300 hover:shadow-glow hover:brightness-110 relative overflow-hidden disabled:opacity-50"
           >
-            {/* Paper grain */}
+            <span className="relative z-10">
+              {loading ? "Planting your seed..." : "🌿 Begin your journey"}
+            </span>
             <div
+              className="absolute inset-0 opacity-[0.07] pointer-events-none"
               style={{
-                position: "absolute",
-                inset: 0,
-                backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`,
-                pointerEvents: "none",
-                opacity: 0.6,
+                backgroundImage:
+                  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 Q40 15 35 30 Q30 20 25 30 Q20 15 30 5Z' fill='%23fff' opacity='0.5'/%3E%3C/svg%3E\")",
               }}
             />
+          </button>
 
-            {/* Heading */}
-            <div className="text-center mb-6">
-              <h1
-                style={{
-                  fontFamily: "'Lora', Georgia, serif",
-                  fontSize: 24,
-                  fontWeight: 600,
-                  color: "#1B4332",
-                  lineHeight: 1.3,
-                  marginBottom: 6,
-                }}
-              >
-                Plant your first seed
-              </h1>
-              <p style={{ color: "#5a7a5a", fontSize: 14 }}>
-                Your knowledge garden awaits
-              </p>
-            </div>
+          {/* Sign in link */}
+          <p className="text-center font-sans text-xs text-ghibli-bark mt-1">
+            Already have an account?{" "}
+            <Link to="/login" className="text-primary font-medium hover:underline">
+              Return to the garden
+            </Link>
+          </p>
+        </form>
 
-            {/* Error */}
-            {error && (
-              <div
-                style={{
-                  marginBottom: 16,
-                  padding: "10px 14px",
-                  borderRadius: 10,
-                  background: "rgba(180,60,40,0.08)",
-                  border: "1px solid rgba(180,60,40,0.2)",
-                  color: "#8B2500",
-                  fontSize: 13,
-                }}
-              >
-                {error}
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {/* Email */}
-              <div>
-                <label
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "#3a5a3a",
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
-                  Email
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="gardener@passai.app"
-                  {...register("email")}
-                  disabled={loading}
-                  style={inputStyle}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = "rgba(27,67,50,0.6)";
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = "rgba(64,145,108,0.35)";
-                  }}
-                />
-                {errors.email && (
-                  <p style={{ fontSize: 12, color: "#8B2500", marginTop: 4 }}>
-                    {errors.email.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Password */}
-              <div>
-                <label
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "#3a5a3a",
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
-                  Password
-                </label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    {...register("password")}
-                    disabled={loading}
-                    style={{ ...inputStyle, paddingRight: "40px" }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "rgba(27,67,50,0.6)";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "rgba(64,145,108,0.35)";
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    style={{
-                      position: "absolute",
-                      right: "12px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "rgba(27,67,50,0.6)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p style={{ fontSize: 12, color: "#8B2500", marginTop: 4 }}>
-                    {errors.password.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <label
-                  style={{
-                    fontSize: 13,
-                    fontWeight: 500,
-                    color: "#3a5a3a",
-                    display: "block",
-                    marginBottom: 6,
-                  }}
-                >
-                  Confirm Password
-                </label>
-                <div style={{ position: "relative" }}>
-                  <input
-                    id="confirmPassword"
-                    type={showConfirmPassword ? "text" : "password"}
-                    placeholder="••••••••"
-                    {...register("confirmPassword")}
-                    disabled={loading}
-                    style={{ ...inputStyle, paddingRight: "40px" }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = "rgba(27,67,50,0.6)";
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = "rgba(64,145,108,0.35)";
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    style={{
-                      position: "absolute",
-                      right: "12px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      color: "rgba(27,67,50,0.6)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff size={18} />
-                    ) : (
-                      <Eye size={18} />
-                    )}
-                  </button>
-                </div>
-                {errors.confirmPassword && (
-                  <p style={{ fontSize: 12, color: "#8B2500", marginTop: 4 }}>
-                    {errors.confirmPassword.message}
-                  </p>
-                )}
-              </div>
-
-              {/* Age confirmation */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
-                  <input
-                    id="ageConfirmed"
-                    type="checkbox"
-                    {...register("ageConfirmed")}
-                    disabled={loading}
-                    style={{ marginTop: 2, accentColor: "#1B4332", width: 15, height: 15, flexShrink: 0, cursor: "pointer" }}
-                  />
-                  <label
-                    htmlFor="ageConfirmed"
-                    style={{ fontSize: 13, color: "#3a5a3a", lineHeight: 1.4, cursor: "pointer" }}
-                  >
-                    I confirm that I am at least 13 years old
-                  </label>
-                </div>
-                {errors.ageConfirmed && (
-                  <p style={{ fontSize: 12, color: "#8B2500", marginLeft: 25 }}>
-                    {errors.ageConfirmed.message}
-                  </p>
-                )}
-                <p style={{ fontSize: 12, color: "#7a9a7a", textAlign: "center", lineHeight: 1.4 }}>
-                  By signing up, you agree to our{" "}
-                  <Link to="/terms" style={{ color: "#2D6A4F", fontWeight: 600, textDecoration: "none" }}>
-                    Terms of Service
-                  </Link>{" "}
-                  and{" "}
-                  <Link to="/privacy" style={{ color: "#2D6A4F", fontWeight: 600, textDecoration: "none" }}>
-                    Privacy Policy
-                  </Link>
-                  .
-                </p>
-              </div>
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  marginTop: 4,
-                  background: loading
-                    ? "rgba(27,67,50,0.5)"
-                    : "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)",
-                  color: "#FEFAE0",
-                  border: "none",
-                  borderRadius: 11,
-                  fontSize: 15,
-                  fontWeight: 600,
-                  fontFamily: "'Nunito', sans-serif",
-                  cursor: loading ? "not-allowed" : "pointer",
-                  letterSpacing: "0.01em",
-                  boxShadow: "0 4px 16px rgba(27,67,50,0.3)",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) => {
-                  if (!loading) {
-                    (e.target as HTMLButtonElement).style.transform =
-                      "translateY(-1px)";
-                    (e.target as HTMLButtonElement).style.boxShadow =
-                      "0 6px 20px rgba(27,67,50,0.4)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  (e.target as HTMLButtonElement).style.transform = "";
-                  (e.target as HTMLButtonElement).style.boxShadow =
-                    "0 4px 16px rgba(27,67,50,0.3)";
-                }}
-              >
-                {loading ? "Planting your seed..." : "Begin your journey"}
-              </button>
-
-              {/* Sign in link */}
-              <p
-                style={{
-                  textAlign: "center",
-                  fontSize: 13,
-                  color: "#7a9a7a",
-                  marginTop: 4,
-                }}
-              >
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  style={{
-                    color: "#2D6A4F",
-                    fontWeight: 600,
-                    textDecoration: "none",
-                  }}
-                >
-                  Return to the garden
-                </Link>
-              </p>
-            </form>
-
-            {/* Cat paw */}
-            <div style={{ textAlign: "center", marginTop: 16, opacity: 0.3 }}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="#40916C">
-                <ellipse cx="12" cy="16" rx="5" ry="4" />
-                <ellipse cx="6" cy="11" rx="2.5" ry="2" />
-                <ellipse cx="18" cy="11" rx="2.5" ry="2" />
-                <ellipse cx="9" cy="8.5" rx="2" ry="1.8" />
-                <ellipse cx="15" cy="8.5" rx="2" ry="1.8" />
-              </svg>
-            </div>
-          </div>
+        {/* Cat paw print */}
+        <div className="flex justify-center mt-4">
+          <img
+            src="/cat-pawprint.png"
+            alt=""
+            className="w-8 h-8 object-contain opacity-40 select-none"
+          />
         </div>
-      </div>
+      </WoodenFrame>
     </div>
   );
 }

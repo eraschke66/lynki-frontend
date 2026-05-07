@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Nunito:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -32,29 +31,38 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Ghibli color tokens */
+  /* Ghibli color tokens — lush oasis palette */
   --color-ghibli-cream:    hsl(43 76% 93%);
-  --color-ghibli-ivory:    hsl(50 80% 94%);
-  --color-ghibli-moss:     hsl(120 25% 45%);
-  --color-ghibli-forest:   hsl(140 35% 28%);
-  --color-ghibli-canopy:   hsl(150 40% 20%);
-  --color-ghibli-sunlight: hsl(45 85% 70%);
-  --color-ghibli-amber:    hsl(28 70% 55%);
-  --color-ghibli-mist:     hsl(120 15% 90%);
-  --color-ghibli-bark:     hsl(30 30% 35%);
-  --color-ghibli-petal:    hsl(350 50% 75%);
+  --color-ghibli-ivory:    hsl(48 78% 96%);
+  --color-ghibli-moss:     hsl(130 22% 42%);
+  --color-ghibli-forest:   hsl(148 42% 22%);
+  --color-ghibli-canopy:   hsl(152 45% 16%);
+  --color-ghibli-jungle:   hsl(145 38% 28%);
+  --color-ghibli-sunlight: hsl(42 90% 72%);
+  --color-ghibli-gold:     hsl(36 75% 58%);
+  --color-ghibli-amber:    hsl(36 75% 58%);
+  --color-ghibli-coral:    hsl(8 62% 66%);
+  --color-ghibli-teal:     hsl(175 35% 48%);
+  --color-ghibli-mist:     hsl(130 18% 92%);
+  --color-ghibli-bark:     hsl(28 32% 32%);
+  --color-ghibli-petal:    hsl(350 55% 78%);
 
   /* Ghibli border-radius */
-  --radius-parchment: 1.25rem;
+  --radius-parchment: 1.75rem;
+  --radius-leaf: 2.25rem;
 
-  /* Ghibli shadows */
-  --shadow-parchment: 0 4px 20px -4px hsl(33 30% 60% / 0.3), inset 0 1px 3px hsl(43 40% 80% / 0.5);
-  --shadow-parchment-hover: 0 8px 30px -8px hsl(33 30% 50% / 0.35), inset 0 1px 3px hsl(43 40% 80% / 0.5);
-  --shadow-glow: 0 0 40px hsl(45 85% 70% / 0.2);
+  /* Ghibli shadows — premium, lush */
+  --shadow-parchment: 0 8px 32px -10px hsl(148 40% 18% / 0.25), 0 2px 6px hsl(148 40% 18% / 0.08), inset 0 1px 0 hsl(48 80% 99% / 0.9);
+  --shadow-parchment-hover: 0 18px 48px -14px hsl(148 40% 18% / 0.32), 0 4px 12px hsl(148 40% 18% / 0.1), inset 0 1px 0 hsl(48 80% 99% / 0.9);
+  --shadow-card-hover: 0 18px 48px -14px hsl(148 40% 18% / 0.32), 0 4px 12px hsl(148 40% 18% / 0.1), inset 0 1px 0 hsl(48 80% 99% / 0.9);
+  --shadow-glow: 0 0 60px hsl(42 90% 72% / 0.35);
+  --shadow-soft-inset: inset 0 2px 8px hsl(140 30% 20% / 0.08);
 
-  /* Ghibli font families */
-  --font-serif: 'Lora', Georgia, serif;
-  --font-sans: 'Nunito', 'Inter', system-ui, sans-serif;
+  /* Ghibli font families — Fraunces is the brand serif; we use it everywhere
+     so font-sans and font-serif resolve to the same family. Mono kept for
+     UUIDs / fixed-width data. */
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Fraunces', Georgia, serif;
 }
 
 @layer base {
@@ -70,7 +78,7 @@
     --secondary: hsl(40 35% 88%);
     --secondary-foreground: hsl(160 20% 20%);
     --muted: hsl(40 30% 85%);
-    --muted-foreground: hsl(160 12% 42%);
+    --muted-foreground: hsl(160 18% 28%);
     --accent: hsl(155 43% 48%);
     --accent-foreground: hsl(0 0% 100%);
     --destructive: hsl(0 72% 51%);
@@ -94,17 +102,27 @@
     --shadow-card:  0 4px 16px rgba(27, 67, 50, 0.10), 0 1px 4px rgba(27, 67, 50, 0.06);
     --shadow-hover: 0 8px 28px rgba(27, 67, 50, 0.14), 0 2px 6px rgba(27, 67, 50, 0.08);
 
-    /* Ghibli custom tokens (HSL values for use with hsl()) */
+    /* Ghibli custom tokens (HSL values for use with hsl()) — lush oasis palette */
     --ghibli-cream: 43 76% 93%;
-    --ghibli-ivory: 50 80% 94%;
-    --ghibli-moss: 120 25% 45%;
-    --ghibli-forest: 140 35% 28%;
-    --ghibli-canopy: 150 40% 20%;
-    --ghibli-sunlight: 45 85% 70%;
-    --ghibli-amber: 28 70% 55%;
-    --ghibli-mist: 120 15% 90%;
-    --ghibli-bark: 30 30% 35%;
-    --ghibli-petal: 350 50% 75%;
+    --ghibli-ivory: 48 78% 96%;
+    --ghibli-moss: 130 22% 42%;
+    --ghibli-forest: 148 42% 22%;
+    --ghibli-canopy: 152 45% 16%;
+    --ghibli-jungle: 145 38% 28%;
+    --ghibli-sunlight: 42 90% 72%;
+    --ghibli-gold: 36 75% 58%;
+    --ghibli-amber: 36 75% 58%;
+    --ghibli-coral: 8 62% 66%;
+    --ghibli-teal: 175 35% 48%;
+    --ghibli-mist: 130 18% 92%;
+    --ghibli-bark: 28 32% 32%;
+    --ghibli-petal: 350 55% 78%;
+
+    /* Premium gradients */
+    --gradient-cream: linear-gradient(135deg, hsl(48 80% 97% / 0.72), hsl(45 70% 92% / 0.58));
+    --gradient-leaf: linear-gradient(180deg, hsl(148 42% 28%), hsl(148 50% 18%));
+    --gradient-gold: linear-gradient(135deg, hsl(42 90% 72%), hsl(36 75% 58%));
+    --gradient-mist: radial-gradient(ellipse at 50% 30%, transparent 0%, hsl(130 18% 92% / 0.45) 70%, hsl(130 22% 80% / 0.65) 100%);
   }
 
   .dark {
@@ -148,21 +166,20 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: 'Nunito', 'Inter', system-ui, sans-serif;
+    font-family: 'Fraunces', Georgia, serif;
     background-image:
-      repeating-linear-gradient(45deg, rgba(140, 95, 40, 0.030) 0px, rgba(140, 95, 40, 0.030) 1px, transparent 1px, transparent 6px),
-      repeating-linear-gradient(-45deg, rgba(140, 95, 40, 0.022) 0px, rgba(140, 95, 40, 0.022) 1px, transparent 1px, transparent 6px),
-      radial-gradient(ellipse 80% 60% at 75% 0%, rgba(245, 220, 160, 0.18) 0%, transparent 65%),
-      radial-gradient(ellipse 60% 30% at 50% 100%, rgba(64, 145, 108, 0.06) 0%, transparent 70%);
+      repeating-linear-gradient(45deg, hsl(var(--ghibli-bark) / 0.030) 0px, hsl(var(--ghibli-bark) / 0.030) 1px, transparent 1px, transparent 6px),
+      repeating-linear-gradient(-45deg, hsl(var(--ghibli-bark) / 0.022) 0px, hsl(var(--ghibli-bark) / 0.022) 1px, transparent 1px, transparent 6px),
+      radial-gradient(ellipse 80% 60% at 75% 0%, hsl(var(--ghibli-sunlight) / 0.18) 0%, transparent 65%),
+      radial-gradient(ellipse 60% 30% at 50% 100%, hsl(var(--ghibli-moss) / 0.06) 0%, transparent 70%);
   }
 
   h1, h2 {
-    font-family: 'Lora', Georgia, serif;
+    font-family: 'Fraunces', Georgia, serif;
   }
 
-  /* Quiz question text — softer, rounder than headings */
+  /* Quiz question text — typographic tunings; family inherits brand serif. */
   .quiz-question {
-    font-family: 'Nunito', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: -0.01em;
     line-height: 1.6;
@@ -189,7 +206,7 @@
   .garden-divider {
     border: none;
     height: 1px;
-    background: linear-gradient(to right, transparent, rgba(64, 145, 108, 0.25) 20%, rgba(64, 145, 108, 0.35) 50%, rgba(64, 145, 108, 0.25) 80%, transparent);
+    background: linear-gradient(to right, transparent, hsl(var(--ghibli-moss) / 0.25) 20%, hsl(var(--ghibli-moss) / 0.35) 50%, hsl(var(--ghibli-moss) / 0.25) 80%, transparent);
     margin: 0;
     position: relative;
   }
@@ -209,13 +226,13 @@
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(64, 145, 108, 0.25); border-radius: 100px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(64, 145, 108, 0.45); }
+::-webkit-scrollbar-thumb { background: hsl(var(--ghibli-moss) / 0.25); border-radius: 100px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(var(--ghibli-moss) / 0.45); }
 
-::selection { background: rgba(64, 145, 108, 0.20); color: #1B4332; }
+::selection { background: hsl(var(--ghibli-moss) / 0.20); color: hsl(var(--ghibli-canopy)); }
 
 :focus-visible {
-  outline: 2px solid rgba(64, 145, 108, 0.6);
+  outline: 2px solid hsl(var(--ghibli-moss) / 0.6);
   outline-offset: 2px;
   border-radius: 4px;
 }
@@ -236,12 +253,60 @@
 
 /* ── Ghibli: Mist overlay ── */
 .mist-overlay {
-  background: radial-gradient(
-    ellipse at center,
-    transparent 40%,
-    hsl(120 15% 90% / 0.4) 70%,
-    hsl(120 20% 85% / 0.6) 100%
-  );
+  background: var(--gradient-mist);
+}
+
+/* ── Ghibli: Scene vignette (deep canopy edges) ── */
+.scene-vignette {
+  background: radial-gradient(ellipse at center, transparent 45%, hsl(148 42% 14% / 0.08) 85%, hsl(148 42% 12% / 0.18) 100%);
+}
+
+/* ── Ghibli: Glass cream card surface ── */
+.glass-cream {
+  background: var(--gradient-cream);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  border: 1px solid hsl(140 25% 70% / 0.35);
+  box-shadow: var(--shadow-parchment);
+}
+
+/* ── Parchment-solid — opaque reading surface ── */
+.parchment-solid {
+  background: linear-gradient(180deg, hsl(48 80% 97% / 0.96), hsl(45 70% 93% / 0.94));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1.5px solid hsl(140 25% 65% / 0.5);
+  box-shadow:
+    0 2px 8px hsl(152 45% 16% / 0.08),
+    inset 0 1px 0 hsl(48 90% 99% / 0.6);
+}
+
+/* Variant — flatter, no inner highlight, for nested rows inside parchment-solid containers */
+.parchment-row {
+  background: hsl(48 78% 95% / 0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid hsl(140 25% 65% / 0.4);
+}
+
+/* ── Ghibli: Botanical border (subtle leaf-edge gradient ring) ── */
+.botanical-border {
+  position: relative;
+}
+.botanical-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+    hsl(148 40% 35% / 0.45),
+    hsl(36 75% 58% / 0.25) 40%,
+    hsl(148 40% 35% / 0.4) 80%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* ── Ghibli animations ── */
@@ -261,8 +326,12 @@
   50% { opacity: 0.6; }
 }
 @keyframes pulse-soft {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.05); opacity: 1; }
+  0%, 100% { transform: scale(1); opacity: 0.92; }
+  50% { transform: scale(1.04); opacity: 1; }
+}
+@keyframes glow-soft {
+  0%, 100% { filter: drop-shadow(0 0 18px hsl(42 90% 72% / 0.35)); }
+  50% { filter: drop-shadow(0 0 32px hsl(42 90% 72% / 0.6)); }
 }
 @keyframes drop-fall {
   0% { transform: translateY(-10px); opacity: 0; }
@@ -278,6 +347,73 @@
 .animate-float-leaf { animation: float-leaf 8s ease-in-out infinite; }
 .animate-drift { animation: drift 12s ease-in-out infinite; }
 .animate-shimmer { animation: shimmer 4s ease-in-out infinite; }
-.animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 3.5s ease-in-out infinite; }
+.animate-glow-soft { animation: glow-soft 4s ease-in-out infinite; }
 .animate-drop { animation: drop-fall 0.6s ease-in forwards; }
 .animate-scale-in { animation: scale-in-bounce 0.5s ease-out forwards; }
+
+/* ── Roaming cat — walks across the page, stops to groom, walks off ── */
+
+@keyframes roaming-cat-walk-in {
+  0% {
+    right: -150px;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    right: 30vw;
+    opacity: 1;
+  }
+}
+
+@keyframes roaming-cat-walk-out {
+  0% {
+    right: 30vw;
+    opacity: 1;
+  }
+  92% {
+    opacity: 1;
+  }
+  100% {
+    right: calc(100vw + 150px);
+    opacity: 0;
+  }
+}
+
+@keyframes roaming-cat-groom-bob {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-1px); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(-1px); }
+}
+
+.roaming-cat-container {
+  right: -150px;
+}
+
+.roaming-cat-walking-in {
+  animation: roaming-cat-walk-in 8s linear forwards;
+}
+
+.roaming-cat-sitting-pre,
+.roaming-cat-grooming,
+.roaming-cat-sitting-post {
+  right: 30vw;
+  opacity: 1;
+}
+
+.roaming-cat-grooming .roaming-cat-image {
+  animation: roaming-cat-groom-bob 1.2s ease-in-out infinite;
+}
+
+.roaming-cat-walking-out {
+  animation: roaming-cat-walk-out 12s linear forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roaming-cat-container {
+    display: none;
+  }
+}

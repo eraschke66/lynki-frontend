@@ -127,14 +127,14 @@ export function LoginForm() {
           />
 
           {/* Inner parchment */}
-          <div className="relative bg-card rounded-[1.1rem] parchment-texture p-8">
+          <div className="relative parchment-solid rounded-[1.1rem] p-8">
             <div className="relative z-10">
               {/* Heading */}
               <div className="text-center mb-6">
                 <h1 className="font-serif text-2xl font-bold text-primary mb-1">
                   Welcome back to your garden
                 </h1>
-                <p className="font-sans text-sm text-muted-foreground">
+                <p className="font-sans text-sm text-ghibli-bark">
                   Your knowledge awaits
                 </p>
               </div>
@@ -152,15 +152,17 @@ export function LoginForm() {
 
                 {/* Email */}
                 <div>
-                  <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
+                  <label htmlFor="login-email" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
                     Email
                   </label>
                   <input
+                    id="login-email"
                     type="email"
+                    autoComplete="username"
                     placeholder="gardener@passai.app"
                     {...register("email")}
                     disabled={loading}
-                    className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                    className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
                   />
                   {errors.email && (
                     <p className="text-sm text-destructive mt-1">
@@ -171,21 +173,23 @@ export function LoginForm() {
 
                 {/* Password */}
                 <div>
-                  <label className="font-sans text-xs font-medium text-foreground/80 mb-1.5 block">
+                  <label htmlFor="login-password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
                     Password
                   </label>
                   <div className="relative">
                     <input
+                      id="login-password"
                       type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
                       placeholder="••••••••"
                       {...register("password")}
                       disabled={loading}
-                      className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-foreground placeholder:text-muted-foreground/50 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                      className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/70 hover:text-foreground transition-colors"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
@@ -217,11 +221,11 @@ export function LoginForm() {
 
                 {/* Divider */}
                 <div className="flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-border" />
-                  <span className="font-sans text-xs text-muted-foreground">
+                  <div className="flex-1 h-px bg-ghibli-moss/30" />
+                  <span className="font-sans text-xs text-ghibli-bark">
                     or continue with
                   </span>
-                  <div className="flex-1 h-px bg-border" />
+                  <div className="flex-1 h-px bg-ghibli-moss/30" />
                 </div>
 
                 {/* Google sign-in — organic 4-petal style */}
@@ -231,7 +235,7 @@ export function LoginForm() {
                     const { error: gError } = await signInWithGoogle();
                     if (gError) setError(gError.message);
                   }}
-                  className="w-full rounded-parchment border-2 border-border/60 bg-card py-3 font-sans font-medium text-sm text-foreground transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
+                  className="w-full rounded-parchment border-2 border-ghibli-moss/45 bg-ghibli-ivory/85 py-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
                 >
                   <svg
                     width="18"
@@ -283,7 +287,7 @@ export function LoginForm() {
               </form>
 
               {/* Sign up link */}
-              <p className="text-center font-sans text-xs text-muted-foreground mt-5">
+              <p className="text-center font-sans text-xs text-ghibli-bark mt-5">
                 New to the garden?{" "}
                 <Link
                   to="/signup"

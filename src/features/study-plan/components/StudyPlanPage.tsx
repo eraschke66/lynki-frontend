@@ -171,26 +171,20 @@ export function StudyPlanPage() {
           {/* Back link */}
           <button
             onClick={() => navigate(`/course/${courseId}`)}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-ghibli-canopy/70 hover:text-ghibli-jungle transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Course
           </button>
 
           {/* Page header */}
-          <div
-            className="mb-8 p-6 rounded-2xl"
-            style={{
-              background: "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
-              border: "1px solid rgba(64,145,108,0.12)",
-            }}
-          >
-            <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-1">
+          <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-ghibli-moss/8 to-transparent border border-ghibli-moss/20">
+            <p className="text-xs font-semibold text-ghibli-moss uppercase tracking-wider mb-1">
               Study Plan
             </p>
-            <h1 className="text-2xl font-bold">{course?.title ?? "Your Course"}</h1>
+            <h1 className="text-2xl font-bold text-ghibli-canopy">{course?.title ?? "Your Course"}</h1>
             {targetLabel && (
-              <p className="text-sm text-muted-foreground mt-1">Target: {targetLabel}</p>
+              <p className="text-sm text-ghibli-bark mt-1">Target: {targetLabel}</p>
             )}
           </div>
 
@@ -204,17 +198,17 @@ export function StudyPlanPage() {
                 style={{ mixBlendMode: "darken" }}
               />
               <div>
-                <h2 className="font-serif text-base font-semibold mb-1">
+                <h2 className="font-serif text-base font-semibold text-ghibli-canopy mb-1">
                   The garden needs seeds first
                 </h2>
-                <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                <p className="text-sm text-ghibli-bark max-w-xs mx-auto">
                   Upload your study materials so the plan knows what to grow.
                 </p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                className="gap-1.5 border-[rgba(64,145,108,0.3)] hover:border-[#40916C]"
+                className="gap-1.5"
                 onClick={() => navigate("/documents")}
               >
                 Upload Materials
@@ -259,8 +253,8 @@ export function StudyPlanPage() {
               {/* Generating spinner */}
               {(isGenerating || planLoading) && (
                 <ParchmentCard className="p-10 flex flex-col items-center gap-3 text-center">
-                  <Loader2 className="w-7 h-7 text-[#40916C] animate-spin" />
-                  <p className="text-sm text-muted-foreground">
+                  <Loader2 className="w-7 h-7 text-ghibli-moss animate-spin" />
+                  <p className="text-sm text-ghibli-bark">
                     Growing your plan… this takes a few seconds.
                   </p>
                 </ParchmentCard>
@@ -276,14 +270,14 @@ export function StudyPlanPage() {
                     style={{ mixBlendMode: "darken" }}
                   />
                   <div>
-                    <p className="text-sm font-semibold mb-1">Ready to map your path?</p>
-                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
+                    <p className="text-sm font-semibold text-ghibli-canopy mb-1">Ready to map your path?</p>
+                    <p className="text-sm text-ghibli-bark max-w-xs mx-auto">
                       Claude will look at your mastery levels and quiz history to write a
                       personalised growth guide — with time estimates and projected outcomes.
                     </p>
                   </div>
                   <Button
-                    className="gap-2 shadow-[0_2px_8px_rgba(13,115,119,0.2)]"
+                    className="gap-2 shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)]"
                     onClick={() => generateMutation.mutate()}
                   >
                     <Sparkles className="w-4 h-4" />

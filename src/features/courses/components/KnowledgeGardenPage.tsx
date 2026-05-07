@@ -51,14 +51,14 @@ function TopicCard({
               {gardenStatus.label}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-ghibli-bark mt-1">
             {topic.mastered_concepts} of {topic.total_concepts} concepts mastered
           </p>
         </div>
         <Button
           size="sm"
           variant="outline"
-          className="shrink-0 gap-1.5 border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
+          className="shrink-0 gap-1.5"
           onClick={() => onStudy(topic.topic_id)}
           disabled={topic.total_concepts === 0}
         >
@@ -68,7 +68,7 @@ function TopicCard({
       </div>
 
       {/* Progress bar */}
-      <div className="w-full h-2 rounded-full bg-secondary overflow-hidden mb-4">
+      <div className="w-full h-2 rounded-full bg-ghibli-mist overflow-hidden mb-4">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{
@@ -85,7 +85,7 @@ function TopicCard({
             {topic.concepts.map((concept) => (
               <div
                 key={concept.concept_id}
-                className="flex items-center gap-2.5 py-1 px-2 rounded-lg hover:bg-secondary/50 transition-colors"
+                className="flex items-center gap-2.5 py-1 px-2 rounded-lg hover:bg-ghibli-ivory/70 transition-colors"
               >
                 <span className="text-base shrink-0" role="img" aria-label={concept.status}>
                   {getConceptIcon(concept.status)}
@@ -99,7 +99,7 @@ function TopicCard({
                   </span>
                 )}
                 {concept.n_attempts === 0 && (
-                  <span className="text-xs text-muted-foreground shrink-0">
+                  <span className="text-xs text-ghibli-bark shrink-0">
                     Not yet explored
                   </span>
                 )}
@@ -113,7 +113,7 @@ function TopicCard({
           {topic.concepts.length > 4 && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="mt-2 text-xs text-muted-foreground hover:text-[#2D6A4F] transition-colors flex items-center gap-1"
+              className="mt-2 text-xs text-ghibli-canopy/70 hover:text-ghibli-jungle transition-colors flex items-center gap-1"
             >
               {expanded
                 ? "Show less"
@@ -178,7 +178,7 @@ export function KnowledgeGardenPage() {
           <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
             <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm w-full">
               <AlertCircle className="w-10 h-10 text-destructive" />
-              <p className="text-sm text-muted-foreground">Could not load your garden</p>
+              <p className="text-sm text-ghibli-bark">Could not load your garden</p>
               <Button variant="outline" size="sm" onClick={() => refetch()}>
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Try again
@@ -186,86 +186,87 @@ export function KnowledgeGardenPage() {
             </ParchmentCard>
           </div>
         ) : (
-          <div className="relative z-10 pt-24 pb-16">
-            <div className="max-w-3xl mx-auto px-6">
-              {/* Back link */}
-              <button
-                onClick={() => navigate(`/course/${courseId}`)}
-                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-[#2D6A4F] transition-colors mb-6"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                Back to Course
-              </button>
+          <div className="relative z-10 max-w-5xl mx-auto px-6 pt-6 md:pt-8 pb-16">
+            {/* Back link */}
+            <button
+              onClick={() => navigate(`/course/${courseId}`)}
+              className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-6"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Course
+            </button>
 
-              {/* Garden header */}
-              <div
-                className="mb-8 p-6 rounded-2xl text-center"
-                style={{
-                  background:
-                    "linear-gradient(135deg, rgba(64,145,108,0.06) 0%, rgba(250,243,224,0) 70%)",
-                  border: "1px solid rgba(64,145,108,0.12)",
-                }}
-              >
-                <p className="text-xs font-semibold text-[#40916C] uppercase tracking-wider mb-2">
-                  Knowledge Garden
-                </p>
-                <h1 className="text-2xl font-bold mb-4">
-                  {gardenData?.course_title ?? "Your Course"}
-                </h1>
-                <PlantIndicator probability={overallProgress} size="xl" showPercent={true} />
-                <p className={`text-sm font-semibold mt-3 ${gardenStatus.color}`}>
-                  {gardenStatus.label}
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts mastered
-                </p>
-              </div>
-
-              {/* Topics */}
-              {topics.length === 0 ? (
-                <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
-                  <img
-                    src="/plant-stage-1.png"
-                    alt=""
-                    className="w-16 h-16 object-contain"
-                    style={{ mixBlendMode: "darken" }}
-                  />
-                  <div>
-                    <h2 className="font-serif text-base font-semibold mb-1">
-                      Your garden is still taking shape
-                    </h2>
-                    <p className="text-sm text-muted-foreground max-w-xs mx-auto">
-                      Your materials are being processed. Check back soon to see your topics bloom.
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="mt-2"
-                    onClick={() => navigate(`/course/${courseId}`)}
-                  >
-                    <ArrowLeft className="w-4 h-4 mr-2" />
-                    Back to Course
-                  </Button>
-                </ParchmentCard>
-              ) : (
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <p className="text-sm font-semibold text-foreground">
-                      {topics.length} {topics.length === 1 ? "topic" : "topics"} in your garden
-                    </p>
-                  </div>
-                  {topics.map((topic) => (
-                    <TopicCard
-                      key={topic.topic_id}
-                      topic={topic}
-                      courseId={courseId}
-                      onStudy={handleStudyTopic}
-                    />
-                  ))}
+            {/* Hero — oasis two-column */}
+            <ParchmentCard glow className="p-8 md:p-12 mb-10 overflow-hidden">
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div className="text-center md:text-left order-2 md:order-1">
+                  <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
+                    Knowledge Garden
+                  </span>
+                  <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight mb-4">
+                    {gardenData?.course_title ?? "Your Course"}
+                  </h1>
+                  <p className={`font-sans text-base font-semibold mb-2 ${gardenStatus.color}`}>
+                    {gardenStatus.label}
+                  </p>
+                  <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed max-w-md mx-auto md:mx-0">
+                    {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts mastered.
+                    {topics.length > 0 && (
+                      <>
+                        {" "}A grove of{" "}
+                        <span className="font-semibold text-ghibli-forest">
+                          {topics.length} {topics.length === 1 ? "topic" : "topics"}
+                        </span>
+                        {" "}is taking root.
+                      </>
+                    )}
+                  </p>
                 </div>
-              )}
-            </div>
+                <div className="order-1 md:order-2 flex justify-center">
+                  <PlantIndicator probability={overallProgress} size="xl" glow showPercent />
+                </div>
+              </div>
+            </ParchmentCard>
+
+            {/* Topics */}
+            {topics.length === 0 ? (
+              <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
+                <img
+                  src="/plant-stage-1.png"
+                  alt=""
+                  className="w-16 h-16 object-contain animate-pulse-soft"
+                  style={{ mixBlendMode: "darken" }}
+                />
+                <div>
+                  <h2 className="font-serif text-xl font-semibold text-ghibli-canopy mb-1">
+                    Your garden is still taking shape
+                  </h2>
+                  <p className="font-sans text-sm text-ghibli-bark/80 max-w-xs mx-auto">
+                    Your materials are being processed. Check back soon to see your topics bloom.
+                  </p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate(`/course/${courseId}`)}
+                  className="mt-2 rounded-full border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:bg-ghibli-ivory/60"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Course
+                </Button>
+              </ParchmentCard>
+            ) : (
+              <div>
+                {topics.map((topic) => (
+                  <TopicCard
+                    key={topic.topic_id}
+                    topic={topic}
+                    courseId={courseId}
+                    onStudy={handleStudyTopic}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </PremiumGate>

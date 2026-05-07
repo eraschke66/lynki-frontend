@@ -64,14 +64,14 @@ export function QuizDetailModal({
         {/* Header */}
         <DialogHeader className="pb-1">
           <div className="flex items-start gap-3">
-            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[rgba(64,145,108,0.1)]">
-              <ClipboardList className="h-4 w-4 text-[#2D6A4F]" />
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ghibli-moss/12">
+              <ClipboardList className="h-4 w-4 text-ghibli-jungle" />
             </div>
             <div className="min-w-0">
-              <DialogTitle className="text-base font-semibold leading-snug">
+              <DialogTitle className="text-base font-semibold leading-snug text-ghibli-canopy">
                 {quiz.name}
               </DialogTitle>
-              <DialogDescription className="mt-0.5 text-xs text-muted-foreground">
+              <DialogDescription className="mt-0.5 text-xs text-ghibli-bark">
                 Generated quiz
               </DialogDescription>
             </div>
@@ -100,7 +100,7 @@ export function QuizDetailModal({
         {/* Session history */}
         {hasCompleted && (
           <div className="mt-2">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ghibli-bark">
               Session History
             </p>
             <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
@@ -123,16 +123,16 @@ export function QuizDetailModal({
                 return (
                   <div
                     key={attempt.id}
-                    className="flex items-center gap-3 rounded-xl border border-border/60 bg-muted/30 px-4 py-3"
+                    className="flex items-center gap-3 rounded-xl bg-ghibli-mist/50 border border-ghibli-moss/40 px-4 py-3"
                   >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-bold text-muted-foreground">
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ghibli-ivory to-ghibli-mist text-xs font-bold text-ghibli-canopy border border-ghibli-moss/45">
                       {completedAttempts.length - i}
                     </span>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground">{date}</p>
+                      <p className="text-xs text-ghibli-bark">{date}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-bold">
+                      <p className="text-sm font-bold text-ghibli-canopy">
                         {attempt.correct_count}/{quiz.total_questions}
                       </p>
                       <p className={`text-xs font-medium ${status.color}`}>
@@ -148,16 +148,16 @@ export function QuizDetailModal({
 
         {/* Empty state */}
         {!hasCompleted && (
-          <div className="mt-2 rounded-xl border border-dashed border-border/60 py-8 text-center">
-            <p className="text-sm text-muted-foreground">No completed sessions yet.</p>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+          <div className="mt-2 rounded-xl border border-dashed border-ghibli-moss/50 py-8 text-center">
+            <p className="text-sm text-ghibli-bark">No completed sessions yet.</p>
+            <p className="mt-0.5 text-xs text-ghibli-bark">
               Take this quiz to start tracking your progress.
             </p>
           </div>
         )}
 
         {/* CTA */}
-        <div className="mt-2 flex justify-end gap-2 border-t border-border/40 pt-4">
+        <div className="mt-2 flex justify-end gap-2 border-t border-ghibli-moss/30 pt-4">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -202,8 +202,8 @@ function MetaChip({
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
         highlighted
-          ? "bg-[rgba(64,145,108,0.12)] text-[#1B4332]"
-          : "bg-muted text-muted-foreground"
+          ? "bg-ghibli-moss/15 text-ghibli-canopy"
+          : "bg-ghibli-mist text-ghibli-bark"
       }`}
     >
       {icon}

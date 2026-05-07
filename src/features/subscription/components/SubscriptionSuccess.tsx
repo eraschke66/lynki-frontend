@@ -94,12 +94,12 @@ export function SubscriptionSuccess() {
             {timedOut ? (
               <>
                 <div className="flex justify-center mb-5">
-                  <Sprout className="w-10 h-10 text-[#40916C]" />
+                  <Sprout className="w-10 h-10 text-ghibli-moss" />
                 </div>
-                <h2 className="font-serif text-xl font-bold text-[#1B4332] mb-3">
+                <h2 className="font-serif text-xl font-bold text-ghibli-canopy mb-3">
                   Almost there…
                 </h2>
-                <p className="text-sm text-muted-foreground mb-6">
+                <p className="text-sm text-ghibli-bark mb-6">
                   Your payment was received — we're just finishing the activation.
                   This can take a minute. Try refreshing the page, or come back shortly.
                 </p>
@@ -113,7 +113,6 @@ export function SubscriptionSuccess() {
                     navigate("/home");
                   }}
                   variant="outline"
-                  className="border-[rgba(64,145,108,0.3)] hover:border-[#40916C] hover:text-[#1B4332]"
                 >
                   Go to dashboard
                 </Button>
@@ -121,20 +120,14 @@ export function SubscriptionSuccess() {
             ) : (
               <>
                 <div className="flex justify-center mb-5">
-                  <Loader2 className="w-10 h-10 text-[#40916C] animate-spin" />
+                  <Loader2 className="w-10 h-10 text-ghibli-moss animate-spin" />
                 </div>
-                <h2 className="font-serif text-xl font-bold text-[#1B4332] mb-3">
+                <h2 className="font-serif text-xl font-bold text-ghibli-canopy mb-3">
                   Activating your garden…
                 </h2>
 
                 {/* Plan-specific detail shown while we wait for the webhook */}
-                <div
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4"
-                  style={{
-                    background: "rgba(64,145,108,0.1)",
-                    color: "#2D6A4F",
-                  }}
-                >
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-4 bg-ghibli-moss/12 text-ghibli-jungle">
                   {isMonthly ? (
                     <>
                       <Clock className="w-3.5 h-3.5" />
@@ -148,7 +141,7 @@ export function SubscriptionSuccess() {
                   )}
                 </div>
 
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-ghibli-bark">
                   Payment confirmed. Unlocking your premium features now.
                 </p>
               </>

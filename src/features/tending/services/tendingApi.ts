@@ -1,0 +1,87 @@
+import { USE_MOCK_TENDING_API } from "@/lib/flags";
+import type {
+  AllStageResults,
+  MasteryDelta,
+  RecallEvaluation,
+  TendingSessionPayload,
+} from "../types";
+import generateMock from "../mocks/generateSession.mock.json";
+import evaluateMock from "../mocks/evaluateRecall.mock.json";
+import completeMock from "../mocks/completeSession.mock.json";
+
+const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000/api/v1";
+
+const MOCK_LATENCY_MS = 1500;
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+async function postJSON<T>(path: string, body: unknown, timeoutMs = 90_000): Promise<T> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${API_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error((err as { detail?: string }).detail ?? `Request failed: ${path}`);
+    }
+    return (await res.json()) as T;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/** POST /topic-tending/generate */
+export async function generateSession(args: {
+  userId: string;
+  courseId: string;
+  topicId: string;
+}): Promise<TendingSessionPayload> {
+  if (USE_MOCK_TENDING_API) {
+    await sleep(MOCK_LATENCY_MS);
+    return {
+      ...(generateMock as TendingSessionPayload),
+      course_id: args.courseId,
+      topic_id: args.topicId,
+      session_id: `mock-${args.courseId}-${args.topicId}-${Date.now()}`,
+    };
+  }
+  return postJSON<TendingSessionPayload>("/topic-tending/generate", {
+    user_id: args.userId,
+    course_id: args.courseId,
+    topic_id: args.topicId,
+  });
+}
+
+/** POST /topic-tending/evaluate-recall */
+export async function evaluateRecall(args: {
+  sessionId: string;
+  studentResponse: string;
+}): Promise<RecallEvaluation> {
+  if (USE_MOCK_TENDING_API) {
+    await sleep(MOCK_LATENCY_MS);
+    return evaluateMock as RecallEvaluation;
+  }
+  return postJSON<RecallEvaluation>("/topic-tending/evaluate-recall", {
+    session_id: args.sessionId,
+    student_response: args.studentResponse,
+  });
+}
+
+/** POST /topic-tending/complete */
+export async function completeSession(args: {
+  sessionId: string;
+  results: AllStageResults;
+}): Promise<MasteryDelta> {
+  if (USE_MOCK_TENDING_API) {
+    await sleep(MOCK_LATENCY_MS);
+    return completeMock as MasteryDelta;
+  }
+  return postJSON<MasteryDelta>("/topic-tending/complete", {
+    session_id: args.sessionId,
+    results: args.results,
+  });
+}

@@ -1,0 +1,21 @@
+{
+  "stage": "mastery_delta",
+  "topic_title": "Mitochondria",
+  "mastery_before": 0.43,
+  "mastery_after": 0.58,
+  "kc_breakdown": [
+    {
+      "kc_id": "kc_mito_function",
+      "name": "Function of mitochondria",
+      "before": 0.40,
+      "after": 0.65
+    },
+    {
+      "kc_id": "kc_mito_structure",
+      "name": "Structure of mitochondria",
+      "before": 0.46,
+      "after": 0.51
+    }
+  ],
+  "tended_today": true
+}

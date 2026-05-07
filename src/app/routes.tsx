@@ -12,6 +12,7 @@ import { Dashboard } from "@/features/dashboard";
 import { CourseDetailPage, KnowledgeGardenPage } from "@/features/courses";
 import { TopicQuizPage } from "@/features/topic-quiz";
 import { StudyPlanPage } from "@/features/study-plan";
+import { TendingFlowPage } from "@/features/tending";
 import { SettingsPage } from "@/features/settings";
 import { AdminPage } from "@/features/admin/AdminPage";
 import { PricingPage } from "@/features/subscription/components/PricingPage";
@@ -78,6 +79,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <TopicQuizPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/course/:courseId/tend/:topicId"
+        element={
+          <ProtectedRoute>
+            <TendingFlowPage />
           </ProtectedRoute>
         }
       />

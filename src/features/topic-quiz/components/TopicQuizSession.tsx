@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, ArrowRight, RefreshCw, RotateCcw, X } from "lucide-react";
 import { useAuth } from "@/features/auth";
@@ -68,6 +68,11 @@ export function TopicQuizSession({
     queryFn: () => fetchTopicQuizSession(user!.id, courseId, topicId),
     enabled: !!user && !!courseId && !!topicId,
     staleTime: Infinity,
+    // Surface failures fast so the user gets the error UI instead of a
+    // silently-retrying load. Was unbounded; that's how V19 stuck at the
+    // "Preparing fresh soil…" screen on a backend hiccup at the connections-
+    // to-quiz transition.
+    retry: 1,
     select: (data) => {
       if (!resumeApplied.current && data.current_index > 0) {
         resumeApplied.current = true;
@@ -91,6 +96,19 @@ export function TopicQuizSession({
   });
 
   const questions = useMemo(() => session?.questions ?? [], [session?.questions]);
+
+  // Surface a manual retry after 30s of loading so a hung backend doesn't
+  // strand the user on the embed loader. Used by the embedded path only —
+  // the standalone GardenVideoLoader has its own affordances.
+  const [showSlowLink, setShowSlowLink] = useState(false);
+  useEffect(() => {
+    if (!isLoading) {
+      setShowSlowLink(false);
+      return;
+    }
+    const id = window.setTimeout(() => setShowSlowLink(true), 30_000);
+    return () => window.clearTimeout(id);
+  }, [isLoading]);
   const currentQuestion = questions[currentIndex] ?? null;
   const totalQuestions = questions.length;
 
@@ -184,6 +202,15 @@ export function TopicQuizSession({
         <div className="max-w-md mx-auto w-full">
           <ParchmentCard className="p-8 text-center" hover={false}>
             <p className="font-serif text-ghibli-canopy">Preparing fresh soil for this topic…</p>
+            {showSlowLink && (
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="mt-4 text-xs text-ghibli-bark/60 hover:text-ghibli-canopy hover:underline"
+              >
+                This is taking longer than usual — try again?
+              </button>
+            )}
           </ParchmentCard>
         </div>
       );

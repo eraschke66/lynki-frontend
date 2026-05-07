@@ -127,7 +127,7 @@ export function ActiveRecallStage({
               {prompt}
             </h2>
             <div
-              className={`flex items-center gap-1.5 shrink-0 tabular-nums font-mono text-base font-semibold ${
+              className={`flex items-center gap-1.5 shrink-0 tabular-nums text-base font-semibold ${
                 timerCritical ? "text-amber-700" : "text-ghibli-canopy"
               }`}
               aria-live="polite"

@@ -28,6 +28,21 @@ const PLANT_STAGES = [
   "/plant-stage-4.png",
 ];
 
+/** Pool of skipped-stage nudges. One picked at random per render — no
+ *  per-line tracking needed; pool size and frequency keep repeats acceptable. */
+const SKIP_NUDGE_POOL = [
+  "That's not a herb patch, you've grown a real garden.",
+  "Before you had sprouts, now you have enough vegetables for a salad.",
+  "Those beans grew like in Jack and the Beanstalk.",
+  "You came in with a window box, you left with a flowerbed.",
+  "That patch went from bare dirt to dinner.",
+  "What was a sapling this morning is a tree by tonight.",
+  "Started with weeds, ended with wildflowers.",
+  "That's a tomato vine where there used to be a stick.",
+  "Yesterday it was a seed packet. Today it's a harvest.",
+  "You walked in with a sprig of basil and walked out with a vegetable garden.",
+];
+
 export function MasteryDeltaStage({
   courseId,
   delta,
@@ -38,6 +53,10 @@ export function MasteryDeltaStage({
   const navigate = useNavigate();
   // Snapshot "now" at mount so the displayed duration doesn't drift on re-render.
   const [snapshotNow] = useState(() => Date.now());
+  // Pick a nudge once per mount so it doesn't shuffle if the component re-renders.
+  const [nudge] = useState(
+    () => SKIP_NUDGE_POOL[Math.floor(Math.random() * SKIP_NUDGE_POOL.length)],
+  );
   const beforePct = Math.round(delta.mastery_before * 100);
   const afterPct = Math.round(delta.mastery_after * 100);
   const diffPct = afterPct - beforePct;
@@ -114,11 +133,7 @@ export function MasteryDeltaStage({
 
       {stagesSkipped.length > 0 && (
         <ParchmentCard className="p-5 mt-6 text-sm w-full max-w-lg" hover={false}>
-          <p className="text-ghibli-canopy/90">
-            You moved fast today — skipped {stagesSkipped.length}{" "}
-            {stagesSkipped.length === 1 ? "stage" : "stages"}. That's the difference
-            between a nursery and an orchard.
-          </p>
+          <p className="text-ghibli-canopy/90">{nudge}</p>
           <p className="mt-2 text-xs text-ghibli-moss/70">
             Skipped: {stagesSkipped.map((s) => STAGE_LABEL[s]).join(", ")}
           </p>

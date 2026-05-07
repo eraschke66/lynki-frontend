@@ -136,19 +136,30 @@ export function useTendingMachine(courseId: string, topicId: string): TendingMac
       const raw = window.sessionStorage.getItem(storageKey(courseId, topicId));
       if (!raw) return;
       const parsed = JSON.parse(raw) as TendingSession;
-      if (parsed.courseId === courseId && parsed.topicId === topicId && parsed.sessionId) {
-        dispatch({ type: "hydrate", payload: parsed });
+      if (parsed.courseId !== courseId || parsed.topicId !== topicId || !parsed.sessionId) {
+        return;
       }
+      // Reject sessions that already completed. Hydrating one would resurface
+      // the old MasteryDelta with a stale startedAt — which is how the
+      // "+15% in 276 minutes" bug rendered on V19.
+      const isCompleted = parsed.currentStage === "mastery_delta" && !!parsed.masteryDelta;
+      if (isCompleted) {
+        window.sessionStorage.removeItem(storageKey(courseId, topicId));
+        return;
+      }
+      dispatch({ type: "hydrate", payload: parsed });
     } catch {
       // Bad JSON in storage — ignore and start fresh.
     }
   }, [courseId, topicId]);
 
-  // Persist whenever state changes, except for empty initial state.
+  // Persist whenever state changes, except for empty initial state and
+  // anything past completion (a session with masteryDelta set is "done" for
+  // hydration purposes — we never want to resurface an old delta).
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!state.sessionId) return;
-    if (state.currentStage === "done") {
+    if (state.currentStage === "done" || state.masteryDelta) {
       window.sessionStorage.removeItem(storageKey(state.courseId, state.topicId));
       return;
     }

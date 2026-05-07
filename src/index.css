@@ -58,9 +58,11 @@
   --shadow-glow: 0 0 60px hsl(42 90% 72% / 0.35);
   --shadow-soft-inset: inset 0 2px 8px hsl(140 30% 20% / 0.08);
 
-  /* Ghibli font families */
+  /* Ghibli font families — Fraunces is the brand serif; we use it everywhere
+     so font-sans and font-serif resolve to the same family. Mono kept for
+     UUIDs / fixed-width data. */
   --font-serif: 'Fraunces', Georgia, serif;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-sans: 'Fraunces', Georgia, serif;
 }
 
 @layer base {
@@ -164,7 +166,7 @@
   body {
     background-color: var(--background);
     color: var(--foreground);
-    font-family: 'DM Sans', system-ui, sans-serif;
+    font-family: 'Fraunces', Georgia, serif;
     background-image:
       repeating-linear-gradient(45deg, hsl(var(--ghibli-bark) / 0.030) 0px, hsl(var(--ghibli-bark) / 0.030) 1px, transparent 1px, transparent 6px),
       repeating-linear-gradient(-45deg, hsl(var(--ghibli-bark) / 0.022) 0px, hsl(var(--ghibli-bark) / 0.022) 1px, transparent 1px, transparent 6px),
@@ -176,9 +178,8 @@
     font-family: 'Fraunces', Georgia, serif;
   }
 
-  /* Quiz question text — softer, rounder than headings */
+  /* Quiz question text — typographic tunings; family inherits brand serif. */
   .quiz-question {
-    font-family: 'DM Sans', system-ui, sans-serif;
     font-weight: 500;
     letter-spacing: -0.01em;
     line-height: 1.6;

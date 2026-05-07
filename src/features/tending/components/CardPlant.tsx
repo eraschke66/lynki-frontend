@@ -40,7 +40,7 @@ export function CardPlant({ tier, partial = false }: CardPlantProps) {
   const showOverlay = partial && clamped < MAX_PLANT_TIER;
 
   return (
-    <div className="relative w-14 h-14 md:w-16 md:h-16 select-none pointer-events-none">
+    <div className="relative w-32 h-32 md:w-64 md:h-64 select-none pointer-events-none">
       <img
         src={PLANT_STAGES[clamped]}
         alt={PLANT_LABELS[clamped]}

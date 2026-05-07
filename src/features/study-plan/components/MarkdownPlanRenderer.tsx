@@ -143,6 +143,37 @@ function buildMarkdownComponents(): Components {
   };
 }
 
+/**
+ * Per-topic body once contained a bullet list of task instructions
+ * (e.g. "5 min: Do a recall pass on X"). Those tasks are now owned by the
+ * Tending Flow itself. We keep the narrative paragraph and the "After this:
+ * this grows from X% to Y%" outcome line, and drop everything in between.
+ *
+ * Returns the cleaned body markdown plus the After-line text (if any) so
+ * the renderer can render it as a styled standalone line outside any list.
+ */
+function extractAfterAndStripBullets(body: string): {
+  afterLine: string | null;
+  cleanBody: string;
+} {
+  let afterLine: string | null = null;
+  const cleanLines: string[] = [];
+  for (const line of body.split("\n")) {
+    const bullet = line.match(/^\s*[-*]\s+(.+)/);
+    if (!bullet) {
+      cleanLines.push(line);
+      continue;
+    }
+    const content = bullet[1].trim();
+    if (afterLine === null && AFTER_LINE_RE.test(content)) {
+      afterLine = content;
+    }
+    // Drop the bullet (task or After) from the rendered markdown — After is
+    // re-emitted as a standalone styled line below the body.
+  }
+  return { afterLine, cleanBody: cleanLines.join("\n").trim() };
+}
+
 function extractText(node: React.ReactNode): string {
   if (typeof node === "string") return node;
   if (typeof node === "number") return String(node);
@@ -214,29 +245,48 @@ function TopicSection({
           </div>
         </div>
         {topicId && (
-          <Button
-            size="sm"
-            variant="outline"
-            className="shrink-0 gap-1.5 text-xs"
-            onClick={() => {
-              queryClient.removeQueries({
-                queryKey: testQueryKeys.quiz(courseId, user?.id ?? ""),
-              });
-              navigate(`/course/${courseId}/tend/${topicId}`);
-            }}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            Practice
-          </Button>
+          <div className="shrink-0 flex flex-col items-end">
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs"
+              onClick={() => {
+                queryClient.removeQueries({
+                  queryKey: testQueryKeys.quiz(courseId, user?.id ?? ""),
+                });
+                navigate(`/course/${courseId}/tend/${topicId}`);
+              }}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              Practice
+            </Button>
+            <p className="mt-1.5 text-[10px] text-ghibli-bark/55 italic leading-tight">
+              Weakest concepts first
+            </p>
+          </div>
         )}
       </div>
 
-      {/* Section body */}
-      <div className="prose-sm max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
-          {section.body}
-        </ReactMarkdown>
-      </div>
+      {/* Section body — task bullets stripped; narrative + outcome line only. */}
+      {(() => {
+        const { afterLine, cleanBody } = extractAfterAndStripBullets(section.body);
+        return (
+          <>
+            {cleanBody && (
+              <div className="prose-sm max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+                  {cleanBody}
+                </ReactMarkdown>
+              </div>
+            )}
+            {afterLine && (
+              <p className="mt-3 text-xs text-ghibli-jungle italic border-l-2 border-[hsl(155_43%_48%)] pl-3 py-0.5 leading-relaxed">
+                {afterLine}
+              </p>
+            )}
+          </>
+        );
+      })()}
     </ParchmentCard>
   );
 }

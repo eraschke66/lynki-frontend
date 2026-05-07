@@ -5,13 +5,16 @@ export function Footer() {
   const { clearConsent } = useCookieConsent();
   const { pathname } = useLocation();
 
-  // Hide footer on quiz pages so legal links don't compete with questions for attention.
-  // Routes: /test/:courseId  and  /course/:courseId/topic-quiz/:topicId
-  const isQuizPage =
+  // Hide footer on focused study surfaces — legal links shouldn't compete
+  // with questions or the Tending Flow's contained world.
+  // Routes: /test/:courseId, /course/:courseId/topic-quiz/:topicId,
+  //         /course/:courseId/tend/:topicId
+  const isFocusedSurface =
     /^\/test\/[^/]+$/.test(pathname) ||
-    /^\/course\/[^/]+\/topic-quiz\/[^/]+$/.test(pathname);
+    /^\/course\/[^/]+\/topic-quiz\/[^/]+$/.test(pathname) ||
+    /^\/course\/[^/]+\/tend\/[^/]+$/.test(pathname);
 
-  if (isQuizPage) {
+  if (isFocusedSurface) {
     return null;
   }
 

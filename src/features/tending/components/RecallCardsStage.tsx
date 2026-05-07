@@ -68,7 +68,7 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
       </div>
 
       <ParchmentCard
-        className="p-8 md:p-10 min-h-[280px] flex flex-col items-center justify-center cursor-pointer select-none relative"
+        className="p-8 md:p-10 min-h-[280px] flex flex-col items-center justify-center cursor-pointer select-none"
         hover={false}
       >
         <button
@@ -95,11 +95,6 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
             </>
           )}
         </button>
-
-        {/* Lower-right corner growth indicator. The only decoration on this card. */}
-        <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4">
-          <CardPlant tier={plantTier} partial={plantPartial} />
-        </div>
       </ParchmentCard>
 
       {flipped && (
@@ -118,6 +113,15 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
       )}
 
       <SkipStageLink onSkip={onSkip} />
+
+      {/*
+        Per-session growth indicator — fixed to viewport bottom-right so it
+        never overlaps the answer copy or the action buttons. Lives outside
+        the card on purpose: quiet, persistent, doesn't compete.
+      */}
+      <div className="fixed bottom-3 right-3 md:bottom-5 md:right-5 z-20 pointer-events-none">
+        <CardPlant tier={plantTier} partial={plantPartial} />
+      </div>
     </div>
   );
 }

@@ -1,6 +1,9 @@
 import { USE_MOCK_TENDING_API } from "@/lib/flags";
+import { supabase } from "@/lib/supabase";
 import type {
   AllStageResults,
+  ConceptMasteryRow,
+  CourseMasterySnapshot,
   MasteryDelta,
   RecallEvaluation,
   TendingSessionPayload,
@@ -69,6 +72,40 @@ export async function evaluateRecall(args: {
     session_id: args.sessionId,
     student_response: args.studentResponse,
   });
+}
+
+/**
+ * Read the user's BKT mastery rows for a course and the course's target_grade.
+ * Used to snapshot pass-probability inputs before a tending session starts so
+ * the Mastery Delta screen can render a pass-probability before/after.
+ *
+ * Direct supabase read — same pattern the dashboard uses. Failures are
+ * swallowed and surfaced as null so the rest of the flow still works.
+ */
+export async function fetchCourseMasterySnapshot(
+  userId: string,
+  courseId: string,
+): Promise<CourseMasterySnapshot | null> {
+  try {
+    const [masteryRes, courseRes] = await Promise.all([
+      supabase
+        .from("bkt_mastery")
+        .select("knowledge_component_id, p_mastery")
+        .eq("user_id", userId)
+        .eq("course_id", courseId),
+      supabase.from("courses").select("target_grade").eq("id", courseId).single(),
+    ]);
+    if (masteryRes.error) return null;
+    const concepts: ConceptMasteryRow[] = (masteryRes.data ?? []).map((r) => ({
+      kc_id: r.knowledge_component_id as string,
+      p_mastery: Number(r.p_mastery),
+    }));
+    const targetGrade =
+      (courseRes.data?.target_grade as number | null | undefined) ?? 1.0;
+    return { concepts, targetGrade };
+  } catch {
+    return null;
+  }
 }
 
 /** POST /topic-tending/complete */

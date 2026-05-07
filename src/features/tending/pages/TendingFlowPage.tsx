@@ -22,7 +22,12 @@ import { QuizStage } from "../components/QuizStage";
 import { RecallCardsStage } from "../components/RecallCardsStage";
 import { StageProgressDots } from "../components/StageProgressDots";
 import { TendingLoading } from "../components/TendingLoading";
-import { completeSession, generateSession } from "../services/tendingApi";
+import { computePassProbability } from "@/lib/passProbability";
+import {
+  completeSession,
+  fetchCourseMasterySnapshot,
+  generateSession,
+} from "../services/tendingApi";
 import { useTendingMachine } from "../state/tendingMachine";
 import type { AllStageResults } from "../types";
 
@@ -58,6 +63,22 @@ function TendingFlowInner() {
       cancelled = true;
     };
   }, [courseId, topicId, user, isInitialized, init, generateAttempt]);
+
+  // Snapshot course-level concept mastery once per session so MasteryDelta can
+  // render pass-probability before/after. Runs in parallel with generateSession;
+  // failure is silent and the screen falls back to topic-only mastery.
+  useEffect(() => {
+    if (!courseId || !user) return;
+    if (state.masterySnapshot) return;
+    let cancelled = false;
+    fetchCourseMasterySnapshot(user.id, courseId).then((snap) => {
+      if (cancelled || !snap) return;
+      machine.setMasterySnapshot(snap);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [courseId, user, state.masterySnapshot, machine]);
 
   // Fire /complete once the machine reaches mastery_delta with no delta yet.
   // This pattern reads the latest state cleanly — earlier closure-based versions
@@ -231,6 +252,21 @@ function TendingFlowInner() {
               delta={state.masteryDelta}
               stagesSkipped={state.stagesSkipped}
               startedAt={state.startedAt}
+              passProbability={(() => {
+                if (!state.masterySnapshot) return null;
+                const before = state.masterySnapshot.concepts.map((c) => c.p_mastery);
+                const overrides = new Map(
+                  state.masteryDelta.kc_breakdown.map((kc) => [kc.kc_id, kc.after]),
+                );
+                const after = state.masterySnapshot.concepts.map(
+                  (c) => overrides.get(c.kc_id) ?? c.p_mastery,
+                );
+                const target = state.masterySnapshot.targetGrade;
+                const passBefore = computePassProbability(before, target);
+                const passAfter = computePassProbability(after, target);
+                if (passBefore === null || passAfter === null) return null;
+                return { before: passBefore, after: passAfter };
+              })()}
             />
           ) : (
             <TendingLoading staticMessage="Measuring how much your bed grew…" />

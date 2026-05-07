@@ -127,6 +127,18 @@ export interface QuizResult {
   question_ids: string[];
 }
 
+// ── Course-level pass-probability snapshot ─────────────────────────
+
+export interface ConceptMasteryRow {
+  kc_id: string;
+  p_mastery: number;
+}
+
+export interface CourseMasterySnapshot {
+  concepts: ConceptMasteryRow[];
+  targetGrade: number;
+}
+
 export interface AllStageResults {
   recall: RecallResult[] | null;
   active_recall: ActiveRecallResult | null;
@@ -153,4 +165,6 @@ export interface TendingSession {
   connectionResults: ConnectionResult[] | null;
   quizResults: QuizResult | null;
   masteryDelta: MasteryDelta | null;
+  /** Snapshot of all course concept mastery captured at session start, used to compute pass-probability before/after on the Mastery Delta screen. Null when not yet fetched or fetch failed. */
+  masterySnapshot: CourseMasterySnapshot | null;
 }

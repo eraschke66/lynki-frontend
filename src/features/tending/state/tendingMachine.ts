@@ -3,6 +3,7 @@ import {
   STAGE_ORDER,
   type ActiveRecallResult,
   type ConnectionResult,
+  type CourseMasterySnapshot,
   type MasteryDelta,
   type MnemonicResult,
   type QuizResult,
@@ -29,6 +30,7 @@ type Action =
   | { type: "recordConnections"; payload: ConnectionResult[] }
   | { type: "recordQuiz"; payload: QuizResult }
   | { type: "recordMastery"; payload: MasteryDelta }
+  | { type: "setMasterySnapshot"; payload: CourseMasterySnapshot }
   | { type: "reset" };
 
 const emptyState: TendingSession = {
@@ -46,6 +48,7 @@ const emptyState: TendingSession = {
   connectionResults: null,
   quizResults: null,
   masteryDelta: null,
+  masterySnapshot: null,
 };
 
 function nextStage(current: Stage): Stage {
@@ -88,6 +91,8 @@ function reducer(state: TendingSession, action: Action): TendingSession {
       return { ...state, quizResults: action.payload };
     case "recordMastery":
       return { ...state, masteryDelta: action.payload, currentStage: "mastery_delta" };
+    case "setMasterySnapshot":
+      return { ...state, masterySnapshot: action.payload };
     case "reset":
       return emptyState;
     default:
@@ -107,6 +112,7 @@ export interface TendingMachine {
   recordConnections: (r: ConnectionResult[]) => void;
   recordQuiz: (r: QuizResult) => void;
   recordMastery: (r: MasteryDelta) => void;
+  setMasterySnapshot: (s: CourseMasterySnapshot) => void;
   clearPersisted: () => void;
 }
 
@@ -167,6 +173,7 @@ export function useTendingMachine(courseId: string, topicId: string): TendingMac
     recordConnections: (r) => dispatch({ type: "recordConnections", payload: r }),
     recordQuiz: (r) => dispatch({ type: "recordQuiz", payload: r }),
     recordMastery: (r) => dispatch({ type: "recordMastery", payload: r }),
+    setMasterySnapshot: (s) => dispatch({ type: "setMasterySnapshot", payload: s }),
     clearPersisted,
   };
 }

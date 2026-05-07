@@ -1,27 +1,37 @@
-import { ParchmentCard } from "@/components/garden/ParchmentCard";
-import { Button } from "@/components/ui/button";
+import { TopicQuizSession, type TopicQuizCompletionResult } from "@/features/topic-quiz";
 import { SkipStageLink } from "./SkipStageLink";
+import type { QuizResult } from "../types";
 
 interface QuizStageProps {
-  onComplete: () => void;
+  courseId: string;
+  topicId: string;
+  onComplete: (result: QuizResult) => void;
   onSkip: () => void;
 }
 
-// V1 stub — Day 5: embed the existing topic-scoped quiz component as the
-// 5th stage of the flow. For now this just advances on click.
-export function QuizStage({ onComplete, onSkip }: QuizStageProps) {
+/**
+ * Embeds the existing topic-scoped quiz session as the 5th stage of the
+ * Tending Flow. Skips the standalone results screen and the inner X button
+ * — the outer Tending shell owns those.
+ */
+export function QuizStage({ courseId, topicId, onComplete, onSkip }: QuizStageProps) {
   return (
-    <div className="max-w-2xl mx-auto w-full">
-      <ParchmentCard className="p-8 md:p-10">
-        <h2 className="font-serif text-2xl text-ghibli-canopy mb-4">Practice Quiz</h2>
-        <p className="text-sm text-gray-500 italic">
-          [Day 5 — embed existing topic-scoped quiz here]
-        </p>
-        <div className="mt-6 flex justify-end">
-          <Button onClick={onComplete}>Continue</Button>
-        </div>
-      </ParchmentCard>
-      <SkipStageLink onSkip={onSkip} />
+    <div className="w-full">
+      <TopicQuizSession
+        courseId={courseId}
+        topicId={topicId}
+        embedded
+        onComplete={(r: TopicQuizCompletionResult) =>
+          onComplete({
+            correct: r.correct,
+            total: r.total,
+            question_ids: r.question_ids,
+          })
+        }
+      />
+      <div className="max-w-2xl mx-auto px-6">
+        <SkipStageLink onSkip={onSkip} />
+      </div>
     </div>
   );
 }

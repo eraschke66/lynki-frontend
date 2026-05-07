@@ -5,8 +5,14 @@
  * no label, no percent, no glow. Designed to sit in the lower-right
  * corner of an austere parchment card.
  *
- * Tier mapping uses 4 stages (the project's full library). With 4-card
- * mock sessions, full Got-it advances reach tier 3 by the last card.
+ * Tier mapping uses 4 stages (the project's full library). Erik confirmed
+ * 4-tier targeting; if a 5th asset is ever commissioned this is a one-line
+ * threshold change here and in PlantIndicator.
+ *
+ * `partial` overlays the *next* tier image at low opacity over the current
+ * tier — the visual treatment for "Show me again" on a recall card. The
+ * plant looks like it's reaching for the next size without committing the
+ * full grow. Cleared on the next "Got it" when tier actually advances.
  */
 
 const PLANT_STAGES = [
@@ -20,20 +26,37 @@ const PLANT_LABELS = ["Seedling", "Sprouting", "Growing", "In Full Bloom"];
 
 export const MAX_PLANT_TIER = PLANT_STAGES.length - 1;
 
+const PARTIAL_OVERLAY_OPACITY = 0.35;
+
 interface CardPlantProps {
   /** Integer tier 0..MAX_PLANT_TIER. Out-of-range values are clamped. */
   tier: number;
+  /** When true and tier < MAX_PLANT_TIER, overlay the next-tier image at ~35% opacity to signal a "reach" — Show me again's visual treatment. */
+  partial?: boolean;
 }
 
-export function CardPlant({ tier }: CardPlantProps) {
+export function CardPlant({ tier, partial = false }: CardPlantProps) {
   const clamped = Math.max(0, Math.min(MAX_PLANT_TIER, Math.round(tier)));
+  const showOverlay = partial && clamped < MAX_PLANT_TIER;
+
   return (
-    <img
-      src={PLANT_STAGES[clamped]}
-      alt={PLANT_LABELS[clamped]}
-      aria-hidden="true"
-      className="w-14 h-14 md:w-16 md:h-16 object-contain transition-all duration-500 ease-out select-none pointer-events-none"
-      style={{ mixBlendMode: "darken" }}
-    />
+    <div className="relative w-14 h-14 md:w-16 md:h-16 select-none pointer-events-none">
+      <img
+        src={PLANT_STAGES[clamped]}
+        alt={PLANT_LABELS[clamped]}
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-contain transition-all duration-500 ease-out"
+        style={{ mixBlendMode: "darken" }}
+      />
+      {showOverlay && (
+        <img
+          src={PLANT_STAGES[clamped + 1]}
+          alt=""
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ease-out"
+          style={{ mixBlendMode: "darken", opacity: PARTIAL_OVERLAY_OPACITY }}
+        />
+      )}
+    </div>
   );
 }

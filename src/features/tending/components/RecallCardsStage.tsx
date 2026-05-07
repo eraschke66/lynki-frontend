@@ -16,9 +16,11 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
   const [flipped, setFlipped] = useState(false);
   const [results, setResults] = useState<RecallResult[]>([]);
   // Plant tier grows with card progress. "Got it" = +1 tier.
-  // "Show me again" partial growth treatment is intentionally not picked yet —
-  // currently no-op for the plant. Erik to choose a treatment before V1.
+  // "Show me again" sets `plantPartial` true so CardPlant overlays the next
+  // tier at ~35% opacity — the plant visibly reaches for the next size
+  // without committing the grow. Cleared on the next "Got it".
   const [plantTier, setPlantTier] = useState(0);
+  const [plantPartial, setPlantPartial] = useState(false);
 
   // Empty / error fallback
   if (cards.length === 0) {
@@ -43,9 +45,11 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
     const next = [...results, { id: card.id, rating }];
     if (rating === "got_it") {
       setPlantTier((t) => Math.min(MAX_PLANT_TIER, t + 1));
+      setPlantPartial(false); // commit the reach into a full grow
+    } else {
+      // "Show me again" — visible reach toward next tier without committing.
+      setPlantPartial(true);
     }
-    // "again" rating: plant tier stays put for now — partial-grow visual is
-    // open for Erik to pick (half-step pose / desaturated / delayed advance).
     if (isLast) {
       onComplete(next);
       return;
@@ -94,7 +98,7 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
 
         {/* Lower-right corner growth indicator. The only decoration on this card. */}
         <div className="absolute bottom-3 right-3 md:bottom-4 md:right-4">
-          <CardPlant tier={plantTier} />
+          <CardPlant tier={plantTier} partial={plantPartial} />
         </div>
       </ParchmentCard>
 

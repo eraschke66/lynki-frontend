@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { X } from "lucide-react";
 import { toast } from "sonner";
@@ -36,6 +36,7 @@ function TendingFlowInner() {
 
   const machine = useTendingMachine(courseId ?? "", topicId ?? "");
   const { state, isInitialized, init } = machine;
+  const completeFiredRef = useRef(false);
 
   // Generate session on mount if no hydrated session is present.
   useEffect(() => {
@@ -58,31 +59,50 @@ function TendingFlowInner() {
     };
   }, [courseId, topicId, user, isInitialized, init, generateAttempt]);
 
-  // Run /complete when we hit mastery_delta with no delta yet.
+  // Fire /complete once the machine reaches mastery_delta with no delta yet.
+  // This pattern reads the latest state cleanly — earlier closure-based versions
+  // captured stale recordings because state updates batch.
   useEffect(() => {
-    if (state.currentStage !== "quiz") return;
-    // Quiz stub auto-advance handled in handler. Real wiring lands Day 5.
-  }, [state.currentStage]);
-
-  const handleQuizComplete = useCallback(async () => {
+    if (state.currentStage !== "mastery_delta") return;
+    if (state.masteryDelta) return;
     if (!state.sessionId) return;
-    machine.advance(); // optimistic to mastery_delta
-    try {
-      const results: AllStageResults = {
-        recall: state.recallResults,
-        active_recall: state.activeRecallResult,
-        mnemonics: state.mnemonicResults,
-        connections: state.connectionResults,
-        quiz: state.quizResults,
-        stages_skipped: state.stagesSkipped,
-      };
-      const delta = await completeSession({ sessionId: state.sessionId, results });
-      machine.recordMastery(delta);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Couldn't save your session.";
-      toast.error(msg);
-    }
-  }, [machine, state]);
+    if (completeFiredRef.current) return;
+    completeFiredRef.current = true;
+
+    let cancelled = false;
+    const results: AllStageResults = {
+      recall: state.recallResults,
+      active_recall: state.activeRecallResult,
+      mnemonics: state.mnemonicResults,
+      connections: state.connectionResults,
+      quiz: state.quizResults,
+      stages_skipped: state.stagesSkipped,
+    };
+    completeSession({ sessionId: state.sessionId, results })
+      .then((delta) => {
+        if (!cancelled) machine.recordMastery(delta);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        completeFiredRef.current = false; // allow retry via stage re-entry
+        const msg = err instanceof Error ? err.message : "Couldn't save your session.";
+        toast.error(msg);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    state.currentStage,
+    state.masteryDelta,
+    state.sessionId,
+    state.recallResults,
+    state.activeRecallResult,
+    state.mnemonicResults,
+    state.connectionResults,
+    state.quizResults,
+    state.stagesSkipped,
+    machine,
+  ]);
 
   const handleConfirmLeave = useCallback(() => {
     machine.clearPersisted();
@@ -193,7 +213,15 @@ function TendingFlowInner() {
         )}
 
         {state.currentStage === "quiz" && (
-          <QuizStage onComplete={handleQuizComplete} onSkip={handleQuizComplete} />
+          <QuizStage
+            courseId={courseId}
+            topicId={topicId}
+            onComplete={(result) => {
+              machine.recordQuiz(result);
+              machine.advance();
+            }}
+            onSkip={machine.skip}
+          />
         )}
 
         {state.currentStage === "mastery_delta" &&

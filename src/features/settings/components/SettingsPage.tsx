@@ -165,7 +165,7 @@ export function SettingsPage() {
                       <>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-moss/12 text-ghibli-jungle">
-                            Premium
+                            Pass Pro
                           </span>
                           {currentPeriodEnd && (
                             <span className="text-xs text-ghibli-bark">
@@ -197,7 +197,7 @@ export function SettingsPage() {
                           className="shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)] bg-gradient-to-br from-ghibli-moss to-ghibli-canopy text-primary-foreground hover:from-ghibli-jungle hover:to-ghibli-canopy"
                         >
                           <Sparkles className="w-4 h-4 mr-2" />
-                          Upgrade to Premium
+                          Upgrade to Pass Pro
                         </Button>
                       </>
                     )}

@@ -97,7 +97,7 @@ export function PricingPage() {
           {/* Heading */}
           <div className="text-center mb-12">
             <h1 className="font-serif text-3xl font-bold text-ghibli-canopy mb-3">
-              Grow further with Premium
+              Grow further with Pass Pro
             </h1>
             <p className="text-ghibli-bark max-w-md mx-auto">
               Unlock the full garden — visual mastery tracking and AI-guided

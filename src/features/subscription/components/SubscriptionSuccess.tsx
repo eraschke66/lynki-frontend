@@ -55,8 +55,8 @@ export function SubscriptionSuccess() {
       posthog.capture("subscription_activated", { plan: resolvedPlan });
 
       const toastMsg = isMonthly
-        ? "You're on the Monthly plan — $9.99/month. Welcome to Premium! 🌱"
-        : "You're on the Annual plan — best value. Welcome to Premium! 🌿";
+        ? "You're on the Monthly plan — $9.99/month. Welcome to Pass Pro! 🌱"
+        : "You're on the Annual plan — best value. Welcome to Pass Pro! 🌿";
 
       toast.success(toastMsg);
       navigate("/home", { replace: true });

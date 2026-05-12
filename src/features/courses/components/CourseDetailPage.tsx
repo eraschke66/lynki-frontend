@@ -239,7 +239,7 @@ export function CourseDetailPage() {
                   size="lg"
                   onClick={handleGenerateQuiz}
                   disabled={!docCount || docCount === 0}
-                  className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+                  className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
                 >
                   <Sparkles className="w-4 h-4" />
                   {quizzes.length > 0 ? "Generate New Quiz" : "Begin Growing"}
@@ -286,7 +286,7 @@ export function CourseDetailPage() {
                     size="xl"
                     showPercent={false}
                   />
-                  <p className="font-sans text-xs text-ghibli-bark/70 italic max-w-[14rem] text-center leading-relaxed">
+                  <p className="font-sans text-xs text-ghibli-bark/70 italic max-w-56 text-center leading-relaxed">
                     Generate a quiz to see your garden
                   </p>
                 </>
@@ -316,7 +316,7 @@ export function CourseDetailPage() {
             <Button
               size="lg"
               onClick={handleGenerateQuiz}
-              className="gap-2 shrink-0 rounded-full px-6 py-5 font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-md hover:shadow-glow transition-all"
+              className="gap-2 shrink-0 rounded-full px-6 py-5 font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-md hover:shadow-glow transition-all"
             >
               <Play className="w-4 h-4" />
               Generate First Quiz

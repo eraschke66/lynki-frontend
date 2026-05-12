@@ -24,7 +24,10 @@ import { TopicQuizSession } from "./TopicQuizSession";
  * own outer chrome and onComplete callback.
  */
 export function TopicQuizPage() {
-  const { courseId, topicId } = useParams<{ courseId: string; topicId: string }>();
+  const { courseId, topicId } = useParams<{
+    courseId: string;
+    topicId: string;
+  }>();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -46,6 +49,19 @@ export function TopicQuizPage() {
     }
   }, [completed, handleExit]);
 
+  // Ensure users are warned if they try to close or refresh the window mid-quiz
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only warn if the quiz is not complete
+      if (!completed) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [completed]);
+
   if (!user || !courseId || !topicId) {
     navigate("/home");
     return null;
@@ -65,18 +81,20 @@ export function TopicQuizPage() {
       <AlertDialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Leave quiz?</AlertDialogTitle>
+            <AlertDialogTitle>Pause and leave?</AlertDialogTitle>
             <AlertDialogDescription>
-              Your progress will be lost. This session won't be saved.
+              Your progress is saved and you can resume this quiz later!
+              However, it's highly recommended to finish what you started to
+              lock in those concepts.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Keep Going</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-ghibli-amber text-primary-foreground hover:bg-ghibli-amber/90"
               onClick={handleExit}
             >
-              Leave Quiz
+              Save & Exit
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

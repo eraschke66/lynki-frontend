@@ -112,11 +112,22 @@ export function StudyPlanPage() {
 
   const generateMutation = useMutation({
     mutationFn: () => generateStudyPlan(user!.id, courseId!),
-    onSuccess: () => {
+    onSuccess: (data) => {
       posthog.capture("study_plan_generated", {
         course_id: courseId,
         regenerated: !!savedPlan,
       });
+
+      // Update cache directly so the UI instantly changes to show the new plan!
+      queryClient.setQueryData(
+        studyPlanQueryKeys.detail(courseId ?? "", user?.id ?? ""),
+        {
+          id: "generated-temp-id",
+          plan_json: data.plan_json,
+          generated_at: data.generated_at,
+        }
+      );
+
       queryClient.invalidateQueries({
         queryKey: studyPlanQueryKeys.detail(courseId ?? "", user?.id ?? ""),
       });

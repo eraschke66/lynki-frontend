@@ -44,12 +44,8 @@ export function QuizDetailModal({
     );
 
   const completedAttempts = allAttempts.filter((a) => a.status === "completed");
-  const inProgressAttempts = allAttempts.filter(
-    (a) => a.status === "in_progress",
-  );
 
   const hasHistory = allAttempts.length > 0;
-  const hasCompleted = completedAttempts.length > 0;
   const bestAttempt = completedAttempts.reduce(
     (best, curr) =>
       curr.correct_count > (best?.correct_count ?? -1) ? curr : best,

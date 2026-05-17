@@ -109,7 +109,7 @@ export function LoginForm() {
       <div className="relative z-10 w-full max-w-md mx-4">
         {/* Outer wood frame */}
         <div
-          className="rounded-[1.5rem] p-[10px]"
+          className="rounded-3xl p-[10px]"
           style={{
             background:
               "linear-gradient(145deg, hsl(30 35% 38%), hsl(25 30% 28%))",
@@ -119,7 +119,7 @@ export function LoginForm() {
         >
           {/* Wood grain texture line */}
           <div
-            className="absolute inset-0 rounded-[1.5rem] opacity-10 pointer-events-none"
+            className="absolute inset-0 rounded-3xl opacity-10 pointer-events-none"
             style={{
               backgroundImage:
                 "repeating-linear-gradient(90deg, transparent, transparent 8px, hsl(30 20% 60% / 0.3) 8px, hsl(30 20% 60% / 0.3) 9px)",
@@ -140,94 +140,7 @@ export function LoginForm() {
               </div>
 
               {/* Form */}
-              <form
-                onSubmit={handleSubmit(onSubmit)}
-                className="flex flex-col gap-4"
-              >
-                {error && (
-                  <div className="p-3 text-sm rounded-parchment bg-destructive/10 text-destructive border border-destructive/20">
-                    {error}
-                  </div>
-                )}
-
-                {/* Email */}
-                <div>
-                  <label htmlFor="login-email" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
-                    Email
-                  </label>
-                  <input
-                    id="login-email"
-                    type="email"
-                    autoComplete="username"
-                    placeholder="gardener@passai.app"
-                    {...register("email")}
-                    disabled={loading}
-                    className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.email.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Password */}
-                <div>
-                  <label htmlFor="login-password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="login-password"
-                      type={showPassword ? "text" : "password"}
-                      autoComplete="current-password"
-                      placeholder="••••••••"
-                      {...register("password")}
-                      disabled={loading}
-                      className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
-                    >
-                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="text-sm text-destructive mt-1">
-                      {errors.password.message}
-                    </p>
-                  )}
-                </div>
-
-                {/* Submit */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full rounded-parchment bg-primary text-primary-foreground py-3 font-sans font-semibold text-sm tracking-wide transition-all duration-300 hover:shadow-glow hover:brightness-110 relative overflow-hidden disabled:opacity-50"
-                >
-                  <span className="relative z-10">
-                    {loading ? "Entering..." : "Enter the Garden"}
-                  </span>
-                  <div
-                    className="absolute inset-0 opacity-[0.07] pointer-events-none"
-                    style={{
-                      backgroundImage:
-                        "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 Q40 15 35 30 Q30 20 25 30 Q20 15 30 5Z' fill='%23fff' opacity='0.5'/%3E%3C/svg%3E\")",
-                    }}
-                  />
-                </button>
-
-                {/* Divider */}
-                <div className="flex items-center gap-3 my-1">
-                  <div className="flex-1 h-px bg-ghibli-moss/30" />
-                  <span className="font-sans text-xs text-ghibli-bark">
-                    or continue with
-                  </span>
-                  <div className="flex-1 h-px bg-ghibli-moss/30" />
-                </div>
-
+              <div className="flex flex-col gap-4">
                 {/* Google sign-in — organic 4-petal style */}
                 <button
                   type="button"
@@ -241,7 +154,7 @@ export function LoginForm() {
                     width="18"
                     height="18"
                     viewBox="0 0 18 18"
-                    className="flex-shrink-0"
+                    className="shrink-0"
                   >
                     <circle
                       cx="9"
@@ -284,7 +197,96 @@ export function LoginForm() {
                   </svg>
                   Continue with Google
                 </button>
-              </form>
+
+                {/* Divider */}
+                <div className="flex items-center gap-3 my-1">
+                  <div className="flex-1 h-px bg-ghibli-moss/30" />
+                  <span className="font-sans text-[10px] uppercase tracking-widest text-ghibli-bark/60">
+                    or email
+                  </span>
+                  <div className="flex-1 h-px bg-ghibli-moss/30" />
+                </div>
+
+                <form
+                  onSubmit={handleSubmit(onSubmit)}
+                  className="flex flex-col gap-4"
+                >
+                  {error && (
+                    <div className="p-3 text-sm rounded-parchment bg-destructive/10 text-destructive border border-destructive/20">
+                      {error}
+                    </div>
+                  )}
+
+                  {/* Email */}
+                  <div>
+                    <label htmlFor="login-email" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
+                      Email
+                    </label>
+                    <input
+                      id="login-email"
+                      type="email"
+                      autoComplete="username"
+                      placeholder="gardener@passai.app"
+                      {...register("email")}
+                      disabled={loading}
+                      className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                    />
+                    {errors.email && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.email.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <label htmlFor="login-password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="login-password"
+                        type={showPassword ? "text" : "password"}
+                        autoComplete="current-password"
+                        placeholder="••••••••"
+                        {...register("password")}
+                        disabled={loading}
+                        className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark/60 outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {errors.password && (
+                      <p className="text-sm text-destructive mt-1">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Submit */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full rounded-parchment bg-primary text-primary-foreground py-3 font-sans font-semibold text-sm tracking-wide transition-all duration-300 hover:shadow-glow hover:brightness-110 relative overflow-hidden disabled:opacity-50"
+                  >
+                    <span className="relative z-10">
+                      {loading ? "Entering..." : "Enter the Garden"}
+                    </span>
+                    <div
+                      className="absolute inset-0 opacity-[0.07] pointer-events-none"
+                      style={{
+                        backgroundImage:
+                          "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 Q40 15 35 30 Q30 20 25 30 Q20 15 30 5Z' fill='%23fff' opacity='0.5'/%3E%3C/svg%3E\")",
+                      }}
+                    />
+                  </button>
+                </form>
+              </div>
 
               {/* Sign up link */}
               <p className="text-center font-sans text-xs text-ghibli-bark mt-5">

@@ -109,6 +109,7 @@ Deno.serve(async (req) => {
       // Attach plan to the Stripe Subscription metadata so the webhook can read it
       subscription_data: {
         metadata: { plan },
+        trial_period_days: 7,
       },
       success_url: `${Deno.env.get("FRONTEND_URL")}/subscription/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url: `${Deno.env.get("FRONTEND_URL")}/pricing`,

@@ -105,6 +105,7 @@ Deno.serve(async (req) => {
       customer: customerId,
       client_reference_id: user.id,
       mode: "subscription",
+      allow_promotion_codes: true,
       line_items: [{ price: priceId, quantity: 1 }],
       // Attach plan to the Stripe Subscription metadata so the webhook can read it
       subscription_data: {

@@ -419,14 +419,6 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-md mx-auto">
       <ParchmentCard glow className="p-10 md:p-12 flex flex-col items-center gap-6">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/30 blur-2xl scale-125" />
-          <img
-            src="/seedling-add.png"
-            alt="Plant your first seed"
-            className="relative w-20 h-20 object-contain select-none animate-glow-soft"
-          />
-        </div>
         <div className="space-y-3">
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ghibli-canopy">Your garden is ready.</h1>
           <p className="text-ghibli-bark/80 font-sans leading-relaxed">

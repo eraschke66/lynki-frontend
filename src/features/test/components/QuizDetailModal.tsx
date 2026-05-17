@@ -23,6 +23,7 @@ interface QuizDetailModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onStart: (quizId: string) => void;
+  onResume?: (quizId: string, attemptId: string) => void;
 }
 
 export function QuizDetailModal({
@@ -30,18 +31,21 @@ export function QuizDetailModal({
   open,
   onOpenChange,
   onStart,
+  onResume,
 }: QuizDetailModalProps) {
   if (!quiz) return null;
 
-  const completedAttempts = (quiz.quiz_attempts ?? [])
-    .filter((a) => a.status === "completed")
+  // Let's get all attempts (completed and in-progress) and sort them by started_at descending (newest on top)
+  const allAttempts = (quiz.quiz_attempts ?? [])
+    .filter((a) => a.status === "completed" || a.status === "in_progress")
     .sort(
       (a, b) =>
-        new Date(b.completed_at ?? b.started_at).getTime() -
-        new Date(a.completed_at ?? a.started_at).getTime(),
+        new Date(b.started_at).getTime() - new Date(a.started_at).getTime(),
     );
 
-  const hasCompleted = completedAttempts.length > 0;
+  const completedAttempts = allAttempts.filter((a) => a.status === "completed");
+
+  const hasHistory = allAttempts.length > 0;
   const bestAttempt = completedAttempts.reduce(
     (best, curr) =>
       curr.correct_count > (best?.correct_count ?? -1) ? curr : best,
@@ -80,12 +84,18 @@ export function QuizDetailModal({
 
         {/* Meta chips */}
         <div className="flex flex-wrap gap-2 pt-1">
-          <MetaChip icon={<Hash className="h-3 w-3" />} label={`${quiz.total_questions} questions`} />
-          <MetaChip icon={<CalendarDays className="h-3 w-3" />} label={`Created ${createdDate}`} />
-          {hasCompleted && (
+          <MetaChip
+            icon={<Hash className="h-3 w-3" />}
+            label={`${quiz.total_questions} questions`}
+          />
+          <MetaChip
+            icon={<CalendarDays className="h-3 w-3" />}
+            label={`Created ${createdDate}`}
+          />
+          {hasHistory && (
             <MetaChip
               icon={<CheckCircle2 className="h-3 w-3" />}
-              label={`${completedAttempts.length} ${completedAttempts.length === 1 ? "attempt" : "attempts"}`}
+              label={`${allAttempts.length} ${allAttempts.length === 1 ? "attempt" : "attempts"}`}
             />
           )}
           {bestScore !== null && (
@@ -98,13 +108,14 @@ export function QuizDetailModal({
         </div>
 
         {/* Session history */}
-        {hasCompleted && (
+        {hasHistory && (
           <div className="mt-2">
             <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-ghibli-bark">
               Session History
             </p>
             <div className="space-y-2 max-h-52 overflow-y-auto pr-1">
-              {completedAttempts.map((attempt, i) => {
+              {allAttempts.map((attempt, i) => {
+                const isCompleted = attempt.status === "completed";
                 const score =
                   quiz.total_questions > 0
                     ? Math.round(
@@ -126,18 +137,42 @@ export function QuizDetailModal({
                     className="flex items-center gap-3 rounded-xl bg-ghibli-mist/50 border border-ghibli-moss/40 px-4 py-3"
                   >
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ghibli-ivory to-ghibli-mist text-xs font-bold text-ghibli-canopy border border-ghibli-moss/45">
-                      {completedAttempts.length - i}
+                      {allAttempts.length - i}
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-ghibli-bark">{date}</p>
+                      {!isCompleted && (
+                        <p className="text-xs font-medium text-ghibli-amber">
+                          In Progress
+                        </p>
+                      )}
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-sm font-bold text-ghibli-canopy">
-                        {attempt.correct_count}/{quiz.total_questions}
-                      </p>
-                      <p className={`text-xs font-medium ${status.color}`}>
-                        {score}% · {status.label}
-                      </p>
+                      {isCompleted ? (
+                        <>
+                          <p className="text-sm font-bold text-ghibli-canopy">
+                            {attempt.correct_count}/{quiz.total_questions}
+                          </p>
+                          <p className={`text-xs font-medium ${status.color}`}>
+                            {score}% · {status.label}
+                          </p>
+                        </>
+                      ) : (
+                        onResume && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-7 text-xs bg-ghibli-amber/10 text-ghibli-amber hover:bg-ghibli-amber/20 border-ghibli-amber/20"
+                            onClick={() => {
+                              onOpenChange(false);
+                              onResume(quiz.id, attempt.id);
+                            }}
+                          >
+                            <Play className="h-3 w-3 mr-1" />
+                            Resume
+                          </Button>
+                        )
+                      )}
                     </div>
                   </div>
                 );
@@ -147,9 +182,9 @@ export function QuizDetailModal({
         )}
 
         {/* Empty state */}
-        {!hasCompleted && (
+        {!hasHistory && (
           <div className="mt-2 rounded-xl border border-dashed border-ghibli-moss/50 py-8 text-center">
-            <p className="text-sm text-ghibli-bark">No completed sessions yet.</p>
+            <p className="text-sm text-ghibli-bark">No sessions yet.</p>
             <p className="mt-0.5 text-xs text-ghibli-bark">
               Take this quiz to start tracking your progress.
             </p>
@@ -158,12 +193,10 @@ export function QuizDetailModal({
 
         {/* CTA */}
         <div className="mt-2 flex justify-end gap-2 border-t border-ghibli-moss/30 pt-4">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
+
           <Button
             className="gap-2"
             onClick={() => {
@@ -171,10 +204,10 @@ export function QuizDetailModal({
               onStart(quiz.id);
             }}
           >
-            {hasCompleted ? (
+            {hasHistory ? (
               <>
                 <RotateCcw className="h-3.5 w-3.5" />
-                Retake Quiz
+                Start Fresh Attempt
               </>
             ) : (
               <>

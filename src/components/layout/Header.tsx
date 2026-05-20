@@ -3,15 +3,18 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import LogoSvg from "@/assets/logo.svg?react";
-import { Home, FileText, Settings, Volume2, VolumeOff, Sparkles } from "lucide-react";
+import { Home, FileText, Settings, Volume2, VolumeOff, Sparkles, Menu } from "lucide-react";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { useSubscription } from "@/features/subscription/hooks/useSubscription";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { useState } from "react";
 
 export function Header() {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { playing, toggle: toggleMusic } = useAmbientMusic();
   const { isPremium, isLoading: subLoading } = useSubscription();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await signOut();
@@ -92,7 +95,7 @@ export function Header() {
                 <Button
                   size="sm"
                   onClick={() => navigate("/pricing")}
-                  className="gap-1.5 rounded-full px-4 font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-glow transition-all"
+                  className="hidden md:inline-flex gap-1.5 rounded-full px-4 font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-glow transition-all"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
                   Upgrade
@@ -114,6 +117,75 @@ export function Header() {
               >
                 Log Out
               </Button>
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="md:hidden rounded-full text-ghibli-canopy hover:bg-ghibli-ivory/60"
+                    aria-label="Open menu"
+                  >
+                    <Menu className="w-5 h-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-72 bg-ghibli-ivory border-l border-ghibli-moss/20">
+                  <div className="flex flex-col gap-1 mt-8">
+                    <NavLink
+                      to="/home"
+                      end
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={({ isActive }) => cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-sans font-medium transition-colors",
+                        isActive ? "bg-ghibli-canopy text-primary-foreground" : "text-ghibli-canopy hover:bg-ghibli-mist/60"
+                      )}
+                    >
+                      <Home className="w-5 h-5" />
+                      Home
+                    </NavLink>
+                    <NavLink
+                      to="/documents"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={({ isActive }) => cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-sans font-medium transition-colors",
+                        isActive ? "bg-ghibli-canopy text-primary-foreground" : "text-ghibli-canopy hover:bg-ghibli-mist/60"
+                      )}
+                    >
+                      <FileText className="w-5 h-5" />
+                      Materials
+                    </NavLink>
+                    <NavLink
+                      to="/settings"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={({ isActive }) => cn(
+                        "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-sans font-medium transition-colors",
+                        isActive ? "bg-ghibli-canopy text-primary-foreground" : "text-ghibli-canopy hover:bg-ghibli-mist/60"
+                      )}
+                    >
+                      <Settings className="w-5 h-5" />
+                      Settings
+                    </NavLink>
+                    <div className="border-t border-ghibli-moss/20 mt-6 pt-6 px-4 space-y-3">
+                      {!subLoading && !isPremium && (
+                        <Button
+                          size="sm"
+                          onClick={() => { setMobileMenuOpen(false); navigate("/pricing"); }}
+                          className="w-full gap-1.5 rounded-full font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy text-primary-foreground"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          Upgrade to Pass Pro
+                        </Button>
+                      )}
+                      {!subLoading && isPremium && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-ghibli-gold/15 text-ghibli-bark">
+                          <Sparkles className="w-3 h-3" />
+                          Pass Pro
+                        </span>
+                      )}
+                      <p className="text-xs text-ghibli-canopy/70 truncate">{user.email}</p>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
             </>
           )}
         </div>

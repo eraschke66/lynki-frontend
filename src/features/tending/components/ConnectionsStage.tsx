@@ -110,7 +110,7 @@ export function ConnectionsStage({ pairs, type, onComplete, onSkip }: Connection
                 <div
                   key={p.id}
                   draggable={!isMatched && !isTouch}
-                  style={!isMatched && !isTouch ? { WebkitUserDrag: "element" } : undefined}
+                  style={!isMatched && !isTouch ? ({ WebkitUserDrag: "element" } as React.CSSProperties) : undefined}
                   onDragStart={(e) => {
                     if (isMatched) return;
                     e.dataTransfer.setData("text/plain", p.id);

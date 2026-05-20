@@ -38,34 +38,62 @@ export function TendingLoading({ onRetry, staticMessage }: TendingLoadingProps) 
 
   const message = staticMessage ?? ROTATING_COPY[copyIdx];
 
-  return (
-    <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-      <img
-        src="/plant-stage-2.png"
-        alt=""
-        aria-hidden="true"
-        className="w-32 md:w-40 mb-8 drop-shadow-sm"
-      />
-      <p
-        key={message}
-        className="font-serif text-ghibli-canopy text-lg md:text-xl text-center max-w-md animate-in fade-in duration-700"
-      >
-        {message}
-      </p>
+    return (<div className="flex-1 flex flex-col items-center justify-center px-6 py-12 relative overflow-hidden">
+      {/* Decorative background elements */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-ghibli-sunlight/5 blur-[100px] rounded-full pointer-events-none" />
+      
+      {/* Blooming Animation Container */}
+      <div className="relative w-48 h-48 mb-12 flex items-center justify-center">
+        {/* Glowing aura */}
+        <div className="absolute inset-0 bg-ghibli-sunlight/20 blur-2xl rounded-full animate-pulse-soft" />
+        
+        {/* The "Flower" - using multiple leaf/petal layers */}
+        <div className="relative animate-float-leaf">
+          <img
+            src="/plant-stage-2.png"
+            alt=""
+            aria-hidden="true"
+            className="w-32 md:w-40 relative z-10 animate-pulse-soft drop-shadow-glow"
+          />
+          
+          {/* Floating petals/particles */}
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute top-1/2 left-1/2 w-3 h-3 bg-ghibli-petal/40 rounded-full blur-[1px] animate-drop"
+              style={{
+                marginLeft: `${(i - 2.5) * 40}px`,
+                animationDelay: `${i * 0.4}s`,
+                animationDuration: "2s",
+                animationIterationCount: "infinite"
+              }}
+            />
+          ))}
+        </div>
+      </div>
 
-      <div className="mt-8 w-48 h-1 rounded-full bg-ghibli-moss/15 overflow-hidden">
-        <div className="h-full w-1/3 rounded-full bg-ghibli-moss/60 animate-pulse" />
+      <div className="relative z-10 max-w-md w-full flex flex-col items-center">
+        <p
+          key={message}
+          className="font-serif text-ghibli-canopy text-xl md:text-2xl text-center mb-8 animate-in fade-in slide-in-from-bottom-4 duration-1000"
+        >
+          {message}
+        </p>
+
+        {/* Custom Progress Bar */}
+        <div className="w-64 h-1.5 rounded-full bg-ghibli-moss/10 overflow-hidden botanical-border p-px">
+          <div className="h-full bg-linear-to-r from-ghibli-moss to-ghibli-sage rounded-full animate-shimmer" style={{ width: '40%' }} />
+        </div>
       </div>
 
       {showSlowLink && onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="mt-6 text-xs text-gray-500 hover:text-gray-700 hover:underline"
+          className="mt-12 text-sm text-ghibli-bark/60 hover:text-ghibli-canopy hover:underline transition-colors relative z-10"
         >
           This is taking longer than usual — try again?
         </button>
       )}
-    </div>
-  );
+    </div>)
 }

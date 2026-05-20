@@ -22,7 +22,10 @@ import {
   Sparkles,
   ChevronRight,
 } from "lucide-react";
-import { fetchPassChance, generateQuiz } from "@/features/test/services/testService";
+import {
+  fetchPassChance,
+  generateQuiz,
+} from "@/features/test/services/testService";
 import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
 import { fetchProfile } from "@/features/settings";
@@ -84,7 +87,9 @@ export function CourseDetailPage() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase as any)
         .from("course_quizzes")
-        .select("id, name, total_questions, created_at, quiz_attempts(id, status, answered_count, correct_count, pass_chance, started_at, completed_at)")
+        .select(
+          "id, name, total_questions, created_at, quiz_attempts(id, status, answered_count, correct_count, pass_chance, started_at, completed_at)",
+        )
         .eq("course_id", courseId!)
         .eq("user_id", user!.id)
         .order("created_at", { ascending: false });
@@ -107,7 +112,7 @@ export function CourseDetailPage() {
   const targetGrade = course?.target_grade ?? 1.0;
   const targetLabel = getGradeLabel(curriculum, targetGrade);
   const completedCount = quizzes.filter((q) =>
-    q.quiz_attempts.some((a) => a.status === "completed")
+    q.quiz_attempts.some((a) => a.status === "completed"),
   ).length;
 
   const handleGenerateQuiz = async () => {
@@ -115,7 +120,9 @@ export function CourseDetailPage() {
     setGenerating(true);
     try {
       const result = await generateQuiz(user.id, courseId);
-      queryClient.invalidateQueries({ queryKey: testQueryKeys.quizzes(courseId, user.id) });
+      queryClient.invalidateQueries({
+        queryKey: testQueryKeys.quizzes(courseId, user.id),
+      });
       // Navigate to TestPage to start the quiz immediately
       navigate(`/test/${courseId}?quiz=${result.quiz_id}`);
     } catch (err) {
@@ -127,6 +134,10 @@ export function CourseDetailPage() {
 
   const handleStartQuiz = (quizId: string) => {
     navigate(`/test/${courseId}?quiz=${quizId}`);
+  };
+
+  const handleResumeQuiz = (quizId: string, attemptId: string) => {
+    navigate(`/test/${courseId}?quiz=${quizId}&attempt=${attemptId}`);
   };
 
   const handleOpenQuizModal = (quiz: CourseQuiz) => {
@@ -214,11 +225,13 @@ export function CourseDetailPage() {
               <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark/70 mb-6 justify-center md:justify-start">
                 <span className="flex items-center gap-1.5">
                   <FileText className="w-4 h-4" />
-                  {docCount ?? 0} {(docCount ?? 0) === 1 ? "document" : "documents"}
+                  {docCount ?? 0}{" "}
+                  {(docCount ?? 0) === 1 ? "document" : "documents"}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <ClipboardCheck className="w-4 h-4" />
-                  {completedCount} {completedCount === 1 ? "quiz" : "quizzes"} completed
+                  {completedCount} {completedCount === 1 ? "quiz" : "quizzes"}{" "}
+                  completed
                 </span>
               </div>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
@@ -226,7 +239,7 @@ export function CourseDetailPage() {
                   size="lg"
                   onClick={handleGenerateQuiz}
                   disabled={!docCount || docCount === 0}
-                  className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+                  className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
                 >
                   <Sparkles className="w-4 h-4" />
                   {quizzes.length > 0 ? "Generate New Quiz" : "Begin Growing"}
@@ -256,15 +269,24 @@ export function CourseDetailPage() {
             <div className="order-1 md:order-2 flex flex-col items-center gap-2">
               {passPercent !== null ? (
                 <>
-                  <PlantIndicator probability={passPercent} size="xl" glow showPercent />
+                  <PlantIndicator
+                    probability={passPercent}
+                    size="xl"
+                    glow
+                    showPercent
+                  />
                   <p className="font-sans text-xs text-ghibli-bark/80 italic">
                     growing toward {targetLabel}
                   </p>
                 </>
               ) : (
                 <>
-                  <PlantIndicator probability={0} size="xl" showPercent={false} />
-                  <p className="font-sans text-xs text-ghibli-bark/70 italic max-w-[14rem] text-center leading-relaxed">
+                  <PlantIndicator
+                    probability={0}
+                    size="xl"
+                    showPercent={false}
+                  />
+                  <p className="font-sans text-xs text-ghibli-bark/70 italic max-w-56 text-center leading-relaxed">
                     Generate a quiz to see your garden
                   </p>
                 </>
@@ -287,13 +309,14 @@ export function CourseDetailPage() {
                 Your garden soil is ready
               </p>
               <p className="font-sans text-sm text-ghibli-bark/80 mt-0.5">
-                Your material has been processed. Generate your first quiz to start tracking mastery.
+                Your material has been processed. Generate your first quiz to
+                start tracking mastery.
               </p>
             </div>
             <Button
               size="lg"
               onClick={handleGenerateQuiz}
-              className="gap-2 shrink-0 rounded-full px-6 py-5 font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-md hover:shadow-glow transition-all"
+              className="gap-2 shrink-0 rounded-full px-6 py-5 font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-md hover:shadow-glow transition-all"
             >
               <Play className="w-4 h-4" />
               Generate First Quiz
@@ -301,46 +324,50 @@ export function CourseDetailPage() {
           </ParchmentCard>
         )}
 
-          {/* Quizzes list */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles className="w-5 h-5 text-ghibli-jungle" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-ghibli-canopy">Quizzes</h2>
-            </div>
-
-            {quizzesLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <p className="text-sm text-ghibli-bark animate-pulse">
-                  Reading the garden path…
-                </p>
-              </div>
-            ) : quizzes.length === 0 ? (
-              <Card className="rounded-2xl border-t-2 border-ghibli-moss/15">
-                <CardContent className="py-12 text-center">
-                  <img
-                    src="/plant-stage-1.png"
-                    alt=""
-                    className="w-16 h-16 object-contain mx-auto mb-3"
-                    style={{ mixBlendMode: "darken" }}
-                  />
-                  <p className="text-sm text-ghibli-bark">
-                    No quizzes yet. Generate your first one above!
-                  </p>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="space-y-3">
-                {quizzes.map((quiz) => (
-                  <QuizCard
-                    key={quiz.id}
-                    quiz={quiz}
-                    onClick={() => handleOpenQuizModal(quiz)}
-                  />
-                ))}
-              </div>
-            )}
+        {/* Quizzes list */}
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles
+              className="w-5 h-5 text-ghibli-jungle"
+              aria-hidden="true"
+            />
+            <h2 className="text-lg font-semibold text-ghibli-canopy">
+              Quizzes
+            </h2>
           </div>
 
+          {quizzesLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-sm text-ghibli-bark animate-pulse">
+                Reading the garden path…
+              </p>
+            </div>
+          ) : quizzes.length === 0 ? (
+            <Card className="rounded-2xl border-t-2 border-ghibli-moss/15">
+              <CardContent className="py-12 text-center">
+                <img
+                  src="/plant-stage-1.png"
+                  alt=""
+                  className="w-16 h-16 object-contain mx-auto mb-3"
+                  style={{ mixBlendMode: "darken" }}
+                />
+                <p className="text-sm text-ghibli-bark">
+                  No quizzes yet. Generate your first one above!
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {quizzes.map((quiz) => (
+                <QuizCard
+                  key={quiz.id}
+                  quiz={quiz}
+                  onClick={() => handleOpenQuizModal(quiz)}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Quiz detail modal */}
@@ -349,6 +376,7 @@ export function CourseDetailPage() {
         open={modalOpen}
         onOpenChange={setModalOpen}
         onStart={handleStartQuiz}
+        onResume={handleResumeQuiz}
       />
     </>
   );
@@ -377,10 +405,13 @@ function QuizCard({
       )
     : null;
 
-  const formattedDate = new Date(quiz.created_at).toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-  });
+  const formattedDate = new Date(quiz.created_at).toLocaleDateString(
+    undefined,
+    {
+      month: "short",
+      day: "numeric",
+    },
+  );
 
   return (
     <Card
@@ -413,8 +444,8 @@ function QuizCard({
               {formattedDate} &middot; {quiz.total_questions} questions
               {hasCompleted && (
                 <>
-                  {" "}&middot;{" "}
-                  {completedAttempts.length}{" "}
+                  {" "}
+                  &middot; {completedAttempts.length}{" "}
                   {completedAttempts.length === 1 ? "attempt" : "attempts"}
                 </>
               )}
@@ -424,7 +455,9 @@ function QuizCard({
           {/* Best score + chevron */}
           <div className="flex items-center gap-2 shrink-0">
             {bestScore !== null && (
-              <span className="text-sm font-bold text-ghibli-jungle">{bestScore}%</span>
+              <span className="text-sm font-bold text-ghibli-jungle">
+                {bestScore}%
+              </span>
             )}
             <ChevronRight className="w-4 h-4 text-ghibli-canopy/65 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ghibli-canopy" />
           </div>

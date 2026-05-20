@@ -29,7 +29,7 @@ const PREMIUM_FEATURES = [
   {
     icon: Sparkles,
     title: "More features coming",
-    description: "Premium expands with the app — unlock everything, now and future.",
+    description: "Pass Pro expands with the app — unlock everything, now and future.",
   },
 ];
 
@@ -54,7 +54,7 @@ function UpgradeWall({
           </div>
 
           <h2 className="font-serif text-xl font-bold text-ghibli-canopy mb-2">
-            {featureName} is a Premium feature
+            {featureName} is a Pass Pro feature
           </h2>
 
           {featureDescription && (
@@ -81,7 +81,7 @@ function UpgradeWall({
             className="w-full shadow-[0_2px_12px_hsl(var(--ghibli-canopy)/0.25)] bg-gradient-to-br from-ghibli-moss to-ghibli-canopy hover:from-ghibli-jungle hover:to-ghibli-canopy text-primary-foreground"
           >
             <Sparkles className="w-4 h-4 mr-2" />
-            Unlock Premium
+            Unlock Pass Pro
           </Button>
 
           <p className="text-xs text-ghibli-bark mt-4">

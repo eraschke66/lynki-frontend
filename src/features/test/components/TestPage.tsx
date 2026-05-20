@@ -33,7 +33,11 @@ import {
   fetchPassChance,
   completeTest,
 } from "../services/testService";
-import { testQueryKeys, profileQueryKeys, gardenQueryKeys } from "@/lib/queryKeys";
+import {
+  testQueryKeys,
+  profileQueryKeys,
+  gardenQueryKeys,
+} from "@/lib/queryKeys";
 import { posthog } from "@/lib/posthog";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel } from "@/lib/curricula";
@@ -75,17 +79,18 @@ export function TestPage() {
   const queryKey = conceptIds
     ? [...testQueryKeys.all, "focused", courseId, "concepts", conceptIds]
     : topicId
-    ? [...testQueryKeys.all, "focused", courseId, topicId]
-    : sessionId
-    ? [...testQueryKeys.all, "resume", sessionId]
-    : quizId && attemptId
-    ? testQueryKeys.resumeAttempt(attemptId)
-    : quizId
-    ? testQueryKeys.quizAttempt(quizId, user?.id ?? "")
-    : testQueryKeys.quiz(courseId ?? "", user?.id ?? "");
+      ? [...testQueryKeys.all, "focused", courseId, topicId]
+      : sessionId
+        ? [...testQueryKeys.all, "resume", sessionId]
+        : quizId && attemptId
+          ? testQueryKeys.resumeAttempt(attemptId)
+          : quizId
+            ? testQueryKeys.quizAttempt(quizId, user?.id ?? "")
+            : testQueryKeys.quiz(courseId ?? "", user?.id ?? "");
 
   const queryFn = () => {
-    if (conceptIds) return fetchBktSession(user!.id, courseId!, null, conceptIds);
+    if (conceptIds)
+      return fetchBktSession(user!.id, courseId!, null, conceptIds);
     if (topicId) return fetchBktSession(user!.id, courseId!, topicId);
     if (sessionId) return fetchResumeTest(user!.id, sessionId);
     if (quizId && attemptId) return resumeQuizAttempt(user!.id, attemptId);
@@ -94,10 +99,18 @@ export function TestPage() {
     return fetchResumeTest(user!.id, sessionId!);
   };
 
-  const { data: testData, isLoading, error, refetch } = useQuery({
+  const {
+    data: testData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery({
     queryKey,
     queryFn,
-    enabled: !!user && !!courseId && (!!quizId || !!topicId || !!conceptIds || !!sessionId),
+    enabled:
+      !!user &&
+      !!courseId &&
+      (!!quizId || !!topicId || !!conceptIds || !!sessionId),
   });
 
   const { data: profileData } = useQuery({
@@ -112,7 +125,13 @@ export function TestPage() {
       quizStartedRef.current = true;
       posthog.capture("quiz_started", {
         course_id: courseId,
-        mode: conceptIds ? "concept" : topicId ? "topic" : quizId ? "quiz" : "session",
+        mode: conceptIds
+          ? "concept"
+          : topicId
+            ? "topic"
+            : quizId
+              ? "quiz"
+              : "session",
         topic_id: topicId ?? undefined,
         quiz_id: quizId ?? undefined,
         attempt_id: testData.test_id,
@@ -144,7 +163,9 @@ export function TestPage() {
       if (feedback || !currentQuestion || !user || !courseId) return;
       setSelectedOption(optionIndex);
 
-      const selectedOpt = currentQuestion.options.find((o) => o.index === optionIndex);
+      const selectedOpt = currentQuestion.options.find(
+        (o) => o.index === optionIndex,
+      );
       const correctOpt = currentQuestion.options.find((o) => o.is_correct);
       const isCorrect = selectedOpt?.is_correct ?? false;
 
@@ -175,20 +196,42 @@ export function TestPage() {
       });
 
       if (quizId && testData?.test_id) {
-        submitQuizAnswer(user.id, courseId, testData.test_id, currentQuestion.id, optionIndex).catch(
-          (err) => console.error("Background quiz answer failed:", err),
-        );
+        submitQuizAnswer(
+          user.id,
+          courseId,
+          testData.test_id,
+          currentQuestion.id,
+          optionIndex,
+        ).catch((err) => console.error("Background quiz answer failed:", err));
       } else if (topicId) {
-        submitBktAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
-          (err) => console.error("Background BKT update failed:", err),
-        );
+        submitBktAnswer(
+          user.id,
+          courseId,
+          currentQuestion.id,
+          optionIndex,
+          testData?.test_id,
+        ).catch((err) => console.error("Background BKT update failed:", err));
       } else {
-        submitAnswer(user.id, courseId, currentQuestion.id, optionIndex, testData?.test_id).catch(
-          (err) => console.error("Background BKT update failed:", err),
-        );
+        submitAnswer(
+          user.id,
+          courseId,
+          currentQuestion.id,
+          optionIndex,
+          testData?.test_id,
+        ).catch((err) => console.error("Background BKT update failed:", err));
       }
     },
-    [feedback, currentQuestion, user, courseId, quizId, topicId, testData?.test_id, questions.length, currentIndex],
+    [
+      feedback,
+      currentQuestion,
+      user,
+      courseId,
+      quizId,
+      topicId,
+      testData?.test_id,
+      questions.length,
+      currentIndex,
+    ],
   );
 
   const handleNext = useCallback(async () => {
@@ -202,8 +245,8 @@ export function TestPage() {
       setLoadingPassChance(true);
       try {
         if (quizId && testData?.test_id) {
-          completeQuizAttempt(user!.id, courseId!, testData.test_id).catch((err) =>
-            console.error("Failed to complete quiz attempt:", err),
+          completeQuizAttempt(user!.id, courseId!, testData.test_id).catch(
+            (err) => console.error("Failed to complete quiz attempt:", err),
           );
         } else if (!topicId && testData?.test_id) {
           completeTest(user!.id, courseId!, testData.test_id).catch((err) =>
@@ -220,14 +263,27 @@ export function TestPage() {
         setLoadingPassChance(false);
       }
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      queryClient.invalidateQueries({ queryKey: testQueryKeys.quizzes(courseId!, user!.id) });
-      queryClient.invalidateQueries({ queryKey: gardenQueryKeys.progress(courseId!, user!.id) });
+      queryClient.invalidateQueries({
+        queryKey: testQueryKeys.quizzes(courseId!, user!.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: gardenQueryKeys.progress(courseId!, user!.id),
+      });
     } else {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setFeedback(null);
     }
-  }, [currentIndex, totalQuestions, user, courseId, quizId, topicId, queryClient, testData?.test_id]);
+  }, [
+    currentIndex,
+    totalQuestions,
+    user,
+    courseId,
+    quizId,
+    topicId,
+    queryClient,
+    testData?.test_id,
+  ]);
 
   const handleRetake = useCallback(() => {
     setCurrentIndex(0);
@@ -243,27 +299,67 @@ export function TestPage() {
 
     if (quizId) {
       // Retake same quiz — start a fresh attempt
-      queryClient.removeQueries({ queryKey: testQueryKeys.quizAttempt(quizId, user?.id ?? "") });
+      queryClient.removeQueries({
+        queryKey: testQueryKeys.quizAttempt(quizId, user?.id ?? ""),
+      });
       if (attemptId) {
-        queryClient.removeQueries({ queryKey: testQueryKeys.resumeAttempt(attemptId) });
+        queryClient.removeQueries({
+          queryKey: testQueryKeys.resumeAttempt(attemptId),
+        });
       }
       // V13: preserve from param across retake URL replacements
       const fromSuffix = fromParam ? `&from=${fromParam}` : "";
-      navigate(`/test/${courseId}?quiz=${quizId}${fromSuffix}`, { replace: true });
+      navigate(`/test/${courseId}?quiz=${quizId}${fromSuffix}`, {
+        replace: true,
+      });
     } else if (topicId) {
-      queryClient.removeQueries({ queryKey: [...testQueryKeys.all, "focused", courseId, topicId] });
+      queryClient.removeQueries({
+        queryKey: [...testQueryKeys.all, "focused", courseId, topicId],
+      });
       // V13: preserve the from param so X button continues to route correctly
       const fromSuffix = fromParam ? `&from=${fromParam}` : "";
-      navigate(`/test/${courseId}?topicId=${topicId}${fromSuffix}`, { replace: true });
+      navigate(`/test/${courseId}?topicId=${topicId}${fromSuffix}`, {
+        replace: true,
+      });
     } else {
-      queryClient.removeQueries({ queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? "") });
+      queryClient.removeQueries({
+        queryKey: testQueryKeys.quiz(courseId ?? "", user?.id ?? ""),
+      });
       // V13: preserve from param even when no topic/quiz scoping
-      navigate(`/test/${courseId}${fromParam ? `?from=${fromParam}` : ""}`, { replace: true });
+      navigate(`/test/${courseId}${fromParam ? `?from=${fromParam}` : ""}`, {
+        replace: true,
+      });
     }
     refetch();
-  }, [courseId, user, quizId, topicId, attemptId, queryClient, refetch, navigate, fromParam]);
+  }, [
+    courseId,
+    user,
+    quizId,
+    topicId,
+    attemptId,
+    queryClient,
+    refetch,
+    navigate,
+    fromParam,
+  ]);
 
-  if (!user || !courseId) { navigate("/home"); return null; }
+  // Ensure users are warned if they try to close or refresh the window mid-quiz
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      // Only warn if the quiz has started, is not complete, and at least one question was answered
+      if (!quizComplete && currentIndex >= 0 && testData) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [quizComplete, currentIndex, testData]);
+
+  if (!user || !courseId) {
+    navigate("/home");
+    return null;
+  }
 
   // Confirm before exiting mid-quiz; results screen exits directly.
   const handleExitRequest = () => {
@@ -290,11 +386,12 @@ export function TestPage() {
     navigate(`/course/${courseId}`);
   }, [navigate, courseId, fromParam]);
 
-  const loadingMessage = quizId && !attemptId
-    ? "Growing your questions..."
-    : topicId
-    ? "Tending this patch..."
-    : "Resuming your walk...";
+  const loadingMessage =
+    quizId && !attemptId
+      ? "Growing your questions..."
+      : topicId
+        ? "Tending this patch..."
+        : "Resuming your walk...";
 
   if (isLoading) {
     return <GardenVideoLoader message={loadingMessage} />;
@@ -302,7 +399,8 @@ export function TestPage() {
 
   if (error) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <GhibliBackground />
         <button
           onClick={handleExit}
           className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
@@ -325,7 +423,8 @@ export function TestPage() {
 
   if (!questions.length) {
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <GhibliBackground />
         <button
           onClick={handleExit}
           className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
@@ -337,12 +436,19 @@ export function TestPage() {
           <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm">
             <PlantIndicator probability={20} size="lg" />
             <div>
-              <h2 className="font-serif text-lg font-semibold mb-1">No Questions Available</h2>
+              <h2 className="font-serif text-lg font-semibold mb-1">
+                No Questions Available
+              </h2>
               <p className="text-sm text-ghibli-bark">
-                {testData?.message || "Your documents may still be processing. Check back in a moment."}
+                {testData?.message ||
+                  "Your documents may still be processing. Check back in a moment."}
               </p>
             </div>
-            <Button variant="outline" className="rounded-parchment" onClick={handleExit}>
+            <Button
+              variant="outline"
+              className="rounded-parchment"
+              onClick={handleExit}
+            >
               Back to Garden
             </Button>
           </ParchmentCard>
@@ -353,13 +459,16 @@ export function TestPage() {
 
   // ── Results ──
   if (quizComplete) {
-    const scorePercent = totalQuestions > 0
-      ? Math.round((correctCount / totalQuestions) * 100)
-      : 0;
-    const passPercent = passChance !== null ? Math.round(passChance * 100) : null;
+    const scorePercent =
+      totalQuestions > 0
+        ? Math.round((correctCount / totalQuestions) * 100)
+        : 0;
+    const passPercent =
+      passChance !== null ? Math.round(passChance * 100) : null;
 
     return (
-      <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <GhibliBackground />
         <button
           onClick={handleExit}
           className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
@@ -373,7 +482,9 @@ export function TestPage() {
               <div className="space-y-3">
                 <PlantIndicator probability={40} size="lg" />
                 <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
-                <p className="text-sm font-sans text-ghibli-bark">Reading the garden...</p>
+                <p className="text-sm font-sans text-ghibli-bark">
+                  Reading the garden...
+                </p>
               </div>
             ) : passPercent !== null ? (
               <div className="space-y-3 flex flex-col items-center">
@@ -381,7 +492,9 @@ export function TestPage() {
                   Garden Walk Complete
                 </p>
                 <PlantIndicator probability={passPercent} size="xl" />
-                <p className={`text-sm font-semibold ${getGardenStatus(passPercent).color}`}>
+                <p
+                  className={`text-sm font-semibold ${getGardenStatus(passPercent).color}`}
+                >
                   {getGardenStatus(passPercent).label}
                 </p>
                 <p className="text-sm font-sans text-ghibli-bark">
@@ -389,12 +502,17 @@ export function TestPage() {
                 </p>
                 <p className="text-xs font-sans text-ghibli-bark">
                   Growing toward{" "}
-                  {getGradeLabel(profileData?.curriculum ?? "percentage", targetGrade)}
+                  {getGradeLabel(
+                    profileData?.curriculum ?? "percentage",
+                    targetGrade,
+                  )}
                 </p>
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-sm text-ghibli-bark">Could not calculate passing chance</p>
+                <p className="text-sm text-ghibli-bark">
+                  Could not calculate passing chance
+                </p>
               </div>
             )}
 
@@ -406,15 +524,19 @@ export function TestPage() {
                 {scorePercent >= 80
                   ? "A perfect bloom! Your garden flourishes."
                   : scorePercent >= 60
-                  ? "Your garden is growing well. Keep tending to it!"
-                  : scorePercent >= 40
-                  ? "The soil is getting richer."
-                  : "Every garden needs patience. Water your knowledge and try again."}
+                    ? "Your garden is growing well. Keep tending to it!"
+                    : scorePercent >= 40
+                      ? "The soil is getting richer."
+                      : "Every garden needs patience. Water your knowledge and try again."}
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">
-              <Button size="lg" className="flex-1 gap-2 rounded-parchment" onClick={handleRetake}>
+              <Button
+                size="lg"
+                className="flex-1 gap-2 rounded-parchment"
+                onClick={handleRetake}
+              >
                 <RotateCcw className="w-4 h-4" />
                 {topicId ? "Study Again" : "Retake Quiz"}
               </Button>
@@ -422,7 +544,11 @@ export function TestPage() {
                 size="lg"
                 variant="outline"
                 className="flex-1 gap-2 rounded-parchment border-ghibli-moss/30 hover:border-ghibli-forest hover:text-ghibli-forest"
-                onClick={topicId ? () => navigate(`/course/${courseId}/garden`) : handleExit}
+                onClick={
+                  topicId
+                    ? () => navigate(`/course/${courseId}/garden`)
+                    : handleExit
+                }
               >
                 <X className="w-4 h-4" />
                 {topicId ? "Return to Knowledge Garden" : "Return to Garden"}
@@ -438,7 +564,8 @@ export function TestPage() {
   const progress = (currentIndex + (feedback ? 1 : 0)) / totalQuestions;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto"><GhibliBackground />
+    <div className="fixed inset-0 z-50 overflow-y-auto">
+      <GhibliBackground />
       <button
         onClick={handleExitRequest}
         className="absolute top-5 right-5 z-30 p-2.5 rounded-full text-ghibli-canopy bg-ghibli-cream/85 backdrop-blur-sm border border-ghibli-moss/40 shadow-sm hover:bg-ghibli-cream hover:border-ghibli-jungle hover:shadow-md transition-all"
@@ -451,18 +578,20 @@ export function TestPage() {
       <AlertDialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Leave quiz?</AlertDialogTitle>
+            <AlertDialogTitle>Pause and leave?</AlertDialogTitle>
             <AlertDialogDescription>
-              Your progress will be lost. This session won't be saved.
+              Your progress is saved and you can resume this quiz later!
+              However, it's highly recommended to finish what you started to
+              lock in those concepts.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Keep Going</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-ghibli-amber text-primary-foreground hover:bg-ghibli-amber/90"
               onClick={handleExit}
             >
-              Leave Quiz
+              Save & Exit
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -470,7 +599,6 @@ export function TestPage() {
 
       <div className="relative z-10 min-h-screen flex flex-col py-12 pb-32">
         <div className="max-w-2xl w-full mx-auto px-6">
-
           {/* Progress bar */}
           <div className="w-full mb-6">
             <div className="flex items-center justify-between mb-3 px-1">
@@ -478,7 +606,8 @@ export function TestPage() {
                 {testData?.course_name ?? "Quiz"}
               </span>
               <span className="font-sans text-xs text-ghibli-bark">
-                Step {currentIndex + 1} of {totalQuestions} &middot; {correctCount} took root
+                Step {currentIndex + 1} of {totalQuestions} &middot;{" "}
+                {correctCount} took root
               </span>
             </div>
             <div className="relative h-5 rounded-full bg-ghibli-mist/70 border border-ghibli-moss/40 overflow-hidden parchment-texture">
@@ -486,7 +615,8 @@ export function TestPage() {
                 className="absolute inset-y-0 left-0 rounded-full transition-all duration-700 ease-out"
                 style={{
                   width: `${progress * 100}%`,
-                  background: "linear-gradient(90deg, hsl(var(--ghibli-moss)), hsl(var(--ghibli-forest)))",
+                  background:
+                    "linear-gradient(90deg, hsl(var(--ghibli-moss)), hsl(var(--ghibli-forest)))",
                 }}
               />
               <div className="absolute inset-0 flex items-center justify-between px-2">
@@ -507,7 +637,12 @@ export function TestPage() {
           {/* Question scroll card */}
           <ParchmentCard className="p-8 md:p-10 mb-6">
             <div className="flex justify-center mb-4">
-              <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
+              <svg
+                width="80"
+                height="12"
+                viewBox="0 0 80 12"
+                className="text-ghibli-bark/30"
+              >
                 <path
                   d="M0 6 Q10 0 20 6 Q30 12 40 6 Q50 0 60 6 Q70 12 80 6"
                   stroke="currentColor"
@@ -520,7 +655,12 @@ export function TestPage() {
               {currentQuestion.question}
             </h2>
             <div className="flex justify-center mt-4">
-              <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
+              <svg
+                width="80"
+                height="12"
+                viewBox="0 0 80 12"
+                className="text-ghibli-bark/30"
+              >
                 <path
                   d="M0 6 Q10 12 20 6 Q30 0 40 6 Q50 12 60 6 Q70 0 80 6"
                   stroke="currentColor"
@@ -541,7 +681,9 @@ export function TestPage() {
               }`}
             >
               <img
-                src={feedback.is_correct ? "/leaf-sprout.png" : "/water-drop.png"}
+                src={
+                  feedback.is_correct ? "/leaf-sprout.png" : "/water-drop.png"
+                }
                 alt=""
                 className={`w-8 h-8 object-contain shrink-0 ${
                   feedback.is_correct ? "animate-scale-in" : "animate-drop"
@@ -549,7 +691,9 @@ export function TestPage() {
               />
               <div className="flex-1 min-w-0">
                 <p className="font-serif font-semibold text-ghibli-canopy text-base">
-                  {feedback.is_correct ? "That one took root." : "That seed needs more light."}
+                  {feedback.is_correct
+                    ? "That one took root."
+                    : "That seed needs more light."}
                 </p>
                 {!feedback.is_correct && (
                   <p className="font-serif font-medium text-ghibli-bark text-base mt-1">
@@ -557,7 +701,9 @@ export function TestPage() {
                   </p>
                 )}
                 {feedback.explanation && (
-                  <p className="font-serif text-ghibli-bark text-base mt-1.5 leading-relaxed">{feedback.explanation}</p>
+                  <p className="font-serif text-ghibli-bark text-base mt-1.5 leading-relaxed">
+                    {feedback.explanation}
+                  </p>
                 )}
               </div>
             </div>
@@ -568,31 +714,39 @@ export function TestPage() {
             {currentQuestion.options.map((option) => {
               const isSelected = selectedOption === option.index;
               const showFeedback = feedback !== null;
-              const isCorrect = showFeedback && feedback.correct_option_index === option.index;
-              const isWrong = showFeedback && isSelected && !feedback.is_correct;
+              const isCorrect =
+                showFeedback && feedback.correct_option_index === option.index;
+              const isWrong =
+                showFeedback && isSelected && !feedback.is_correct;
 
               let optionClasses =
                 "relative w-full text-left rounded-parchment border-2 px-6 py-5 font-serif text-base font-semibold transition-all duration-300 cursor-pointer select-none flex items-center gap-4 parchment-solid text-ghibli-canopy";
 
               if (showFeedback) {
                 if (isCorrect) {
-                  optionClasses += " border-ghibli-moss bg-ghibli-moss/20 shadow-md";
+                  optionClasses +=
+                    " border-ghibli-moss bg-ghibli-moss/20 shadow-md";
                 } else if (isWrong) {
-                  optionClasses += " border-ghibli-petal bg-ghibli-petal/20 text-ghibli-bark";
+                  optionClasses +=
+                    " border-ghibli-petal bg-ghibli-petal/20 text-ghibli-bark";
                 } else {
                   optionClasses += " border-ghibli-moss/40 text-ghibli-bark";
                 }
               } else if (isSelected) {
-                optionClasses += " border-ghibli-jungle bg-ghibli-moss/15 shadow-md";
+                optionClasses +=
+                  " border-ghibli-jungle bg-ghibli-moss/15 shadow-md";
               } else {
-                optionClasses += " border-ghibli-moss/50 hover:border-ghibli-jungle hover:shadow-lg";
+                optionClasses +=
+                  " border-ghibli-moss/50 hover:border-ghibli-jungle hover:shadow-lg";
               }
 
               if (showFeedback && !isCorrect && !isWrong) {
                 optionClasses += " cursor-default";
               }
 
-              const letter = stoneLetters[option.index] ?? String.fromCharCode(65 + option.index);
+              const letter =
+                stoneLetters[option.index] ??
+                String.fromCharCode(65 + option.index);
 
               return (
                 <button
@@ -606,8 +760,8 @@ export function TestPage() {
                       isCorrect
                         ? "bg-gradient-to-br from-ghibli-jungle to-ghibli-canopy text-primary-foreground shadow-sm"
                         : isWrong
-                        ? "bg-ghibli-petal/45 text-ghibli-bark"
-                        : "bg-gradient-to-br from-ghibli-ivory to-ghibli-mist text-ghibli-canopy border border-ghibli-moss/45"
+                          ? "bg-ghibli-petal/45 text-ghibli-bark"
+                          : "bg-gradient-to-br from-ghibli-ivory to-ghibli-mist text-ghibli-canopy border border-ghibli-moss/45"
                     }`}
                   >
                     {letter}
@@ -635,7 +789,11 @@ export function TestPage() {
           {/* Next button */}
           {feedback && (
             <div className="mt-8 flex justify-end">
-              <Button size="lg" className="gap-2 rounded-parchment" onClick={handleNext}>
+              <Button
+                size="lg"
+                className="gap-2 rounded-parchment"
+                onClick={handleNext}
+              >
                 {currentIndex + 1 >= totalQuestions ? "See What Grew" : "Next"}
                 <ArrowRight className="w-4 h-4" />
               </Button>

@@ -148,6 +148,8 @@ export function Dashboard() {
   }
 
   const hasNoCourses = !dashboardData || dashboardData.courses.length === 0;
+  const processingCourses = dashboardData?.courses.filter(c => c.hasProcessing) ?? [];
+  const hasProcessing = processingCourses.length > 0;
   const nextItem = dashboardData?.nextStudyItem;
 
   return (
@@ -161,6 +163,35 @@ export function Dashboard() {
           <EmptyState onUpload={() => setUploadModalOpen(true)} />
         ) : (
           <>
+            {/* Prominent Processing Indicator */}
+            {hasProcessing && (
+              <ParchmentCard className="p-0 mb-10 overflow-hidden border-ghibli-moss/30 shadow-glow-soft animate-in fade-in slide-in-from-top-4 duration-700">
+                <div className="relative h-32 md:h-40 flex items-center justify-center">
+                  <video
+                    src="/garden-loader.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                  />
+                  <div className="absolute inset-0 bg-linear-to-r from-ghibli-cream via-ghibli-cream/20 to-ghibli-cream" />
+                  <div className="relative z-10 text-center space-y-2">
+                    <div className="flex items-center justify-center gap-3">
+                      <Loader2 className="w-5 h-5 animate-spin text-ghibli-canopy" />
+                      <h3 className="font-serif text-xl font-bold text-ghibli-canopy">Reading your materials...</h3>
+                    </div>
+                    <p className="font-sans text-xs text-ghibli-bark/80 max-w-xs mx-auto">
+                      We're extracting concepts from {processingCourses.length === 1 ? processingCourses[0].title : `${processingCourses.length} courses`}. This usually takes 1-2 minutes.
+                    </p>
+                  </div>
+                </div>
+                <div className="h-1.5 w-full bg-ghibli-moss/10 overflow-hidden">
+                  <div className="h-full bg-ghibli-moss animate-pulse" style={{ width: '60%' }} />
+                </div>
+              </ParchmentCard>
+            )}
+
             <HeroSection
               data={dashboardData!}
               onStartStudying={() => {
@@ -258,7 +289,7 @@ function HeroSection({ data, onStartStudying, onUpload }: {
           <Button
             size="lg"
             onClick={primaryAction}
-            className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+            className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
           >
             {hasStudyable && nextItem ? (
               <Sparkles className="w-4 h-4" />
@@ -311,7 +342,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
           <div onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-ghibli-canopy/60 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors flex-shrink-0">
+                <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-ghibli-canopy/60 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors shrink-0">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
@@ -375,7 +406,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
       <Button
         onClick={onClick}
         disabled={!isClickable}
-        className="w-full rounded-full font-sans text-sm font-semibold tracking-wide bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-lg transition-all disabled:opacity-60 relative z-10"
+        className="w-full rounded-full font-sans text-sm font-semibold tracking-wide bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground shadow-md hover:shadow-lg transition-all disabled:opacity-60 relative z-10"
       >
         Walk the Path →
       </Button>
@@ -388,14 +419,6 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-md mx-auto">
       <ParchmentCard glow className="p-10 md:p-12 flex flex-col items-center gap-6">
-        <div className="relative">
-          <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/30 blur-2xl scale-125" />
-          <img
-            src="/seedling-add.png"
-            alt="Plant your first seed"
-            className="relative w-20 h-20 object-contain select-none animate-glow-soft"
-          />
-        </div>
         <div className="space-y-3">
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ghibli-canopy">Your garden is ready.</h1>
           <p className="text-ghibli-bark/80 font-sans leading-relaxed">
@@ -405,7 +428,7 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
         <Button
           size="lg"
           onClick={onUpload}
-          className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+          className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
         >
           <Upload className="w-5 h-5" />
           Plant a Seed

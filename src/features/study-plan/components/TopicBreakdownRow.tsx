@@ -24,9 +24,17 @@ export function TopicBreakdownRow({
 
   return (
     <div className="border border-ghibli-moss/20 rounded-xl overflow-hidden">
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setExpanded((v) => !v)}
-        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-ghibli-moss/8 transition-colors"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            setExpanded((v) => !v);
+          }
+        }}
+        className="w-full flex items-center gap-3 px-5 py-4 text-left hover:bg-ghibli-moss/8 transition-colors cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -63,7 +71,7 @@ export function TopicBreakdownRow({
             <ChevronDown className="w-4 h-4 text-ghibli-canopy/65" />
           )}
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="px-5 pb-4 space-y-1.5 border-t border-ghibli-moss/15 pt-3">

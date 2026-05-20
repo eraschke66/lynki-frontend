@@ -136,7 +136,7 @@ export function LandingPage() {
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Upload your study materials</li>
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>AI quizzes from your notes</li>
                 <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Pass probability after each quiz</li>
-                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>1 subject</li>
+                <li className="flex items-start gap-2"><span className="text-primary mt-0.5">✓</span>Unlimited courses</li>
               </ul>
               <Button asChild variant="outline" className="w-full mt-8" size="lg">
                 <Link to="/signup">Get started</Link>

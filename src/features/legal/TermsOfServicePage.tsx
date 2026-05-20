@@ -37,14 +37,15 @@ export function TermsOfServicePage() {
           <li>Upload study materials</li>
           <li>AI-generated quizzes</li>
           <li>Pass probability snapshot after each quiz</li>
-          <li>1 subject</li>
+          <li>Unlimited subjects</li>
+          <li>Mock exam sessions</li>
         </ul>
         <H3>Pass Pro ($79/year)</H3>
         <ul className="list-disc pl-5 space-y-1 text-sm text-ghibli-bark">
           <li>Everything in Starter</li>
-          <li>Unlimited subjects</li>
           <li>Knowledge Garden (topic-by-topic progress)</li>
           <li>Smart study plans</li>
+          <li>Priority AI generation</li>
           <li>Progress tracking over time</li>
         </ul>
       </Section>

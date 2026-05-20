@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { X, CheckCircle, AlertCircle, FileText, Plus, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useFileUpload } from "../hooks/useFileUpload";
+import { wakeUpBackend } from "../services/documentService";
 import { fetchUserCourses, createCourse } from "@/features/courses";
 import type { Course } from "@/features/courses";
 
@@ -22,14 +24,31 @@ interface FileUploaderProps {
 }
 
 export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
+  const [searchParams] = useSearchParams();
+  const initialCourseId = searchParams.get("courseId") ?? "";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploading, uploads, error, handleFilesSelected, resetUploads } =
     useFileUpload(onUploadComplete);
   const [courses, setCourses] = useState<Course[]>([]);
-  const [selectedCourseId, setSelectedCourseId] = useState<string>("");
+  const [selectedCourseId, setSelectedCourseId] = useState<string>(initialCourseId);
   const [creatingNew, setCreatingNew] = useState(false);
   const [newCourseName, setNewCourseName] = useState("");
-  const [courseReady, setCourseReady] = useState(false);
+  const [backendReady, setBackendReady] = useState(false);
+  const hasWokenBackend = useRef(false);
+
+  // Step 2 is unlocked whenever a real course is selected and we're not
+  // mid-creation. Derived from selectedCourseId so re-selecting the same
+  // value in the dropdown can't leave it stuck (Radix Select's onValueChange
+  // doesn't fire on a no-op re-select).
+  const courseReady = !!selectedCourseId && !creatingNew;
+
+  // Pre-warm the Render backend on mount so the processing trigger doesn't
+  // eat a cold start. The upload zone stays gated until this ping resolves.
+  useEffect(() => {
+    if (hasWokenBackend.current) return;
+    hasWokenBackend.current = true;
+    wakeUpBackend().finally(() => setBackendReady(true));
+  }, []);
 
   useEffect(() => {
     if (!userId) return;
@@ -39,8 +58,10 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
         const data = await fetchUserCourses(userId);
         if (cancelled) return;
         setCourses(data);
+        // Auto-select the only course, but never override a courseId that
+        // was already supplied (query param) or chosen by the user.
         if (data.length === 1) {
-          setSelectedCourseId(data[0].id);
+          setSelectedCourseId((prev) => prev || data[0].id);
         }
       } catch (err) {
         if (!cancelled) console.error(err);
@@ -73,7 +94,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (!uploading && selectedCourseId) {
+    if (!uploading && selectedCourseId && backendReady) {
       handleFilesSelected(e.dataTransfer.files, userId, selectedCourseId);
     }
   };
@@ -81,6 +102,8 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
   const hasUploads = uploads.length > 0;
   const allDone = hasUploads && uploads.every((u) => u.complete || u.error);
   const selectedCourse = courses.find((c) => c.id === selectedCourseId);
+  // Course chosen but the backend warm-up ping hasn't resolved yet.
+  const showWarming = courseReady && !backendReady;
 
   return (
     <Card className="w-full">
@@ -88,7 +111,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
         <CardTitle>Upload Study Materials</CardTitle>
         <CardDescription>
           Select a course, then upload your materials (PDF, DOCX, PPTX, PNG,
-            JPEG). Max 10 MB per file, up to 5 files.
+            JPEG). Max 50 MB per file, up to 20 files.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -137,10 +160,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
               <div className="flex gap-2 pl-8">
                 <Select
                   value={selectedCourseId}
-                  onValueChange={(val) => {
-                    setSelectedCourseId(val);
-                    setCourseReady(true);
-                  }}
+                  onValueChange={(val) => setSelectedCourseId(val)}
                 >
                   <SelectTrigger className="flex-1">
                     <SelectValue placeholder={courses.length === 0 ? "No courses yet — create one →" : "Select a course"} />
@@ -187,7 +207,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
 
             <div
               className={`rounded-xl p-8 text-center transition-all duration-300 ${
-                !courseReady
+                !courseReady || !backendReady
                   ? "opacity-30 pointer-events-none select-none"
                   : uploading
                   ? "pointer-events-none bg-ghibli-mist/40 text-ghibli-bark/65"
@@ -201,7 +221,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
               }}
               onDragOver={handleDragOver}
               onDrop={handleDrop}
-              onClick={() => courseReady && !uploading && fileInputRef.current?.click()}
+              onClick={() => courseReady && backendReady && !uploading && fileInputRef.current?.click()}
             >
               <div className="flex flex-col items-center gap-3">
                 <div className="flex items-center gap-2">
@@ -209,7 +229,11 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                     2
                   </div>
                   <span className="text-sm font-semibold text-ghibli-jungle">
-                    {courseReady ? "Drop files here or click to upload" : "Select a course above first"}
+                    {!courseReady
+                      ? "Select a course above first"
+                      : showWarming
+                      ? "Warming up server, ~30s on first visit…"
+                      : "Drop files here or click to upload"}
                   </span>
                 </div>
                 <img
@@ -226,7 +250,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                 className="hidden"
                 multiple
                 onChange={onFileChange}
-                disabled={uploading || !courseReady}
+                disabled={uploading || !courseReady || !backendReady}
                 accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.jpeg,.png,image/png,image/jpeg"
               />
             </div>

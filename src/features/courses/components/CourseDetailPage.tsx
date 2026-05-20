@@ -21,6 +21,7 @@ import {
   CalendarDays,
   Sparkles,
   ChevronRight,
+  FilePlus,
 } from "lucide-react";
 import {
   fetchPassChance,
@@ -263,6 +264,15 @@ export function CourseDetailPage() {
                 >
                   <CalendarDays className="w-4 h-4" />
                   Study Plan
+                </Button>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => navigate(`/documents?courseId=${courseId}`)}
+                  className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
+                >
+                  <FilePlus className="w-4 h-4" />
+                  Add materials
                 </Button>
               </div>
             </div>

@@ -5,12 +5,16 @@ const BUCKET_NAME = "course-materials";
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 /**
- * Retry configuration for API calls
+ * Retry configuration for the backend processing trigger.
+ * The first attempt gets a long timeout to cover a Render cold start;
+ * retries use a short timeout since the service is awake by then.
  */
-const RETRY_CONFIG = {
-  maxRetries: 3,
+const PROCESS_TRIGGER_CONFIG = {
+  maxRetries: 2,
   baseDelayMs: 1000,
-  maxDelayMs: 10000,
+  maxDelayMs: 5000,
+  firstAttemptTimeoutMs: 45000, // first call: cover cold start
+  retryTimeoutMs: 15000, // retries: backend is awake now
 };
 
 /**
@@ -22,8 +26,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * Calculate exponential backoff delay
  */
 const getRetryDelay = (attempt: number): number => {
-  const delay = RETRY_CONFIG.baseDelayMs * Math.pow(2, attempt);
-  return Math.min(delay, RETRY_CONFIG.maxDelayMs);
+  const delay = PROCESS_TRIGGER_CONFIG.baseDelayMs * Math.pow(2, attempt);
+  return Math.min(delay, PROCESS_TRIGGER_CONFIG.maxDelayMs);
 };
 
 /**
@@ -55,10 +59,15 @@ export async function wakeUpBackend(): Promise<boolean> {
 async function triggerBackendProcessing(
   documentId: string,
 ): Promise<{ success: boolean; error?: string }> {
-  for (let attempt = 0; attempt <= RETRY_CONFIG.maxRetries; attempt++) {
+  for (let attempt = 0; attempt <= PROCESS_TRIGGER_CONFIG.maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 60000); // 60s timeout
+      // First attempt covers a cold start; retries hit an already-warm backend.
+      const timeoutMs =
+        attempt === 0
+          ? PROCESS_TRIGGER_CONFIG.firstAttemptTimeoutMs
+          : PROCESS_TRIGGER_CONFIG.retryTimeoutMs;
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
       const response = await fetch(
         `${API_URL}/documents/process/${documentId}`,
@@ -84,10 +93,10 @@ async function triggerBackendProcessing(
       }
 
       // Retryable errors (5xx, network issues)
-      if (attempt < RETRY_CONFIG.maxRetries) {
+      if (attempt < PROCESS_TRIGGER_CONFIG.maxRetries) {
         const delay = getRetryDelay(attempt);
         console.warn(
-          `Processing trigger failed (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1}), retrying in ${delay}ms...`,
+          `Processing trigger failed (attempt ${attempt + 1}/${PROCESS_TRIGGER_CONFIG.maxRetries + 1}), retrying in ${delay}ms...`,
         );
         await sleep(delay);
       }
@@ -99,10 +108,10 @@ async function triggerBackendProcessing(
           ? err.message
           : "Unknown error";
 
-      if (attempt < RETRY_CONFIG.maxRetries) {
+      if (attempt < PROCESS_TRIGGER_CONFIG.maxRetries) {
         const delay = getRetryDelay(attempt);
         console.warn(
-          `Processing trigger error (attempt ${attempt + 1}/${RETRY_CONFIG.maxRetries + 1}): ${errorMessage}, retrying in ${delay}ms...`,
+          `Processing trigger error (attempt ${attempt + 1}/${PROCESS_TRIGGER_CONFIG.maxRetries + 1}): ${errorMessage}, retrying in ${delay}ms...`,
         );
         await sleep(delay);
       } else {

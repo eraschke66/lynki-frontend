@@ -2,8 +2,8 @@ import { useState, useCallback } from "react";
 import { uploadDocument } from "../services/documentService";
 import type { UploadStatus } from "../types";
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const MAX_FILES_PER_BATCH = 5;
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_FILES_PER_BATCH = 20;
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
   "application/msword",
@@ -65,7 +65,7 @@ export function useFileUpload(
       const invalidFiles = files.filter((f) => f.size > MAX_FILE_SIZE);
       if (invalidFiles.length > 0) {
         setError(
-          `Some files are too large. Maximum size is 10MB. (${invalidFiles
+          `Some files are too large. Maximum size is 50MB. (${invalidFiles
             .map((f) => f.name)
             .join(", ")})`,
         );

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { HardDrive } from "lucide-react";
 import { Header } from "@/components/layout/Header";
@@ -10,7 +10,6 @@ import {
   getUserStorageStats,
   deleteDocument,
   retryDocumentProcessing,
-  wakeUpBackend,
 } from "../services/documentService";
 import { FileUploader } from "./FileUploader";
 import { DocumentsList } from "./DocumentsList";
@@ -22,18 +21,6 @@ import { posthog } from "@/lib/posthog";
 export function DocumentsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const hasWokenBackend = useRef(false);
-
-  useEffect(() => {
-    if (!hasWokenBackend.current) {
-      hasWokenBackend.current = true;
-      wakeUpBackend().then((isAwake) => {
-        if (!isAwake) {
-          console.log("Backend may be cold starting, first upload may take longer");
-        }
-      });
-    }
-  }, []);
 
   const { data: documents = [], isLoading: documentsLoading } = useQuery({
     queryKey: documentQueryKeys.list(user?.id ?? ""),

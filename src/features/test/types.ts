@@ -97,3 +97,28 @@ export interface TestHistoryData {
   sessions: TestSession[];
   total: number;
 }
+
+/** A single question's result within a completed attempt (v1 review page). */
+export interface AttemptQuestionResult {
+  question_id: string;
+  question_text: string;
+  options: Array<{ index: number; text: string; is_correct: boolean; explanation: string | null }>;
+  selected_option_index: number | null; // null if the question wasn't answered
+  correct_option_index: number;
+  is_correct: boolean;
+  concept_name: string | null;
+}
+
+/** Full payload for the attempt results review page. */
+export interface AttemptResultsData {
+  attempt_id: string;
+  quiz_id: string;
+  quiz_name: string;
+  course_id: string;
+  total_questions: number;
+  correct_count: number;
+  answered_count: number;
+  completed_at: string | null;
+  started_at: string;
+  questions: AttemptQuestionResult[];
+}

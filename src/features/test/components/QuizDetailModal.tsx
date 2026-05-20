@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,7 @@ import {
   CalendarDays,
   Hash,
   Trophy,
+  ChevronRight,
 } from "lucide-react";
 import { getGardenStatus } from "@/lib/garden";
 import type { CourseQuiz } from "@/features/test/types";
@@ -33,6 +35,8 @@ export function QuizDetailModal({
   onStart,
   onResume,
 }: QuizDetailModalProps) {
+  const navigate = useNavigate();
+
   if (!quiz) return null;
 
   // Let's get all attempts (completed and in-progress) and sort them by started_at descending (newest on top)
@@ -131,17 +135,44 @@ export function QuizDetailModal({
                   year: "numeric",
                 });
 
+                const handleViewResults = () => {
+                  onOpenChange(false);
+                  navigate(`/attempts/${attempt.id}`);
+                };
+
                 return (
                   <div
                     key={attempt.id}
-                    className="flex items-center gap-3 rounded-xl bg-ghibli-mist/50 border border-ghibli-moss/40 px-4 py-3"
+                    role={isCompleted ? "button" : undefined}
+                    tabIndex={isCompleted ? 0 : undefined}
+                    onClick={isCompleted ? handleViewResults : undefined}
+                    onKeyDown={
+                      isCompleted
+                        ? (e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              handleViewResults();
+                            }
+                          }
+                        : undefined
+                    }
+                    className={`flex items-center gap-3 rounded-xl bg-ghibli-mist/50 border border-ghibli-moss/40 px-4 py-3 ${
+                      isCompleted
+                        ? "hover:bg-ghibli-mist/40 cursor-pointer transition-colors"
+                        : ""
+                    }`}
                   >
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-ghibli-ivory to-ghibli-mist text-xs font-bold text-ghibli-canopy border border-ghibli-moss/45">
                       {allAttempts.length - i}
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-ghibli-bark">{date}</p>
-                      {!isCompleted && (
+                      {isCompleted ? (
+                        <span className="inline-flex items-center gap-0.5 text-xs font-medium text-ghibli-jungle">
+                          View results
+                          <ChevronRight className="h-3 w-3" />
+                        </span>
+                      ) : (
                         <p className="text-xs font-medium text-ghibli-amber">
                           In Progress
                         </p>

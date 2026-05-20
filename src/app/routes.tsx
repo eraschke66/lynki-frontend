@@ -7,7 +7,7 @@ import {
   AuthCallback,
 } from "@/features/auth";
 import { DocumentsPage } from "@/features/documents";
-import { TestPage } from "@/features/test";
+import { TestPage, AttemptResultsPage } from "@/features/test";
 import { Dashboard } from "@/features/dashboard";
 import { CourseDetailPage, KnowledgeGardenPage } from "@/features/courses";
 import { TopicQuizPage } from "@/features/topic-quiz";
@@ -71,6 +71,14 @@ export function AppRoutes() {
         element={
           <ProtectedRoute>
             <TestPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/attempts/:attemptId"
+        element={
+          <ProtectedRoute>
+            <AttemptResultsPage />
           </ProtectedRoute>
         }
       />

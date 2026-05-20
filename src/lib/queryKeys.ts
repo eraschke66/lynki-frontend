@@ -31,6 +31,8 @@ export const testQueryKeys = {
     [...testQueryKeys.all, "history", courseId, userId] as const,
   quizzes: (courseId: string, userId: string) =>
     [...testQueryKeys.all, "quizzes", courseId, userId] as const,
+  attemptResults: (attemptId: string) =>
+    [...testQueryKeys.all, "attempt-results", attemptId] as const,
 };
 
 export const profileQueryKeys = {

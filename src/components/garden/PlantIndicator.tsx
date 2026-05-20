@@ -7,12 +7,13 @@ interface PlantIndicatorProps {
 
 const stages = [
   "/plant-stage-1.png",
+  "/plant-stage-1.png",
   "/plant-stage-2.png",
   "/plant-stage-3.png",
   "/plant-stage-4.png",
 ];
 
-const stageLabels = ["Seedling", "Sprouting", "Growing", "In Full Bloom"];
+const stageLabels = ["Needs Water", "Sprouting", "Growing", "Blooming", "Thriving"];
 
 const sizeMap = {
   sm:  { img: "h-10 w-10",  labelPx: 10, pctPx: 10 },
@@ -22,7 +23,11 @@ const sizeMap = {
 };
 
 export function PlantIndicator({ probability, size = "md", showPercent = true, glow = false }: PlantIndicatorProps) {
-  const stageIndex = probability >= 80 ? 3 : probability >= 55 ? 2 : probability >= 30 ? 1 : 0;
+  const stageIndex =
+    probability >= 85 ? 4 :
+    probability >= 70 ? 3 :
+    probability >= 55 ? 2 :
+    probability >= 40 ? 1 : 0;
   const { img, labelPx, pctPx } = sizeMap[size];
 
   return (

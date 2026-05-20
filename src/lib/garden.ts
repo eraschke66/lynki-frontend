@@ -20,46 +20,46 @@ export interface GardenStatus {
 }
 
 export function getGardenStatus(percentage: number): GardenStatus {
-  if (percentage >= 75) {
+  if (percentage >= 85) {
     return {
-      label: "In full bloom",
-      japanese: "満開",
-      description: "Your garden is thriving.",
+      label: "Thriving",
+      japanese: "繁栄",
+      description: "Your garden is in full bloom.",
       color: "text-emerald-700",
       bgColor: "bg-emerald-50",
     };
   }
-  if (percentage >= 60) {
+  if (percentage >= 70) {
     return {
       label: "Blooming",
       japanese: "開花",
-      description: "Things are coming together beautifully.",
+      description: "Beautiful growth — keep tending.",
       color: "text-teal-700",
       bgColor: "bg-teal-50",
     };
   }
-  if (percentage >= 40) {
+  if (percentage >= 55) {
     return {
-      label: "Putting down roots",
+      label: "Growing",
       japanese: "成長",
-      description: "Steady growth. The roots are strong.",
+      description: "Steady, healthy growth.",
       color: "text-green-700",
       bgColor: "bg-green-50",
     };
   }
-  if (percentage >= 20) {
+  if (percentage >= 40) {
     return {
-      label: "Taking root",
+      label: "Sprouting",
       japanese: "芽生え",
-      description: "Every garden starts here.",
+      description: "The first leaves are showing.",
       color: "text-lime-700",
       bgColor: "bg-lime-50",
     };
   }
   return {
-    label: "Freshly planted",
-    japanese: "種",
-    description: "The seed is in the ground. Let's tend it.",
+    label: "Needs Water",
+    japanese: "渇き",
+    description: "This area needs more attention.",
     color: "text-amber-700",
     bgColor: "bg-amber-50",
   };

@@ -22,7 +22,7 @@ const FREE_FEATURES = [
 
 const PREMIUM_FEATURES = [
   "Everything in Free",
-  "Study Garden — visualise mastery as a living garden",
+  "Knowledge Garden — visualise mastery as a living garden",
   "Smart Study Plan — AI-tailored growth guide",
   "More premium features coming soon",
 ];
@@ -182,7 +182,10 @@ export function PricingPage() {
                 </Button>
               )}
 
-              <p className="text-xs text-ghibli-bark mt-3 text-center">
+              <p className="text-xs text-ghibli-bark/80 mt-3 text-center">
+                7-day free trial · cancel anytime
+              </p>
+              <p className="text-xs text-ghibli-bark mt-1 text-center">
                 Secured by Stripe
               </p>
             </ParchmentCard>
@@ -240,8 +243,11 @@ export function PricingPage() {
                 </Button>
               )}
 
-              <p className="text-xs text-ghibli-bark mt-3 text-center">
-                Cancel anytime · Secured by Stripe
+              <p className="text-xs text-ghibli-bark/80 mt-3 text-center">
+                7-day free trial · cancel anytime
+              </p>
+              <p className="text-xs text-ghibli-bark mt-1 text-center">
+                Secured by Stripe
               </p>
             </ParchmentCard>
           </div>

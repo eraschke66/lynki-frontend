@@ -176,7 +176,7 @@ export function LandingPage() {
             <h3 className="text-xl font-bold font-serif text-ghibli-canopy mb-1">Starter</h3>
             <p className="text-4xl font-bold font-serif text-ghibli-canopy mb-6">Free</p>
             <ul className="space-y-4 mb-8 flex-1">
-              {["1 Subject", "AI Quizzes from notes", "Pass probability score"].map((item, i) => (
+              {["Unlimited courses", "AI quizzes from your notes", "Pass probability tracking"].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-sm text-ghibli-bark font-serif">
                   <span className="text-ghibli-moss">✓</span> {item}
                 </li>
@@ -194,7 +194,7 @@ export function LandingPage() {
               <span className="text-ghibli-bark font-serif opacity-60">/year</span>
             </div>
             <ul className="space-y-4 mb-8 flex-1">
-              {["Unlimited Subjects", "Full Knowledge Garden", "Dynamic Study Plans", "Priority AI generation"].map((item, i) => (
+              {["Everything in Starter", "Knowledge Garden — visualize mastery", "Smart Study Plan — AI-tailored to your exam", "Priority AI generation"].map((item, i) => (
                 <li key={i} className="flex items-center gap-3 text-sm text-ghibli-bark font-serif">
                   <span className="text-ghibli-gold">✦</span> {item}
                 </li>
@@ -218,7 +218,7 @@ export function LandingPage() {
           <div className="pt-12 flex flex-wrap justify-center gap-x-8 gap-y-4 text-[10px] text-ghibli-bark/60 font-serif uppercase tracking-widest">
             <Link to="/terms" className="hover:text-ghibli-canopy">Terms</Link>
             <Link to="/privacy" className="hover:text-ghibli-canopy">Privacy</Link>
-            <span>© 2024 PassAI</span>
+            <span>© 2026 Shryn, Inc.</span>
           </div>
         </div>
       </footer>

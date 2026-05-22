@@ -330,3 +330,37 @@ export async function deleteDocument(
     throw new Error("Failed to delete document record");
   }
 }
+
+/**
+ * Create a short-lived signed URL for viewing a stored document file.
+ * Returns null if the URL could not be created.
+ */
+export async function getDocumentSignedUrl(
+  filePath: string,
+  expiresIn = 60,
+): Promise<string | null> {
+  const { data, error } = await supabase.storage
+    .from(BUCKET_NAME)
+    .createSignedUrl(filePath, expiresIn);
+  if (error || !data?.signedUrl) {
+    console.warn("Failed to create signed URL", error);
+    return null;
+  }
+  return data.signedUrl;
+}
+
+/**
+ * Rename a document (title is mutable; hard-edit, no history).
+ */
+export async function renameDocument(
+  documentId: string,
+  title: string,
+): Promise<void> {
+  const { error } = await supabase
+    .from("documents")
+    .update({ title, updated_at: new Date().toISOString() })
+    .eq("id", documentId);
+  if (error) {
+    throw new Error("Failed to rename document");
+  }
+}

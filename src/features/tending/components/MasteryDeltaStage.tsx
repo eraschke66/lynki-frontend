@@ -10,8 +10,8 @@ interface MasteryDeltaStageProps {
   delta: MasteryDelta;
   stagesSkipped: Stage[];
   startedAt: number;
-  /** Optional pass-probability before/after — rendered only when both are
-   *  non-null and they actually moved. */
+  /** Optional pass-probability before/after — rendered whenever both are
+   *  non-null, including when the value did not change. */
   passProbability?: { before: number; after: number } | null;
 }
 
@@ -67,8 +67,7 @@ export function MasteryDeltaStage({
   const showPass =
     passProbability &&
     passProbability.before !== null &&
-    passProbability.after !== null &&
-    Math.round(passProbability.before * 100) !== Math.round(passProbability.after * 100);
+    passProbability.after !== null;
   const passBefore = passProbability ? Math.round(passProbability.before * 100) : null;
   const passAfter = passProbability ? Math.round(passProbability.after * 100) : null;
   const passDiff = passBefore !== null && passAfter !== null ? passAfter - passBefore : null;
@@ -102,9 +101,9 @@ export function MasteryDeltaStage({
           Pass probability:{" "}
           <span className="tabular-nums">{passBefore}%</span> →{" "}
           <span className="font-semibold tabular-nums">{passAfter}%</span>
-          {passDiff !== null && passDiff !== 0 && (
+          {passDiff !== null && (
             <span className="text-ghibli-moss/75 ml-1.5 text-xs">
-              ({passDiff > 0 ? `+${passDiff}` : passDiff}%)
+              ({passDiff > 0 ? `+${passDiff}` : passDiff === 0 ? "0" : passDiff} points)
             </span>
           )}
         </p>

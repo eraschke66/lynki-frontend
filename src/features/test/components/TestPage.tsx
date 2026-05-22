@@ -71,6 +71,7 @@ export function TestPage() {
   const [, setAnsweredCount] = useState(0);
   const [quizComplete, setQuizComplete] = useState(false);
   const [passChance, setPassChance] = useState<number | null>(null);
+  const [passChanceBefore, setPassChanceBefore] = useState<number | null>(null);
   const [targetGrade, setTargetGrade] = useState<number>(1.0);
   const [loadingPassChance, setLoadingPassChance] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -153,6 +154,16 @@ export function TestPage() {
       setCorrectCount(testData.correct_count ?? 0);
     }
   }, [testData]);
+
+  // Snapshot pass probability once when the quiz first becomes ready, so the
+  // completion screen can show a before→after delta.
+  useEffect(() => {
+    if (!user || !courseId || !testData || quizComplete) return;
+    if (passChanceBefore !== null) return; // already captured
+    fetchPassChance(user.id, courseId)
+      .then((pc) => setPassChanceBefore(pc.pass_probability))
+      .catch(() => setPassChanceBefore(null));
+  }, [user, courseId, testData, quizComplete, passChanceBefore]);
 
   const questions = testData?.questions ?? [];
   const currentQuestion = questions[currentIndex] ?? null;
@@ -254,7 +265,7 @@ export function TestPage() {
           );
         }
         const pc = await fetchPassChance(user!.id, courseId!);
-        setPassChance(pc.avg_mastery);
+        setPassChance(pc.pass_probability);
         setTargetGrade(pc.target_grade ?? 1.0);
       } catch (err) {
         console.error("Failed to fetch pass chance:", err);
@@ -293,6 +304,7 @@ export function TestPage() {
     setAnsweredCount(0);
     setQuizComplete(false);
     setPassChance(null);
+    setPassChanceBefore(null);
     setTargetGrade(1.0);
     resumeApplied.current = false;
     quizStartedRef.current = false;
@@ -506,6 +518,32 @@ export function TestPage() {
                     profileData?.curriculum ?? "percentage",
                     targetGrade,
                   )}
+                </p>
+                <p className="text-sm font-sans text-ghibli-canopy/85 mt-2">
+                  Pass probability:{" "}
+                  <span className="tabular-nums">{passPercent}%</span>
+                  {passChanceBefore !== null &&
+                    (() => {
+                      const beforePct = Math.round(passChanceBefore * 100);
+                      const diff = passPercent - beforePct;
+                      const diffColor =
+                        diff > 0
+                          ? "text-emerald-700"
+                          : diff < 0
+                            ? "text-amber-700"
+                            : "text-ghibli-bark/60";
+                      return (
+                        <>
+                          {" "}
+                          <span className="text-ghibli-bark/70">
+                            (was {beforePct}%,
+                          </span>
+                          <span className={`${diffColor} ml-1`}>
+                            {diff > 0 ? `+${diff}` : diff} points)
+                          </span>
+                        </>
+                      );
+                    })()}
                 </p>
               </div>
             ) : (

@@ -30,7 +30,8 @@ import { EditCourseDialog } from "./EditCourseDialog";
 import { DeleteCourseDialog } from "./DeleteCourseDialog";
 import type { CourseSummary, DashboardData } from "../types";
 import { supabase } from "@/lib/supabase";
-import { getGardenStatus, getStudyCTA, getDashboardSubtitle } from "@/lib/garden";
+import { getGardenStatus, getStudyCTA } from "@/lib/garden";
+import { getGradeLabel } from "@/lib/curricula";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
@@ -194,6 +195,7 @@ export function Dashboard() {
 
             <HeroSection
               data={dashboardData!}
+              curriculum={profileData?.curriculum ?? "percentage"}
               onStartStudying={() => {
                 if (nextItem) navigate(`/course/${nextItem.courseId}`);
               }}
@@ -259,19 +261,32 @@ export function Dashboard() {
 }
 
 /* ── Hero Section — oasis "Tend Your Study Garden" two-column ── */
-function HeroSection({ data, onStartStudying, onUpload }: {
+function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
   data: DashboardData;
+  curriculum: string;
   onStartStudying: () => void;
   onUpload: () => void;
 }) {
   const hasStudyable = data.courses.some((c) => c.totalConcepts > 0);
   const nextItem = data.nextStudyItem;
-  const subtitle = getDashboardSubtitle(hasStudyable, nextItem?.reason ?? null);
+
+  // No quiz activity yet → hide the bar, nudge toward a first quiz.
+  const hasAnyMastery = data.courses.some((c) => c.masteredConcepts > 0);
+  // Target grade for the bar caption: the course furthest from passing.
+  const lowestPassCourse = data.courses.length
+    ? data.courses.reduce(
+        (min, c) => (c.passProbability < min.passProbability ? c : min),
+        data.courses[0],
+      )
+    : null;
+  const targetGrade = lowestPassCourse?.targetGrade ?? 0.5;
 
   const primaryAction = hasStudyable && nextItem ? onStartStudying : onUpload;
-  const ctaLabel = hasStudyable && nextItem
-    ? getStudyCTA(nextItem.reason)
-    : "Plant a Seed";
+  const ctaLabel = !hasAnyMastery && hasStudyable
+    ? "Generate Your First Quiz"
+    : hasStudyable && nextItem
+      ? getStudyCTA(nextItem.reason)
+      : "Plant a Seed";
 
   return (
     <ParchmentCard className="p-8 md:p-12 mb-10 overflow-hidden" glow>
@@ -283,9 +298,39 @@ function HeroSection({ data, onStartStudying, onUpload }: {
           <h2 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight mb-4">
             Tend Your<br />Study Garden
           </h2>
-          <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed mb-6 max-w-md mx-auto md:mx-0">
-            {subtitle}
-          </p>
+          {hasAnyMastery ? (
+            <div className="max-w-[360px] mx-auto md:mx-0 mb-6">
+              <div className="flex justify-between mb-1.5">
+                <span className="text-xs text-ghibli-bark">
+                  Growing toward {getGradeLabel(curriculum, targetGrade)}
+                </span>
+                <span className="text-sm font-medium text-ghibli-canopy">
+                  {data.overallPassProbability}% pass probability
+                </span>
+              </div>
+              <div
+                className="relative h-2.5 rounded-full overflow-hidden"
+                style={{ background: "#e8e3d5" }}
+              >
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{ width: `${data.overallPassProbability}%`, background: "#6b8e4e" }}
+                />
+                <div
+                  className="absolute"
+                  style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px", background: "#4a6b3a" }}
+                />
+              </div>
+              <div className="flex justify-between mt-1 text-[10px] text-ghibli-canopy/65">
+                <span>Needs water</span>
+                <span className="mr-[13%]">Thriving</span>
+              </div>
+            </div>
+          ) : (
+            <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed mb-6 max-w-md mx-auto md:mx-0">
+              Take your first quiz to see your pass probability.
+            </p>
+          )}
           <Button
             size="lg"
             onClick={primaryAction}
@@ -332,7 +377,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
         <div className="flex items-center gap-1 shrink-0">
           {course.totalConcepts > 0 ? (
             <span className={`text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 ${status.color}`}>
-              {status.label}
+              {status.label} · {course.passProbability}%
             </span>
           ) : isProcessing ? (
             <span className="text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 text-primary">

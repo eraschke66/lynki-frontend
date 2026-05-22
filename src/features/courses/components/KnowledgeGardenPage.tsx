@@ -52,7 +52,7 @@ function TopicCard({
             </span>
           </div>
           <p className="text-xs text-ghibli-bark mt-1">
-            {topic.mastered_concepts} of {topic.total_concepts} concepts mastered
+            Average mastery: {topic.overall_progress}% · {topic.mastered_concepts} of {topic.total_concepts} fully mastered
           </p>
         </div>
         <Button

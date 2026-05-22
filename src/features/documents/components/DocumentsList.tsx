@@ -8,10 +8,28 @@ import {
   XCircle,
   RefreshCw,
   AlertTriangle,
+  MoreVertical,
+  Eye,
+  Pencil,
+  FileQuestion,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  getDocumentSignedUrl,
+  renameDocument,
+} from "../services/documentService";
 import {
   Card,
   CardContent,
@@ -64,6 +82,9 @@ export function DocumentsList({
   loading,
 }: DocumentsListProps) {
   const [retryingDocs, setRetryingDocs] = useState<Set<string>>(new Set());
+  const [renamingDocId, setRenamingDocId] = useState<string | null>(null);
+  const [renameValue, setRenameValue] = useState("");
+  const navigate = useNavigate();
 
   // Memoize document IDs to prevent unnecessary re-fetches
   const documentIds = useMemo(
@@ -145,6 +166,63 @@ export function DocumentsList({
     [onRetry],
   );
 
+  const handleView = useCallback(async (doc: Document) => {
+    const url = await getDocumentSignedUrl(doc.filePath, 60);
+    if (!url) {
+      toast.error("Could not open document");
+      return;
+    }
+    window.open(url, "_blank", "noopener,noreferrer");
+  }, []);
+
+  const handleStartRename = useCallback((doc: Document) => {
+    setRenamingDocId(doc.id);
+    setRenameValue(doc.title);
+  }, []);
+
+  const handleCancelRename = useCallback(() => {
+    setRenamingDocId(null);
+    setRenameValue("");
+  }, []);
+
+  const handleSaveRename = useCallback(
+    async (doc: Document) => {
+      const newTitle = renameValue.trim();
+      if (!newTitle || newTitle === doc.title) {
+        setRenamingDocId(null);
+        return;
+      }
+      try {
+        await renameDocument(doc.id, newTitle);
+        // Optimistically reflect the new title; the realtime subscription
+        // (postgres_changes UPDATE) will reconcile shortly after.
+        onDocumentUpdate?.({
+          ...doc,
+          title: newTitle,
+          updatedAt: new Date().toISOString(),
+        });
+        toast.success("Document renamed");
+      } catch {
+        toast.error("Could not rename document");
+      } finally {
+        setRenamingDocId(null);
+        setRenameValue("");
+      }
+    },
+    [renameValue, onDocumentUpdate],
+  );
+
+  // NOTE: The backend quiz-generation endpoint (/quiz-sessions/generate) only
+  // accepts user_id + course_id — there is no per-document quiz generation yet.
+  // So this routes to the course detail page, where "Generate New Quiz" lives.
+  // Pre-selecting the document is a separate ticket (needs a backend param).
+  const handleGenerateQuiz = useCallback(
+    (doc: Document) => {
+      navigate(`/course/${doc.courseId}`);
+    },
+    [navigate],
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -193,10 +271,29 @@ export function DocumentsList({
               <TableRow key={doc.id}>
                 <TableCell className="font-medium">
                   <div className="flex items-center gap-2">
-                    <FileIcon className="w-4 h-4 text-primary" />
-                    <span className="truncate max-w-50" title={doc.title}>
-                      {doc.title}
-                    </span>
+                    <FileIcon className="w-4 h-4 text-primary shrink-0" />
+                    {renamingDocId === doc.id ? (
+                      <Input
+                        value={renameValue}
+                        autoFocus
+                        onChange={(e) => setRenameValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            handleSaveRename(doc);
+                          } else if (e.key === "Escape") {
+                            e.preventDefault();
+                            handleCancelRename();
+                          }
+                        }}
+                        onBlur={() => handleSaveRename(doc)}
+                        className="h-8 max-w-xs"
+                      />
+                    ) : (
+                      <span className="break-words" title={doc.title}>
+                        {doc.title}
+                      </span>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>{formatFileSize(doc.fileSize)}</TableCell>
@@ -275,17 +372,44 @@ export function DocumentsList({
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(doc.id, doc.filePath)}
-                      className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-full text-ghibli-canopy/60 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors"
+                        aria-label="Actions"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                      <DropdownMenuItem onClick={() => handleView(doc)}>
+                        <Eye className="w-4 h-4 mr-2" />
+                        View document
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleStartRename(doc)}>
+                        <Pencil className="w-4 h-4 mr-2" />
+                        Rename
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleGenerateQuiz(doc)}>
+                        <FileQuestion className="w-4 h-4 mr-2" />
+                        Generate quiz from this document
+                      </DropdownMenuItem>
+                      {doc.status === "failed" && onRetry && (
+                        <DropdownMenuItem onClick={() => handleRetry(doc)}>
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Reprocess
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={() => onDelete(doc.id, doc.filePath)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

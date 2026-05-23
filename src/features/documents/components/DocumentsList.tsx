@@ -381,7 +381,11 @@ export function DocumentsList({
                         <MoreVertical className="w-4 h-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-48"
+                      onCloseAutoFocus={(e) => e.preventDefault()}
+                    >
                       <DropdownMenuItem onClick={() => handleView(doc)}>
                         <Eye className="w-4 h-4 mr-2" />
                         View document

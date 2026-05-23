@@ -519,32 +519,49 @@ export function TestPage() {
                     targetGrade,
                   )}
                 </p>
-                <p className="text-sm font-sans text-ghibli-canopy/85 mt-2">
-                  Pass probability:{" "}
-                  <span className="tabular-nums">{passPercent}%</span>
-                  {passChanceBefore !== null &&
-                    (() => {
-                      const beforePct = Math.round(passChanceBefore * 100);
-                      const diff = passPercent - beforePct;
-                      const diffColor =
-                        diff > 0
-                          ? "text-emerald-700"
-                          : diff < 0
-                            ? "text-amber-700"
-                            : "text-ghibli-bark/60";
-                      return (
-                        <>
-                          {" "}
-                          <span className="text-ghibli-bark/70">
-                            (was {beforePct}%,
+                {passChanceBefore !== null ? (
+                  (() => {
+                    const beforePct = Math.round(passChanceBefore * 100);
+                    const diff = passPercent - beforePct;
+                    const verdictColor =
+                      diff > 0
+                        ? "text-ghibli-canopy"
+                        : diff < 0
+                          ? "text-amber-700"
+                          : "text-ghibli-bark/60";
+                    const deltaLabel =
+                      diff > 0
+                        ? `+${diff} points`
+                        : diff < 0
+                          ? `${diff} points`
+                          : "0 points";
+                    return (
+                      <div
+                        className={`mt-2 w-full max-w-md flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm font-sans ${verdictColor}`}
+                      >
+                        <span>
+                          Your pass probability moved from{" "}
+                          <span className="tabular-nums font-semibold">
+                            {beforePct}%
+                          </span>{" "}
+                          to{" "}
+                          <span className="tabular-nums font-semibold">
+                            {passPercent}%
                           </span>
-                          <span className={`${diffColor} ml-1`}>
-                            {diff > 0 ? `+${diff}` : diff} points)
-                          </span>
-                        </>
-                      );
-                    })()}
-                </p>
+                          .
+                        </span>
+                        <span className="tabular-nums font-semibold">
+                          {deltaLabel}
+                        </span>
+                      </div>
+                    );
+                  })()
+                ) : (
+                  <p className="text-sm font-sans text-ghibli-canopy/85 mt-2">
+                    Pass probability:{" "}
+                    <span className="tabular-nums">{passPercent}%</span>
+                  </p>
+                )}
               </div>
             ) : (
               <div className="space-y-2">

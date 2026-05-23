@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useSearchParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { HardDrive } from "lucide-react";
 import { Header } from "@/components/layout/Header";
@@ -15,12 +16,15 @@ import { FileUploader } from "./FileUploader";
 import { DocumentsList } from "./DocumentsList";
 import type { Document } from "../types";
 import { toast } from "sonner";
-import { documentQueryKeys } from "@/lib/queryKeys";
+import { documentQueryKeys, courseQueryKeys } from "@/lib/queryKeys";
+import { fetchUserCourses } from "@/features/courses";
 import { posthog } from "@/lib/posthog";
 
 export function DocumentsPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  const courseIdFilter = searchParams.get("courseId");
 
   const { data: documents = [], isLoading: documentsLoading } = useQuery({
     queryKey: documentQueryKeys.list(user?.id ?? ""),
@@ -33,6 +37,12 @@ export function DocumentsPage() {
       );
       return hasProcessing ? 5000 : false;
     },
+  });
+
+  const { data: courses = [], isLoading: coursesLoading } = useQuery({
+    queryKey: courseQueryKeys.list(user?.id ?? ""),
+    queryFn: () => fetchUserCourses(user!.id),
+    enabled: !!user,
   });
 
   const { data: stats = { usedSpace: 0, fileCount: 0 } } = useQuery({
@@ -169,14 +179,115 @@ export function DocumentsPage() {
             </div>
           </div>
 
-          {/* Documents List */}
-          <DocumentsList
-            documents={documents}
-            onDelete={handleDelete}
-            onRetry={handleRetry}
-            onDocumentUpdate={handleDocumentUpdate}
-            loading={documentsLoading}
-          />
+          {/* Documents — filtered to one course, or grouped per course */}
+          {(() => {
+            if (courseIdFilter) {
+              const filteredDocs = documents.filter(
+                (d) => d.courseId === courseIdFilter,
+              );
+              const course = courses.find((c) => c.id === courseIdFilter);
+              return (
+                <section className="space-y-4">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <h2 className="text-xl font-semibold text-ghibli-canopy">
+                      {course ? course.title : "Materials"}
+                    </h2>
+                    <Link
+                      to="/documents"
+                      className="text-sm text-ghibli-bark hover:text-ghibli-canopy underline-offset-4 hover:underline"
+                    >
+                      ← All materials
+                    </Link>
+                  </div>
+                  <DocumentsList
+                    documents={filteredDocs}
+                    onDelete={handleDelete}
+                    onRetry={handleRetry}
+                    onDocumentUpdate={handleDocumentUpdate}
+                    loading={documentsLoading}
+                    title={course ? `${course.title} materials` : "Materials"}
+                    description="Documents uploaded to this course"
+                  />
+                </section>
+              );
+            }
+
+            // Courses query still in-flight while documents have arrived —
+            // avoid a flash of "Uncategorized" containing everything.
+            if (documents.length > 0 && coursesLoading) {
+              return (
+                <DocumentsList
+                  documents={[]}
+                  onDelete={handleDelete}
+                  onRetry={handleRetry}
+                  onDocumentUpdate={handleDocumentUpdate}
+                  loading={true}
+                />
+              );
+            }
+
+            // Grouped mode — one section per course that has docs, plus Uncategorized
+            const courseIds = new Set(courses.map((c) => c.id));
+            const groups = courses
+              .map((c) => ({
+                course: c,
+                docs: documents.filter((d) => d.courseId === c.id),
+              }))
+              .filter((g) => g.docs.length > 0);
+
+            const uncategorized = documents.filter(
+              (d) => !courseIds.has(d.courseId),
+            );
+
+            if (groups.length === 0 && uncategorized.length === 0) {
+              return (
+                <DocumentsList
+                  documents={[]}
+                  onDelete={handleDelete}
+                  onRetry={handleRetry}
+                  onDocumentUpdate={handleDocumentUpdate}
+                  loading={documentsLoading}
+                />
+              );
+            }
+
+            return (
+              <div className="space-y-8">
+                {groups.map(({ course, docs }) => (
+                  <section key={course.id} className="space-y-3">
+                    <h2 className="text-xl font-semibold text-ghibli-canopy">
+                      {course.title}
+                    </h2>
+                    <DocumentsList
+                      documents={docs}
+                      onDelete={handleDelete}
+                      onRetry={handleRetry}
+                      onDocumentUpdate={handleDocumentUpdate}
+                      loading={documentsLoading}
+                      title={`${course.title} materials`}
+                      description="Documents uploaded to this course"
+                    />
+                  </section>
+                ))}
+                {uncategorized.length > 0 && (
+                  <section className="space-y-3">
+                    <h2 className="text-xl font-semibold text-ghibli-canopy">
+                      Uncategorized
+                    </h2>
+                    <DocumentsList
+                      documents={uncategorized}
+                      onDelete={handleDelete}
+                      onRetry={handleRetry}
+                      onDocumentUpdate={handleDocumentUpdate}
+                      loading={documentsLoading}
+                      title="Uncategorized"
+                      description="Documents not linked to a course"
+                    />
+                  </section>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
     </>

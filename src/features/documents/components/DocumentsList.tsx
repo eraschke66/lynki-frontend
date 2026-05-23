@@ -72,6 +72,8 @@ interface DocumentsListProps {
   onRetry?: (doc: Document) => void;
   onDocumentUpdate?: (doc: Document) => void;
   loading: boolean;
+  title?: string;
+  description?: string;
 }
 
 export function DocumentsList({
@@ -80,6 +82,8 @@ export function DocumentsList({
   onRetry,
   onDocumentUpdate,
   loading,
+  title = "Your Documents",
+  description = "Manage your uploaded course materials",
 }: DocumentsListProps) {
   const [retryingDocs, setRetryingDocs] = useState<Set<string>>(new Set());
   const [renamingDocId, setRenamingDocId] = useState<string | null>(null);
@@ -252,8 +256,8 @@ export function DocumentsList({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Your Documents</CardTitle>
-        <CardDescription>Manage your uploaded course materials</CardDescription>
+        <CardTitle>{title}</CardTitle>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>

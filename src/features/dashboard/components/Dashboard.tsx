@@ -271,7 +271,9 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
   const nextItem = data.nextStudyItem;
 
   // No quiz activity yet → hide the bar, nudge toward a first quiz.
-  const hasAnyMastery = data.courses.some((c) => c.masteredConcepts > 0);
+  const hasAnyActivity = data.courses.some(
+    (c) => c.passChance !== null || c.progressPercent > 0,
+  );
   // Target grade for the bar caption: the course furthest from passing.
   const lowestPassCourse = data.courses.length
     ? data.courses.reduce(
@@ -282,7 +284,7 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
   const targetGrade = lowestPassCourse?.targetGrade ?? 0.5;
 
   const primaryAction = hasStudyable && nextItem ? onStartStudying : onUpload;
-  const ctaLabel = !hasAnyMastery && hasStudyable
+  const ctaLabel = !hasAnyActivity && hasStudyable
     ? "Generate Your First Quiz"
     : hasStudyable && nextItem
       ? getStudyCTA(nextItem.reason)
@@ -298,7 +300,7 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
           <h2 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight mb-4">
             Tend Your<br />Study Garden
           </h2>
-          {hasAnyMastery ? (
+          {hasAnyActivity ? (
             <div className="max-w-[360px] mx-auto md:mx-0 mb-6">
               <div className="flex justify-between mb-1.5">
                 <span className="text-xs text-ghibli-bark">

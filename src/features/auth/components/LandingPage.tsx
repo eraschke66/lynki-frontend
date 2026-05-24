@@ -144,13 +144,13 @@ export function LandingPage() {
             </div>
             <div className="space-y-3">
               <h2 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy leading-tight">
-                Built by a teacher, not just a technology company.
+                Designed by an educator, not just a technology company.
               </h2>
               <p className="font-serif text-base md:text-lg text-ghibli-bark leading-relaxed">
-                PassAI was created by Erik Raschke, an educator with more than 30 years of experience
-                teaching in American and European educational systems, including the International
-                Baccalaureate. It is designed around a problem students face every year: having piles
-                of materials, an approaching exam, and no clear sense of what they actually know.
+                PassAI was shaped by more than 30 years of teaching experience across American and
+                European educational systems, including the International Baccalaureate. It is built
+                around a problem students face every year: having piles of materials, an approaching
+                exam, and no clear sense of what they actually know.
               </p>
               <p className="font-serif text-sm md:text-base text-ghibli-canopy/85 italic leading-relaxed">
                 PassAI helps students focus their effort where it can make the greatest difference.
@@ -175,25 +175,25 @@ export function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <StepCard
               number="01"
-              plant="/plant-seedling-raw.png"
+              plant="/plant-stage-1.png"
               title="Upload what you are studying"
               text="Add your class notes, teacher's slides, readings or revision documents."
             />
             <StepCard
               number="02"
-              plant="/plant-young-raw.png"
+              plant="/plant-stage-2.png"
               title="Take quizzes from your course"
               text="PassAI generates targeted questions from the materials your exam is based on."
             />
             <StepCard
               number="03"
-              plant="/plant-flower-raw.png"
+              plant="/plant-stage-3.png"
               title="Find what needs water"
               text="See which concepts are weak, which are growing and where to focus next."
             />
             <StepCard
               number="04"
-              plant="/plant-lush-raw.png"
+              plant="/plant-stage-4.png"
               title="Grow toward your target grade"
               text="Set your exam date and target grade, then follow a study plan shaped by your progress."
             />
@@ -462,15 +462,20 @@ function StepCard({
 }) {
   return (
     <ParchmentCard className="p-6 md:p-7 h-full flex flex-col" hover={false}>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <span className="font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss font-semibold">
           Step {number}
         </span>
+      </div>
+      <div className="relative flex items-center justify-center mb-4 h-24 md:h-28">
+        <div className="absolute inset-0 m-auto w-24 h-24 rounded-full bg-ghibli-sunlight/15 blur-2xl" />
         <img
           src={plant}
           alt=""
-          className="w-12 h-12 object-contain opacity-90"
-          style={{ mixBlendMode: "darken" }}
+          aria-hidden
+          loading="lazy"
+          decoding="async"
+          className="relative h-24 md:h-28 w-auto object-contain opacity-95 select-none"
         />
       </div>
       <h3 className="font-serif text-lg font-semibold text-ghibli-canopy mb-2 leading-snug">
@@ -919,27 +924,48 @@ function BigGardenPreview() {
           aria-hidden
           focusable="false"
           className="absolute inset-0 w-full h-full pointer-events-none select-none"
-          style={{ color: "hsl(28 32% 32%)", opacity: 0.16 }}
+          style={{ color: "hsl(28 32% 28%)" }}
         >
+          {/* Heavier strokes that pass through the open gaps between topic rows
+              (rows centred at ~10/30/50/70/90; gaps fall at ~19/39/59/79).
+              These remain visible against the parchment background. */}
           <g
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
             vectorEffect="non-scaling-stroke"
+            strokeWidth="2"
+            opacity="0.3"
           >
             {/* Soft vertical spine, drifting slightly */}
             <path d="M 6 4 C 5 22, 8 38, 6 54 C 4 70, 7 86, 6 96" />
-            {/* Branches to each topic row (rows centred at ~10, 30, 50, 70, 90) */}
+            {/* Cubic-bezier curves running through the inter-row gaps */}
+            <path d="M 6 19 C 24 17, 50 22, 78 19" />
+            <path d="M 6 39 C 22 37, 46 42, 72 39" />
+            <path d="M 6 59 C 26 57, 52 62, 80 59" />
+            <path d="M 6 79 C 20 77, 44 82, 68 79" />
+            {/* One restrained Y-branch between rows 2 and 3 — implies a quiet
+                connection between two concepts, not a network diagram. */}
+            <path d="M 30 39 C 32 46, 31 52, 33 59" />
+            <path d="M 30 39 C 28 46, 29 52, 27 59" />
+          </g>
+          {/* Lighter, finer strokes that reach into each topic row — sit under
+              the semi-transparent row cards and tie the spine to each topic. */}
+          <g
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+            strokeWidth="1.5"
+            opacity="0.22"
+          >
             <path d="M 6 10 C 18 9, 34 12, 52 10" />
             <path d="M 6 30 C 22 28, 40 33, 60 30" />
             <path d="M 6 50 C 24 48, 46 53, 68 50" />
             <path d="M 6 70 C 20 68, 38 73, 56 70" />
             <path d="M 6 90 C 26 88, 50 93, 72 90" />
-            {/* One restrained branching connection — a quiet Y between two adjacent rows */}
-            <path d="M 30 30 C 32 38, 30 44, 32 50" />
-            <path d="M 30 30 C 28 38, 30 44, 28 50" />
           </g>
         </svg>
 

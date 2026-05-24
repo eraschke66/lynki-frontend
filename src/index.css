@@ -73,6 +73,10 @@
   --text-shadow-footer: 0 1px 2px hsl(48 80% 97% / 0.7);
   --text-shadow-loader: 0 1px 4px hsl(var(--ghibli-canopy) / 0.4);
 
+  /* Drop-shadow tokens (filter: drop-shadow) — Neko illustration */
+  --drop-shadow-neko:      0 4px 12px rgba(27,67,50,0.18);
+  --drop-shadow-neko-side: -4px 4px 10px rgba(27,67,50,0.15);
+
   /* Ghibli font families — Fraunces is the brand serif; we use it everywhere
      so font-sans and font-serif resolve to the same family. Mono kept for
      UUIDs / fixed-width data. */

@@ -421,7 +421,7 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="relative z-10 flex items-center justify-center min-h-screen">
-          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
+          <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4">
             <AlertCircle className="w-10 h-10 text-destructive" />
             <p className="text-sm text-ghibli-bark">Failed to load quiz</p>
             <Button variant="outline" size="sm" onClick={() => refetch()}>
@@ -445,7 +445,7 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="relative z-10 flex items-center justify-center min-h-screen">
-          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm">
+          <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4 max-w-sm">
             <PlantIndicator probability={20} size="lg" />
             <div>
               <h2 className="font-serif text-lg font-semibold mb-1">
@@ -489,7 +489,7 @@ export function TestPage() {
           <X className="w-6 h-6" />
         </button>
         <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
-          <ParchmentCard className="p-10 text-center flex flex-col items-center gap-6 w-full max-w-lg">
+          <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-6 w-full max-w-lg">
             {loadingPassChance ? (
               <div className="space-y-3">
                 <PlantIndicator probability={40} size="lg" />

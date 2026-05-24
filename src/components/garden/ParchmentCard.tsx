@@ -13,7 +13,7 @@ export function ParchmentCard({ children, className = "", hover = true, glow = f
     <div
       style={style}
       className={`
-        relative glass-cream botanical-border parchment-texture
+        relative parchment-solid botanical-border parchment-texture
         rounded-[28px]
         ${hover ? "transition-all duration-500 hover:shadow-parchment-hover hover:-translate-y-0.5" : ""}
         ${glow ? "shadow-glow" : ""}

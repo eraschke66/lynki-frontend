@@ -63,6 +63,11 @@
   --shadow-glow: 0 0 60px hsl(42 90% 72% / 0.35);
   --shadow-soft-inset: inset 0 2px 8px hsl(140 30% 20% / 0.08);
 
+  /* Text shadows — exact values preserved for visual fidelity */
+  --text-shadow-hero:   0 1px 4px rgba(0,0,0,0.4);
+  --text-shadow-footer: 0 1px 2px hsl(48 80% 97% / 0.7);
+  --text-shadow-loader: 0 1px 4px hsl(var(--ghibli-canopy) / 0.4);
+
   /* Ghibli font families — Fraunces is the brand serif; we use it everywhere
      so font-sans and font-serif resolve to the same family. Mono kept for
      UUIDs / fixed-width data. */

@@ -31,10 +31,7 @@ export function Footer() {
         borderRadius: "0",
       }}
     >
-      <div
-        className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4"
-        style={{ textShadow: "0 1px 2px hsl(48 80% 97% / 0.7)" }}
-      >
+      <div className="max-w-5xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-shadow-footer">
 
         {/* Left: wordmark + copyright */}
         <div className="flex flex-col items-center sm:items-start gap-0.5">

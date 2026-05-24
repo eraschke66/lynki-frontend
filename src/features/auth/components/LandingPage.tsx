@@ -161,7 +161,7 @@ export function LandingPage() {
       </section>
 
       {/* ── How It Works ────────────────────────────────────── */}
-      <section id="how-it-works" className="relative z-10 py-16 md:py-20 px-6 bg-white/30 backdrop-blur-sm border-y border-ghibli-moss/10">
+      <section id="how-it-works" className="relative z-10 scroll-mt-24 py-16 md:py-20 px-6 bg-white/30 backdrop-blur-sm border-y border-ghibli-moss/10">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12 space-y-3 max-w-2xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-ghibli-canopy">
@@ -291,7 +291,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Knowledge Garden ────────────────────────────────── */}
-      <section id="knowledge-garden" className="relative z-10 py-16 md:py-24 px-6">
+      <section id="knowledge-garden" className="relative z-10 scroll-mt-24 py-16 md:py-24 px-6">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.1fr] gap-12 items-center">
           <div className="space-y-5">
             <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss px-3 py-1 rounded-full bg-ghibli-mist/60 border border-ghibli-moss/15">
@@ -914,62 +914,43 @@ function BigGardenPreview() {
           </p>
         </div>
       </div>
-      <div className="relative">
-        {/* Subtle root tracery behind the topic rows — illustrative only.
-            Static inline SVG, no refs/observers, no event handlers, no
-            dependency on the real GardenRoots component. */}
-        <svg
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-          aria-hidden
-          focusable="false"
-          className="absolute inset-0 w-full h-full pointer-events-none select-none"
-          style={{ color: "hsl(28 32% 28%)" }}
-        >
-          {/* Heavier strokes that pass through the open gaps between topic rows
-              (rows centred at ~10/30/50/70/90; gaps fall at ~19/39/59/79).
-              These remain visible against the parchment background. */}
-          <g
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-            strokeWidth="2"
-            opacity="0.3"
+      <div className="flex items-stretch gap-0">
+        {/* Slim left rail — empty parchment column that houses the root system.
+            No row card sits behind this column, so the spine and its short
+            branches never overlap any label or progress bar. */}
+        <div className="relative w-6 md:w-8 shrink-0 pointer-events-none">
+          <svg
+            viewBox="0 0 10 100"
+            preserveAspectRatio="none"
+            aria-hidden
+            focusable="false"
+            className="absolute inset-0 w-full h-full pointer-events-none select-none"
+            style={{ color: "hsl(28 32% 28%)" }}
           >
-            {/* Soft vertical spine, drifting slightly */}
-            <path d="M 6 4 C 5 22, 8 38, 6 54 C 4 70, 7 86, 6 96" />
-            {/* Cubic-bezier curves running through the inter-row gaps */}
-            <path d="M 6 19 C 24 17, 50 22, 78 19" />
-            <path d="M 6 39 C 22 37, 46 42, 72 39" />
-            <path d="M 6 59 C 26 57, 52 62, 80 59" />
-            <path d="M 6 79 C 20 77, 44 82, 68 79" />
-            {/* One restrained Y-branch between rows 2 and 3 — implies a quiet
-                connection between two concepts, not a network diagram. */}
-            <path d="M 30 39 C 32 46, 31 52, 33 59" />
-            <path d="M 30 39 C 28 46, 29 52, 27 59" />
-          </g>
-          {/* Lighter, finer strokes that reach into each topic row — sit under
-              the semi-transparent row cards and tie the spine to each topic. */}
-          <g
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-            strokeWidth="1.5"
-            opacity="0.22"
-          >
-            <path d="M 6 10 C 18 9, 34 12, 52 10" />
-            <path d="M 6 30 C 22 28, 40 33, 60 30" />
-            <path d="M 6 50 C 24 48, 46 53, 68 50" />
-            <path d="M 6 70 C 20 68, 38 73, 56 70" />
-            <path d="M 6 90 C 26 88, 50 93, 72 90" />
-          </g>
-        </svg>
+            <g
+              fill="none"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              vectorEffect="non-scaling-stroke"
+              strokeWidth="1.75"
+              opacity="0.26"
+            >
+              {/* Slim organic vertical spine, drifting gently inside the rail. */}
+              <path d="M 4.5 4 C 3.5 22, 5.5 38, 4.5 54 C 3.5 70, 5.5 86, 4.5 96" />
+              {/* One short soft-S branch per topic row, ending at the rail's
+                  right edge (= the left edge of each card). Row centres in
+                  the rail sit at y ≈ 10/30/50/70/90. */}
+              <path d="M 4.5 10 C 6 9, 8 11, 9.5 10" />
+              <path d="M 4.5 30 C 6 29, 8 31, 9.5 30" />
+              <path d="M 4.5 50 C 6 49, 8 51, 9.5 50" />
+              <path d="M 4.5 70 C 6 69, 8 71, 9.5 70" />
+              <path d="M 4.5 90 C 6 89, 8 91, 9.5 90" />
+            </g>
+          </svg>
+        </div>
 
-        <div className="relative z-10 space-y-2.5">
+        <div className="flex-1 min-w-0 space-y-2.5">
           {topics.map((t) => (
             <div
               key={t.name}

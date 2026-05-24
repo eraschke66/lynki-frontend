@@ -23,6 +23,68 @@ function getConceptIcon(status: ConceptMastery["status"]): string {
 }
 
 // ---------------------------------------------------------------------------
+// Recommended-next-topic selection
+//
+// Isolated so Phase 2 can swap the implementation for a backend call
+// (/courses/{course_id}/recommend-next-topic) without touching the
+// rendering surface. overall_progress is integer 0–100.
+// ---------------------------------------------------------------------------
+
+const RECOMMEND_MASTERY_THRESHOLD = 75;
+
+function selectRecommendedTopic(topics: TopicMastery[]): TopicMastery | null {
+  const candidates = topics.filter(
+    (t) => t.overall_progress < RECOMMEND_MASTERY_THRESHOLD,
+  );
+  if (candidates.length === 0) return null;
+  const sorted = [...candidates].sort((a, b) => {
+    if (a.overall_progress !== b.overall_progress) {
+      return a.overall_progress - b.overall_progress;
+    }
+    if (a.total_concepts !== b.total_concepts) {
+      return b.total_concepts - a.total_concepts;
+    }
+    return a.topic_name.localeCompare(b.topic_name);
+  });
+  return sorted[0];
+}
+
+// ---------------------------------------------------------------------------
+// RecommendedTopicCard
+// ---------------------------------------------------------------------------
+
+function RecommendedTopicCard({
+  topic,
+  onBegin,
+}: {
+  topic: TopicMastery;
+  onBegin: (topicId: string) => void;
+}) {
+  const gardenStatus = getGardenStatus(topic.overall_progress);
+
+  return (
+    <ParchmentCard className="p-6 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h2 className="font-serif text-base font-semibold text-foreground leading-snug">
+            Today: tend {topic.topic_name}
+          </h2>
+          <p className="text-xs text-ghibli-bark mt-1">
+            15 min · {gardenStatus.label}
+          </p>
+        </div>
+        <Button
+          onClick={() => onBegin(topic.topic_id)}
+          className="shrink-0"
+        >
+          Begin →
+        </Button>
+      </div>
+    </ParchmentCard>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // TopicCard
 // ---------------------------------------------------------------------------
 
@@ -154,6 +216,13 @@ export function KnowledgeGardenPage() {
     [courseId, navigate],
   );
 
+  const handleBeginTending = useCallback(
+    (topicId: string) => {
+      navigate(`/course/${courseId}/tend/${topicId}`);
+    },
+    [courseId, navigate],
+  );
+
   if (!user || !courseId) {
     navigate("/home");
     return null;
@@ -162,6 +231,7 @@ export function KnowledgeGardenPage() {
   const topics = gardenData?.topics ?? [];
   const overallProgress = gardenData?.overall_progress ?? 0;
   const gardenStatus = getGardenStatus(overallProgress);
+  const recommendedTopic = selectRecommendedTopic(topics);
 
   return (
     <>
@@ -227,6 +297,14 @@ export function KnowledgeGardenPage() {
                 </div>
               </div>
             </ParchmentCard>
+
+            {/* Recommended next topic — hidden when every topic is ≥75% mastery */}
+            {recommendedTopic && (
+              <RecommendedTopicCard
+                topic={recommendedTopic}
+                onBegin={handleBeginTending}
+              />
+            )}
 
             {/* Topics */}
             {topics.length === 0 ? (

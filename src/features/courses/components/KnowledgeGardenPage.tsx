@@ -337,7 +337,7 @@ export function KnowledgeGardenPage() {
               </ParchmentCard>
             ) : (
               <div className="relative" ref={topicsContainerRef}>
-                <GardenRoots containerRef={topicsContainerRef} />
+                <GardenRoots containerRef={topicsContainerRef} topics={topics} />
                 {topics.map((topic) => (
                   <TopicCard
                     key={topic.topic_id}

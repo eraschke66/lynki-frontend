@@ -97,7 +97,7 @@ export function LandingPage() {
               <Button asChild size="lg" className="h-14 px-8 text-base bg-ghibli-canopy hover:bg-ghibli-forest text-white shadow-md hover:shadow-lg transition-all duration-300 font-serif rounded-full">
                 <Link to="/signup">
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload One Document Free
+                  Upload Your Materials Free
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-base border-ghibli-moss/30 text-ghibli-canopy hover:bg-white/60 font-serif rounded-full">
@@ -113,30 +113,50 @@ export function LandingPage() {
           {/* Hero product preview — believable PassAI screen */}
           <div className="relative">
             <div className="absolute inset-0 bg-ghibli-moss/10 blur-3xl rounded-[2.5rem] transform scale-95" />
-            {/* Floating plant accents flanking the preview card */}
-            <img
-              src="/plant-young-raw.png"
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              className="hidden lg:block absolute -left-10 -bottom-8 w-24 opacity-70 animate-float-leaf pointer-events-none select-none"
-              style={{ mixBlendMode: "darken" }}
-            />
-            <img
-              src="/plant-seedling-raw.png"
-              alt=""
-              aria-hidden
-              loading="lazy"
-              decoding="async"
-              className="hidden lg:block absolute -right-6 -top-8 w-20 opacity-60 animate-drift pointer-events-none select-none"
-              style={{ mixBlendMode: "darken" }}
-            />
             <HeroProductPreview />
             <p className="font-sans text-[12px] md:text-xs text-ghibli-bark/80 italic text-center mt-3 max-w-md mx-auto leading-relaxed">
               Your readiness estimate updates as you complete quizzes from your materials.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* ── Educator / founder trust panel ──────────────────── */}
+      <section className="relative z-10 pb-10 md:pb-12 px-6">
+        <div className="max-w-5xl mx-auto">
+          <ParchmentCard
+            className="px-7 py-7 md:px-10 md:py-8 grid md:grid-cols-[auto_1fr] gap-6 md:gap-8 items-center"
+            hover={false}
+          >
+            <div className="flex md:flex-col items-center md:items-start gap-3 md:gap-2 md:w-44 shrink-0">
+              <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss font-semibold px-3 py-1 rounded-full bg-ghibli-mist/60 border border-ghibli-moss/15">
+                Built from the classroom
+              </span>
+              <img
+                src="/leaf-sprout.png"
+                alt=""
+                aria-hidden
+                loading="lazy"
+                decoding="async"
+                className="hidden md:block w-10 h-10 object-contain opacity-70"
+                style={{ mixBlendMode: "darken" }}
+              />
+            </div>
+            <div className="space-y-3">
+              <h2 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy leading-tight">
+                Built by a teacher, not just a technology company.
+              </h2>
+              <p className="font-serif text-base md:text-lg text-ghibli-bark leading-relaxed">
+                PassAI was created by Erik Raschke, an educator with more than 30 years of experience
+                teaching in American and European educational systems, including the International
+                Baccalaureate. It is designed around a problem students face every year: having piles
+                of materials, an approaching exam, and no clear sense of what they actually know.
+              </p>
+              <p className="font-serif text-sm md:text-base text-ghibli-canopy/85 italic leading-relaxed">
+                PassAI helps students focus their effort where it can make the greatest difference.
+              </p>
+            </div>
+          </ParchmentCard>
         </div>
       </section>
 

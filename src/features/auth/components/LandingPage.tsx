@@ -26,6 +26,26 @@ export function LandingPage() {
       <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-ghibli-sunlight/10 blur-[120px] rounded-full pointer-events-none animate-shimmer" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-ghibli-moss/5 blur-[100px] rounded-full pointer-events-none animate-pulse-soft" />
 
+      {/* Faded foliage at viewport edges — restrained botanical framing */}
+      <img
+        src="/foliage-left-v2.png"
+        alt=""
+        aria-hidden
+        loading="lazy"
+        decoding="async"
+        className="hidden md:block fixed left-0 bottom-0 w-[280px] lg:w-[340px] opacity-[0.18] pointer-events-none select-none z-0"
+        style={{ mixBlendMode: "multiply" }}
+      />
+      <img
+        src="/foliage-right-v2.png"
+        alt=""
+        aria-hidden
+        loading="lazy"
+        decoding="async"
+        className="hidden md:block fixed right-0 bottom-0 w-[280px] lg:w-[340px] opacity-[0.18] pointer-events-none select-none z-0"
+        style={{ mixBlendMode: "multiply" }}
+      />
+
       {/* ── Header ─────────────────────────────────────────── */}
       <nav className="fixed top-0 w-full z-50 glass-cream border-b border-ghibli-moss/15">
         <div className="max-w-6xl mx-auto px-6 py-3.5 flex items-center justify-between">
@@ -77,7 +97,7 @@ export function LandingPage() {
               <Button asChild size="lg" className="h-14 px-8 text-base bg-ghibli-canopy hover:bg-ghibli-forest text-white shadow-md hover:shadow-lg transition-all duration-300 font-serif rounded-full">
                 <Link to="/signup">
                   <Upload className="w-4 h-4 mr-2" />
-                  Upload Materials Free
+                  Upload One Document Free
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-base border-ghibli-moss/30 text-ghibli-canopy hover:bg-white/60 font-serif rounded-full">
@@ -86,22 +106,44 @@ export function LandingPage() {
             </div>
 
             <p className="text-sm text-ghibli-bark/75 font-sans max-w-md mx-auto lg:mx-0 leading-relaxed">
-              Built from your materials. Focused on your exam. Designed to show what you actually know.
+              Upload one document. Take your first quiz. See what needs work.
             </p>
           </div>
 
           {/* Hero product preview — believable PassAI screen */}
           <div className="relative">
             <div className="absolute inset-0 bg-ghibli-moss/10 blur-3xl rounded-[2.5rem] transform scale-95" />
+            {/* Floating plant accents flanking the preview card */}
+            <img
+              src="/plant-young-raw.png"
+              alt=""
+              aria-hidden
+              loading="lazy"
+              decoding="async"
+              className="hidden lg:block absolute -left-10 -bottom-8 w-24 opacity-70 animate-float-leaf pointer-events-none select-none"
+              style={{ mixBlendMode: "darken" }}
+            />
+            <img
+              src="/plant-seedling-raw.png"
+              alt=""
+              aria-hidden
+              loading="lazy"
+              decoding="async"
+              className="hidden lg:block absolute -right-6 -top-8 w-20 opacity-60 animate-drift pointer-events-none select-none"
+              style={{ mixBlendMode: "darken" }}
+            />
             <HeroProductPreview />
+            <p className="font-sans text-[12px] md:text-xs text-ghibli-bark/80 italic text-center mt-3 max-w-md mx-auto leading-relaxed">
+              Your readiness estimate updates as you complete quizzes from your materials.
+            </p>
           </div>
         </div>
       </section>
 
       {/* ── How It Works ────────────────────────────────────── */}
-      <section id="how-it-works" className="relative z-10 py-20 md:py-24 px-6 bg-white/30 backdrop-blur-sm border-y border-ghibli-moss/10">
+      <section id="how-it-works" className="relative z-10 py-16 md:py-20 px-6 bg-white/30 backdrop-blur-sm border-y border-ghibli-moss/10">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14 space-y-3 max-w-2xl mx-auto">
+          <div className="text-center mb-12 space-y-3 max-w-2xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-ghibli-canopy">
               From your materials to exam readiness
             </h2>
@@ -140,19 +182,19 @@ export function LandingPage() {
       </section>
 
       {/* ── Product proof panels ────────────────────────────── */}
-      <section className="relative z-10 py-20 md:py-28 px-6">
+      <section className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-14 space-y-3 max-w-2xl mx-auto">
+          <div className="text-center mb-12 space-y-3 max-w-2xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-ghibli-canopy">
               See exactly what the product does.
             </h2>
             <p className="text-ghibli-bark font-serif text-base md:text-lg leading-relaxed">
-              Four real screens from inside PassAI — every claim on this page lives in the product.
-              Values below are example data, not a live account.
+              Four previews based on the real PassAI experience. Every feature shown here is already
+              part of the product. Values below are example data, not a live account.
             </p>
           </div>
 
-          <div className="space-y-12 md:space-y-20">
+          <div className="space-y-10 md:space-y-16">
             <ProofPanel
               align="left"
               label="Materials"
@@ -183,16 +225,16 @@ export function LandingPage() {
             />
           </div>
 
-          <p className="text-center mt-16 text-ghibli-canopy font-serif text-lg md:text-xl italic max-w-2xl mx-auto leading-relaxed">
+          <p className="text-center mt-12 text-ghibli-canopy font-serif text-lg md:text-xl italic max-w-2xl mx-auto leading-relaxed">
             PassAI does not simply generate more questions. It helps you decide what to study next.
           </p>
         </div>
       </section>
 
       {/* ── Differentiator / Comparison ─────────────────────── */}
-      <section className="relative z-10 py-20 md:py-24 px-6 bg-white/30 backdrop-blur-sm border-y border-ghibli-moss/10">
+      <section className="relative z-10 py-16 md:py-20 px-6 bg-white/30 backdrop-blur-sm border-y border-ghibli-moss/10">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12 space-y-3 max-w-2xl mx-auto">
+          <div className="text-center mb-10 space-y-3 max-w-2xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-ghibli-canopy">
               Not another generic quiz generator.
             </h2>
@@ -229,7 +271,7 @@ export function LandingPage() {
       </section>
 
       {/* ── Knowledge Garden ────────────────────────────────── */}
-      <section id="knowledge-garden" className="relative z-10 py-20 md:py-28 px-6">
+      <section id="knowledge-garden" className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.1fr] gap-12 items-center">
           <div className="space-y-5">
             <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss px-3 py-1 rounded-full bg-ghibli-mist/60 border border-ghibli-moss/15">
@@ -256,39 +298,27 @@ export function LandingPage() {
         </div>
       </section>
 
-      {/* ── Exam Readiness / Pain ───────────────────────────── */}
-      <section className="relative z-10 py-20 md:py-24 px-6 bg-white/30 backdrop-blur-sm border-y border-ghibli-moss/10">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
+      {/* ── Exam Readiness / Pain — compact lead-in to pricing ── */}
+      <section className="relative z-10 pt-14 md:pt-16 pb-2 px-6 bg-white/30 backdrop-blur-sm border-t border-ghibli-moss/10">
+        <div className="max-w-3xl mx-auto text-center space-y-4">
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-ghibli-canopy">
             Stop guessing whether you are ready.
           </h2>
-          <ParchmentCard className="p-8 md:p-10 text-left max-w-2xl mx-auto" hover={false}>
-            <ul className="space-y-3 font-serif text-base md:text-lg text-ghibli-canopy leading-relaxed">
-              <li>Your exam is getting closer.</li>
-              <li>Your materials are scattered across notes, slides and documents.</li>
-              <li>You do not need to revise everything again.</li>
-              <li className="font-semibold">You need to know what to study next.</li>
-            </ul>
-          </ParchmentCard>
-          <p className="text-ghibli-bark font-serif text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
-            PassAI turns your existing materials into a focused path from uncertainty to exam
-            readiness.
+          <p className="font-serif text-base md:text-lg text-ghibli-canopy/90 leading-relaxed max-w-2xl mx-auto">
+            Your exam is getting closer. Your materials are scattered across notes, slides and
+            documents. You do not need to revise everything again —{" "}
+            <span className="font-semibold text-ghibli-canopy">you need to know what to study next.</span>
           </p>
-          <div className="pt-2">
-            <Button asChild size="lg" className="h-14 px-10 text-base bg-ghibli-canopy hover:bg-ghibli-forest text-white shadow-md hover:shadow-lg transition-all duration-300 font-serif rounded-full">
-              <Link to="/signup">
-                <Sparkles className="w-4 h-4 mr-2" />
-                Start Your Study Garden
-              </Link>
-            </Button>
-          </div>
+          <p className="text-ghibli-bark font-serif text-sm md:text-base leading-relaxed max-w-2xl mx-auto">
+            PassAI turns your existing materials into a focused path from uncertainty to exam readiness.
+          </p>
         </div>
       </section>
 
-      {/* ── Pricing — preserves existing plans and routes ───── */}
-      <section id="pricing" className="relative z-10 py-20 md:py-28 px-6">
+      {/* ── Pricing & final CTA — preserves existing plans and routes ── */}
+      <section id="pricing" className="relative z-10 pt-12 md:pt-14 pb-20 md:pb-24 px-6 bg-white/30 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12 space-y-3 max-w-2xl mx-auto">
+          <div className="text-center mb-10 space-y-3 max-w-2xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-bold font-serif text-ghibli-canopy">
               Your exam materials are already there. Find out what you actually know.
             </h2>
@@ -859,36 +889,71 @@ function BigGardenPreview() {
           </p>
         </div>
       </div>
-      <div className="space-y-2.5">
-        {topics.map((t) => (
-          <div
-            key={t.name}
-            className="flex items-center gap-3 rounded-2xl bg-white/55 border border-ghibli-moss/15 px-3.5 py-3"
+      <div className="relative">
+        {/* Subtle root tracery behind the topic rows — illustrative only.
+            Static inline SVG, no refs/observers, no event handlers, no
+            dependency on the real GardenRoots component. */}
+        <svg
+          viewBox="0 0 100 100"
+          preserveAspectRatio="none"
+          aria-hidden
+          focusable="false"
+          className="absolute inset-0 w-full h-full pointer-events-none select-none"
+          style={{ color: "hsl(28 32% 32%)", opacity: 0.16 }}
+        >
+          <g
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
           >
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 mb-1.5">
-                <p className="font-serif text-sm font-semibold text-ghibli-canopy truncate">
-                  {t.name}
-                </p>
-                <span
-                  className="font-sans text-[10px] uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full shrink-0"
-                  style={{ background: t.bg, color: t.color }}
-                >
-                  {t.status}
-                </span>
+            {/* Soft vertical spine, drifting slightly */}
+            <path d="M 6 4 C 5 22, 8 38, 6 54 C 4 70, 7 86, 6 96" />
+            {/* Branches to each topic row (rows centred at ~10, 30, 50, 70, 90) */}
+            <path d="M 6 10 C 18 9, 34 12, 52 10" />
+            <path d="M 6 30 C 22 28, 40 33, 60 30" />
+            <path d="M 6 50 C 24 48, 46 53, 68 50" />
+            <path d="M 6 70 C 20 68, 38 73, 56 70" />
+            <path d="M 6 90 C 26 88, 50 93, 72 90" />
+            {/* One restrained branching connection — a quiet Y between two adjacent rows */}
+            <path d="M 30 30 C 32 38, 30 44, 32 50" />
+            <path d="M 30 30 C 28 38, 30 44, 28 50" />
+          </g>
+        </svg>
+
+        <div className="relative z-10 space-y-2.5">
+          {topics.map((t) => (
+            <div
+              key={t.name}
+              className="flex items-center gap-3 rounded-2xl bg-white/55 border border-ghibli-moss/15 px-3.5 py-3"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <p className="font-serif text-sm font-semibold text-ghibli-canopy truncate">
+                    {t.name}
+                  </p>
+                  <span
+                    className="font-sans text-[10px] uppercase tracking-widest font-semibold px-2 py-0.5 rounded-full shrink-0"
+                    style={{ background: t.bg, color: t.color }}
+                  >
+                    {t.status}
+                  </span>
+                </div>
+                <div className="h-1.5 rounded-full bg-ghibli-mist overflow-hidden">
+                  <div
+                    className="h-full rounded-full"
+                    style={{ width: `${t.pct}%`, background: t.color }}
+                  />
+                </div>
               </div>
-              <div className="h-1.5 rounded-full bg-ghibli-mist overflow-hidden">
-                <div
-                  className="h-full rounded-full"
-                  style={{ width: `${t.pct}%`, background: t.color }}
-                />
-              </div>
+              <span className="font-sans text-xs font-semibold text-ghibli-canopy/80 tabular-nums shrink-0">
+                {t.pct}%
+              </span>
             </div>
-            <span className="font-sans text-xs font-semibold text-ghibli-canopy/80 tabular-nums shrink-0">
-              {t.pct}%
-            </span>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </ParchmentCard>
   );

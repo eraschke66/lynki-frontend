@@ -47,6 +47,11 @@
   --color-ghibli-bark:     hsl(28 32% 32%);
   --color-ghibli-petal:    hsl(350 55% 78%);
 
+  /* Garden root tracery — soft pencil-on-cream tone for decorative SVG
+     curves between topic cards. Slightly darker than ghibli-parchment so
+     it registers as tracery without competing with the cards. */
+  --color-garden-root: hsl(35 25% 70%);
+
   /* Ghibli border-radius */
   --radius-parchment: 1.75rem;
   --radius-leaf: 2.25rem;

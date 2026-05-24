@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
@@ -7,6 +7,7 @@ import { AlertCircle, ArrowLeft, RefreshCw, BookOpen } from "lucide-react";
 import { gardenQueryKeys } from "@/lib/queryKeys";
 import { getGardenStatus } from "@/lib/garden";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
+import { GardenRoots } from "@/components/garden/GardenRoots";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
@@ -134,6 +135,7 @@ export function KnowledgeGardenPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const topicsContainerRef = useRef<HTMLDivElement | null>(null);
 
   const {
     data: gardenData,
@@ -256,7 +258,8 @@ export function KnowledgeGardenPage() {
                 </Button>
               </ParchmentCard>
             ) : (
-              <div>
+              <div className="relative" ref={topicsContainerRef}>
+                <GardenRoots containerRef={topicsContainerRef} />
                 {topics.map((topic) => (
                   <TopicCard
                     key={topic.topic_id}

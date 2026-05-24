@@ -15,6 +15,12 @@ interface GardenRootsProps {
    * id-based linking is the canonicalization backend ticket's job.
    */
   topics: TopicMastery[];
+  /**
+   * Topic id of the topic just tended, if the user is returning from a
+   * Tending session. Semantic edges that touch this topic pulse for ~6s
+   * via the `animate-garden-pulse` utility. (Commit 3.)
+   */
+  justTendedTopicId?: string | null;
 }
 
 /**
@@ -24,7 +30,8 @@ interface GardenRootsProps {
  *  Commit 2 — semantic edges: non-adjacent topic pairs that share at
  *             least one concept name. Stroke thickness scales with shared
  *             count. Capped at MAX_SEMANTIC_EDGES, sorted by weight desc.
- *  Commit 3 (later) — animation.
+ *  Commit 3 — pulse-on-return: semantic edges touching `justTendedTopicId`
+ *             briefly animate after the user finishes a Tending session.
  */
 
 const MAX_SEMANTIC_EDGES = 60;
@@ -38,6 +45,7 @@ interface SemanticEdgeSpec {
 interface RenderedEdge {
   d: string;
   strokeWidth: number;
+  pulse: boolean;
 }
 
 function normalizeName(name: string): string {
@@ -69,7 +77,11 @@ function computeSemanticEdges(topics: TopicMastery[]): SemanticEdgeSpec[] {
   return edges.slice(0, MAX_SEMANTIC_EDGES);
 }
 
-export function GardenRoots({ containerRef, topics }: GardenRootsProps) {
+export function GardenRoots({
+  containerRef,
+  topics,
+  justTendedTopicId,
+}: GardenRootsProps) {
   const [edges, setEdges] = useState<RenderedEdge[]>([]);
 
   const semanticEdges = useMemo(
@@ -115,6 +127,7 @@ export function GardenRoots({ containerRef, topics }: GardenRootsProps) {
             `${b.cx - sway} ${b.cy - dy * 0.4}, ` +
             `${b.cx} ${b.cy}`,
           strokeWidth: 1.5,
+          pulse: false,
         });
       }
 
@@ -130,6 +143,10 @@ export function GardenRoots({ containerRef, topics }: GardenRootsProps) {
         const span = edge.j - edge.i;
         const sideMag = Math.min(220, span * 35);
         const side = idx % 2 === 0 ? sideMag : -sideMag;
+        const pulse =
+          !!justTendedTopicId &&
+          (topics[edge.i]?.topic_id === justTendedTopicId ||
+            topics[edge.j]?.topic_id === justTendedTopicId);
         next.push({
           d:
             `M ${a.cx} ${a.cy} ` +
@@ -137,6 +154,7 @@ export function GardenRoots({ containerRef, topics }: GardenRootsProps) {
             `${b.cx + side} ${b.cy - dy * 0.25}, ` +
             `${b.cx} ${b.cy}`,
           strokeWidth: strokeForWeight(edge.weight),
+          pulse,
         });
       });
 
@@ -147,7 +165,7 @@ export function GardenRoots({ containerRef, topics }: GardenRootsProps) {
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [containerRef, semanticEdges]);
+  }, [containerRef, semanticEdges, justTendedTopicId, topics]);
 
   if (edges.length === 0) return null;
 
@@ -168,6 +186,7 @@ export function GardenRoots({ containerRef, topics }: GardenRootsProps) {
           strokeWidth={e.strokeWidth}
           strokeLinecap="round"
           fill="none"
+          className={e.pulse ? "animate-garden-pulse" : undefined}
         />
       ))}
     </svg>

@@ -7,6 +7,9 @@ import { STAGE_LABEL } from "../types";
 
 interface MasteryDeltaStageProps {
   courseId: string;
+  /** Topic id for the session — used by the "View Garden" exit so the
+   *  garden can pulse the roots touching this topic. */
+  topicId: string;
   delta: MasteryDelta;
   stagesSkipped: Stage[];
   startedAt: number;
@@ -45,6 +48,7 @@ const SKIP_NUDGE_POOL = [
 
 export function MasteryDeltaStage({
   courseId,
+  topicId,
   delta,
   stagesSkipped,
   startedAt,
@@ -157,6 +161,14 @@ export function MasteryDeltaStage({
       <div className="flex flex-col sm:flex-row gap-3 mt-6 justify-center">
         <Button onClick={() => navigate(`/course/${courseId}/study-plan`)}>
           Back to Study Plan
+        </Button>
+        <Button
+          variant="outline"
+          onClick={() =>
+            navigate(`/course/${courseId}/garden?just_tended=${topicId}`)
+          }
+        >
+          View Garden
         </Button>
         <Button
           variant="outline"

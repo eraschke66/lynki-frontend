@@ -94,11 +94,21 @@
   --drop-shadow-neko:      0 4px 12px rgba(27,67,50,0.18);
   --drop-shadow-neko-side: -4px 4px 10px rgba(27,67,50,0.15);
 
+  /* Garden roots pulse — drives the post-Tending tracery highlight on
+     edges connected to the just-tended topic. Three iterations over ~6s
+     then stops. (GardenRoots Commit 3.) */
+  --animate-garden-pulse: garden-pulse 2s ease-in-out 3;
+
   /* Ghibli font families — Fraunces is the brand serif; we use it everywhere
      so font-sans and font-serif resolve to the same family. Mono kept for
      UUIDs / fixed-width data. */
   --font-serif: 'Fraunces', Georgia, serif;
   --font-sans: 'Fraunces', Georgia, serif;
+}
+
+@keyframes garden-pulse {
+  0%, 100% { opacity: 0.95; }
+  50%      { opacity: 0.35; }
 }
 
 @layer base {

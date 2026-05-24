@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
@@ -93,13 +93,43 @@ function TopicCard({
   topic,
   courseId: _courseId,
   onStudy,
+  animateProgressFrom,
 }: {
   topic: TopicMastery;
   courseId: string;
   onStudy: (topicId: string) => void;
+  /** If set and != topic.overall_progress, the bar paints first at this
+   *  value then transitions up to topic.overall_progress over ~1.5s.
+   *  Used by the post-Tending tick-up on the just-tended topic. */
+  animateProgressFrom?: number;
 }) {
   const [expanded, setExpanded] = useState(false);
   const gardenStatus = getGardenStatus(topic.overall_progress);
+
+  const shouldAnimate =
+    animateProgressFrom !== undefined &&
+    animateProgressFrom !== topic.overall_progress;
+  // Initial paint shows the pre-tend value if animating; on next tick we
+  // swap to the real value so the CSS transition runs the tick-up.
+  const [displayProgress, setDisplayProgress] = useState<number>(() =>
+    shouldAnimate ? (animateProgressFrom as number) : topic.overall_progress,
+  );
+
+  useEffect(() => {
+    if (!shouldAnimate) {
+      // Sync display with the post-fetch topic value when not animating.
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- syncing derived display state with a prop that changes on background BKT refetch.
+      setDisplayProgress(topic.overall_progress);
+      return;
+    }
+    // Schedule the swap so the initial paint commits with the pre-tend
+    // value and the CSS transition runs the tick-up.
+    const t = setTimeout(
+      () => setDisplayProgress(topic.overall_progress),
+      50,
+    );
+    return () => clearTimeout(t);
+  }, [shouldAnimate, topic.overall_progress]);
 
   return (
     <ParchmentCard className="p-5 md:p-6 mb-3 md:mb-4">
@@ -135,8 +165,11 @@ function TopicCard({
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{
-            width: `${topic.overall_progress}%`,
+            width: `${displayProgress}%`,
             background: "linear-gradient(90deg, hsl(var(--ghibli-moss)), hsl(var(--ghibli-forest)))",
+            ...(shouldAnimate
+              ? { transition: "width 1500ms ease-in-out" }
+              : {}),
           }}
         />
       </div>
@@ -198,6 +231,68 @@ export function KnowledgeGardenPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const topicsContainerRef = useRef<HTMLDivElement | null>(null);
+  const [searchParams] = useSearchParams();
+
+  // "Just tended" signal — either from ?just_tended= (set by the View
+  // Garden button on MasteryDeltaStage) or from sessionStorage (set by
+  // TendingFlowPage on completion; covers users who navigate to the
+  // garden manually). Read once at mount via lazy useState so we don't
+  // setState inside an effect; a separate effect consumes the
+  // sessionStorage keys so a reload doesn't re-trigger. (Commit 3.)
+  const [{ justTendedTopicId, preTendProgress }] = useState<{
+    justTendedTopicId: string | null;
+    preTendProgress: number | null;
+  }>(() => {
+    let tendedId: string | null = searchParams.get("just_tended");
+    if (!tendedId) {
+      try {
+        const raw = sessionStorage.getItem("passai:just_tended");
+        if (raw) {
+          const parsed = JSON.parse(raw) as {
+            topicId?: string;
+            courseId?: string;
+            ts?: number;
+          };
+          if (
+            parsed.topicId &&
+            parsed.courseId === courseId &&
+            typeof parsed.ts === "number" &&
+            Date.now() - parsed.ts < 30_000
+          ) {
+            tendedId = parsed.topicId;
+          }
+        }
+      } catch {
+        // sessionStorage / JSON failure — degrade silently.
+      }
+    }
+    if (!tendedId) return { justTendedTopicId: null, preTendProgress: null };
+    let preTend: number | null = null;
+    try {
+      const snap = sessionStorage.getItem(
+        `passai:pre_tend_progress:${tendedId}`,
+      );
+      if (snap !== null) {
+        const n = Number(snap);
+        if (Number.isFinite(n)) preTend = n;
+      }
+    } catch {
+      // ignore
+    }
+    return { justTendedTopicId: tendedId, preTendProgress: preTend };
+  });
+
+  // Consume the sessionStorage keys after the lazy useState has captured
+  // them so a reload doesn't re-trigger the pulse / tick-up.
+  useEffect(() => {
+    if (!justTendedTopicId) return;
+    try {
+      sessionStorage.removeItem("passai:just_tended");
+      sessionStorage.removeItem(`passai:pre_tend_progress:${justTendedTopicId}`);
+    } catch {
+      // ignore
+    }
+  }, [justTendedTopicId]);
 
   const {
     data: gardenData,
@@ -337,13 +432,23 @@ export function KnowledgeGardenPage() {
               </ParchmentCard>
             ) : (
               <div className="relative" ref={topicsContainerRef}>
-                <GardenRoots containerRef={topicsContainerRef} topics={topics} />
+                <GardenRoots
+                  containerRef={topicsContainerRef}
+                  topics={topics}
+                  justTendedTopicId={justTendedTopicId}
+                />
                 {topics.map((topic) => (
                   <TopicCard
                     key={topic.topic_id}
                     topic={topic}
                     courseId={courseId}
                     onStudy={handleStudyTopic}
+                    animateProgressFrom={
+                      topic.topic_id === justTendedTopicId &&
+                      preTendProgress !== null
+                        ? preTendProgress
+                        : undefined
+                    }
                   />
                 ))}
               </div>

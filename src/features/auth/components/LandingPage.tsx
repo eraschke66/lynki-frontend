@@ -26,6 +26,50 @@ export function LandingPage() {
       <div className="fixed top-0 left-1/4 w-[600px] h-[600px] bg-ghibli-sunlight/10 blur-[120px] rounded-full pointer-events-none animate-shimmer" />
       <div className="fixed bottom-0 right-1/4 w-[500px] h-[500px] bg-ghibli-moss/5 blur-[100px] rounded-full pointer-events-none animate-pulse-soft" />
 
+      {/* Continuous page-level growth root — one organic line that travels
+          through the page's background whitespace only.
+          - Hidden below md so mobile layouts (where margins disappear) stay clean.
+          - viewBox stretches the path across the full page height.
+          - The path lives in the left/right page margins (x ≈ 2–6 and 94–98)
+            and briefly arcs through gutters between sections, never crossing
+            text, buttons, cards, preview panels, pricing or progress bars. */}
+      <svg
+        aria-hidden
+        focusable="false"
+        viewBox="0 0 100 1000"
+        preserveAspectRatio="none"
+        className="hidden md:block absolute inset-0 w-full h-full pointer-events-none select-none z-0"
+        style={{ color: "hsl(120 18% 30%)" }}
+      >
+        <g
+          fill="none"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+          strokeWidth="1.75"
+          opacity="0.18"
+        >
+          {/* Main travelling line:
+                Starts just under the right edge of the hero preview card (y≈115),
+                drifts down to the left margin during the teacher-panel band (y≈170),
+                continues down the left margin through How-It-Works and the
+                first half of the product-proof sequence (y≈170 → y≈430),
+                arcs gently to the right margin around the Knowledge Garden
+                anchor band (y≈540), travels down the right margin through
+                the Knowledge Garden section and exam-readiness band, then
+                gently settles toward the centre-low region just above the
+                footer (y≈920). */}
+          <path d="M 78 115 C 60 130, 30 150, 5 175 C 3 230, 6 290, 4 350 C 6 405, 3 460, 5 510 C 25 555, 60 575, 94 540 C 97 600, 95 670, 96 740 C 94 800, 80 850, 60 905 C 55 910, 50 915, 50 920" />
+          {/* Two tiny restrained rootlets — small flourishes only, never crossing content */}
+          <path d="M 5 285 C 7 287, 9 286, 11 290" />
+          <path d="M 95 700 C 93 702, 91 700, 89 704" />
+          {/* End flourish near the final conversion area — a single tiny leaf-curl */}
+          <path d="M 50 920 C 52 924, 54 925, 55 930" />
+          <path d="M 50 920 C 48 924, 46 925, 45 930" />
+        </g>
+      </svg>
+
       {/* Faded foliage at viewport edges — restrained botanical framing */}
       <img
         src="/foliage-left-v2.png"
@@ -914,43 +958,8 @@ function BigGardenPreview() {
           </p>
         </div>
       </div>
-      <div className="flex items-stretch gap-0">
-        {/* Slim left rail — empty parchment column that houses the root system.
-            No row card sits behind this column, so the spine and its short
-            branches never overlap any label or progress bar. */}
-        <div className="relative w-6 md:w-8 shrink-0 pointer-events-none">
-          <svg
-            viewBox="0 0 10 100"
-            preserveAspectRatio="none"
-            aria-hidden
-            focusable="false"
-            className="absolute inset-0 w-full h-full pointer-events-none select-none"
-            style={{ color: "hsl(28 32% 28%)" }}
-          >
-            <g
-              fill="none"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              vectorEffect="non-scaling-stroke"
-              strokeWidth="1.75"
-              opacity="0.26"
-            >
-              {/* Slim organic vertical spine, drifting gently inside the rail. */}
-              <path d="M 4.5 4 C 3.5 22, 5.5 38, 4.5 54 C 3.5 70, 5.5 86, 4.5 96" />
-              {/* One short soft-S branch per topic row, ending at the rail's
-                  right edge (= the left edge of each card). Row centres in
-                  the rail sit at y ≈ 10/30/50/70/90. */}
-              <path d="M 4.5 10 C 6 9, 8 11, 9.5 10" />
-              <path d="M 4.5 30 C 6 29, 8 31, 9.5 30" />
-              <path d="M 4.5 50 C 6 49, 8 51, 9.5 50" />
-              <path d="M 4.5 70 C 6 69, 8 71, 9.5 70" />
-              <path d="M 4.5 90 C 6 89, 8 91, 9.5 90" />
-            </g>
-          </svg>
-        </div>
-
-        <div className="flex-1 min-w-0 space-y-2.5">
+      <div>
+        <div className="space-y-2.5">
           {topics.map((t) => (
             <div
               key={t.name}

@@ -52,6 +52,11 @@
      it registers as tracery without competing with the cards. */
   --color-garden-root: hsl(35 25% 70%);
 
+  /* Pass-probability bar palette — exact hex preserved for visual fidelity */
+  --color-ghibli-canopy-mid:  #6b8e4e;
+  --color-ghibli-canopy-dark: #4a6b3a;
+  --color-ghibli-parchment:   #e8e3d5;
+
   /* Ghibli border-radius */
   --radius-parchment: 1.75rem;
   --radius-leaf: 2.25rem;

@@ -308,17 +308,14 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
                   {data.overallPassProbability}% pass probability
                 </span>
               </div>
-              <div
-                className="relative h-2.5 rounded-full overflow-hidden"
-                style={{ background: "#e8e3d5" }}
-              >
+              <div className="relative h-2.5 rounded-full overflow-hidden bg-ghibli-parchment">
                 <div
-                  className="h-full rounded-full transition-all duration-700"
-                  style={{ width: `${data.overallPassProbability}%`, background: "#6b8e4e" }}
+                  className="h-full rounded-full transition-all duration-700 bg-ghibli-canopy-mid"
+                  style={{ width: `${data.overallPassProbability}%` }}
                 />
                 <div
-                  className="absolute"
-                  style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px", background: "#4a6b3a" }}
+                  className="absolute bg-ghibli-canopy-dark"
+                  style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px" }}
                 />
               </div>
               <div className="flex justify-between mt-1 text-[10px] text-ghibli-canopy/65">

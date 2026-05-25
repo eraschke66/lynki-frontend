@@ -21,6 +21,7 @@ import { fetchProfile, updateProfile } from "../services/profileService";
 import { profileQueryKeys } from "@/lib/queryKeys";
 import { CURRICULA, getCurriculum } from "@/lib/curricula";
 import { useSubscription } from "@/features/subscription/hooks/useSubscription";
+import { useSeedBalance } from "@/features/subscription/hooks/useSeedBalance";
 import { createPortalSession } from "@/features/subscription/services/subscriptionService";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { Link } from "react-router-dom";
@@ -38,6 +39,7 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isPremium, currentPeriodEnd, isLoading: subLoading } = useSubscription();
+  const { balance: seedBalance, isLoading: seedLoading } = useSeedBalance();
   const { consent, clearConsent } = useCookieConsent();
   const [portalLoading, setPortalLoading] = useState(false);
 
@@ -192,6 +194,20 @@ export function SettingsPage() {
                         <p className="text-sm text-ghibli-bark">
                           You're on the <strong>Free</strong> plan. Upgrade to unlock the Study Garden and Smart Study Plan.
                         </p>
+                        {/* §12 Block F — seed balance display. "Buy more" button
+                            ships with Block G (purchase modal); for now this is
+                            read-only so users can see what they have. */}
+                        {!seedLoading && (
+                          <p className="text-sm text-ghibli-bark inline-flex items-center gap-1.5">
+                            <span aria-hidden="true">🌱</span>
+                            <span className="tabular-nums font-semibold">
+                              {seedBalance}
+                            </span>
+                            <span>
+                              {seedBalance === 1 ? "seed" : "seeds"} remaining
+                            </span>
+                          </p>
+                        )}
                         <Button
                           onClick={() => navigate("/pricing")}
                           className="shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)] bg-gradient-to-br from-ghibli-moss to-ghibli-canopy text-primary-foreground hover:from-ghibli-jungle hover:to-ghibli-canopy"

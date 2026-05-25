@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { toast } from "sonner";
+import { gardenQueryKeys } from "@/lib/queryKeys";
+import type { CourseGardenData } from "@/features/courses/types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +38,7 @@ function TendingFlowInner() {
   const { courseId, topicId } = useParams<{ courseId: string; topicId: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateAttempt, setGenerateAttempt] = useState(0);
@@ -42,6 +46,28 @@ function TendingFlowInner() {
   const machine = useTendingMachine(courseId ?? "", topicId ?? "");
   const { state, isInitialized, init } = machine;
   const completeFiredRef = useRef(false);
+  const preTendSnapshotRef = useRef(false);
+
+  // Snapshot the topic's current overall_progress from the garden query cache
+  // BEFORE Tending starts changing it. Used by the garden's "tended-topic
+  // own-tick" animation on return. Cache-only — we don't issue a new fetch
+  // just for this; if the user landed on Tending without visiting the garden
+  // first, the animation is silently skipped on return. (Commit 3.)
+  useEffect(() => {
+    if (!courseId || !topicId || !user) return;
+    if (preTendSnapshotRef.current) return;
+    preTendSnapshotRef.current = true;
+    const cached = queryClient.getQueryData<CourseGardenData>(
+      gardenQueryKeys.progress(courseId, user.id),
+    );
+    const topic = cached?.topics.find((t) => t.topic_id === topicId);
+    if (topic) {
+      sessionStorage.setItem(
+        `passai:pre_tend_progress:${topicId}`,
+        String(topic.overall_progress),
+      );
+    }
+  }, [courseId, topicId, user, queryClient]);
 
   // Generate session on mount if no hydrated session is present.
   useEffect(() => {
@@ -101,7 +127,26 @@ function TendingFlowInner() {
     };
     completeSession({ sessionId: state.sessionId, results })
       .then((delta) => {
-        if (!cancelled) machine.recordMastery(delta);
+        if (cancelled) return;
+        machine.recordMastery(delta);
+        // Marker for KnowledgeGardenPage: it pulses semantic edges and
+        // animates the tended topic's own progress bar on return. Garden
+        // treats anything <30s old as "just tended". (Commit 3.)
+        if (topicId && courseId) {
+          try {
+            sessionStorage.setItem(
+              "passai:just_tended",
+              JSON.stringify({ topicId, courseId, ts: Date.now() }),
+            );
+          } catch {
+            // sessionStorage can throw in private modes; degrade silently.
+          }
+          if (user) {
+            queryClient.invalidateQueries({
+              queryKey: gardenQueryKeys.progress(courseId, user.id),
+            });
+          }
+        }
       })
       .catch((err: unknown) => {
         if (cancelled) return;
@@ -123,6 +168,10 @@ function TendingFlowInner() {
     state.quizResults,
     state.stagesSkipped,
     machine,
+    topicId,
+    courseId,
+    user,
+    queryClient,
   ]);
 
   const handleConfirmLeave = useCallback(() => {
@@ -249,6 +298,7 @@ function TendingFlowInner() {
           (state.masteryDelta ? (
             <MasteryDeltaStage
               courseId={courseId}
+              topicId={topicId}
               delta={state.masteryDelta}
               stagesSkipped={state.stagesSkipped}
               startedAt={state.startedAt}

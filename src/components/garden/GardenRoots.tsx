@@ -1,4 +1,5 @@
-import { useEffect, useState, type RefObject } from "react";
+import { useEffect, useMemo, useState, type RefObject } from "react";
+import type { TopicMastery } from "@/features/courses/types";
 
 interface GardenRootsProps {
   /**
@@ -7,19 +8,86 @@ interface GardenRootsProps {
    * getBoundingClientRect and connected with cubic-bezier curves.
    */
   containerRef: RefObject<HTMLElement | null>;
+  /**
+   * Topic list in the same order as the children of `containerRef.current`.
+   * Used to compute concept-overlap edges (Commit 2 — semantic roots).
+   * Concept matching is by normalized `concept_name` (trim + lowercase) —
+   * id-based linking is the canonicalization backend ticket's job.
+   */
+  topics: TopicMastery[];
+  /**
+   * Topic id of the topic just tended, if the user is returning from a
+   * Tending session. Semantic edges that touch this topic pulse for ~6s
+   * via the `animate-garden-pulse` utility. (Commit 3.)
+   */
+  justTendedTopicId?: string | null;
 }
 
 /**
- * Static decorative tracery behind the topic grid. Commit 1 of 3 — purely
- * decorative; later commits will make the roots semantic (shared concepts)
- * then live (post-Tending pulse).
+ * Decorative tracery behind the topic stack.
  *
- * The visible layout is a vertical stack (single column at every viewport),
- * so the roots connect each card to the one directly below with a gentle
- * left/right alternating sway for an organic vine feel.
+ *  Commit 1 — structural vine: every adjacent pair connected.
+ *  Commit 2 — semantic edges: non-adjacent topic pairs that share at
+ *             least one concept name. Stroke thickness scales with shared
+ *             count. Capped at MAX_SEMANTIC_EDGES, sorted by weight desc.
+ *  Commit 3 — pulse-on-return: semantic edges touching `justTendedTopicId`
+ *             briefly animate after the user finishes a Tending session.
  */
-export function GardenRoots({ containerRef }: GardenRootsProps) {
-  const [paths, setPaths] = useState<string[]>([]);
+
+const MAX_SEMANTIC_EDGES = 60;
+
+interface SemanticEdgeSpec {
+  i: number;
+  j: number;
+  weight: number;
+}
+
+interface RenderedEdge {
+  d: string;
+  strokeWidth: number;
+  pulse: boolean;
+}
+
+function normalizeName(name: string): string {
+  return name.trim().toLowerCase();
+}
+
+function strokeForWeight(weight: number): number {
+  if (weight >= 3) return 3;
+  if (weight === 2) return 2.25;
+  return 1.5;
+}
+
+function computeSemanticEdges(topics: TopicMastery[]): SemanticEdgeSpec[] {
+  const sets = topics.map(
+    (t) => new Set(t.concepts.map((c) => normalizeName(c.concept_name))),
+  );
+  const edges: SemanticEdgeSpec[] = [];
+  for (let i = 0; i < topics.length; i++) {
+    // j starts at i + 2 — adjacent pairs are already covered by the vine.
+    for (let j = i + 2; j < topics.length; j++) {
+      let overlap = 0;
+      for (const name of sets[i]) {
+        if (sets[j].has(name)) overlap++;
+      }
+      if (overlap >= 1) edges.push({ i, j, weight: overlap });
+    }
+  }
+  edges.sort((a, b) => b.weight - a.weight);
+  return edges.slice(0, MAX_SEMANTIC_EDGES);
+}
+
+export function GardenRoots({
+  containerRef,
+  topics,
+  justTendedTopicId,
+}: GardenRootsProps) {
+  const [edges, setEdges] = useState<RenderedEdge[]>([]);
+
+  const semanticEdges = useMemo(
+    () => computeSemanticEdges(topics),
+    [topics],
+  );
 
   useEffect(() => {
     const el = containerRef.current;
@@ -32,7 +100,7 @@ export function GardenRoots({ containerRef }: GardenRootsProps) {
       ) as HTMLElement[];
 
       if (cards.length < 2) {
-        setPaths([]);
+        setEdges([]);
         return;
       }
 
@@ -44,45 +112,81 @@ export function GardenRoots({ containerRef }: GardenRootsProps) {
         };
       });
 
-      const next: string[] = [];
+      const next: RenderedEdge[] = [];
+
+      // Structural vine — adjacent pairs, S-curve with alternating sway.
       for (let i = 0; i < centers.length - 1; i++) {
         const a = centers[i];
         const b = centers[i + 1];
         const dy = b.cy - a.cy;
-        // Alternate horizontal sway per segment so the vine reads as
-        // organic, not as a single straight line.
         const sway = (i % 2 === 0 ? 1 : -1) * Math.min(60, Math.abs(dy) * 0.25);
-        next.push(
-          `M ${a.cx} ${a.cy} ` +
+        next.push({
+          d:
+            `M ${a.cx} ${a.cy} ` +
             `C ${a.cx + sway} ${a.cy + dy * 0.4}, ` +
             `${b.cx - sway} ${b.cy - dy * 0.4}, ` +
             `${b.cx} ${b.cy}`,
-        );
+          strokeWidth: 1.5,
+          pulse: false,
+        });
       }
-      setPaths(next);
+
+      // Semantic arcs — non-adjacent pairs sharing concepts. Both control
+      // points on the same horizontal side so the curve arcs out to the
+      // side rather than zig-zagging through intermediate cards. Direction
+      // alternates by edge index for visual balance.
+      semanticEdges.forEach((edge, idx) => {
+        if (edge.i >= centers.length || edge.j >= centers.length) return;
+        const a = centers[edge.i];
+        const b = centers[edge.j];
+        const dy = b.cy - a.cy;
+        const span = edge.j - edge.i;
+        const sideMag = Math.min(220, span * 35);
+        const side = idx % 2 === 0 ? sideMag : -sideMag;
+        const pulse =
+          !!justTendedTopicId &&
+          (topics[edge.i]?.topic_id === justTendedTopicId ||
+            topics[edge.j]?.topic_id === justTendedTopicId);
+        next.push({
+          d:
+            `M ${a.cx} ${a.cy} ` +
+            `C ${a.cx + side} ${a.cy + dy * 0.25}, ` +
+            `${b.cx + side} ${b.cy - dy * 0.25}, ` +
+            `${b.cx} ${b.cy}`,
+          strokeWidth: strokeForWeight(edge.weight),
+          pulse,
+        });
+      });
+
+      setEdges(next);
     };
 
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [containerRef]);
+  }, [containerRef, semanticEdges, justTendedTopicId, topics]);
 
-  if (paths.length === 0) return null;
+  if (edges.length === 0) return null;
 
   return (
     <svg
       className="absolute inset-0 w-full h-full pointer-events-none"
+      // overflow:visible lets the semantic arcs bulge past the SVG box.
+      // No ancestor in the page tree clips horizontally, so the arcs
+      // render into the page gutters on wide viewports.
+      style={{ overflow: "visible" }}
       aria-hidden="true"
     >
-      {paths.map((d, i) => (
+      {edges.map((e, i) => (
         <path
           key={i}
-          d={d}
+          d={e.d}
           stroke="var(--color-garden-root)"
-          strokeWidth="1.8"
+          strokeWidth={e.strokeWidth}
           strokeLinecap="round"
           fill="none"
+          className={e.pulse ? "animate-garden-pulse" : undefined}
         />
       ))}
     </svg>

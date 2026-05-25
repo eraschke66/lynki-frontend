@@ -306,10 +306,10 @@ export function LandingPage() {
               stop reviewing everything and focus on what matters most.
             </p>
             <div className="grid grid-cols-2 gap-3 max-w-md pt-2">
-              <GardenStatusChip dot="#c98a3b" label="Needs Water" />
-              <GardenStatusChip dot="#7fa05a" label="Sprouting" />
-              <GardenStatusChip dot="#4f8a3f" label="Growing" />
-              <GardenStatusChip dot="#2d6a3e" label="Thriving" />
+              <GardenStatusChip dot="var(--color-marketing-status-water)" label="Needs Water" />
+              <GardenStatusChip dot="var(--color-marketing-status-sprouting)" label="Sprouting" />
+              <GardenStatusChip dot="var(--color-marketing-status-growing)" label="Growing" />
+              <GardenStatusChip dot="var(--color-marketing-status-blooming)" label="Thriving" />
             </div>
           </div>
           <div>
@@ -614,11 +614,11 @@ function HeroProductPreview() {
             <p className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy leading-tight mb-2">
               72% pass probability
             </p>
-            <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "#e8e3d5" }}>
-              <div className="h-full rounded-full" style={{ width: "72%", background: "#6b8e4e" }} />
+            <div className="relative h-2 rounded-full overflow-hidden" style={{ background: "var(--color-ghibli-parchment)" }}>
+              <div className="h-full rounded-full" style={{ width: "72%", background: "var(--color-ghibli-canopy-mid)" }} />
               <div
                 className="absolute"
-                style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px", background: "#4a6b3a" }}
+                style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px", background: "var(--color-ghibli-canopy-dark)" }}
               />
             </div>
             <div className="flex justify-between mt-1.5 text-[10px] text-ghibli-canopy-medium font-sans">
@@ -648,9 +648,9 @@ function HeroProductPreview() {
       <div className="rounded-xl bg-white/60 border border-ghibli-moss/15 px-3.5 py-3 flex items-center gap-3">
         <span
           className="inline-flex items-center justify-center w-9 h-9 rounded-full shrink-0"
-          style={{ background: "rgba(201, 138, 59, 0.15)" }}
+          style={{ background: "rgb(from var(--color-marketing-status-water) r g b / 0.15)" }}
         >
-          <Droplets className="w-4 h-4" style={{ color: "#c98a3b" }} />
+          <Droplets className="w-4 h-4" style={{ color: "var(--color-marketing-status-water)" }} />
         </span>
         <div className="min-w-0 flex-1">
           <p className="font-serif text-sm font-semibold text-ghibli-canopy truncate">
@@ -662,7 +662,7 @@ function HeroProductPreview() {
         </div>
         <span
           className="font-sans text-[10px] uppercase tracking-widest font-semibold px-2 py-1 rounded-full"
-          style={{ background: "rgba(201, 138, 59, 0.12)", color: "#a06b1f" }}
+          style={{ background: "rgb(from var(--color-marketing-status-water) r g b / 0.12)", color: "var(--color-marketing-status-water)" }}
         >
           Needs Water
         </span>
@@ -776,10 +776,10 @@ function QuizPreview() {
 
 function GardenPreview() {
   const topics = [
-    { name: "Cellular Respiration", status: "Needs Water", color: "#c98a3b", bg: "rgba(201,138,59,0.12)", pct: 38, plant: 28 },
-    { name: "Photosynthesis", status: "Growing", color: "#4f8a3f", bg: "rgba(79,138,63,0.12)", pct: 64, plant: 64 },
-    { name: "Cell Division", status: "Blooming", color: "#2d6a3e", bg: "rgba(45,106,62,0.14)", pct: 78, plant: 78 },
-    { name: "Genetics & Heredity", status: "Sprouting", color: "#7fa05a", bg: "rgba(127,160,90,0.14)", pct: 48, plant: 48 },
+    { name: "Cellular Respiration", status: "Needs Water", color: "var(--color-marketing-status-water)", bg: "rgb(from var(--color-marketing-status-water) r g b / 0.12)", pct: 38, plant: 28 },
+    { name: "Photosynthesis", status: "Growing", color: "var(--color-marketing-status-growing)", bg: "rgb(from var(--color-marketing-status-growing) r g b / 0.12)", pct: 64, plant: 64 },
+    { name: "Cell Division", status: "Blooming", color: "var(--color-marketing-status-blooming)", bg: "rgb(from var(--color-marketing-status-blooming) r g b / 0.14)", pct: 78, plant: 78 },
+    { name: "Genetics & Heredity", status: "Sprouting", color: "var(--color-marketing-status-sprouting)", bg: "rgb(from var(--color-marketing-status-sprouting) r g b / 0.14)", pct: 48, plant: 48 },
   ];
   return (
     <ParchmentCard className="p-6 md:p-7" hover={false}>
@@ -889,11 +889,11 @@ function StudyPlanPreview() {
 
 function BigGardenPreview() {
   const topics = [
-    { name: "Cellular Respiration", status: "Needs Water", color: "#c98a3b", bg: "rgba(201,138,59,0.12)", pct: 38 },
-    { name: "Photosynthesis", status: "Growing", color: "#4f8a3f", bg: "rgba(79,138,63,0.12)", pct: 64 },
-    { name: "Cell Division", status: "Blooming", color: "#2d6a3e", bg: "rgba(45,106,62,0.14)", pct: 78 },
-    { name: "Genetics & Heredity", status: "Sprouting", color: "#7fa05a", bg: "rgba(127,160,90,0.14)", pct: 48 },
-    { name: "Evolution", status: "Thriving", color: "#1f5a3a", bg: "rgba(31,90,58,0.14)", pct: 92 },
+    { name: "Cellular Respiration", status: "Needs Water", color: "var(--color-marketing-status-water)", bg: "rgb(from var(--color-marketing-status-water) r g b / 0.12)", pct: 38 },
+    { name: "Photosynthesis", status: "Growing", color: "var(--color-marketing-status-growing)", bg: "rgb(from var(--color-marketing-status-growing) r g b / 0.12)", pct: 64 },
+    { name: "Cell Division", status: "Blooming", color: "var(--color-marketing-status-blooming)", bg: "rgb(from var(--color-marketing-status-blooming) r g b / 0.14)", pct: 78 },
+    { name: "Genetics & Heredity", status: "Sprouting", color: "var(--color-marketing-status-sprouting)", bg: "rgb(from var(--color-marketing-status-sprouting) r g b / 0.14)", pct: 48 },
+    { name: "Evolution", status: "Thriving", color: "var(--color-marketing-status-thriving)", bg: "rgb(from var(--color-marketing-status-thriving) r g b / 0.14)", pct: 92 },
   ];
   return (
     <ParchmentCard className="p-7 md:p-8" glow>

@@ -55,7 +55,7 @@ export function LandingPage() {
               Beta
             </span>
           </Link>
-          <div className="hidden md:flex items-center gap-1 text-sm font-serif text-ghibli-canopy/80">
+          <div className="hidden md:flex items-center gap-1 text-sm font-serif text-ghibli-canopy-strong">
             <a href="#how-it-works" className="px-3 py-2 rounded-full hover:text-ghibli-canopy hover:bg-ghibli-moss/5 transition-colors">How It Works</a>
             <a href="#knowledge-garden" className="px-3 py-2 rounded-full hover:text-ghibli-canopy hover:bg-ghibli-moss/5 transition-colors">Knowledge Garden</a>
             <Link to="/pricing" className="px-3 py-2 rounded-full hover:text-ghibli-canopy hover:bg-ghibli-moss/5 transition-colors">Pricing</Link>
@@ -105,7 +105,7 @@ export function LandingPage() {
               </Button>
             </div>
 
-            <p className="text-sm text-ghibli-bark/75 font-sans max-w-md mx-auto lg:mx-0 leading-relaxed">
+            <p className="text-sm text-ghibli-bark-medium font-sans max-w-md mx-auto lg:mx-0 leading-relaxed">
               Upload one document. Take your first quiz. See what needs work.
             </p>
           </div>
@@ -114,7 +114,7 @@ export function LandingPage() {
           <div className="relative">
             <div className="absolute inset-0 bg-ghibli-moss/10 blur-3xl rounded-[2.5rem] transform scale-95" />
             <HeroProductPreview />
-            <p className="font-sans text-[12px] md:text-xs text-ghibli-bark/80 italic text-center mt-3 max-w-md mx-auto leading-relaxed">
+            <p className="font-sans text-[12px] md:text-xs text-ghibli-bark-strong italic text-center mt-3 max-w-md mx-auto leading-relaxed">
               Your readiness estimate updates as you complete quizzes from your materials.
             </p>
           </div>
@@ -152,7 +152,7 @@ export function LandingPage() {
                 around a problem students face every year: having piles of materials, an approaching
                 exam, and no clear sense of what they actually know.
               </p>
-              <p className="font-serif text-sm md:text-base text-ghibli-canopy/85 italic leading-relaxed">
+              <p className="font-serif text-sm md:text-base text-ghibli-canopy-strong italic leading-relaxed">
                 PassAI helps students focus their effort where it can make the greatest difference.
               </p>
             </div>
@@ -324,7 +324,7 @@ export function LandingPage() {
           <h2 className="text-3xl md:text-4xl font-bold font-serif text-ghibli-canopy">
             Stop guessing whether you are ready.
           </h2>
-          <p className="font-serif text-base md:text-lg text-ghibli-canopy/90 leading-relaxed max-w-2xl mx-auto">
+          <p className="font-serif text-base md:text-lg text-ghibli-canopy-strong leading-relaxed max-w-2xl mx-auto">
             Your exam is getting closer. Your materials are scattered across notes, slides and
             documents. You do not need to revise everything again —{" "}
             <span className="font-semibold text-ghibli-canopy">you need to know what to study next.</span>
@@ -378,7 +378,7 @@ export function LandingPage() {
                 <span className="text-4xl font-bold font-serif text-ghibli-canopy">$79</span>
                 <span className="text-ghibli-bark font-serif opacity-60">/year</span>
               </div>
-              <p className="text-xs text-ghibli-bark/75 font-sans mb-6">
+              <p className="text-xs text-ghibli-bark-medium font-sans mb-6">
                 or $9.99/month — see <Link to="/pricing" className="underline underline-offset-2 hover:text-ghibli-canopy">all plans</Link>
               </p>
               <ul className="space-y-3 mb-8 flex-1 font-sans">
@@ -417,10 +417,10 @@ export function LandingPage() {
       {/* ── Footer ──────────────────────────────────────────── */}
       <footer className="relative z-10 py-12 px-6 border-t border-ghibli-moss/10 text-center">
         <div className="max-w-2xl mx-auto space-y-4">
-          <p className="text-xs text-ghibli-bark/60 font-sans italic">
+          <p className="text-xs text-ghibli-bark-weak font-sans italic">
             Built for students preparing for the exam they actually have.
           </p>
-          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] text-ghibli-bark/60 font-serif uppercase tracking-widest">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] text-ghibli-bark-weak font-serif uppercase tracking-widest">
             <Link to="/terms" className="hover:text-ghibli-canopy">Terms</Link>
             <Link to="/privacy" className="hover:text-ghibli-canopy">Privacy</Link>
             <Link to="/cookies" className="hover:text-ghibli-canopy">Cookies</Link>
@@ -441,7 +441,7 @@ function PreviewBadge({ className = "" }: { className?: string }) {
     <span
       aria-label="Example preview — not live data"
       title="Example preview — not live data"
-      className={`inline-flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-[0.18em] font-semibold px-2 py-0.5 rounded-full bg-ghibli-bark/10 text-ghibli-bark/85 border border-ghibli-bark/15 ${className}`}
+      className={`inline-flex items-center gap-1.5 font-sans text-[10px] uppercase tracking-[0.18em] font-semibold px-2 py-0.5 rounded-full bg-ghibli-bark/10 text-ghibli-bark-strong border border-ghibli-bark/15 ${className}`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-ghibli-bark/40" />
       Preview
@@ -481,7 +481,7 @@ function StepCard({
       <h3 className="font-serif text-lg font-semibold text-ghibli-canopy mb-2 leading-snug">
         {title}
       </h3>
-      <p className="font-sans text-sm text-ghibli-bark/90 leading-relaxed">{text}</p>
+      <p className="font-sans text-sm text-ghibli-bark-strong leading-relaxed">{text}</p>
     </ParchmentCard>
   );
 }
@@ -537,7 +537,7 @@ function ComparisonCard({
     >
       <h3
         className={`font-serif text-lg md:text-xl font-semibold mb-5 ${
-          isPrimary ? "text-ghibli-canopy" : "text-ghibli-bark/80"
+          isPrimary ? "text-ghibli-canopy" : "text-ghibli-bark-strong"
         }`}
       >
         {heading}
@@ -547,13 +547,13 @@ function ComparisonCard({
           <li
             key={it}
             className={`flex items-start gap-3 text-sm md:text-base font-sans ${
-              isPrimary ? "text-ghibli-canopy" : "text-ghibli-bark/75"
+              isPrimary ? "text-ghibli-canopy" : "text-ghibli-bark-medium"
             }`}
           >
             {isPrimary ? (
               <CheckCircle2 className="w-4 h-4 mt-0.5 text-ghibli-moss shrink-0" />
             ) : (
-              <span className="w-4 h-4 mt-0.5 inline-flex items-center justify-center text-ghibli-bark/50 shrink-0">
+              <span className="w-4 h-4 mt-0.5 inline-flex items-center justify-center text-ghibli-bark-weak shrink-0">
                 ✕
               </span>
             )}
@@ -600,7 +600,7 @@ function HeroProductPreview() {
           </span>
         </div>
       </div>
-      <p className="font-sans text-[11px] text-ghibli-bark/70 italic text-center mb-4">
+      <p className="font-sans text-[11px] text-ghibli-bark-medium italic text-center mb-4">
         Example dashboard. Your numbers will come from your own materials and quizzes.
       </p>
 
@@ -621,7 +621,7 @@ function HeroProductPreview() {
                 style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px", background: "#4a6b3a" }}
               />
             </div>
-            <div className="flex justify-between mt-1.5 text-[10px] text-ghibli-canopy/65 font-sans">
+            <div className="flex justify-between mt-1.5 text-[10px] text-ghibli-canopy-medium font-sans">
               <span>Needs water</span>
               <span className="mr-[13%]">Target</span>
             </div>
@@ -656,7 +656,7 @@ function HeroProductPreview() {
           <p className="font-serif text-sm font-semibold text-ghibli-canopy truncate">
             Cellular Respiration
           </p>
-          <p className="font-sans text-[11px] text-ghibli-bark/80">
+          <p className="font-sans text-[11px] text-ghibli-bark-strong">
             Weak concept · 38% mastery
           </p>
         </div>
@@ -686,7 +686,7 @@ function MaterialsPreview() {
         </span>
         <PreviewBadge />
       </div>
-      <p className="font-sans text-[11px] text-ghibli-bark/70 italic mb-4">
+      <p className="font-sans text-[11px] text-ghibli-bark-medium italic mb-4">
         Example layout. Accepted: PDF · DOCX · PPTX · PNG · JPEG.
       </p>
       <div className="border-2 border-dashed border-ghibli-moss/30 rounded-2xl py-7 px-4 mb-4 text-center bg-white/50">
@@ -694,7 +694,7 @@ function MaterialsPreview() {
         <p className="font-serif text-sm font-semibold text-ghibli-canopy">
           Drop your notes, slides or readings
         </p>
-        <p className="font-sans text-[11px] text-ghibli-bark/70 mt-0.5">
+        <p className="font-sans text-[11px] text-ghibli-bark-medium mt-0.5">
           We'll extract the concepts your course is built on.
         </p>
       </div>
@@ -708,7 +708,7 @@ function MaterialsPreview() {
             <span className="font-sans text-sm text-ghibli-canopy truncate flex-1">{f.name}</span>
             <span
               className={`font-sans text-[10px] uppercase tracking-widest shrink-0 ${
-                f.status === "Indexed" ? "text-ghibli-moss" : "text-ghibli-bark/60 italic"
+                f.status === "Indexed" ? "text-ghibli-moss" : "text-ghibli-bark-weak italic"
               }`}
             >
               {f.status}
@@ -729,7 +729,7 @@ function QuizPreview() {
         </span>
         <PreviewBadge />
       </div>
-      <p className="font-sans text-[11px] text-ghibli-bark/70 italic mb-3">
+      <p className="font-sans text-[11px] text-ghibli-bark-medium italic mb-3">
         Example question. Yours come from your own course materials.
       </p>
       <div className="h-1.5 w-full rounded-full bg-ghibli-mist/80 overflow-hidden mb-5">
@@ -752,14 +752,14 @@ function QuizPreview() {
               className={`flex items-center gap-3 px-4 py-3 rounded-2xl border font-sans text-sm ${
                 isCorrect
                   ? "bg-ghibli-moss/12 border-ghibli-moss/40 text-ghibli-canopy"
-                  : "bg-white/55 border-ghibli-moss/15 text-ghibli-canopy/85"
+                  : "bg-white/55 border-ghibli-moss/15 text-ghibli-canopy-strong"
               }`}
             >
               <span
                 className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold shrink-0 ${
                   isCorrect
                     ? "bg-ghibli-moss text-white"
-                    : "bg-ghibli-mist text-ghibli-canopy/70"
+                    : "bg-ghibli-mist text-ghibli-canopy-medium"
                 }`}
               >
                 {o.letter}
@@ -815,7 +815,7 @@ function GardenPreview() {
                 />
               </div>
             </div>
-            <span className="font-sans text-xs font-semibold text-ghibli-canopy/80 tabular-nums shrink-0">
+            <span className="font-sans text-xs font-semibold text-ghibli-canopy-strong tabular-nums shrink-0">
               {t.pct}%
             </span>
           </div>
@@ -834,7 +834,7 @@ function StudyPlanPreview() {
         </span>
         <PreviewBadge />
       </div>
-      <div className="flex items-center gap-1.5 font-sans text-[11px] text-ghibli-bark/70 mb-4">
+      <div className="flex items-center gap-1.5 font-sans text-[11px] text-ghibli-bark-medium mb-4">
         <CalendarDays className="w-3.5 h-3.5" />
         Example · Exam in 12 days
       </div>
@@ -858,7 +858,7 @@ function StudyPlanPreview() {
         </div>
       </div>
 
-      <p className="font-sans text-[11px] uppercase tracking-[0.18em] text-ghibli-moss/90 mb-2.5">
+      <p className="font-sans text-[11px] uppercase tracking-[0.18em] text-ghibli-moss-strong mb-2.5">
         Focus next
       </p>
       <div className="space-y-2.5">
@@ -877,9 +877,9 @@ function StudyPlanPreview() {
               <p className="font-serif text-sm font-semibold text-ghibli-canopy truncate">
                 {row.name}
               </p>
-              <p className="font-sans text-[11px] text-ghibli-bark/80">{row.reason}</p>
+              <p className="font-sans text-[11px] text-ghibli-bark-strong">{row.reason}</p>
             </div>
-            <ArrowRight className="w-4 h-4 text-ghibli-canopy/60 shrink-0" />
+            <ArrowRight className="w-4 h-4 text-ghibli-canopy-weak shrink-0" />
           </div>
         ))}
       </div>
@@ -909,7 +909,7 @@ function BigGardenPreview() {
           <h3 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy leading-tight mb-1.5">
             14 of 22 concepts mastered.
           </h3>
-          <p className="font-sans text-sm text-ghibli-bark/80">
+          <p className="font-sans text-sm text-ghibli-bark-strong">
             A grove of <span className="font-semibold text-ghibli-forest">5 topics</span> is taking root.
           </p>
         </div>
@@ -940,7 +940,7 @@ function BigGardenPreview() {
                   />
                 </div>
               </div>
-              <span className="font-sans text-xs font-semibold text-ghibli-canopy/80 tabular-nums shrink-0">
+              <span className="font-sans text-xs font-semibold text-ghibli-canopy-strong tabular-nums shrink-0">
                 {t.pct}%
               </span>
             </div>

@@ -199,7 +199,7 @@ export function CourseDetailPage() {
         {/* Back link */}
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
+          className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy-medium hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
@@ -216,11 +216,11 @@ export function CourseDetailPage() {
                 {course.title}
               </h1>
               {course.description && (
-                <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed mb-4 max-w-md mx-auto md:mx-0">
+                <p className="font-sans text-base text-ghibli-bark-strong leading-relaxed mb-4 max-w-md mx-auto md:mx-0">
                   {course.description}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark/70 mb-4 md:mb-6 justify-center md:justify-start">
+              <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark-medium mb-4 md:mb-6 justify-center md:justify-start">
                 <span className="flex items-center gap-1.5">
                   <FileText className="w-4 h-4" />
                   {docCount ?? 0}{" "}
@@ -282,7 +282,7 @@ export function CourseDetailPage() {
                     glow
                     showPercent
                   />
-                  <p className="font-sans text-xs text-ghibli-bark/80 italic">
+                  <p className="font-sans text-xs text-ghibli-bark-strong italic">
                     growing toward {targetLabel}
                   </p>
                 </>
@@ -293,7 +293,7 @@ export function CourseDetailPage() {
                     size="xl"
                     showPercent={false}
                   />
-                  <p className="font-sans text-xs text-ghibli-bark/70 italic max-w-56 text-center leading-relaxed">
+                  <p className="font-sans text-xs text-ghibli-bark-medium italic max-w-56 text-center leading-relaxed">
                     Generate a quiz to see your garden
                   </p>
                 </>
@@ -315,7 +315,7 @@ export function CourseDetailPage() {
               <p className="font-serif text-lg font-semibold text-ghibli-canopy">
                 Your garden soil is ready
               </p>
-              <p className="font-sans text-sm text-ghibli-bark/80 mt-0.5">
+              <p className="font-sans text-sm text-ghibli-bark-strong mt-0.5">
                 Your material has been processed. Generate your first quiz to
                 start tracking mastery.
               </p>
@@ -466,7 +466,7 @@ function QuizCard({
                 {bestScore}%
               </span>
             )}
-            <ChevronRight className="w-4 h-4 text-ghibli-canopy/65 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ghibli-canopy" />
+            <ChevronRight className="w-4 h-4 text-ghibli-canopy-medium transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ghibli-canopy" />
           </div>
         </div>
       </CardContent>

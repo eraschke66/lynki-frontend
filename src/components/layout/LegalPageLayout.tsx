@@ -12,7 +12,7 @@ export function LegalPageLayout({ children }: LegalPageLayoutProps) {
           <Link to="/" className="text-xl font-bold text-primary tracking-tight">
             PassAI
           </Link>
-          <Link to="/" className="text-sm text-ghibli-canopy/70 hover:text-ghibli-canopy transition-colors">
+          <Link to="/" className="text-sm text-ghibli-canopy-medium hover:text-ghibli-canopy transition-colors">
             ← Back to home
           </Link>
         </div>

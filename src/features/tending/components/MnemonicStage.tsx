@@ -45,7 +45,7 @@ export function MnemonicStage({ mnemonics, onComplete, onSkip }: MnemonicStagePr
   return (
     <div className="max-w-xl mx-auto w-full">
       <div className="text-center mb-6">
-        <p className="text-xs uppercase tracking-wider text-ghibli-moss/80 font-medium">
+        <p className="text-xs uppercase tracking-wider text-ghibli-moss-strong font-medium">
           Memory hook {idx + 1} of {mnemonics.length}
         </p>
       </div>
@@ -54,7 +54,7 @@ export function MnemonicStage({ mnemonics, onComplete, onSkip }: MnemonicStagePr
         <h2 className="font-serif text-2xl md:text-3xl text-ghibli-canopy leading-snug mb-5">
           {card.hook}
         </h2>
-        <p className="font-sans text-ghibli-canopy/80 text-sm md:text-base leading-relaxed">
+        <p className="font-sans text-ghibli-canopy-strong text-sm md:text-base leading-relaxed">
           {card.explanation}
         </p>
       </ParchmentCard>

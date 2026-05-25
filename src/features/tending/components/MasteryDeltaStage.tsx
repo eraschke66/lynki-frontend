@@ -82,7 +82,7 @@ export function MasteryDeltaStage({
         style={{ mixBlendMode: "darken" }}
       />
 
-      <p className="text-xs uppercase tracking-wider text-ghibli-moss/80 font-medium mt-2 mb-3">
+      <p className="text-xs uppercase tracking-wider text-ghibli-moss-strong font-medium mt-2 mb-3">
         {delta.topic_title}
       </p>
 
@@ -91,7 +91,7 @@ export function MasteryDeltaStage({
         <span className="font-semibold">{beforePct}%</span> →{" "}
         <span className="font-semibold">{afterPct}%</span>
       </h2>
-      <p className="text-ghibli-moss/80 text-sm">
+      <p className="text-ghibli-moss-strong text-sm">
         {diffPct >= 0 ? `+${diffPct}%` : `${diffPct}%`} in {minutes}{" "}
         {minutes === 1 ? "minute" : "minutes"}
       </p>
@@ -102,7 +102,7 @@ export function MasteryDeltaStage({
             ? "text-ghibli-canopy"
             : passDiff < 0
               ? "text-amber-700"
-              : "text-ghibli-bark/60";
+              : "text-ghibli-bark-weak";
         const deltaLabel =
           passDiff > 0
             ? `+${passDiff} points`
@@ -126,7 +126,7 @@ export function MasteryDeltaStage({
 
       {delta.kc_breakdown.length > 0 && (
         <details className="mt-5 text-left max-w-md w-full px-4">
-          <summary className="text-sm text-ghibli-canopy/80 cursor-pointer hover:text-ghibli-canopy">
+          <summary className="text-sm text-ghibli-canopy-strong cursor-pointer hover:text-ghibli-canopy">
             See what shifted
           </summary>
           <ul className="mt-3 space-y-2">
@@ -136,7 +136,7 @@ export function MasteryDeltaStage({
                 className="text-sm flex items-center justify-between gap-2"
               >
                 <span className="text-ghibli-canopy">{kc.name}</span>
-                <span className="text-ghibli-moss/80 tabular-nums">
+                <span className="text-ghibli-moss-strong tabular-nums">
                   {Math.round(kc.before * 100)}% → {Math.round(kc.after * 100)}%
                 </span>
               </li>
@@ -147,8 +147,8 @@ export function MasteryDeltaStage({
 
       {stagesSkipped.length > 0 && (
         <ParchmentCard className="p-5 mt-6 text-sm w-full max-w-lg" hover={false}>
-          <p className="text-ghibli-canopy/90">{nudge}</p>
-          <p className="mt-2 text-xs text-ghibli-moss/70">
+          <p className="text-ghibli-canopy-strong">{nudge}</p>
+          <p className="mt-2 text-xs text-ghibli-moss-medium">
             Skipped: {stagesSkipped.map((s) => STAGE_LABEL[s]).join(", ")}
           </p>
         </ParchmentCard>

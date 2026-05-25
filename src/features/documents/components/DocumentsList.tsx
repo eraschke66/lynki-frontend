@@ -379,7 +379,7 @@ export function DocumentsList({
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-full text-ghibli-canopy/60 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-full text-ghibli-canopy-weak hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors"
                         aria-label="Actions"
                       >
                         <MoreVertical className="w-4 h-4" />

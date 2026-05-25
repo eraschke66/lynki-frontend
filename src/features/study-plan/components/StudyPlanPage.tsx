@@ -182,7 +182,7 @@ export function StudyPlanPage() {
           {/* Back link */}
           <button
             onClick={() => navigate(`/course/${courseId}`)}
-            className="flex items-center gap-1.5 text-sm text-ghibli-canopy/70 hover:text-ghibli-jungle transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-ghibli-canopy-medium hover:text-ghibli-jungle transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Course

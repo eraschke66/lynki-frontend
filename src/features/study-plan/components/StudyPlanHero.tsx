@@ -37,10 +37,10 @@ export function StudyPlanHero({
           <h2 className="font-serif text-6xl md:text-7xl font-semibold text-ghibli-canopy leading-none mb-3">
             {daysRemaining}
           </h2>
-          <p className="font-sans text-lg text-ghibli-canopy/80 mb-2">
+          <p className="font-sans text-lg text-ghibli-canopy-strong mb-2">
             {daysRemaining === 1 ? "day" : "days"} of growing time
           </p>
-          <p className="font-sans text-sm text-ghibli-bark/70 italic mb-4">
+          <p className="font-sans text-sm text-ghibli-bark-medium italic mb-4">
             {formattedDate}
           </p>
           <button
@@ -60,14 +60,14 @@ export function StudyPlanHero({
           {passPercent !== null ? (
             <>
               <PlantIndicator probability={passPercent} size="xl" glow showPercent />
-              <p className="font-sans text-xs text-ghibli-bark/80 italic">
+              <p className="font-sans text-xs text-ghibli-bark-strong italic">
                 growing toward {targetLabel}
               </p>
             </>
           ) : (
             <>
               <PlantIndicator probability={0} size="xl" showPercent={false} />
-              <p className="font-sans text-xs text-ghibli-bark/70 italic max-w-[14rem] text-center leading-relaxed">
+              <p className="font-sans text-xs text-ghibli-bark-medium italic max-w-[14rem] text-center leading-relaxed">
                 Take your first quiz to see your pass chance
               </p>
             </>

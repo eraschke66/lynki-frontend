@@ -34,7 +34,7 @@ export function Header() {
       "flex items-center gap-2 px-5 py-2 rounded-full text-sm font-sans font-medium transition-all",
       isActive
         ? "bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy text-primary-foreground shadow-md"
-        : "text-ghibli-canopy/70 hover:text-ghibli-canopy hover:bg-ghibli-ivory/60",
+        : "text-ghibli-canopy-medium hover:text-ghibli-canopy hover:bg-ghibli-ivory/60",
     );
 
   return (
@@ -55,7 +55,7 @@ export function Header() {
             <h1 className="font-serif text-2xl md:text-[1.75rem] font-semibold text-ghibli-canopy tracking-tight">
               Pass<span className="italic text-ghibli-forest">AI</span>
             </h1>
-            <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-ghibli-moss/80">
+            <span className="font-sans text-[10px] uppercase tracking-[0.22em] text-ghibli-moss-strong">
               a quiet study garden
             </span>
           </div>
@@ -85,7 +85,7 @@ export function Header() {
             onClick={toggleMusic}
             aria-label={playing ? "Pause ambient music" : "Play ambient music"}
             title={playing ? "Pause ambient music" : "Play ambient music"}
-            className="p-2 rounded-full text-ghibli-canopy/70 hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
+            className="p-2 rounded-full text-ghibli-canopy-medium hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
           >
             {playing ? <Volume2 className="w-4 h-4" /> : <VolumeOff className="w-4 h-4" />}
           </button>
@@ -107,7 +107,7 @@ export function Header() {
                   Pass Pro
                 </span>
               )}
-              <p className="text-xs font-sans text-ghibli-canopy/70 hidden lg:block max-w-[12rem] truncate">
+              <p className="text-xs font-sans text-ghibli-canopy-medium hidden lg:block max-w-[12rem] truncate">
                 {user.email}
               </p>
               <Button
@@ -181,7 +181,7 @@ export function Header() {
                           Pass Pro
                         </span>
                       )}
-                      <p className="text-xs text-ghibli-canopy/70 truncate">{user.email}</p>
+                      <p className="text-xs text-ghibli-canopy-medium truncate">{user.email}</p>
                     </div>
                   </div>
                 </SheetContent>

@@ -176,7 +176,7 @@ function TopicCard({
           {topic.concepts.length > 4 && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="mt-2 text-xs text-ghibli-canopy/70 hover:text-ghibli-jungle transition-colors flex items-center gap-1"
+              className="mt-2 text-xs text-ghibli-canopy-medium hover:text-ghibli-jungle transition-colors flex items-center gap-1"
             >
               {expanded
                 ? "Show less"
@@ -262,7 +262,7 @@ export function KnowledgeGardenPage() {
             {/* Back link */}
             <button
               onClick={() => navigate(`/course/${courseId}`)}
-              className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
+              className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy-medium hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Course
@@ -281,7 +281,7 @@ export function KnowledgeGardenPage() {
                   <p className={`font-sans text-base font-semibold mb-2 ${gardenStatus.color}`}>
                     {gardenStatus.label}
                   </p>
-                  <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed max-w-md mx-auto md:mx-0">
+                  <p className="font-sans text-base text-ghibli-bark-strong leading-relaxed max-w-md mx-auto md:mx-0">
                     {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts mastered.
                     {topics.length > 0 && (
                       <>
@@ -321,7 +321,7 @@ export function KnowledgeGardenPage() {
                   <h2 className="font-serif text-xl font-semibold text-ghibli-canopy mb-1">
                     Your garden is still taking shape
                   </h2>
-                  <p className="font-sans text-sm text-ghibli-bark/80 max-w-xs mx-auto">
+                  <p className="font-sans text-sm text-ghibli-bark-strong max-w-xs mx-auto">
                     Your materials are being processed. Check back soon to see your topics bloom.
                   </p>
                 </div>

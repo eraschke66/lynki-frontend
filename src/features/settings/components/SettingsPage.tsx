@@ -93,7 +93,7 @@ export function SettingsPage() {
         <div className="max-w-2xl mx-auto px-6">
           <button
             onClick={() => navigate("/home")}
-            className="flex items-center gap-1.5 text-sm text-ghibli-canopy/70 hover:text-ghibli-jungle transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-ghibli-canopy-medium hover:text-ghibli-jungle transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard

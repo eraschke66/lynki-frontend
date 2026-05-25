@@ -415,7 +415,7 @@ export function TestPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy-medium hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
@@ -439,7 +439,7 @@ export function TestPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy-medium hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
@@ -483,7 +483,7 @@ export function TestPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy/65 hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy-medium hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
@@ -528,7 +528,7 @@ export function TestPage() {
                         ? "text-ghibli-canopy"
                         : diff < 0
                           ? "text-amber-700"
-                          : "text-ghibli-bark/60";
+                          : "text-ghibli-bark-weak";
                     const deltaLabel =
                       diff > 0
                         ? `+${diff} points`
@@ -557,7 +557,7 @@ export function TestPage() {
                     );
                   })()
                 ) : (
-                  <p className="text-sm font-sans text-ghibli-canopy/85 mt-2">
+                  <p className="text-sm font-sans text-ghibli-canopy-strong mt-2">
                     Pass probability:{" "}
                     <span className="tabular-nums">{passPercent}%</span>
                   </p>
@@ -696,7 +696,7 @@ export function TestPage() {
                 width="80"
                 height="12"
                 viewBox="0 0 80 12"
-                className="text-ghibli-bark/30"
+                className="text-ghibli-bark-ghost"
               >
                 <path
                   d="M0 6 Q10 0 20 6 Q30 12 40 6 Q50 0 60 6 Q70 12 80 6"
@@ -714,7 +714,7 @@ export function TestPage() {
                 width="80"
                 height="12"
                 viewBox="0 0 80 12"
-                className="text-ghibli-bark/30"
+                className="text-ghibli-bark-ghost"
               >
                 <path
                   d="M0 6 Q10 12 20 6 Q30 0 40 6 Q50 12 60 6 Q70 0 80 6"

@@ -182,7 +182,7 @@ export function PricingPage() {
                 </Button>
               )}
 
-              <p className="text-xs text-ghibli-bark/80 mt-3 text-center">
+              <p className="text-xs text-ghibli-bark-strong mt-3 text-center">
                 7-day free trial · cancel anytime
               </p>
               <p className="text-xs text-ghibli-bark mt-1 text-center">
@@ -243,7 +243,7 @@ export function PricingPage() {
                 </Button>
               )}
 
-              <p className="text-xs text-ghibli-bark/80 mt-3 text-center">
+              <p className="text-xs text-ghibli-bark-strong mt-3 text-center">
                 7-day free trial · cancel anytime
               </p>
               <p className="text-xs text-ghibli-bark mt-1 text-center">

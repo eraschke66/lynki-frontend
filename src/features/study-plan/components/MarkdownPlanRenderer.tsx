@@ -260,7 +260,7 @@ function TopicSection({
               <BookOpen className="w-3.5 h-3.5" />
               Practice
             </Button>
-            <p className="mt-1.5 text-[10px] text-ghibli-bark/55 italic leading-tight">
+            <p className="mt-1.5 text-[10px] text-ghibli-bark-weak italic leading-tight">
               Weakest concepts first
             </p>
           </div>

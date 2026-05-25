@@ -210,7 +210,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                 !courseReady || !backendReady
                   ? "opacity-30 pointer-events-none select-none"
                   : uploading
-                  ? "pointer-events-none bg-ghibli-mist/40 text-ghibli-bark/65"
+                  ? "pointer-events-none bg-ghibli-mist/40 text-ghibli-bark-disabled"
                   : "cursor-pointer hover:border-ghibli-jungle hover:bg-ghibli-moss/8"
               }`}
               style={{

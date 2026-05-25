@@ -57,6 +57,23 @@
   --color-ghibli-canopy-dark: #4a6b3a;
   --color-ghibli-parchment:   #e8e3d5;
 
+  /* Muted text-color tokens — semantic bands per color (V9 Tier C2).
+     Replaces alpha-modifier sprawl (text-ghibli-canopy/70 etc.) with
+     fixed strong/medium/weak intensities. Two exception tokens preserve
+     the disabled-state signal on FileUploader and the near-ghost decorative
+     wavy dividers in the quiz cards. */
+  --color-ghibli-canopy-strong: hsl(var(--ghibli-canopy) / 0.80);
+  --color-ghibli-canopy-medium: hsl(var(--ghibli-canopy) / 0.70);
+  --color-ghibli-canopy-weak:   hsl(var(--ghibli-canopy) / 0.60);
+  --color-ghibli-bark-strong:   hsl(var(--ghibli-bark) / 0.80);
+  --color-ghibli-bark-medium:   hsl(var(--ghibli-bark) / 0.70);
+  --color-ghibli-bark-weak:     hsl(var(--ghibli-bark) / 0.60);
+  --color-ghibli-bark-disabled: hsl(var(--ghibli-bark) / 0.65);
+  --color-ghibli-bark-ghost:    hsl(var(--ghibli-bark) / 0.30);
+  --color-ghibli-moss-strong:   hsl(var(--ghibli-moss) / 0.80);
+  --color-ghibli-moss-medium:   hsl(var(--ghibli-moss) / 0.70);
+  --color-ghibli-moss-weak:     hsl(var(--ghibli-moss) / 0.60);
+
   /* Ghibli border-radius */
   --radius-parchment: 1.75rem;
   --radius-leaf: 2.25rem;

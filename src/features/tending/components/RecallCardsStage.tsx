@@ -62,7 +62,7 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
   return (
     <div className="max-w-xl mx-auto w-full flex flex-col">
       <div className="text-center mb-6">
-        <p className="text-xs uppercase tracking-wider text-ghibli-moss/80 font-medium">
+        <p className="text-xs uppercase tracking-wider text-ghibli-moss-strong font-medium">
           Recall card {idx + 1} of {cards.length}
         </p>
       </div>
@@ -82,11 +82,11 @@ export function RecallCardsStage({ cards, onComplete, onSkip }: RecallCardsStage
               <h2 className="font-serif text-2xl md:text-3xl text-ghibli-canopy leading-snug mb-6">
                 {card.front}
               </h2>
-              <p className="text-xs text-ghibli-moss/70 italic">Tap to reveal answer</p>
+              <p className="text-xs text-ghibli-moss-medium italic">Tap to reveal answer</p>
             </>
           ) : (
             <>
-              <p className="text-sm uppercase tracking-wider text-ghibli-moss/70 font-medium mb-3">
+              <p className="text-sm uppercase tracking-wider text-ghibli-moss-medium font-medium mb-3">
                 Answer
               </p>
               <p className="font-serif text-lg md:text-xl text-ghibli-canopy leading-relaxed">

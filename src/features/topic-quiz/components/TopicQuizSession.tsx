@@ -206,7 +206,7 @@ export function TopicQuizSession({
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="mt-4 text-xs text-ghibli-bark/60 hover:text-ghibli-canopy hover:underline"
+                className="mt-4 text-xs text-ghibli-bark-weak hover:text-ghibli-canopy hover:underline"
               >
                 This is taking longer than usual — try again?
               </button>
@@ -351,7 +351,7 @@ export function TopicQuizSession({
 
       <ParchmentCard className="p-8 md:p-10 mb-6">
         <div className="flex justify-center mb-4">
-          <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
+          <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark-ghost">
             <path
               d="M0 6 Q10 0 20 6 Q30 12 40 6 Q50 0 60 6 Q70 12 80 6"
               stroke="currentColor"
@@ -364,7 +364,7 @@ export function TopicQuizSession({
           {currentQuestion!.question}
         </h2>
         <div className="flex justify-center mt-4">
-          <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark/30">
+          <svg width="80" height="12" viewBox="0 0 80 12" className="text-ghibli-bark-ghost">
             <path
               d="M0 6 Q10 12 20 6 Q30 0 40 6 Q50 12 60 6 Q70 0 80 6"
               stroke="currentColor"

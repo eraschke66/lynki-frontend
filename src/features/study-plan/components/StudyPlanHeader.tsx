@@ -32,7 +32,7 @@ export function StudyPlanHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1.5 text-xs text-ghibli-canopy/70 hover:text-ghibli-jungle"
+            className="gap-1.5 text-xs text-ghibli-canopy-medium hover:text-ghibli-jungle"
             onClick={onRegenerate}
           >
             <RefreshCw className="w-3.5 h-3.5" />

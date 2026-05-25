@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { useRef, useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { X, CheckCircle, AlertCircle, FileText, Plus, ChevronRight } from "lucide-react";
@@ -64,7 +65,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
           setSelectedCourseId((prev) => prev || data[0].id);
         }
       } catch (err) {
-        if (!cancelled) console.error(err);
+        if (!cancelled) reportError("Fetch courses for uploader failed:", err);
       }
     };
     load();
@@ -80,7 +81,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
       setCreatingNew(false);
       setNewCourseName("");
     } catch (err) {
-      console.error("Failed to create course:", err);
+      reportError("Failed to create course:", err);
     }
   };
 

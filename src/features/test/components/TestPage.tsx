@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -213,7 +214,7 @@ export function TestPage() {
           testData.test_id,
           currentQuestion.id,
           optionIndex,
-        ).catch((err) => console.error("Background quiz answer failed:", err));
+        ).catch((err) => reportError("Background quiz answer failed:", err));
       } else if (topicId) {
         submitBktAnswer(
           user.id,
@@ -221,7 +222,7 @@ export function TestPage() {
           currentQuestion.id,
           optionIndex,
           testData?.test_id,
-        ).catch((err) => console.error("Background BKT update failed:", err));
+        ).catch((err) => reportError("Background BKT update failed:", err));
       } else {
         submitAnswer(
           user.id,
@@ -229,7 +230,7 @@ export function TestPage() {
           currentQuestion.id,
           optionIndex,
           testData?.test_id,
-        ).catch((err) => console.error("Background BKT update failed:", err));
+        ).catch((err) => reportError("Background BKT update failed:", err));
       }
     },
     [
@@ -257,18 +258,18 @@ export function TestPage() {
       try {
         if (quizId && testData?.test_id) {
           completeQuizAttempt(user!.id, courseId!, testData.test_id).catch(
-            (err) => console.error("Failed to complete quiz attempt:", err),
+            (err) => reportError("Failed to complete quiz attempt:", err),
           );
         } else if (!topicId && testData?.test_id) {
           completeTest(user!.id, courseId!, testData.test_id).catch((err) =>
-            console.error("Failed to complete test session:", err),
+            reportError("Failed to complete test session:", err),
           );
         }
         const pc = await fetchPassChance(user!.id, courseId!);
         setPassChance(pc.pass_probability);
         setTargetGrade(pc.target_grade ?? 1.0);
       } catch (err) {
-        console.error("Failed to fetch pass chance:", err);
+        reportError("Failed to fetch pass chance:", err);
         setPassChance(null);
       } finally {
         setLoadingPassChance(false);

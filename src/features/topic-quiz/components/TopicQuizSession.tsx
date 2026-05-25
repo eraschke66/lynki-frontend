@@ -200,7 +200,7 @@ export function TopicQuizSession({
     if (embedded) {
       return (
         <div className="max-w-md mx-auto w-full">
-          <ParchmentCard className="p-8 text-center" hover={false}>
+          <ParchmentCard className="p-5 md:p-8 text-center" hover={false}>
             <p className="font-serif text-ghibli-canopy">Preparing fresh soil for this topic…</p>
             {showSlowLink && (
               <button
@@ -222,7 +222,7 @@ export function TopicQuizSession({
   if (error) {
     return (
       <CenteredCard embedded={embedded}>
-        <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
+        <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4">
           <AlertCircle className="w-10 h-10 text-destructive" />
           <div>
             <p className="font-serif font-semibold mb-1">The seeds are resting</p>
@@ -242,7 +242,7 @@ export function TopicQuizSession({
   if (!questions.length) {
     return (
       <CenteredCard embedded={embedded}>
-        <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm">
+        <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4 max-w-sm">
           <p className="font-serif text-lg font-semibold">No questions could be grown</p>
           <p className="text-sm text-ghibli-bark">
             This topic may not have enough material yet.
@@ -263,7 +263,7 @@ export function TopicQuizSession({
       totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
     return (
       <CenteredCard embedded={embedded}>
-        <ParchmentCard className="p-10 text-center flex flex-col items-center gap-6 w-full max-w-lg">
+        <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-6 w-full max-w-lg">
           <p className="text-xs font-semibold text-ghibli-forest uppercase tracking-wider">
             Topic Study Complete
           </p>

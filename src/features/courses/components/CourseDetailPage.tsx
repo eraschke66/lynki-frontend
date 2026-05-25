@@ -198,19 +198,19 @@ export function CourseDetailPage() {
       <GhibliBackground />
       <Header />
       <VineDecoration />
-      <div className="relative z-10 max-w-5xl mx-auto px-6 pt-6 md:pt-8 pb-16">
+      <div className="relative z-10 max-w-5xl mx-auto px-6 pt-6 md:pt-8 pb-8 md:pb-16">
         {/* Back link */}
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-6"
+          className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
         </button>
 
         {/* Hero — oasis two-column pattern */}
-        <ParchmentCard className="p-8 md:p-12 mb-10 overflow-hidden" glow>
-          <div className="grid md:grid-cols-2 gap-8 items-center">
+        <ParchmentCard className="p-5 md:p-12 mb-6 md:mb-10 overflow-hidden" glow>
+          <div className="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
             <div className="text-center md:text-left order-2 md:order-1">
               <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
                 Your Garden
@@ -223,7 +223,7 @@ export function CourseDetailPage() {
                   {course.description}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark/70 mb-6 justify-center md:justify-start">
+              <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark/70 mb-4 md:mb-6 justify-center md:justify-start">
                 <span className="flex items-center gap-1.5">
                   <FileText className="w-4 h-4" />
                   {docCount ?? 0}{" "}
@@ -307,7 +307,7 @@ export function CourseDetailPage() {
 
         {/* First-quiz banner */}
         {docCount && docCount > 0 && quizzes.length === 0 && (
-          <ParchmentCard className="p-6 mb-6 flex flex-col sm:flex-row items-center gap-5">
+          <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6 flex flex-col sm:flex-row items-center gap-5">
             <img
               src="/plant-stage-1.png"
               alt=""
@@ -347,14 +347,14 @@ export function CourseDetailPage() {
           </div>
 
           {quizzesLoading ? (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-6 md:py-12">
               <p className="text-sm text-ghibli-bark animate-pulse">
                 Reading the garden path…
               </p>
             </div>
           ) : quizzes.length === 0 ? (
             <Card className="rounded-2xl border-t-2 border-ghibli-moss/15">
-              <CardContent className="py-12 text-center">
+              <CardContent className="py-6 md:py-12 text-center">
                 <img
                   src="/plant-stage-1.png"
                   alt=""

@@ -39,7 +39,7 @@ function TopicCard({
   const gardenStatus = getGardenStatus(topic.overall_progress);
 
   return (
-    <ParchmentCard className="p-6 mb-4">
+    <ParchmentCard className="p-5 md:p-6 mb-3 md:mb-4">
       {/* Topic header row */}
       <div className="flex items-start justify-between gap-4 mb-3">
         <div className="min-w-0 flex-1">
@@ -186,19 +186,19 @@ export function KnowledgeGardenPage() {
             </ParchmentCard>
           </div>
         ) : (
-          <div className="relative z-10 max-w-5xl mx-auto px-6 pt-6 md:pt-8 pb-16">
+          <div className="relative z-10 max-w-5xl mx-auto px-6 pt-6 md:pt-8 pb-8 md:pb-16">
             {/* Back link */}
             <button
               onClick={() => navigate(`/course/${courseId}`)}
-              className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-6"
+              className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy/70 hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Course
             </button>
 
             {/* Hero — oasis two-column */}
-            <ParchmentCard glow className="p-8 md:p-12 mb-10 overflow-hidden">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
+            <ParchmentCard glow className="p-5 md:p-12 mb-6 md:mb-10 overflow-hidden">
+              <div className="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
                 <div className="text-center md:text-left order-2 md:order-1">
                   <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
                     Knowledge Garden
@@ -230,7 +230,7 @@ export function KnowledgeGardenPage() {
 
             {/* Topics */}
             {topics.length === 0 ? (
-              <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
+              <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4">
                 <img
                   src="/plant-stage-1.png"
                   alt=""

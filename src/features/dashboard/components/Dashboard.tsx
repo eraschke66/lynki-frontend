@@ -159,7 +159,7 @@ export function Dashboard() {
       <Header />
 
       {/* Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-6 md:pt-8 pb-16">
+      <div className="relative z-10 max-w-6xl mx-auto px-6 pt-6 md:pt-8 pb-8 md:pb-16">
         {hasNoCourses ? (
           <EmptyState onUpload={() => setUploadModalOpen(true)} />
         ) : (
@@ -215,7 +215,7 @@ export function Dashboard() {
             </div>
 
             {/* Course grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
               {dashboardData!.courses.map((course) => (
                 <CourseCard
                   key={course.id}
@@ -230,7 +230,7 @@ export function Dashboard() {
             </div>
 
             {/* Footer */}
-            <p className="text-center text-ghibli-bark/50 text-xs font-sans italic mt-16 mb-4 tracking-wide">
+            <p className="text-center text-ghibli-bark/50 text-xs font-sans italic mt-10 md:mt-16 mb-4 tracking-wide">
               🌿 Study gently · grow steadily · breathe deeply 🌿
             </p>
           </>
@@ -289,8 +289,8 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
       : "Plant a Seed";
 
   return (
-    <ParchmentCard className="p-8 md:p-12 mb-10 overflow-hidden" glow>
-      <div className="grid md:grid-cols-2 gap-8 items-center">
+    <ParchmentCard className="p-5 md:p-12 mb-6 md:mb-10 overflow-hidden" glow>
+      <div className="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
         <div className="text-center md:text-left order-2 md:order-1">
           <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
             Your Sanctuary
@@ -327,7 +327,7 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
               </div>
             </div>
           ) : (
-            <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed mb-6 max-w-md mx-auto md:mx-0">
+            <p className="font-sans text-base text-ghibli-bark/80 leading-relaxed mb-4 md:mb-6 max-w-md mx-auto md:mx-0">
               Take your first quiz to see your pass probability.
             </p>
           )}
@@ -463,7 +463,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
 function EmptyState({ onUpload }: { onUpload: () => void }) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center max-w-md mx-auto">
-      <ParchmentCard glow className="p-10 md:p-12 flex flex-col items-center gap-6">
+      <ParchmentCard glow className="p-6 md:p-12 flex flex-col items-center gap-6">
         <div className="space-y-3">
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ghibli-canopy">Your garden is ready.</h1>
           <p className="text-ghibli-bark/80 font-sans leading-relaxed">

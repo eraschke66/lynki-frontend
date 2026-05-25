@@ -21,14 +21,14 @@ const placementStyles: Record<NekoPlacement, React.CSSProperties> = {
     bottom: 24,
     right: 24,
     zIndex: 30,
-    filter: "drop-shadow(0 4px 12px rgba(27,67,50,0.18))",
+    filter: "drop-shadow(var(--drop-shadow-neko))",
   },
   "bottom-left": {
     position: "fixed",
     bottom: 24,
     left: 28,
     zIndex: 30,
-    filter: "drop-shadow(0 4px 12px rgba(27,67,50,0.18))",
+    filter: "drop-shadow(var(--drop-shadow-neko))",
   },
   "bottom-center": {
     position: "fixed",
@@ -36,14 +36,14 @@ const placementStyles: Record<NekoPlacement, React.CSSProperties> = {
     left: "50%",
     transform: "translateX(-50%)",
     zIndex: 30,
-    filter: "drop-shadow(0 4px 12px rgba(27,67,50,0.18))",
+    filter: "drop-shadow(var(--drop-shadow-neko))",
   },
   "peek-right": {
     position: "fixed",
     bottom: 80,
     right: -8,
     zIndex: 30,
-    filter: "drop-shadow(-4px 4px 10px rgba(27,67,50,0.15))",
+    filter: "drop-shadow(var(--drop-shadow-neko-side))",
     transform: "scaleX(-1)", // face inward
   },
   "inline": {},

@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -53,7 +54,7 @@ export function LoginForm() {
       navigate("/home");
     } catch (err) {
       setError("An unexpected error occurred. Please try again.");
-      console.error("Login error:", err);
+      reportError("Login error:", err);
     } finally {
       setLoading(false);
     }

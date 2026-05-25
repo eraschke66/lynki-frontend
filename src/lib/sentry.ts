@@ -33,4 +33,13 @@ export function initSentry() {
   });
 }
 
+/**
+ * Log a caught error to console AND report it to Sentry with a context label.
+ * Use at every `catch` site so production errors aren't invisible.
+ */
+export function reportError(message: string, err: unknown) {
+  console.error(message, err);
+  Sentry.captureException(err, { extra: { context: message } });
+}
+
 export { Sentry };

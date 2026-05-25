@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -127,7 +128,7 @@ export function CourseDetailPage() {
       // Navigate to TestPage to start the quiz immediately
       navigate(`/test/${courseId}?quiz=${result.quiz_id}`);
     } catch (err) {
-      console.error("Quiz generation failed:", err);
+      reportError("Quiz generation failed:", err);
     } finally {
       setGenerating(false);
     }

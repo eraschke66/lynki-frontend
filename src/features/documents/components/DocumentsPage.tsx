@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { useCallback, useMemo } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -66,7 +67,7 @@ export function DocumentsPage() {
       await deleteDocument(id, filePath);
       queryClient.invalidateQueries({ queryKey: documentQueryKeys.all });
     } catch (error) {
-      console.error("Delete failed:", error);
+      reportError("Delete failed:", error);
       queryClient.invalidateQueries({ queryKey: documentQueryKeys.all });
       toast.error("Delete failed", {
         description: "Could not delete the document. Please try again.",

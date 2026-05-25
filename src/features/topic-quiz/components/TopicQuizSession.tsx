@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, ArrowRight, RefreshCw, RotateCcw, X } from "lucide-react";
@@ -123,7 +124,7 @@ export function TopicQuizSession({
         setFeedback(localFeedback);
         if (result.is_correct) setCorrectCount((prev) => prev + 1);
       } catch (err) {
-        console.error("Failed to submit answer:", err);
+        reportError("Failed to submit answer:", err);
         setSelectedOption(null);
       } finally {
         setSubmitting(false);
@@ -143,7 +144,7 @@ export function TopicQuizSession({
       });
       if (sessionId) {
         completeTopicQuiz(sessionId).catch((err) =>
-          console.error("Failed to complete topic quiz:", err),
+          reportError("Failed to complete topic quiz:", err),
         );
       }
       if (user) {

@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { useRef, useState, useEffect } from "react";
 import {
   Dialog,
@@ -96,7 +97,7 @@ export function UploadModal({
           setStep("upload_files");
         }
       } catch (err) {
-        if (!cancelled) console.error(err);
+        if (!cancelled) reportError("Fetch courses for upload modal failed:", err);
       } finally {
         if (!cancelled) setLoadingCourses(false);
       }
@@ -126,7 +127,7 @@ export function UploadModal({
       toast.success("Course created successfully!");
       setStep("upload_files");
     } catch (err) {
-      console.error("Failed to create course:", err);
+      reportError("Failed to create course:", err);
       toast.error("Failed to create course");
     }
   };

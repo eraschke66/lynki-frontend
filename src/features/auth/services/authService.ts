@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import type {
   SignUpCredentials,
@@ -67,7 +68,7 @@ export async function signOut(): Promise<void> {
   const { error } = await supabase.auth.signOut();
 
   if (error) {
-    console.error("Error signing out:", error);
+    reportError("Error signing out:", error);
     throw error;
   }
 }
@@ -116,7 +117,7 @@ export async function getSession() {
   const { data, error } = await supabase.auth.getSession();
 
   if (error) {
-    console.error("Error getting session:", error);
+    reportError("Error getting session:", error);
     return null;
   }
 
@@ -131,7 +132,7 @@ export async function getUser() {
   const { data, error } = await supabase.auth.getUser();
 
   if (error) {
-    console.error("Error getting user:", error);
+    reportError("Error getting user:", error);
     return null;
   }
 

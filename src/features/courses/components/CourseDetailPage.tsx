@@ -163,10 +163,7 @@ export function CourseDetailPage() {
         />
         <div className="absolute inset-0 bg-ghibli-canopy/20" />
         <div className="relative z-10 text-center pb-16 space-y-3">
-          <p
-            className="text-white text-base font-medium tracking-wide"
-            style={{ textShadow: "0 1px 4px rgba(0,0,0,0.4)" }}
-          >
+          <p className="text-white text-base font-medium tracking-wide text-shadow-hero">
             Tending the garden...
           </p>
         </div>

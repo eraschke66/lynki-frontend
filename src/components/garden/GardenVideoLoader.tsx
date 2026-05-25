@@ -104,13 +104,13 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
 
         {/* Message */}
         <p
+          className="text-shadow-loader"
           style={{
             margin: 0,
             fontSize: "1rem",
             fontWeight: 500,
             color: "hsl(var(--ghibli-ivory) / 0.92)",
             letterSpacing: "0.03em",
-            textShadow: "0 1px 4px hsl(var(--ghibli-canopy) / 0.4)",
           }}
         >
           {message}

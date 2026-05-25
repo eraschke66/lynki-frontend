@@ -96,18 +96,33 @@ export function MasteryDeltaStage({
         {minutes === 1 ? "minute" : "minutes"}
       </p>
 
-      {showPass && passBefore !== null && passAfter !== null && (
-        <p className="mt-3 text-sm text-ghibli-canopy/85">
-          Pass probability:{" "}
-          <span className="tabular-nums">{passBefore}%</span> →{" "}
-          <span className="font-semibold tabular-nums">{passAfter}%</span>
-          {passDiff !== null && (
-            <span className="text-ghibli-moss/75 ml-1.5 text-xs">
-              ({passDiff > 0 ? `+${passDiff}` : passDiff === 0 ? "0" : passDiff} points)
+      {showPass && passBefore !== null && passAfter !== null && passDiff !== null && (() => {
+        const verdictColor =
+          passDiff > 0
+            ? "text-ghibli-canopy"
+            : passDiff < 0
+              ? "text-amber-700"
+              : "text-ghibli-bark/60";
+        const deltaLabel =
+          passDiff > 0
+            ? `+${passDiff} points`
+            : passDiff < 0
+              ? `${passDiff} points`
+              : "0 points";
+        return (
+          <div
+            className={`mt-3 w-full max-w-md flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm ${verdictColor}`}
+          >
+            <span>
+              Your pass probability moved from{" "}
+              <span className="tabular-nums font-semibold">{passBefore}%</span>{" "}
+              to{" "}
+              <span className="tabular-nums font-semibold">{passAfter}%</span>.
             </span>
-          )}
-        </p>
-      )}
+            <span className="tabular-nums font-semibold">{deltaLabel}</span>
+          </div>
+        );
+      })()}
 
       {delta.kc_breakdown.length > 0 && (
         <details className="mt-5 text-left max-w-md w-full px-4">

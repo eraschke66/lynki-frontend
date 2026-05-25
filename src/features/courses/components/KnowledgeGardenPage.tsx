@@ -374,10 +374,10 @@ export function KnowledgeGardenPage() {
                     {gardenData?.course_title ?? "Your Course"}
                   </h1>
                   <p className={`font-sans text-base font-semibold mb-2 ${gardenStatus.color}`}>
-                    {gardenStatus.label}
+                    {gardenStatus.label} · {Math.round(overallProgress)}% average mastery
                   </p>
                   <p className="font-sans text-base text-ghibli-bark-strong leading-relaxed max-w-md mx-auto md:mx-0">
-                    {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts mastered.
+                    {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts fully mastered.
                     {topics.length > 0 && (
                       <>
                         {" "}A grove of{" "}
@@ -390,7 +390,7 @@ export function KnowledgeGardenPage() {
                   </p>
                 </div>
                 <div className="order-1 md:order-2 flex justify-center">
-                  <PlantIndicator probability={overallProgress} size="xl" glow showPercent />
+                  <PlantIndicator probability={overallProgress} size="xl" glow showPercent={false} />
                 </div>
               </div>
             </ParchmentCard>

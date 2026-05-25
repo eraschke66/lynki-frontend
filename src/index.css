@@ -57,6 +57,17 @@
   --color-ghibli-canopy-dark: #4a6b3a;
   --color-ghibli-parchment:   #e8e3d5;
 
+  /* Marketing landing-page status palette — used only on LandingPage
+     mockups, distinct from the in-app getGardenStatus Tailwind colors
+     (emerald-700, etc.). Hex values inlined here for fidelity with the
+     original design; HSL components included as comments so future
+     -tint or -strong variants can be derived. */
+  --color-marketing-status-water:     hsl(33 57% 51%);   /* #c98a3b */
+  --color-marketing-status-sprouting: hsl(88 28% 49%);   /* #7fa05a */
+  --color-marketing-status-growing:   hsl(107 37% 39%);  /* #4f8a3f */
+  --color-marketing-status-blooming:  hsl(137 40% 30%);  /* #2d6a3e */
+  --color-marketing-status-thriving:  hsl(147 49% 24%);  /* #1f5a3a */
+
   /* Muted text-color tokens — semantic bands per color (V9 Tier C2).
      Replaces alpha-modifier sprawl (text-ghibli-canopy/70 etc.) with
      fixed strong/medium/weak intensities. Two exception tokens preserve

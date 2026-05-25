@@ -55,10 +55,21 @@ export function EditCourseDialog({
     if (open && course) {
       setTitle(course.title);
       setDescription(course.description ?? "");
-      setTargetGrade(course.targetGrade ?? 1.0);
+      // Snap the stored value to the closest grade-option so Radix Select
+      // can match it. Floats like 6/7 won't equal a Supabase-rounded 0.857.
+      const stored = course.targetGrade ?? 1.0;
+      const options = curriculumInfo.gradeOptions;
+      const snapped = options.length
+        ? options.reduce((best, opt) =>
+            Math.abs(opt.value - stored) < Math.abs(best.value - stored)
+              ? opt
+              : best,
+          )
+        : { value: stored };
+      setTargetGrade(snapped.value);
       setError(null);
     }
-  }, [open, course]);
+  }, [open, course, curriculumInfo]);
 
   const handleSave = async () => {
     if (!course) return;

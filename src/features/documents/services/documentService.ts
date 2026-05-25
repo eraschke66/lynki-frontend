@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import type { Document, StorageStats } from "../types";
 
@@ -158,7 +159,7 @@ export async function uploadDocument(
     });
 
   if (uploadError) {
-    console.error("Storage upload error:", uploadError);
+    reportError("Storage upload error:", uploadError);
     throw new Error(`Failed to upload ${file.name}`);
   }
 
@@ -180,7 +181,7 @@ export async function uploadDocument(
     .single();
 
   if (dbError || !document) {
-    console.error("Database insert error:", dbError);
+    reportError("Database insert error:", dbError);
     // Cleanup storage if DB fails? ideally yes, but keeping it simple for now.
     throw new Error(`Failed to save metadata for ${file.name}`);
   }
@@ -200,7 +201,7 @@ export async function uploadDocument(
       })
       .eq("id", document.id);
 
-    console.error("Failed to trigger processing:", processingResult.error);
+    reportError("Failed to trigger processing:", processingResult.error);
   }
 
   onProgress?.(100);
@@ -288,7 +289,7 @@ export async function getUserStorageStats(
     .eq("user_id", userId);
 
   if (error) {
-    console.error("Stats error", error);
+    reportError("Stats error:", error);
     return { usedSpace: 0, fileCount: 0 };
   }
 

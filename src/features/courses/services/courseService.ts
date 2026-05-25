@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 /**
  * Course CRUD service — thin Supabase client.
  */
@@ -16,7 +17,7 @@ export async function fetchUserCourses(userId: string): Promise<Course[]> {
     .order("updated_at", { ascending: false });
 
   if (error) {
-    console.error("Error fetching courses:", error);
+    reportError("Error fetching courses:", error);
     throw error;
   }
 
@@ -53,7 +54,7 @@ export async function createCourse(
     .single();
 
   if (error || !data) {
-    console.error("Error creating course:", error);
+    reportError("Error creating course:", error);
     throw new Error("Failed to create course");
   }
 
@@ -82,7 +83,7 @@ export async function updateCourseTestDate(
     .eq("id", courseId);
 
   if (error) {
-    console.error("Error updating test date:", error);
+    reportError("Error updating test date:", error);
     throw new Error("Failed to update exam date");
   }
 }
@@ -107,7 +108,7 @@ export async function updateCourse(
     .eq("id", courseId);
 
   if (error) {
-    console.error("Error updating course:", error);
+    reportError("Error updating course:", error);
     throw new Error("Failed to update course");
   }
 }
@@ -119,7 +120,7 @@ export async function deleteCourse(courseId: string): Promise<void> {
   const { error } = await supabase.from("courses").delete().eq("id", courseId);
 
   if (error) {
-    console.error("Error deleting course:", error);
+    reportError("Error deleting course:", error);
     throw new Error("Failed to delete course");
   }
 }

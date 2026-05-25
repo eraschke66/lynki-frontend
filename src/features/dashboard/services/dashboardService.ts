@@ -1,3 +1,4 @@
+import { reportError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import { retryDocumentProcessing as retryDocProcessing } from "@/features/documents/services/documentService";
 import { computePassProbability } from "@/lib/passProbability";
@@ -32,7 +33,7 @@ export async function fetchDashboardData(
     .order("updated_at", { ascending: false });
 
   if (coursesError) {
-    console.error("Error fetching courses:", coursesError);
+    reportError("Error fetching courses (dashboard):", coursesError);
     throw coursesError;
   }
 

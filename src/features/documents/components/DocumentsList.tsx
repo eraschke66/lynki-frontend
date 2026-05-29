@@ -216,10 +216,11 @@ export function DocumentsList({
     [renameValue, onDocumentUpdate],
   );
 
-  // NOTE: The backend quiz-generation endpoint (/quiz-sessions/generate) only
-  // accepts user_id + course_id — there is no per-document quiz generation yet.
-  // So this routes to the course detail page, where "Generate New Quiz" lives.
-  // Pre-selecting the document is a separate ticket (needs a backend param).
+  // The backend quiz-generation endpoint (/quiz-sessions/generate) accepts
+  // only user_id + course_id — there is no per-document quiz generation yet
+  // (tracked separately; needs a document_id backend param). Until then this
+  // generates a quiz for the whole course, so the label says exactly that and
+  // the action is only offered for documents that have finished processing.
   const handleGenerateQuiz = useCallback(
     (doc: Document) => {
       navigate(`/course/${doc.courseId}`);
@@ -398,16 +399,21 @@ export function DocumentsList({
                         <Pencil className="w-4 h-4 mr-2" />
                         Rename
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleGenerateQuiz(doc)}>
-                        <FileQuestion className="w-4 h-4 mr-2" />
-                        Generate quiz from this document
-                      </DropdownMenuItem>
-                      {doc.status === "failed" && onRetry && (
-                        <DropdownMenuItem onClick={() => handleRetry(doc)}>
-                          <RefreshCw className="w-4 h-4 mr-2" />
-                          Reprocess
+                      {doc.status === "completed" && (
+                        <DropdownMenuItem onClick={() => handleGenerateQuiz(doc)}>
+                          <FileQuestion className="w-4 h-4 mr-2" />
+                          Generate a quiz for this course
                         </DropdownMenuItem>
                       )}
+                      {doc.status === "failed" &&
+                        onRetry &&
+                        classifyDocumentError(doc.errorMessage) ===
+                          "technical" && (
+                          <DropdownMenuItem onClick={() => handleRetry(doc)}>
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Reprocess
+                          </DropdownMenuItem>
+                        )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         onClick={() => onDelete(doc.id, doc.filePath)}

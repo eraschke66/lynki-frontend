@@ -16,7 +16,7 @@ import {
 } from "@/features/courses/services/courseService";
 import { fetchPassChance } from "@/features/test/services/testService";
 import { fetchProfile } from "@/features/settings";
-import { getGradeLabel } from "@/lib/curricula";
+import { getGradeLabel, fromDbCurriculum } from "@/lib/curricula";
 import {
   gardenQueryKeys,
   testQueryKeys,
@@ -46,7 +46,7 @@ export function StudyPlanPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("courses")
-        .select("id, title, target_grade, test_date")
+        .select("id, title, target_grade, test_date, curriculum_type")
         .eq("id", courseId!)
         .single();
       if (error) throw error;
@@ -147,7 +147,10 @@ export function StudyPlanPage() {
   }
 
   // ── Derived values ─────────────────────────────────────────────────────────
-  const curriculum = profileData?.curriculum ?? "percentage";
+  const curriculum =
+    fromDbCurriculum(course?.curriculum_type) ??
+    profileData?.curriculum ??
+    "percentage";
   const targetGrade = course?.target_grade ?? 1.0;
   const targetLabel = getGradeLabel(curriculum, targetGrade);
   const passPercent =

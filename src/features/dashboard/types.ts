@@ -13,6 +13,8 @@ export interface CourseSummary {
   passProbability: number;
   /** Normalized target grade (0–1) */
   targetGrade: number;
+  /** Per-course grading system id; null falls back to account default */
+  curriculumType: string | null;
   totalConcepts: number;
   masteredConcepts: number;
   progressPercent: number;

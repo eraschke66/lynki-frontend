@@ -2,6 +2,7 @@ import { reportError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import { retryDocumentProcessing as retryDocProcessing } from "@/features/documents/services/documentService";
 import { computePassProbability } from "@/lib/passProbability";
+import { fromDbCurriculum } from "@/lib/curricula";
 import type { DashboardData, CourseSummary } from "../types";
 
 /** BKT mastery threshold — concept is considered mastered above this */
@@ -28,7 +29,7 @@ export async function fetchDashboardData(
   // 1. Fetch user's courses
   const { data: courses, error: coursesError } = await supabase
     .from("courses")
-    .select("id, title, description, created_at, updated_at, target_grade")
+    .select("id, title, description, created_at, updated_at, target_grade, curriculum_type")
     .eq("user_id", userId)
     .order("updated_at", { ascending: false });
 
@@ -150,6 +151,7 @@ export async function fetchDashboardData(
       passChance,
       passProbability,
       targetGrade: c.target_grade ?? 1.0,
+      curriculumType: fromDbCurriculum(c.curriculum_type),
       totalConcepts,
       masteredConcepts,
       progressPercent: (() => {

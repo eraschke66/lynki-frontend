@@ -35,13 +35,15 @@ import {
   completeTest,
 } from "../services/testService";
 import {
+  courseQueryKeys,
   testQueryKeys,
   profileQueryKeys,
   gardenQueryKeys,
 } from "@/lib/queryKeys";
 import { posthog } from "@/lib/posthog";
 import { fetchProfile } from "@/features/settings";
-import { getGradeLabel } from "@/lib/curricula";
+import { getGradeLabel, fromDbCurriculum } from "@/lib/curricula";
+import { supabase } from "@/lib/supabase";
 import { getGardenStatus } from "@/lib/garden";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
@@ -119,6 +121,20 @@ export function TestPage() {
     queryKey: profileQueryKeys.detail(user?.id ?? ""),
     queryFn: () => fetchProfile(user!.id),
     enabled: !!user,
+  });
+
+  // Per-course curriculum override; falls back to the account default below.
+  const { data: courseCurriculumRow } = useQuery({
+    queryKey: courseQueryKeys.curriculum(courseId ?? ""),
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("courses")
+        .select("curriculum_type")
+        .eq("id", courseId!)
+        .single();
+      return data;
+    },
+    enabled: !!courseId,
   });
 
   const quizStartedRef = useRef(false);
@@ -516,7 +532,9 @@ export function TestPage() {
                 <p className="text-xs font-sans text-ghibli-bark">
                   Growing toward{" "}
                   {getGradeLabel(
-                    profileData?.curriculum ?? "percentage",
+                    fromDbCurriculum(courseCurriculumRow?.curriculum_type) ??
+                      profileData?.curriculum ??
+                      "percentage",
                     targetGrade,
                   )}
                 </p>

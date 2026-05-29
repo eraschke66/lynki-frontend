@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { fetchDashboardData } from "../services/dashboardService";
 import { updateCourse, deleteCourse } from "@/features/courses";
 import { fetchProfile } from "@/features/settings";
-import { profileQueryKeys } from "@/lib/queryKeys";
+import { courseQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { UploadModal } from "./UploadModal";
 import { EditCourseDialog } from "./EditCourseDialog";
 import { DeleteCourseDialog } from "./DeleteCourseDialog";
@@ -70,9 +70,11 @@ export function Dashboard() {
     title: string,
     description: string,
     targetGrade?: number,
+    curriculumType?: string | null,
   ) => {
-    await updateCourse(courseId, { title, description, targetGrade });
+    await updateCourse(courseId, { title, description, targetGrade, curriculumType });
     queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.data(user!.id) });
+    queryClient.invalidateQueries({ queryKey: courseQueryKeys.curriculum(courseId) });
     queryClient.invalidateQueries({ queryKey: ["test"] });
     toast.success("Course updated");
   };
@@ -282,6 +284,7 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
       )
     : null;
   const targetGrade = lowestPassCourse?.targetGrade ?? 0.5;
+  const heroCurriculum = lowestPassCourse?.curriculumType ?? curriculum;
 
   const primaryAction = hasStudyable && nextItem ? onStartStudying : onUpload;
   const ctaLabel = !hasAnyActivity && hasStudyable
@@ -304,7 +307,7 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
             <div className="max-w-[360px] mx-auto md:mx-0 mb-6">
               <div className="flex justify-between mb-1.5">
                 <span className="text-xs text-ghibli-bark">
-                  Growing toward {getGradeLabel(curriculum, targetGrade)}
+                  Growing toward {getGradeLabel(heroCurriculum, targetGrade)}
                 </span>
                 <span className="text-sm font-medium text-ghibli-canopy">
                   {data.overallPassProbability}% pass probability

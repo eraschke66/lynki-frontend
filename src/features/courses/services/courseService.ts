@@ -4,6 +4,7 @@ import { reportError } from "@/lib/sentry";
  */
 
 import { supabase } from "@/lib/supabase";
+import { toDbCurriculum, fromDbCurriculum } from "@/lib/curricula";
 import type { Course, CourseGardenData, TopicMastery, ConceptMastery } from "../types";
 
 /**
@@ -27,6 +28,7 @@ export async function fetchUserCourses(userId: string): Promise<Course[]> {
     title: c.title,
     description: c.description,
     targetGrade: c.target_grade ?? 1.0,
+    curriculumType: fromDbCurriculum(c.curriculum_type),
     testDate: c.test_date ?? null,
     createdAt: c.created_at,
     updatedAt: c.updated_at,
@@ -41,6 +43,7 @@ export async function createCourse(
   title: string,
   description?: string,
   targetGrade?: number,
+  curriculumType?: string | null,
 ): Promise<Course> {
   const { data, error } = await supabase
     .from("courses")
@@ -49,6 +52,7 @@ export async function createCourse(
       title: title.trim(),
       description: description?.trim() || null,
       target_grade: targetGrade ?? 1.0,
+      curriculum_type: toDbCurriculum(curriculumType),
     })
     .select()
     .single();
@@ -64,6 +68,7 @@ export async function createCourse(
     title: data.title,
     description: data.description,
     targetGrade: data.target_grade ?? 1.0,
+    curriculumType: fromDbCurriculum(data.curriculum_type),
     testDate: null,
     createdAt: data.created_at,
     updatedAt: data.updated_at,
@@ -93,14 +98,24 @@ export async function updateCourseTestDate(
  */
 export async function updateCourse(
   courseId: string,
-  updates: { title?: string; description?: string; targetGrade?: number },
+  updates: {
+    title?: string;
+    description?: string;
+    targetGrade?: number;
+    curriculumType?: string | null;
+  },
 ): Promise<void> {
-  const payload: Record<string, string | number> = {};
+  const payload: Record<string, string | number | null> = {};
   if (updates.title !== undefined) payload.title = updates.title.trim();
   if (updates.description !== undefined)
     payload.description = updates.description.trim();
   if (updates.targetGrade !== undefined)
     payload.target_grade = updates.targetGrade;
+  // Skip vs. write is decided here: an untouched curriculum arrives as
+  // `undefined` and the column is left alone (inherit). A provided value is
+  // mapped to the DB's allowed set — "percentage"/unsupported -> NULL.
+  if (updates.curriculumType !== undefined)
+    payload.curriculum_type = toDbCurriculum(updates.curriculumType);
 
   const { error } = await supabase
     .from("courses")

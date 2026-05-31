@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shryn Classroom — Lecture</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --line:#2a2f3a; --fg:#e8eaed; --mut:#9aa3b2; --accent:#6ea8fe; --err:#f87171; }
+  *{box-sizing:border-box} body{margin:0;font:15px/1.6 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--fg)}
+  .wrap{max-width:860px;margin:0 auto;padding:24px 18px 80px}
+  h1{font-size:22px;margin:0 0 2px} .mut{color:var(--mut)} .err{color:var(--err)}
+  video{width:100%;border-radius:12px;background:#000;margin:14px 0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+  input{width:100%;padding:10px 12px;background:#0f1218;border:1px solid var(--line);border-radius:8px;color:var(--fg);font:inherit}
+  button{background:var(--accent);color:#08101f;border:0;border-radius:8px;padding:10px 16px;font:inherit;font-weight:600;cursor:pointer}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .feeditem{border-top:1px solid var(--line);padding:10px 0} .feeditem:first-child{border-top:0}
+  .q{font-weight:600} .a{color:var(--mut);margin-top:3px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="title">Lecture</h1>
+  <div id="meta" class="mut"></div>
+  <div id="body"></div>
+</div>
+<script>
+const SUPABASE_URL = "https://cmoamdistlpbahcryjda.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2FtZGlzdGxwYmFoY3J5amRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNzk4NjcsImV4cCI6MjA3Mzc1NTg2N30.IcNmiVGplxWSipSSjKNNCKTYXWOh0n4MBmmAh2WnROo";
+
+const $ = s => document.querySelector(s);
+const esc = s => (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]));
+
+// Route: ?subject=erik-raschke&slug=my-lecture  (or /classroom/{subject}/{slug})
+function route(){
+  const p = new URLSearchParams(location.search);
+  let subject = p.get("subject"), slug = p.get("slug");
+  if(!subject||!slug){ const m = location.pathname.match(/classroom\/([^/]+)\/([^/]+)/); if(m){subject=m[1];slug=m[2];} }
+  return { subject, slug };
+}
+
+async function rest(path){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers:{ apikey:ANON_KEY, Authorization:"Bearer "+ANON_KEY }});
+  return r.json();
+}
+
+let LECTURE = null;
+async function load(){
+  const { subject, slug } = route();
+  if(!subject||!slug){ $("#body").innerHTML = `<p class="err">Missing subject/slug. Use ?subject=…&slug=…</p>`; return; }
+  // Public read (RLS exposes published lectures). Never select the password column.
+  const rows = await rest(`classroom_lectures?subject_slug=eq.${encodeURIComponent(subject)}&lecture_slug=eq.${encodeURIComponent(slug)}&is_public=eq.true&select=id,lecture_title,subject_slug,lecture_slug,course_name,video_url,captions_url,duration_seconds,access_mode,portrait_url`);
+  if(!Array.isArray(rows)||!rows.length){ $("#body").innerHTML = `<p class="err">This lecture isn’t published, or doesn’t exist.</p>`; return; }
+  LECTURE = rows[0];
+  $("#title").textContent = LECTURE.lecture_title;
+  $("#meta").textContent = LECTURE.course_name || "";
+
+  if(LECTURE.access_mode === "private"){
+    // Per-lecture password gating needs a server-side verifier (not yet built).
+    $("#body").innerHTML = `<div class="card mut">This is a private lecture. Password access is handled by the classroom site’s gate.</div>`;
+    return;
+  }
+  render();
+}
+
+function render(){
+  const captions = LECTURE.captions_url ? `<track kind="captions" label="English" srclang="en" src="${LECTURE.captions_url}" default>` : "";
+  $("#body").innerHTML = `
+    <video id="vid" controls crossorigin="anonymous" playsinline src="${LECTURE.video_url}">${captions}</video>
+    <div class="card">
+      <h3 style="margin:0 0 8px">Ask the scholar</h3>
+      <div class="row"><input id="ask" placeholder="Ask a question about this lecture…" style="flex:1 1 240px"><button id="askBtn">Ask</button></div>
+      <p id="ans" class="a"></p>
+    </div>
+    <div class="card">
+      <h3 style="margin:0 0 8px">Class questions</h3>
+      <div id="feed" class="mut">…</div>
+    </div>`;
+  $("#askBtn").onclick = ask;
+  loadFeed();
+}
+
+async function ask(){
+  const q = $("#ask").value.trim(); if(!q) return;
+  $("#ans").textContent = "Thinking…";
+  try{
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/classroom-ask`, { method:"POST", headers:{ apikey:ANON_KEY, "Content-Type":"application/json" }, body: JSON.stringify({ lecture_id: LECTURE.id, question_text: q }) });
+    const d = await r.json();
+    $("#ans").textContent = d.text || d.error || "(no answer)";
+  }catch(e){ $("#ans").innerHTML = `<span class="err">${e.message}</span>`; }
+}
+
+async function loadFeed(){
+  try{
+    const r = await fetch(`${SUPABASE_URL}/functions/v1/classroom-feed?subject_slug=${LECTURE.subject_slug}&lecture_slug=${LECTURE.lecture_slug}&limit=30`, { headers:{ apikey:ANON_KEY }});
+    const d = await r.json();
+    $("#feed").innerHTML = (d.items||[]).map(i=>`<div class="feeditem"><div class="q">${esc(i.display_name)}: ${esc(i.question)}</div><div class="a">${esc(i.response)}</div></div>`).join("") || "<span class='mut'>No questions yet.</span>";
+  }catch{ $("#feed").textContent = "Could not load feed."; }
+}
+load();
+</script>
+</body>
+</html>

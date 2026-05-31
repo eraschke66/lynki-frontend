@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shryn Classroom — New Lecture</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --line:#2a2f3a; --fg:#e8eaed; --mut:#9aa3b2; --accent:#6ea8fe; --ok:#4ade80; --err:#f87171; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif; background:var(--bg); color:var(--fg); }
+  .wrap { max-width:760px; margin:0 auto; padding:28px 20px 80px; }
+  h1 { font-size:22px; margin:0 0 4px; } h2 { font-size:16px; margin:22px 0 10px; }
+  .sub { color:var(--mut); margin:0 0 22px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px; margin:14px 0; }
+  label { display:block; font-size:13px; color:var(--mut); margin:12px 0 5px; }
+  input[type=text], input[type=email], input[type=password], select, textarea {
+    width:100%; padding:10px 12px; background:#0f1218; border:1px solid var(--line); border-radius:8px; color:var(--fg); font:inherit; }
+  textarea { min-height:200px; resize:vertical; font:13px/1.5 ui-monospace,Menlo,Consolas,monospace; }
+  input[type=file] { width:100%; color:var(--mut); }
+  .row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .row > * { flex:0 0 auto; }
+  button { background:var(--accent); color:#08101f; border:0; border-radius:8px; padding:10px 16px; font:inherit; font-weight:600; cursor:pointer; }
+  button.secondary { background:#222732; color:var(--fg); border:1px solid var(--line); }
+  button:disabled { opacity:.5; cursor:default; }
+  .muted { color:var(--mut); } .ok { color:var(--ok); } .err { color:var(--err); }
+  .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:12px; border:1px solid var(--line); }
+  .bar { height:6px; background:#0f1218; border-radius:6px; overflow:hidden; border:1px solid var(--line); }
+  .bar > i { display:block; height:100%; background:var(--accent); width:0; transition:width .4s; }
+  video { width:100%; border-radius:10px; background:#000; margin-top:8px; }
+  .feeditem { border-top:1px solid var(--line); padding:10px 0; } .feeditem:first-child { border-top:0; }
+  .q { font-weight:600; } .a { color:var(--mut); margin-top:3px; }
+  code { background:#0f1218; padding:1px 6px; border-radius:5px; }
+  .hidden { display:none; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Shryn Classroom</h1>
+  <p class="sub">Upload a lecture video — a working class page and shareable link appear, no manual steps.</p>
+
+  <!-- ============ AUTH ============ -->
+  <div id="auth" class="card hidden">
+    <h2>Sign in</h2>
+    <label>Email</label><input id="email" type="email" placeholder="you@university.edu" />
+    <label>Password</label><input id="password" type="password" placeholder="••••••••" />
+    <div class="row" style="margin-top:14px">
+      <button id="signin">Sign in</button>
+      <button id="magic" class="secondary">Email me a magic link</button>
+      <span id="authMsg" class="muted"></span>
+    </div>
+  </div>
+
+  <!-- ============ NEW LECTURE FORM ============ -->
+  <div id="app" class="hidden">
+    <div class="row" style="justify-content:space-between">
+      <span class="muted">Signed in as <b id="who"></b></span>
+      <button id="signout" class="secondary">Sign out</button>
+    </div>
+
+    <div id="formCard" class="card">
+      <h2>New lecture</h2>
+      <label>Subject (your AI)</label>
+      <select id="subject"></select>
+
+      <label>Course (optional)</label>
+      <input id="course" type="text" list="courseList" placeholder="e.g. Intro to Anthropology — leave blank for a standalone lecture" />
+      <datalist id="courseList"></datalist>
+
+      <label>Lecture title</label>
+      <input id="title" type="text" placeholder="Identity, Religion & Postcolonial Theory" />
+
+      <label>URL slug</label>
+      <input id="slug" type="text" placeholder="identity-religion-postcolonial-theory" />
+
+      <label>Video file</label>
+      <input id="video" type="file" accept="video/*" />
+
+      <label>Visibility</label>
+      <div class="row">
+        <label class="row" style="margin:0"><input type="radio" name="vis" value="public" checked> &nbsp;Public</label>
+        <label class="row" style="margin:0"><input type="radio" name="vis" value="private"> &nbsp;Private (password)</label>
+      </div>
+      <div id="pwWrap" class="hidden"><label>Access password</label><input id="pw" type="text" placeholder="set a password students will enter" /></div>
+
+      <div class="row" style="margin-top:16px">
+        <button id="create">Create lecture</button>
+        <span id="formMsg" class="muted"></span>
+      </div>
+    </div>
+
+    <!-- ============ BUILD PROGRESS ============ -->
+    <div id="buildCard" class="card hidden">
+      <h2>Building <span id="buildPill" class="pill">…</span></h2>
+      <div class="bar"><i id="buildBar"></i></div>
+      <p id="buildMsg" class="muted" style="margin-top:10px"></p>
+    </div>
+
+    <!-- ============ PREVIEW / PUBLISH ============ -->
+    <div id="previewCard" class="card hidden">
+      <h2>Preview &amp; publish</h2>
+      <video id="vid" controls crossorigin="anonymous" playsinline></video>
+
+      <h2>Ask the scholar (Q&amp;A check)</h2>
+      <div class="row"><input id="askBox" type="text" placeholder="Type a student question…" style="flex:1 1 240px" /><button id="askBtn" class="secondary">Ask</button></div>
+      <p id="askAns" class="a"></p>
+
+      <h2>Teaching prompt <span class="muted" style="font-weight:400">— review &amp; edit before publishing</span></h2>
+      <textarea id="prompt"></textarea>
+      <div class="row" style="margin-top:8px"><button id="savePrompt" class="secondary">Save prompt</button><span id="promptMsg" class="muted"></span></div>
+
+      <h2>Class questions <span class="muted" style="font-weight:400">(seed feed)</span></h2>
+      <div id="feed" class="muted">…</div>
+
+      <h2>Publish</h2>
+      <div class="row">
+        <button id="publish">Publish lecture</button>
+        <span id="pubMsg" class="muted"></span>
+      </div>
+      <div id="shareWrap" class="hidden" style="margin-top:12px">
+        <label>Share link</label>
+        <div class="row"><input id="shareUrl" type="text" readonly style="flex:1 1 240px" /><button id="copy" class="secondary">Copy</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ---- Config (public values) ----
+const SUPABASE_URL = "https://cmoamdistlpbahcryjda.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNtb2FtZGlzdGxwYmFoY3J5amRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgxNzk4NjcsImV4cCI6MjA3Mzc1NTg2N30.IcNmiVGplxWSipSSjKNNCKTYXWOh0n4MBmmAh2WnROo";
+const PUBLIC_BASE = "https://shryn.ai/classroom"; // share-link base for students
+
+const sb = supabase.createClient(SUPABASE_URL, ANON_KEY);
+const $ = (id) => document.getElementById(id);
+let TOKEN = null, SUBJECTS = [], LECTURE = null, POLL = null;
+
+async function authedFetch(path, { method = "POST", body = null, json = null } = {}) {
+  const headers = { apikey: ANON_KEY, Authorization: "Bearer " + TOKEN };
+  if (json) { headers["Content-Type"] = "application/json"; body = JSON.stringify(json); }
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/${path}`, { method, headers, body });
+  const text = await res.text();
+  let data; try { data = JSON.parse(text); } catch { data = { raw: text }; }
+  if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+  return data;
+}
+
+// ---------- auth ----------
+async function refresh() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) { $("auth").classList.remove("hidden"); $("app").classList.add("hidden"); return; }
+  TOKEN = session.access_token;
+  $("who").textContent = session.user.email;
+  $("auth").classList.add("hidden"); $("app").classList.remove("hidden");
+  await loadSubjects();
+}
+$("signin").onclick = async () => {
+  $("authMsg").textContent = "…";
+  const { error } = await sb.auth.signInWithPassword({ email: $("email").value.trim(), password: $("password").value });
+  $("authMsg").textContent = error ? error.message : ""; if (!error) refresh();
+};
+$("magic").onclick = async () => {
+  const { error } = await sb.auth.signInWithOtp({ email: $("email").value.trim() });
+  $("authMsg").textContent = error ? error.message : "Check your email for the link.";
+};
+$("signout").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+
+// ---------- subjects + courses ----------
+async function loadSubjects() {
+  const { data: { user } } = await sb.auth.getUser();
+  const { data, error } = await sb.from("subject_profiles").select("id, subject_name").eq("user_id", user.id).order("subject_name");
+  if (error) { $("formMsg").textContent = error.message; return; }
+  SUBJECTS = data || [];
+  $("subject").innerHTML = SUBJECTS.map(s => `<option value="${s.id}">${s.subject_name}</option>`).join("");
+  loadCourses();
+}
+$("subject").onchange = loadCourses;
+async function loadCourses() {
+  const sid = $("subject").value;
+  const { data } = await sb.from("classroom_courses").select("id, course_name").eq("subject_id", sid);
+  $("courseList").innerHTML = (data || []).map(c => `<option data-id="${c.id}" value="${c.course_name}">`).join("");
+}
+
+// ---------- form ----------
+$("title").addEventListener("input", () => {
+  $("slug").value = $("title").value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+});
+document.querySelectorAll("input[name=vis]").forEach(r => r.onchange = () => {
+  $("pwWrap").classList.toggle("hidden", document.querySelector("input[name=vis]:checked").value !== "private");
+});
+
+$("create").onclick = async () => {
+  const subjectId = $("subject").value;
+  const subjectName = SUBJECTS.find(s => s.id === subjectId)?.subject_name || "";
+  const file = $("video").files[0];
+  const vis = document.querySelector("input[name=vis]:checked").value;
+  if (!file) { $("formMsg").textContent = "Choose a video file."; return; }
+  if (!$("title").value || !$("slug").value) { $("formMsg").textContent = "Title and slug are required."; return; }
+
+  const fd = new FormData();
+  fd.append("video", file);
+  fd.append("subject_id", subjectId);
+  fd.append("subject_name", subjectName);
+  fd.append("lecture_title", $("title").value);
+  fd.append("lecture_slug", $("slug").value);
+  fd.append("is_public", vis === "public" ? "true" : "false");
+  if (vis === "private") fd.append("access_password", $("pw").value);
+  // optional course: match typed name to an existing course id
+  const opt = [...$("courseList").options].find(o => o.value === $("course").value);
+  if (opt) fd.append("course_id", opt.dataset.id);
+
+  $("create").disabled = true; $("formMsg").textContent = "Uploading…";
+  try {
+    const out = await authedFetch("lecture-create", { method: "POST", body: fd });
+    $("formMsg").textContent = "";
+    LECTURE = { id: out.lecture_id };
+    $("buildCard").classList.remove("hidden");
+    pollStatus();
+  } catch (e) {
+    $("formMsg").innerHTML = `<span class="err">${e.message}</span>`;
+    $("create").disabled = false;
+  }
+};
+
+// ---------- build progress ----------
+const STEPS = { transcribing: 30, generating_prompt: 60, seeding: 85, ready: 100, failed: 100 };
+const LABEL = { transcribing: "Transcribing video…", generating_prompt: "Writing the teaching prompt…", seeding: "Seeding class questions…", ready: "Ready", failed: "Failed" };
+function pollStatus() {
+  clearInterval(POLL);
+  POLL = setInterval(async () => {
+    let s; try { s = await authedFetch(`lecture-status?lecture_id=${LECTURE.id}`, { method: "GET" }); }
+    catch (e) { $("buildMsg").innerHTML = `<span class="err">${e.message}</span>`; return; }
+    $("buildPill").textContent = s.status;
+    $("buildBar").style.width = (STEPS[s.status] || 10) + "%";
+    $("buildMsg").textContent = LABEL[s.status] || s.status;
+    if (s.status === "failed") { clearInterval(POLL); $("buildMsg").innerHTML = `<span class="err">Build failed: ${s.error_message || "unknown"}</span>`; $("create").disabled = false; }
+    if (s.status === "ready") { clearInterval(POLL); LECTURE = s; showPreview(s); }
+  }, 3000);
+}
+
+// ---------- preview ----------
+function showPreview(s) {
+  $("previewCard").classList.remove("hidden");
+  const v = $("vid"); v.src = s.video_url; v.crossOrigin = "anonymous";
+  [...v.querySelectorAll("track")].forEach(t => t.remove());
+  if (s.captions_url) {
+    const t = document.createElement("track");
+    t.kind = "captions"; t.label = "English"; t.srclang = "en"; t.src = s.captions_url; t.default = true;
+    v.appendChild(t);
+  }
+  $("prompt").value = s.teaching_mode_prompt || "";
+  $("shareUrl").value = `${PUBLIC_BASE}/${s.subject_slug}/${s.lecture_slug}`;
+  loadFeed(s.subject_slug, s.lecture_slug);
+}
+$("savePrompt").onclick = async () => {
+  $("promptMsg").textContent = "Saving…";
+  try { await authedFetch("classroom-write", { json: { action: "update_lecture", lecture_id: LECTURE.lecture_id, payload: { teaching_mode_prompt: $("prompt").value } } });
+    $("promptMsg").innerHTML = `<span class="ok">Saved.</span>`; }
+  catch (e) { $("promptMsg").innerHTML = `<span class="err">${e.message}</span>`; }
+};
+$("askBtn").onclick = async () => {
+  const q = $("askBox").value.trim(); if (!q) return;
+  $("askAns").textContent = "Thinking…";
+  try { const r = await authedFetch("classroom-ask", { json: { lecture_id: LECTURE.lecture_id, question_text: q } });
+    $("askAns").textContent = r.text || "(no answer)"; }
+  catch (e) { $("askAns").innerHTML = `<span class="err">${e.message}</span>`; }
+};
+async function loadFeed(subject, slug) {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/classroom-feed?subject_slug=${subject}&lecture_slug=${slug}&limit=20`, { headers: { apikey: ANON_KEY } });
+    const d = await res.json();
+    $("feed").innerHTML = (d.items || []).map(i => `<div class="feeditem"><div class="q">${escapeHtml(i.display_name)}: ${escapeHtml(i.question)}</div><div class="a">${escapeHtml(i.response)}</div></div>`).join("") || "<span class='muted'>No questions yet.</span>";
+  } catch { $("feed").textContent = "Could not load feed."; }
+}
+$("publish").onclick = async () => {
+  $("pubMsg").textContent = "Publishing…";
+  try {
+    await authedFetch("classroom-write", { json: { action: "update_lecture", lecture_id: LECTURE.lecture_id, payload: { is_public: true, access_mode: LECTURE.access_mode } } });
+    $("pubMsg").innerHTML = `<span class="ok">Published.</span>`;
+    $("shareWrap").classList.remove("hidden");
+  } catch (e) { $("pubMsg").innerHTML = `<span class="err">${e.message}</span>`; }
+};
+$("copy").onclick = () => { $("shareUrl").select(); document.execCommand("copy"); };
+
+function escapeHtml(s){ return (s||"").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c])); }
+
+sb.auth.onAuthStateChange(() => refresh());
+refresh();
+</script>
+</body>
+</html>

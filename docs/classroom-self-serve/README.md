@@ -80,9 +80,10 @@ New action `update_lecture` (existing course `create`/`update` actions unchanged
 There was previously no edge path to write a lecture row — `classroom-set-visibility`
 only flips student `conversation_logs` rows, not lectures.
 
-## Frontend (Lovable) integration — the remaining "frontend only" work
-Guards for every Lovable prompt: do not create/modify edge functions; do not modify
-Serge; no bulk client-side DB operations.
+## Frontend — static HTML (built here: `html/portal.html`, `html/lecture.html`)
+The professor self-serve UI is plain, dependency-light HTML that talks straight to
+the edge functions (no framework/build step). `portal.html` covers steps 1–4 below;
+`lecture.html` is the public viewer. See `html/README.md`. The flow:
 
 1. **New lecture form** → multipart POST to `lecture-create` (fields: `video`,
    `subject_id`, `subject_name`, `course_id?`, `lecture_title`, `lecture_slug`,

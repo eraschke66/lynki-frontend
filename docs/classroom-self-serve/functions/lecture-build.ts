@@ -1,23 +1,13 @@
-// lecture-build v2 — AssemblyAI transcription webhook receiver + async build finisher.
+// lecture-build v3 — AssemblyAI transcription webhook receiver + async build finisher.
 //
 // Project: Shryn website (cmoamdistlpbahcryjda). Mirror of the deployed edge function.
 //
-// Triggered by AssemblyAI when a transcript submitted by lecture-create completes.
-// Does the slow/heavy work that used to block lecture-create synchronously:
-//   1. Fetch the finished transcript (text + word timestamps).
-//   2. Generate WebVTT captions and upload them.
-//   3. Draft the teaching_mode_prompt (Claude Haiku, engagement-first).
-//   4. Seed 12–18 starter Q&A rows into conversation_logs (backdated).
-//   5. Flip classroom_lectures.status to 'ready' (or 'failed' with a reason).
-//
-// v2: acknowledge the webhook FAST and run the build in EdgeRuntime.waitUntil,
-// so AssemblyAI's short webhook timeout never fires a retry mid-build. The job
-// is claimed atomically (status transcribing -> generating_prompt) so concurrent
-// webhook deliveries can't double-seed.
-//
-// Auth: no JWT (AssemblyAI can't send one). The webhook URL carries ?lecture_id=
-// and AssemblyAI echoes a per-lecture secret in 'x-lecture-token' which must
-// match classroom_lectures.transcription_token.
+// v3: trust the webhook via HMAC instead of a DB column. The token AssemblyAI
+// echoes in 'x-lecture-token' must equal HMAC-SHA256('lecture-build:'+lecture_id)
+// keyed by the service-role secret. Nothing secret lives in the anon-readable
+// classroom_lectures table. Everything else is unchanged from v2 (fast-ack +
+// atomic claim + EdgeRuntime.waitUntil build: VTT, engagement-first prompt,
+// 14 backdated seed Q&A rows, status -> ready/failed).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -32,10 +22,7 @@ const corsHeaders = {
 };
 
 function json(body: Record<string, unknown>, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
 
 function timingSafeEqual(a: string, b: string): boolean {
@@ -43,6 +30,12 @@ function timingSafeEqual(a: string, b: string): boolean {
   let out = 0;
   for (let i = 0; i < a.length; i++) out |= a.charCodeAt(i) ^ b.charCodeAt(i);
   return out === 0;
+}
+
+async function lectureToken(lectureId: string): Promise<string> {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(SERVICE_ROLE_KEY), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`lecture-build:${lectureId}`));
+  return btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 function formatVTTTime(ms: number): string {
@@ -84,16 +77,10 @@ async function generateTeachingPrompt(transcript: string, voiceProfile: Record<s
       }),
       signal: AbortSignal.timeout(30000),
     });
-    if (!res.ok) {
-      console.error(`[lecture-build] Claude prompt ${res.status}: ${(await res.text()).slice(0, 200)}`);
-      return fallback;
-    }
+    if (!res.ok) { console.error(`[lecture-build] Claude prompt ${res.status}: ${(await res.text()).slice(0, 200)}`); return fallback; }
     const data = await res.json();
     return data.content?.[0]?.text || fallback;
-  } catch (e) {
-    console.error(`[lecture-build] prompt gen err: ${(e as Error).message}`);
-    return fallback;
-  }
+  } catch (e) { console.error(`[lecture-build] prompt gen err: ${(e as Error).message}`); return fallback; }
 }
 
 function sanitizeFirstName(raw: unknown): string {
@@ -121,48 +108,28 @@ async function generateSeeds(teachingPrompt: string, transcript: string, subject
       }),
       signal: AbortSignal.timeout(60000),
     });
-    if (!res.ok) {
-      console.error(`[lecture-build] Claude seeds ${res.status}: ${(await res.text()).slice(0, 200)}`);
-      return [];
-    }
+    if (!res.ok) { console.error(`[lecture-build] Claude seeds ${res.status}: ${(await res.text()).slice(0, 200)}`); return []; }
     const data = await res.json();
     let txt = (data.content?.[0]?.text || "").trim();
-    const start = txt.indexOf("[");
-    const end = txt.lastIndexOf("]");
+    const start = txt.indexOf("["); const end = txt.lastIndexOf("]");
     if (start === -1 || end === -1) return [];
     txt = txt.slice(start, end + 1);
     const arr = JSON.parse(txt);
     if (!Array.isArray(arr)) return [];
-    return arr
-      .filter((x: any) => x && typeof x.question === "string" && typeof x.answer === "string")
-      .map((x: any) => ({
-        name: sanitizeFirstName(x.student_name),
-        question: String(x.question).slice(0, 500),
-        answer: String(x.answer).slice(0, 2000),
-      }));
-  } catch (e) {
-    console.error(`[lecture-build] seed gen err: ${(e as Error).message}`);
-    return [];
-  }
+    return arr.filter((x: any) => x && typeof x.question === "string" && typeof x.answer === "string")
+      .map((x: any) => ({ name: sanitizeFirstName(x.student_name), question: String(x.question).slice(0, 500), answer: String(x.answer).slice(0, 2000) }));
+  } catch (e) { console.error(`[lecture-build] seed gen err: ${(e as Error).message}`); return []; }
 }
 
 async function fail(sb: any, lectureId: string, message: string) {
   console.error(`[lecture-build] FAILED ${lectureId}: ${message}`);
-  await sb.from("classroom_lectures").update({
-    status: "failed",
-    error_message: message.slice(0, 500),
-    updated_at: new Date().toISOString(),
-  }).eq("id", lectureId);
+  await sb.from("classroom_lectures").update({ status: "failed", error_message: message.slice(0, 500), updated_at: new Date().toISOString() }).eq("id", lectureId);
 }
 
 async function runBuild(sb: any, lecture: any, transcriptId: string) {
   const lectureId = lecture.id as string;
   try {
-    // 1. Fetch finished transcript
-    const tRes = await fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
-      headers: { authorization: ASSEMBLYAI_API_KEY },
-      signal: AbortSignal.timeout(30000),
-    });
+    const tRes = await fetch(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, { headers: { authorization: ASSEMBLYAI_API_KEY }, signal: AbortSignal.timeout(30000) });
     if (!tRes.ok) throw new Error(`AAI fetch ${tRes.status}: ${(await tRes.text()).slice(0, 200)}`);
     const t = await tRes.json();
     if (t.status === "error") throw new Error(`AAI error: ${t.error}`);
@@ -172,22 +139,17 @@ async function runBuild(sb: any, lecture: any, transcriptId: string) {
     const words: Array<{ text: string; start: number; end: number }> = t.words || [];
     const duration_seconds = t.audio_duration ? Math.round(t.audio_duration) : (words.length ? Math.round(words[words.length - 1].end / 1000) : 0);
 
-    // 2. WebVTT
     const vtt = generateVTT(words);
     const vttPath = `${lecture.subject_slug}/${lecture.lecture_slug}.vtt`;
-    const { error: vttErr } = await sb.storage.from("classroom-assets")
-      .upload(vttPath, new TextEncoder().encode(vtt), { contentType: "text/vtt", upsert: true });
+    const { error: vttErr } = await sb.storage.from("classroom-assets").upload(vttPath, new TextEncoder().encode(vtt), { contentType: "text/vtt", upsert: true });
     if (vttErr) console.error(`[lecture-build] VTT upload warning: ${vttErr.message}`);
     const captions_url = sb.storage.from("classroom-assets").getPublicUrl(vttPath).data.publicUrl;
 
-    // 3. Teaching prompt
-    const { data: sp } = await sb.from("subject_profiles")
-      .select("subject_name, voice_profile").eq("id", lecture.subject_id).single();
+    const { data: sp } = await sb.from("subject_profiles").select("subject_name, voice_profile").eq("id", lecture.subject_id).single();
     const subjectName = sp?.subject_name || lecture.subject_slug;
     const voiceProfile = (sp?.voice_profile as Record<string, unknown> | null) || null;
     const teaching_mode_prompt = await generateTeachingPrompt(transcript, voiceProfile, subjectName);
 
-    // 4. Seed feed
     await sb.from("classroom_lectures").update({ status: "seeding", updated_at: new Date().toISOString() }).eq("id", lectureId);
     const seeds = await generateSeeds(teaching_mode_prompt, transcript, subjectName);
     if (seeds.length) {
@@ -195,39 +157,20 @@ async function runBuild(sb: any, lecture: any, transcriptId: string) {
       const now = Date.now();
       const rows = seeds.map((s, i) => {
         const ageMs = ((i + 1) / (seeds.length + 1)) * 8 * 24 * 60 * 60 * 1000 + Math.random() * 6 * 60 * 60 * 1000;
-        return {
-          subject_name: lecture.subject_slug,
-          subject_id: lecture.subject_id,
-          question: s.question,
-          response: s.answer,
-          page_url: pageUrl,
-          is_demo: true,
-          response_source: "classroom_seed",
-          student_display_name: s.name,
-          visibility: "public",
-          created_at: new Date(now - ageMs).toISOString(),
-        };
+        return { subject_name: lecture.subject_slug, subject_id: lecture.subject_id, question: s.question, response: s.answer, page_url: pageUrl, is_demo: true, response_source: "classroom_seed", student_display_name: s.name, visibility: "public", created_at: new Date(now - ageMs).toISOString() };
       });
       const { error: seedErr } = await sb.from("conversation_logs").insert(rows);
       if (seedErr) console.error(`[lecture-build] seed insert warning: ${seedErr.message}`);
       else console.log(`[lecture-build] seeded ${rows.length} Q&A rows for ${pageUrl}`);
     }
 
-    // 5. Finalize
     const { error: finErr } = await sb.from("classroom_lectures").update({
-      transcript,
-      duration_seconds,
-      captions_url,
-      teaching_mode_prompt,
-      status: "ready",
-      error_message: null,
-      updated_at: new Date().toISOString(),
+      transcript, duration_seconds, captions_url, teaching_mode_prompt,
+      status: "ready", error_message: null, updated_at: new Date().toISOString(),
     }).eq("id", lectureId);
     if (finErr) throw new Error(`Finalize update failed: ${finErr.message}`);
     console.log(`[lecture-build] READY ${lectureId} (${duration_seconds}s, ${transcript.length} chars, ${seeds.length} seeds)`);
-  } catch (err) {
-    await fail(sb, lectureId, (err as Error).message);
-  }
+  } catch (err) { await fail(sb, lectureId, (err as Error).message); }
 }
 
 Deno.serve(async (req: Request) => {
@@ -241,44 +184,34 @@ Deno.serve(async (req: Request) => {
   const token = req.headers.get("x-lecture-token") || "";
   if (!lectureId) return json({ error: "lecture_id required" }, 400);
 
+  // Trust the AssemblyAI callback via HMAC — no secret stored in the DB.
+  const expected = await lectureToken(lectureId);
+  if (!timingSafeEqual(token, expected)) return json({ error: "Unauthorized" }, 401);
+
   const { data: lecture, error: lecErr } = await sb.from("classroom_lectures")
-    .select("id, subject_id, subject_slug, lecture_slug, transcript_job_id, transcription_token, status")
-    .eq("id", lectureId).single();
+    .select("id, subject_id, subject_slug, lecture_slug, transcript_job_id, status").eq("id", lectureId).single();
   if (lecErr || !lecture) return json({ error: "Lecture not found" }, 404);
-  if (!lecture.transcription_token || !timingSafeEqual(token, lecture.transcription_token)) {
-    return json({ error: "Unauthorized" }, 401);
-  }
 
   let payload: any = {};
   try { payload = await req.json(); } catch (_) { /* AssemblyAI sends JSON */ }
   const transcriptId = payload.transcript_id || lecture.transcript_job_id;
   const aaiStatus = payload.status;
 
-  if (aaiStatus === "error") {
-    await fail(sb, lectureId, `AssemblyAI error: ${payload.error || "unknown"}`);
-    return json({ ok: true });
-  }
+  if (aaiStatus === "error") { await fail(sb, lectureId, `AssemblyAI error: ${payload.error || "unknown"}`); return json({ ok: true }); }
   if (!transcriptId) return json({ error: "No transcript_id" }, 400);
 
-  // Atomically claim the job so concurrent / retried webhook deliveries can't
-  // run the build twice (which would double-seed the feed). Only the delivery
-  // that flips 'transcribing' -> 'generating_prompt' proceeds.
+  // Atomically claim (transcribing -> generating_prompt) so retried/concurrent
+  // deliveries can't double-seed.
   const { data: claimed } = await sb.from("classroom_lectures")
     .update({ status: "generating_prompt", updated_at: new Date().toISOString() })
     .eq("id", lectureId).eq("status", "transcribing").select("id");
-  if (!claimed || claimed.length === 0) {
-    return json({ ok: true, note: "already claimed or finished" });
-  }
+  if (!claimed || claimed.length === 0) return json({ ok: true, note: "already claimed or finished" });
 
-  // Acknowledge fast; finish the heavy build in the background so AssemblyAI's
-  // webhook timeout never fires a retry.
   const work = runBuild(sb, lecture, transcriptId);
   // @ts-ignore EdgeRuntime is a Supabase global
   if (typeof EdgeRuntime !== "undefined" && (EdgeRuntime as any)?.waitUntil) {
     // @ts-ignore
     (EdgeRuntime as any).waitUntil(work);
-  } else {
-    await work;
-  }
+  } else { await work; }
   return json({ ok: true, status: "building" });
 });

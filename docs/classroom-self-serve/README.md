@@ -98,20 +98,65 @@ Serge; no bulk client-side DB operations.
    (+ `access_mode`/`access_password`); Share link is
    `shryn.ai/classroom/{subject-slug}/{lecture-slug}`.
 
-## Verification status
-- Migration applied; legacy rows confirmed `status='ready'`.
-- All four functions deployed (compiled clean).
-- Full end-to-end (real lecture upload through the form → `ready` → playback,
-  captions, in-voice answer, seed feed, publish) is the spec §5 acceptance test and
-  still requires a real professor-account run through the Lovable form. **Built but
-  unverified** until that pass.
+## Security hardening (2026-05-31, student-privacy)
+The professor-facing mutating endpoints were open (`verify_jwt=false`, no ownership
+check). Hardened so student data can't be exposed by a stranger:
+- **`lecture-create` (v7/v8)**, **`lecture-status` (v2)**, **`classroom-write` (v3)**
+  now require the **subject owner's JWT** (`subject_profiles.user_id = auth.uid()`)
+  or the **service-role key**. Without it they return `401`/`403`. This stops anyone
+  from creating lectures under another subject, reading an unpublished/private
+  lecture's video+prompt, or publishing a private classroom (which would expose its
+  student feed). The authenticated portal already sends the owner JWT via
+  `supabase-js`, so this is compatible; only unauthenticated callers are now rejected.
+- **Webhook secret moved to HMAC.** The AssemblyAI callback token is now
+  `HMAC-SHA256('lecture-build:'+lecture_id)` keyed by the service-role secret —
+  recomputed and constant-time-compared in `lecture-build`. Nothing secret is stored
+  in `classroom_lectures` (which is anon-readable), closing the build-injection vector.
+- **`lecture-create` v8** also fixes the AssemblyAI param (`speech_models: ["universal"]`;
+  `speech_model` is now rejected with HTTP 400 — caught by the smoke test below).
+
+### Pre-existing holes found but NOT changed (need Erik's call — could break the live public frontend)
+RLS lets the **anon key** do things well beyond this feature:
+- `classroom_lectures` policy `"Anon read all lectures"` (`qual: true`) exposes every
+  column of every lecture to anon, **including `access_password`** (defeats private-
+  lecture protection). RLS can't hide a column; the safe fix is a view or column
+  grants, with a frontend tweak — risky to apply blind.
+- `subject_profiles`: `anon_read_subject_profiles` exposes PII (`subject_email`,
+  `correction_pin_hash`, Stripe IDs); **`anon_update_subject_profiles` lets anyone
+  rewrite any scholar's profile** (critical). Both are broader than this feature and
+  likely load-bearing for the public chat frontend, so left for Erik to decide.
+
+## Verification (2026-05-31) — pipeline passed end-to-end
+Ran a real media file through the actual `lecture-create → AssemblyAI → lecture-build`
+chain as Erik's subject (`erik-raschke`), driven server-side via `pg_net` (this
+container can't reach the function host). Result row `autobuild-smoke-test`:
+- `status = ready`; transcript 4,880 chars (real: *"Smoke from hundreds of wildfires
+  in Canada…"*); `duration_seconds = 282`; WebVTT captions generated + uploaded;
+  teaching prompt 4,102 chars containing `ENGAGEMENT STYLE: TEACH THROUGH CHALLENGE &
+  CURIOSITY`; **14 seed Q&A rows** inserted (engagement-first, grounded, varied names).
+- `classroom-feed` returns the seeds (HTTP 200, safe fields only — no `session_id`/
+  `subject_id` leaked).
+- `lecture-status` correctly returns **401** to an unauthenticated caller (auth gate
+  verified live).
+
+Caveats:
+- **YouTube extraction is currently broken on the project.** `youtubei.js` (used by
+  `youtube-audio-extract` and the throwaway test harness) **503s at boot** — YouTube's
+  anti-bot/PoToken changes routinely break these libraries. So the literal "strip from
+  YouTube" step needs the extractor repaired/upgraded first; the pipeline was proven
+  with a direct public media URL instead. Repairing YouTube ingest is a separate task.
+- The smoke-test artifacts remain under Erik's subject: lecture
+  `/classroom/erik-raschke/autobuild-smoke-test` (unpublished) + its 14 seed rows.
+  Delete with: `DELETE FROM classroom_lectures WHERE lecture_slug='autobuild-smoke-test';
+  DELETE FROM conversation_logs WHERE page_url='/classroom/erik-raschke/autobuild-smoke-test';`
+- The temporary `lecture-test-ingest` edge function was neutralized to an inert 410
+  stub (no MCP delete-function tool exists); safe to delete from the dashboard.
+- Full §5 acceptance (real professor upload through the Lovable form → playback in the
+  browser → in-voice answer → publish/share) still needs the Lovable frontend work.
 
 ## Notes / follow-ups
-- `lecture-create` keeps `verify_jwt=false` (matches v5 and the existing form). It is
-  therefore callable unauthenticated, which can trigger billable transcription. This
-  is the pre-existing posture; tightening auth is out of scope here but worth a future
-  pass.
-- Build reliability depends on the `ASSEMBLYAI_API_KEY` and `ANTHROPIC_API_KEY`
-  secrets already configured on the project (used by v5 and `classroom-ask`).
+- Build reliability depends on `ASSEMBLYAI_API_KEY` and `ANTHROPIC_API_KEY` secrets
+  (already configured; both exercised successfully in the smoke test).
 - The `classroom-assets` bucket must remain public-read so AssemblyAI can fetch the
   video by URL and the page can play it.
+- `transcription_token` column is now unused (token is HMAC-derived); harmless to keep.

@@ -1,19 +1,14 @@
-// lecture-create v6 — FAST synchronous path only. The heavy build is async.
+// lecture-create v8 — fast synchronous path + AUTHORIZED + HMAC webhook token.
 //
 // Project: Shryn website (cmoamdistlpbahcryjda). Mirror of the deployed edge function.
 //
-// Why v6: v5 polled AssemblyAI inline for up to 5 minutes, which exceeds the
-// edge wall-clock limit and dies on real (long) lectures. Now this function
-// does only the fast work and returns immediately:
-//   1. Validate input + upload the video to classroom-assets.
-//   2. Insert a classroom_lectures row with status='transcribing' (unpublished).
-//   3. Submit an AssemblyAI job that fetches the (public) video URL and calls
-//      the lecture-build webhook on completion — which does VTT, the teaching
-//      prompt, and the seed feed, then flips status to 'ready'.
-//   4. Return { lecture_id, status } so the portal can poll lecture-status.
-//
-// The lecture is created UNPUBLISHED (is_public=false). The professor reviews
-// in the preview step and publishes via classroom-write (action update_lecture).
+// v8: fix AssemblyAI param — use speech_models (array); 'speech_model' is
+// deprecated/rejected with HTTP 400. (Caught by the end-to-end smoke test.)
+// v7 security hardening (student-privacy):
+//   - AUTHORIZATION: the caller must own the subject (subject_profiles.user_id =
+//     auth.uid()) or present the service-role key.
+//   - WEBHOOK SECRET via HMAC: the AssemblyAI callback token is HMAC(lecture_id)
+//     keyed by the service-role secret — NOT stored in the anon-readable table.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
@@ -27,20 +22,38 @@ const corsHeaders = {
 };
 
 function json(body: Record<string, unknown>, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+  return new Response(JSON.stringify(body), { status, headers: { ...corsHeaders, "Content-Type": "application/json" } });
 }
 
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
+export async function lectureToken(lectureId: string): Promise<string> {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(SERVICE_ROLE_KEY), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`lecture-build:${lectureId}`));
+  return btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function authorize(req: Request, sb: any): Promise<{ isService: boolean; userId?: string } | null> {
+  const token = (req.headers.get("Authorization") || "").replace(/^Bearer\s+/i, "").trim();
+  if (!token) return null;
+  if (token === SERVICE_ROLE_KEY) return { isService: true };
+  try {
+    const { data, error } = await sb.auth.getUser(token);
+    if (error || !data?.user) return null;
+    return { isService: false, userId: data.user.id };
+  } catch { return null; }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (!SERVICE_ROLE_KEY) return json({ error: "SUPABASE_SERVICE_ROLE_KEY not configured" }, 500);
   if (!ASSEMBLYAI_API_KEY) return json({ error: "ASSEMBLYAI_API_KEY not configured" }, 500);
+
+  const sb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
+  const auth = await authorize(req, sb);
+  if (!auth) return json({ error: "Unauthorized: log in as the subject owner" }, 401);
 
   try {
     const formData = await req.formData();
@@ -59,16 +72,20 @@ Deno.serve(async (req: Request) => {
     if (!lecture_title) return json({ error: "Missing lecture_title" }, 400);
     if (!lecture_slug) return json({ error: "Missing lecture_slug" }, 400);
 
-    // The professor's public/private CHOICE is preserved as access_mode, but the
-    // lecture is not published until they hit Publish in the preview step.
+    // Ownership: a non-service caller may only create lectures for a subject they own.
+    if (!auth.isService) {
+      const { data: owned } = await sb.from("subject_profiles")
+        .select("id").eq("id", subject_id).eq("user_id", auth.userId).maybeSingle();
+      if (!owned) return json({ error: "Forbidden: you do not own this subject" }, 403);
+    }
+
     const wants_public = is_public_str === "true";
     const access_mode = wants_public ? "public" : "private";
     const scholarSlug = slugify(subject_name);
-    const sb = createClient(SUPABASE_URL, SERVICE_ROLE_KEY);
 
     console.log(`[lecture-create] Start: ${lecture_title} (${(video.size / 1048576).toFixed(1)}MB) for ${subject_name}`);
 
-    // 1. Upload video to Supabase Storage (public bucket so AssemblyAI + the page can read it)
+    // 1. Upload video (public bucket so AssemblyAI + the page can read it)
     const storagePath = `${scholarSlug}/${lecture_slug}.mp4`;
     const videoBytes = await video.arrayBuffer();
     const { error: uploadErr } = await sb.storage.from("classroom-assets")
@@ -79,8 +96,7 @@ Deno.serve(async (req: Request) => {
 
     // 2. Resolve chat function / portrait / voice from the subject profile
     const { data: sp } = await sb.from("subject_profiles")
-      .select("edge_function_name, profile_image_url, voice_profile")
-      .eq("id", subject_id).single();
+      .select("edge_function_name, profile_image_url, voice_profile").eq("id", subject_id).single();
     const chat_edge_function = sp?.edge_function_name || "agent-chat";
     const portrait_url = sp?.profile_image_url || null;
     const voice_profile = sp?.voice_profile as Record<string, unknown> | null;
@@ -95,30 +111,18 @@ Deno.serve(async (req: Request) => {
     // 3. Resolve course_name (fallback to lecture_title)
     let course_name = lecture_title;
     if (course_id) {
-      const { data: course } = await sb.from("classroom_courses")
-        .select("course_name").eq("id", course_id).single();
+      const { data: course } = await sb.from("classroom_courses").select("course_name").eq("id", course_id).single();
       if (course?.course_name) course_name = course.course_name;
     }
 
     // 4. Insert the lecture row in 'transcribing' state (unpublished)
-    const transcription_token = crypto.randomUUID();
     const { data: lecture, error: lectureErr } = await sb.from("classroom_lectures").insert({
-      subject_id,
-      subject_slug: scholarSlug,
-      lecture_slug,
-      lecture_title,
-      course_name,
-      audio_url: video_url,
-      video_url,
-      slide_manifest: [],
-      chat_edge_function,
-      voice_id: resolved_voice_id,
-      portrait_url,
-      is_public: false,
-      access_mode,
+      subject_id, subject_slug: scholarSlug, lecture_slug, lecture_title, course_name,
+      audio_url: video_url, video_url, slide_manifest: [], chat_edge_function,
+      voice_id: resolved_voice_id, portrait_url,
+      is_public: false, access_mode,
       access_password: wants_public ? null : (access_password || null),
       status: "transcribing",
-      transcription_token,
     }).select("id").single();
     if (lectureErr) {
       console.error("[lecture-create] insert error:", lectureErr);
@@ -136,7 +140,8 @@ Deno.serve(async (req: Request) => {
       if (linkErr) console.error(`[lecture-create] course link warning: ${linkErr.message}`);
     }
 
-    // 6. Submit AssemblyAI job that fetches the public video URL and webhooks back
+    // 6. Submit AssemblyAI job (HMAC webhook token; nothing secret stored in DB)
+    const token = await lectureToken(lectureId);
     const webhookUrl = `${SUPABASE_URL}/functions/v1/lecture-build?lecture_id=${lectureId}`;
     try {
       const jobRes = await fetch("https://api.assemblyai.com/v2/transcript", {
@@ -144,10 +149,10 @@ Deno.serve(async (req: Request) => {
         headers: { authorization: ASSEMBLYAI_API_KEY, "content-type": "application/json" },
         body: JSON.stringify({
           audio_url: video_url,
-          speech_model: "universal",
+          speech_models: ["universal"],
           webhook_url: webhookUrl,
           webhook_auth_header_name: "x-lecture-token",
-          webhook_auth_header_value: transcription_token,
+          webhook_auth_header_value: token,
         }),
         signal: AbortSignal.timeout(20000),
       });

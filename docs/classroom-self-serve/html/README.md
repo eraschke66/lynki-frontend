@@ -32,6 +32,8 @@ Both files embed the public project URL + anon key (safe to expose). Change
 ## Notes
 - These call the **hardened** functions: `lecture-create` / `lecture-status` /
   `classroom-write` require the owner's login, so `portal.html` must be used signed in.
-- `verify-password` only covers fixed named gates (env-secret based), not per-lecture
-  `access_password`. A private-lecture verifier is a follow-up; until then `lecture.html`
-  shows public lectures and defers private gating to the existing site gate.
+- Private lectures: `lecture.html` shows a password gate that calls
+  `lecture-verify-password` (server-side hash check; the password is never sent to or
+  stored on the client). Note the video file is in a public bucket, so the gate
+  controls page access, not the raw storage URL — fully private video would need a
+  private bucket + signed URLs (larger change).

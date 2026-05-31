@@ -35,3 +35,17 @@ ALTER TABLE public.classroom_lectures
 COMMENT ON COLUMN public.classroom_lectures.source_type IS 'upload | youtube | vimeo | url (legacy rows = upload).';
 COMMENT ON COLUMN public.classroom_lectures.source_url  IS 'Original professor-supplied URL.';
 COMMENT ON COLUMN public.classroom_lectures.embed_url   IS 'Player embed URL for hosted sources; null for uploads.';
+
+-- Migration: classroom_privacy_hardening (applied 2026-05-31)
+-- (1) Close critical hole: anon could UPDATE any subject_profiles row.
+DROP POLICY IF EXISTS anon_update_subject_profiles ON public.subject_profiles;
+-- (2) Per-lecture passwords as hashes in a service-role-only table (never readable
+--     via the anon key, unlike classroom_lectures.access_password).
+CREATE TABLE IF NOT EXISTS public.classroom_lecture_secrets (
+  lecture_id    uuid PRIMARY KEY REFERENCES public.classroom_lectures(id) ON DELETE CASCADE,
+  password_hash text NOT NULL,
+  updated_at    timestamptz NOT NULL DEFAULT now()
+);
+ALTER TABLE public.classroom_lecture_secrets ENABLE ROW LEVEL SECURITY; -- no policies => service-role only
+-- (3) Clear any plaintext from the anon-readable column.
+UPDATE public.classroom_lectures SET access_password = NULL WHERE access_password IS NOT NULL;

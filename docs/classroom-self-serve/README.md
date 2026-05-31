@@ -116,7 +116,23 @@ check). Hardened so student data can't be exposed by a stranger:
 - **`lecture-create` v8** also fixes the AssemblyAI param (`speech_models: ["universal"]`;
   `speech_model` is now rejected with HTTP 400 — caught by the smoke test below).
 
-### Pre-existing holes found but NOT changed (need Erik's call — could break the live public frontend)
+### Privacy fixes applied 2026-05-31 (migration `classroom_privacy_hardening`)
+- **Dropped `anon_update_subject_profiles`** — anyone with the anon key could
+  previously rewrite *any* scholar's profile (system prompt, voice, etc.). Now only
+  the authenticated owner edits their own rows (`profile_user_isolation`). Verified:
+  the policy is gone.
+- **Per-lecture passwords are now server-verified.** New service-role-only table
+  `classroom_lecture_secrets` stores `SHA-256(lecture_id:password)`; the plaintext
+  `access_password` column is left null (it was anon-readable). `lecture-create` (v9),
+  `lecture-import` (v2) and `classroom-write` (v4) write the hash; new function
+  **`lecture-verify-password`** (public, rate-limited) checks it; `html/lecture.html`
+  shows a password gate that calls it. Verified: correct→`{valid:true}`, wrong→
+  `{valid:false}`; the secrets table has RLS on with zero policies (service-role only).
+  - *Residual:* the video file itself sits in a public bucket, so the gate controls the
+    page, not the raw storage URL. Truly private video needs a private bucket + signed
+    URLs (larger change; conflicts with AssemblyAI/embeds fetching public URLs).
+
+### Other pre-existing holes found but NOT changed (need Erik's call — could break the live public frontend)
 RLS lets the **anon key** do things well beyond this feature:
 - `classroom_lectures` policy `"Anon read all lectures"` (`qual: true`) exposes every
   column of every lecture to anon, **including `access_password`** (defeats private-

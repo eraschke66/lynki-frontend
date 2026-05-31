@@ -1,7 +1,9 @@
-// classroom-write v3 — AUTHORIZED create/update of classroom_courses + classroom_lectures.
+// classroom-write v4 — AUTHORIZED create/update of classroom_courses + classroom_lectures.
 //
 // Project: Shryn website (cmoamdistlpbahcryjda). Mirror of the deployed edge function.
 //
+// v4: update_lecture stores access_password as a hash in classroom_lecture_secrets
+// (service-role only); never plaintext in the anon-readable row.
 // v3: every action now requires the subject owner's JWT (subject_profiles.user_id
 // = auth.uid()) or the service-role key. Previously these writes were open —
 // anyone could create courses or (via v2's update_lecture) publish a private
@@ -33,6 +35,7 @@ async function authorize(req: Request, sb: any): Promise<{ isService: boolean; u
   } catch { return null; }
 }
 
+async function sha256hex(s: string){ const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
 async function ownsSubject(sb: any, subjectId: string, userId: string): Promise<boolean> {
   const { data } = await sb.from("subject_profiles").select("id").eq("id", subjectId).eq("user_id", userId).maybeSingle();
   return !!data;
@@ -68,8 +71,13 @@ Deno.serve(async (req: Request) => {
         if (p.access_mode !== "public" && p.access_mode !== "private") return json({ error: "access_mode must be 'public' or 'private'" }, 400);
         updates.access_mode = p.access_mode;
       }
-      if (p.access_password !== undefined) updates.access_password = p.access_password || null;
-      if (Object.keys(updates).length === 1) return json({ error: "No lecture fields to update" }, 400);
+      // Password -> hashed secret table; never plaintext in the anon-readable row.
+      if (p.access_password !== undefined) {
+        updates.access_password = null;
+        if (p.access_password) await sb.from("classroom_lecture_secrets").upsert({ lecture_id: id, password_hash: await sha256hex(`${id}:${p.access_password}`), updated_at: new Date().toISOString() });
+        else await sb.from("classroom_lecture_secrets").delete().eq("lecture_id", id);
+      }
+      if (Object.keys(updates).length === 1 && p.access_password === undefined) return json({ error: "No lecture fields to update" }, 400);
 
       const { data, error } = await sb.from("classroom_lectures").update(updates).eq("id", id)
         .select("id, lecture_slug, subject_slug, is_public, access_mode, status").single();

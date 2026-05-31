@@ -1,7 +1,9 @@
-// lecture-create v8 — fast synchronous path + AUTHORIZED + HMAC webhook token.
+// lecture-create v9 — fast synchronous path + AUTHORIZED + HMAC webhook token.
 //
 // Project: Shryn website (cmoamdistlpbahcryjda). Mirror of the deployed edge function.
 //
+// v9: private-lecture passwords stored as SHA-256(lecture_id:password) in the
+// service-role-only classroom_lecture_secrets table; access_password left NULL.
 // v8: fix AssemblyAI param — use speech_models (array); 'speech_model' is
 // deprecated/rejected with HTTP 400. (Caught by the end-to-end smoke test.)
 // v7 security hardening (student-privacy):
@@ -28,6 +30,7 @@ function json(body: Record<string, unknown>, status = 200) {
 function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
+async function sha256hex(s: string){ const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
 
 export async function lectureToken(lectureId: string): Promise<string> {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(SERVICE_ROLE_KEY), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -120,8 +123,7 @@ Deno.serve(async (req: Request) => {
       subject_id, subject_slug: scholarSlug, lecture_slug, lecture_title, course_name,
       audio_url: video_url, video_url, slide_manifest: [], chat_edge_function,
       voice_id: resolved_voice_id, portrait_url,
-      is_public: false, access_mode,
-      access_password: wants_public ? null : (access_password || null),
+      is_public: false, access_mode, access_password: null,
       status: "transcribing",
     }).select("id").single();
     if (lectureErr) {
@@ -129,7 +131,11 @@ Deno.serve(async (req: Request) => {
       return json({ error: `Lecture insert failed: ${lectureErr.message}` }, 400);
     }
     const lectureId = lecture.id as string;
-    console.log(`[lecture-create] Lecture row: ${lectureId}`);
+
+    // Private password -> hashed secret (never plaintext in the anon-readable row)
+    if (!wants_public && access_password) {
+      await sb.from("classroom_lecture_secrets").upsert({ lecture_id: lectureId, password_hash: await sha256hex(`${lectureId}:${access_password}`), updated_at: new Date().toISOString() });
+    }
 
     // 5. Link to course if provided
     if (course_id) {

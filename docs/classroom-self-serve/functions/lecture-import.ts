@@ -1,7 +1,9 @@
-// lecture-import v1 — create a classroom lecture from a HOSTED video URL.
+// lecture-import v2 — create a classroom lecture from a HOSTED video URL.
 //
 // Project: Shryn website (cmoamdistlpbahcryjda). Mirror of the deployed edge function.
 //
+// v2: private-lecture passwords stored as a hash in the service-role-only
+// classroom_lecture_secrets table; access_password left NULL (anon-readable row).
 // Sources: youtube | vimeo | url (direct media). Owner-authed (subject owner JWT or
 // service-role key), same contract as lecture-create. Playback vs transcription split:
 //   - PLAYBACK: youtube/vimeo embed the player (embed_url); 'url' plays the file.
@@ -25,6 +27,7 @@ const corsHeaders = {
 };
 function json(b: Record<string, unknown>, s = 200) { return new Response(JSON.stringify(b), { status: s, headers: { ...corsHeaders, "Content-Type": "application/json" } }); }
 function slugify(s: string){ return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""); }
+async function sha256hex(s: string){ const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)); return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,"0")).join(""); }
 
 async function lectureToken(id: string): Promise<string> {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(SERVICE_ROLE_KEY), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
@@ -177,12 +180,15 @@ Deno.serve(async (req: Request) => {
       subject_id, subject_slug: scholarSlug, lecture_slug, lecture_title: resolvedTitle, course_name: course_name || resolvedTitle,
       audio_url: video_url, video_url, embed_url, source_type, source_url: url,
       slide_manifest: [], chat_edge_function, voice_id, portrait_url: sp?.profile_image_url || null,
-      is_public: false, access_mode, access_password: is_public ? null : (access_password || null),
+      is_public: false, access_mode, access_password: null,
       transcript: transcriptText, captions_url, duration_seconds,
       status: captionsCues ? "generating_prompt" : "transcribing",
     }).select("id, subject_slug, lecture_slug, subject_id").single();
     if (insErr) return json({ error: `Insert failed: ${insErr.message}` }, 400);
 
+    if (!is_public && access_password) {
+      await sb.from("classroom_lecture_secrets").upsert({ lecture_id: lecture.id, password_hash: await sha256hex(`${lecture.id}:${access_password}`), updated_at: new Date().toISOString() });
+    }
     if (course_id) {
       const { count } = await sb.from("classroom_lecture_courses").select("*",{count:"exact",head:true}).eq("course_id", course_id);
       await sb.from("classroom_lecture_courses").insert({ lecture_id: lecture.id, course_id, position:(count||0)+1 });

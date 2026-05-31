@@ -155,6 +155,36 @@ Caveats:
 - Full §5 acceptance (real professor upload through the Lovable form → playback in the
   browser → in-voice answer → publish/share) still needs the Lovable frontend work.
 
+## Video source connectors (2026-05-31)
+Professors can bring a hosted video instead of uploading a file. Migration
+`classroom_lectures_video_source` adds `source_type` / `source_url` / `embed_url`.
+New function **`lecture-import`** (owner-authed, same auth model as `lecture-create`)
+accepts JSON `{ source_type: youtube|vimeo|url, url, subject_id, subject_name,
+lecture_title, lecture_slug, is_public, access_password?, course_id? }`. Playback and
+transcription are handled separately:
+
+| Source | Playback | Transcript | Verified |
+|---|---|---|---|
+| **upload** | `<video>` (Supabase storage) | AssemblyAI on the uploaded file | ✅ |
+| **vimeo** | Vimeo embed (`player.vimeo.com`) | Vimeo player-config progressive file → AssemblyAI | ✅ end-to-end |
+| **url** (direct mp4/mp3…) | `<video>` | AssemblyAI fetches the URL | ✅ (same path as upload) |
+| **youtube** | YouTube embed | the video's caption track (Innertube timedtext); **no download** | ⚠️ embed works; transcript often blocked |
+
+**YouTube caveat:** YouTube now gates caption-track listing (and progressive download)
+from bare server-side requests, so transcription frequently fails with a clear message
+(*"This YouTube video has no captions to transcribe…"*). The embed still plays. For
+reliable YouTube transcripts we'd need a third-party (e.g. a captions/oEmbed service or
+browser-side extraction) — a follow-up. Vimeo and direct-URL are reliable today.
+
+The portal (`html/portal.html`) has a **Video source** selector that routes file uploads
+to `lecture-create` and YouTube/Vimeo/URL to `lecture-import`; the preview and
+`html/lecture.html` render an iframe embed for hosted sources and a `<video>` for uploads.
+
+Verified 2026-05-31 (server-side via `pg_net` as Erik's subject, then cleaned up):
+- **Vimeo** (`vimeo.com/76979871`) → `ready`: 723-char transcript, captions, 3,928-char
+  engagement prompt, 14 seeds, `embed_url` set.
+- **YouTube** → reached YouTube and returned the graceful "no captions" error (no crash).
+
 ## Notes / follow-ups
 - Build reliability depends on `ASSEMBLYAI_API_KEY` and `ANTHROPIC_API_KEY` secrets
   (already configured; both exercised successfully in the smoke test).

@@ -73,8 +73,17 @@
       <label>URL slug</label>
       <input id="slug" type="text" placeholder="identity-religion-postcolonial-theory" />
 
-      <label>Video file</label>
-      <input id="video" type="file" accept="video/*" />
+      <label>Video source</label>
+      <select id="source">
+        <option value="upload">Upload a file</option>
+        <option value="youtube">YouTube link</option>
+        <option value="vimeo">Vimeo link</option>
+        <option value="url">Direct video URL</option>
+      </select>
+
+      <div id="fileWrap"><label>Video file</label><input id="video" type="file" accept="video/*" /></div>
+      <div id="urlWrap" class="hidden"><label id="urlLabel">Video link</label><input id="srcurl" type="text" placeholder="https://…" />
+        <p id="srcNote" class="muted" style="font-size:12px;margin:6px 0 0"></p></div>
 
       <label>Visibility</label>
       <div class="row">
@@ -99,7 +108,7 @@
     <!-- ============ PREVIEW / PUBLISH ============ -->
     <div id="previewCard" class="card hidden">
       <h2>Preview &amp; publish</h2>
-      <video id="vid" controls crossorigin="anonymous" playsinline></video>
+      <div id="player"></div>
 
       <h2>Ask the scholar (Q&amp;A check)</h2>
       <div class="row"><input id="askBox" type="text" placeholder="Type a student question…" style="flex:1 1 240px" /><button id="askBtn" class="secondary">Ask</button></div>
@@ -190,29 +199,56 @@ document.querySelectorAll("input[name=vis]").forEach(r => r.onchange = () => {
   $("pwWrap").classList.toggle("hidden", document.querySelector("input[name=vis]:checked").value !== "private");
 });
 
+// source selector toggle
+const SRC_NOTE = {
+  youtube: "Paste a YouTube link. The video is embedded for playback; transcription uses the video's captions (the video must have captions turned on).",
+  vimeo: "Paste a Vimeo link. The video is embedded for playback; transcription uses the file (the video must allow file access).",
+  url: "Paste a direct video/audio file URL (mp4, mov, mp3…). It will be transcribed by AssemblyAI.",
+};
+$("source").onchange = () => {
+  const v = $("source").value;
+  $("fileWrap").classList.toggle("hidden", v !== "upload");
+  $("urlWrap").classList.toggle("hidden", v === "upload");
+  $("urlLabel").textContent = v === "youtube" ? "YouTube link" : v === "vimeo" ? "Vimeo link" : "Direct video URL";
+  $("srcNote").textContent = SRC_NOTE[v] || "";
+};
+
 $("create").onclick = async () => {
   const subjectId = $("subject").value;
   const subjectName = SUBJECTS.find(s => s.id === subjectId)?.subject_name || "";
-  const file = $("video").files[0];
   const vis = document.querySelector("input[name=vis]:checked").value;
-  if (!file) { $("formMsg").textContent = "Choose a video file."; return; }
+  const isPublic = vis === "public";
+  const src = $("source").value;
   if (!$("title").value || !$("slug").value) { $("formMsg").textContent = "Title and slug are required."; return; }
-
-  const fd = new FormData();
-  fd.append("video", file);
-  fd.append("subject_id", subjectId);
-  fd.append("subject_name", subjectName);
-  fd.append("lecture_title", $("title").value);
-  fd.append("lecture_slug", $("slug").value);
-  fd.append("is_public", vis === "public" ? "true" : "false");
-  if (vis === "private") fd.append("access_password", $("pw").value);
-  // optional course: match typed name to an existing course id
   const opt = [...$("courseList").options].find(o => o.value === $("course").value);
-  if (opt) fd.append("course_id", opt.dataset.id);
+  const courseId = opt ? opt.dataset.id : null;
 
-  $("create").disabled = true; $("formMsg").textContent = "Uploading…";
+  $("create").disabled = true;
   try {
-    const out = await authedFetch("lecture-create", { method: "POST", body: fd });
+    let out;
+    if (src === "upload") {
+      const file = $("video").files[0];
+      if (!file) { $("formMsg").textContent = "Choose a video file."; $("create").disabled = false; return; }
+      $("formMsg").textContent = "Uploading…";
+      const fd = new FormData();
+      fd.append("video", file);
+      fd.append("subject_id", subjectId); fd.append("subject_name", subjectName);
+      fd.append("lecture_title", $("title").value); fd.append("lecture_slug", $("slug").value);
+      fd.append("is_public", isPublic ? "true" : "false");
+      if (!isPublic) fd.append("access_password", $("pw").value);
+      if (courseId) fd.append("course_id", courseId);
+      out = await authedFetch("lecture-create", { method: "POST", body: fd });
+    } else {
+      const url = $("srcurl").value.trim();
+      if (!url) { $("formMsg").textContent = "Paste a link."; $("create").disabled = false; return; }
+      $("formMsg").textContent = "Importing…";
+      out = await authedFetch("lecture-import", { json: {
+        source_type: src, url, subject_id: subjectId, subject_name: subjectName,
+        lecture_title: $("title").value, lecture_slug: $("slug").value,
+        is_public: isPublic, access_password: isPublic ? null : $("pw").value,
+        course_id: courseId,
+      }});
+    }
     $("formMsg").textContent = "";
     LECTURE = { id: out.lecture_id };
     $("buildCard").classList.remove("hidden");
@@ -242,12 +278,11 @@ function pollStatus() {
 // ---------- preview ----------
 function showPreview(s) {
   $("previewCard").classList.remove("hidden");
-  const v = $("vid"); v.src = s.video_url; v.crossOrigin = "anonymous";
-  [...v.querySelectorAll("track")].forEach(t => t.remove());
-  if (s.captions_url) {
-    const t = document.createElement("track");
-    t.kind = "captions"; t.label = "English"; t.srclang = "en"; t.src = s.captions_url; t.default = true;
-    v.appendChild(t);
+  if (s.embed_url) {
+    $("player").innerHTML = `<iframe src="${s.embed_url}" style="width:100%;aspect-ratio:16/9;border:0;border-radius:10px;margin-top:8px" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+  } else {
+    const cap = s.captions_url ? `<track kind="captions" label="English" srclang="en" src="${s.captions_url}" default>` : "";
+    $("player").innerHTML = `<video controls crossorigin="anonymous" playsinline style="width:100%;border-radius:10px;background:#000;margin-top:8px" src="${s.video_url}">${cap}</video>`;
   }
   $("prompt").value = s.teaching_mode_prompt || "";
   $("shareUrl").value = `${PUBLIC_BASE}/${s.subject_slug}/${s.lecture_slug}`;

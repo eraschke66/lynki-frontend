@@ -24,3 +24,14 @@ COMMENT ON COLUMN public.classroom_lectures.transcript_job_id IS
   'AssemblyAI transcript id for the async transcription job.';
 COMMENT ON COLUMN public.classroom_lectures.transcription_token IS
   'Random per-lecture secret; the AssemblyAI webhook (lecture-build) must echo it to be trusted.';
+
+-- Migration: classroom_lectures_video_source (applied 2026-05-31)
+-- Video source connectors (upload | youtube | vimeo | url). Hosted sources embed
+-- the player; uploads use video_url.
+ALTER TABLE public.classroom_lectures
+  ADD COLUMN IF NOT EXISTS source_type text NOT NULL DEFAULT 'upload',
+  ADD COLUMN IF NOT EXISTS source_url  text,
+  ADD COLUMN IF NOT EXISTS embed_url   text;
+COMMENT ON COLUMN public.classroom_lectures.source_type IS 'upload | youtube | vimeo | url (legacy rows = upload).';
+COMMENT ON COLUMN public.classroom_lectures.source_url  IS 'Original professor-supplied URL.';
+COMMENT ON COLUMN public.classroom_lectures.embed_url   IS 'Player embed URL for hosted sources; null for uploads.';

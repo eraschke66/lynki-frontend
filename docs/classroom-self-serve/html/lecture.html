@@ -49,7 +49,7 @@ async function load(){
   const { subject, slug } = route();
   if(!subject||!slug){ $("#body").innerHTML = `<p class="err">Missing subject/slug. Use ?subject=…&slug=…</p>`; return; }
   // Public read (RLS exposes published lectures). Never select the password column.
-  const rows = await rest(`classroom_lectures?subject_slug=eq.${encodeURIComponent(subject)}&lecture_slug=eq.${encodeURIComponent(slug)}&is_public=eq.true&select=id,lecture_title,subject_slug,lecture_slug,course_name,video_url,captions_url,duration_seconds,access_mode,portrait_url`);
+  const rows = await rest(`classroom_lectures?subject_slug=eq.${encodeURIComponent(subject)}&lecture_slug=eq.${encodeURIComponent(slug)}&is_public=eq.true&select=id,lecture_title,subject_slug,lecture_slug,course_name,video_url,embed_url,source_type,captions_url,duration_seconds,access_mode,portrait_url`);
   if(!Array.isArray(rows)||!rows.length){ $("#body").innerHTML = `<p class="err">This lecture isn’t published, or doesn’t exist.</p>`; return; }
   LECTURE = rows[0];
   $("#title").textContent = LECTURE.lecture_title;
@@ -65,8 +65,11 @@ async function load(){
 
 function render(){
   const captions = LECTURE.captions_url ? `<track kind="captions" label="English" srclang="en" src="${LECTURE.captions_url}" default>` : "";
+  const player = LECTURE.embed_url
+    ? `<iframe src="${LECTURE.embed_url}" style="width:100%;aspect-ratio:16/9;border:0;border-radius:12px;margin:14px 0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`
+    : `<video id="vid" controls crossorigin="anonymous" playsinline src="${LECTURE.video_url}">${captions}</video>`;
   $("#body").innerHTML = `
-    <video id="vid" controls crossorigin="anonymous" playsinline src="${LECTURE.video_url}">${captions}</video>
+    ${player}
     <div class="card">
       <h3 style="margin:0 0 8px">Ask the scholar</h3>
       <div class="row"><input id="ask" placeholder="Ask a question about this lecture…" style="flex:1 1 240px"><button id="askBtn">Ask</button></div>

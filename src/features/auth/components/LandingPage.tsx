@@ -84,13 +84,12 @@ export function LandingPage() {
             </div>
 
             <h1 className="font-serif text-[2.5rem] leading-[1.05] sm:text-5xl lg:text-[3.75rem] font-semibold text-ghibli-canopy tracking-tight">
-              Know what to study<br className="hidden sm:block" /> before your exam.
+              Find your gaps.<br className="hidden sm:block" /> Walk into the exam ready.
             </h1>
 
             <p className="text-lg md:text-xl text-ghibli-bark max-w-xl mx-auto lg:mx-0 leading-relaxed font-serif">
-              Upload your notes, slides and readings. PassAI creates quizzes from your actual course
-              materials, finds the concepts holding you back, and shows how close you are to your
-              target grade.
+              PassAI analyzes your own course material, tests your real understanding, and shows
+              which topics need attention before exam day.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-2">

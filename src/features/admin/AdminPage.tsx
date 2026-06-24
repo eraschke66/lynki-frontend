@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { RefreshCw, Users, FileText, ClipboardCheck, ArrowLeft } from "lucide-react";
+import { StudentOutcomes } from "./components/StudentOutcomes";
 
 const ADMIN_EMAILS = ["erik@shryn.ai", "erikraschke@gmail.com", "erikraschke@me.com"];
 
@@ -289,6 +290,11 @@ export function AdminPage() {
               </div>
             </Card>
           </section>
+
+          {/* Per-student outcome view: cohort + drill-down (pass probability,
+              quiz history over time, topic mastery, activity). Reads existing
+              data through admin-gated SECURITY DEFINER RPCs. */}
+          <StudentOutcomes />
 
         </div>
       </div>

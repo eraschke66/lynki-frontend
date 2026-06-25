@@ -30,7 +30,7 @@ import { useFileUpload } from "@/features/documents/hooks/useFileUpload";
 import { fetchUserCourses, createCourse } from "@/features/courses";
 import type { Course } from "@/features/courses";
 import { fetchProfile } from "@/features/settings";
-import { getCurriculum } from "@/lib/curricula";
+import { CURRICULA, getCurriculum } from "@/lib/curricula";
 import { toast } from "sonner";
 
 interface UploadModalProps {
@@ -64,7 +64,7 @@ export function UploadModal({
   const [newCourseTargetGrade, setNewCourseTargetGrade] = useState<
     number | null
   >(null);
-  const [userCurriculum, setUserCurriculum] = useState("percentage");
+  const [newCourseCurriculum, setNewCourseCurriculum] = useState("percentage");
   const [loadingCourses, setLoadingCourses] = useState(false);
   const [step, setStep] = useState<"create_course" | "upload_files">("upload_files");
 
@@ -82,7 +82,7 @@ export function UploadModal({
         ]);
         if (cancelled) return;
         setCourses(data);
-        setUserCurriculum(profile.curriculum);
+        setNewCourseCurriculum(profile.curriculum);
         const curriculum = getCurriculum(profile.curriculum);
         setNewCourseTargetGrade(curriculum.defaultTarget);
         if (defaultCourseId) {
@@ -109,15 +109,23 @@ export function UploadModal({
     };
   }, [open, userId, defaultCourseId]);
 
+  const handleNewCourseCurriculumChange = (next: string) => {
+    setNewCourseCurriculum(next);
+    // Reset the target grade to the new curriculum's sensible default so the
+    // grade Select never holds a value from a different grading system.
+    setNewCourseTargetGrade(getCurriculum(next).defaultTarget);
+  };
+
   const handleCreateCourse = async () => {
     if (!newCourseName.trim()) return;
     try {
-      const curriculum = getCurriculum(userCurriculum);
+      const curriculum = getCurriculum(newCourseCurriculum);
       const course = await createCourse(
         userId,
         newCourseName.trim(),
         undefined,
         newCourseTargetGrade ?? curriculum.defaultTarget,
+        newCourseCurriculum,
       );
       setCourses((prev) => [course, ...prev]);
       setSelectedCourseId(course.id);
@@ -198,6 +206,34 @@ export function UploadModal({
 
               <div className="space-y-2">
                 <Label className="font-sans text-sm font-semibold text-ghibli-canopy">
+                  Curriculum
+                </Label>
+                <Select
+                  value={newCourseCurriculum}
+                  onValueChange={handleNewCourseCurriculumChange}
+                >
+                  <SelectTrigger className="w-full border-ghibli-moss/35 focus:ring-ghibli-forest">
+                    <SelectValue placeholder="Select curriculum" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRICULA.map((c) => (
+                      // A-Level has no per-course DB slot; offer it only as the
+                      // account default (Settings), not per course.
+                      <SelectItem
+                        key={c.id}
+                        value={c.id}
+                        disabled={c.id === "a-level"}
+                      >
+                        {c.label}
+                        {c.id === "a-level" ? " — set at account level" : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="font-sans text-sm font-semibold text-ghibli-canopy">
                   Target passing grade
                 </Label>
                 <Select
@@ -210,7 +246,7 @@ export function UploadModal({
                     <SelectValue placeholder="Select target grade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {getCurriculum(userCurriculum).gradeOptions.map(
+                    {getCurriculum(newCourseCurriculum).gradeOptions.map(
                       (opt) => (
                         <SelectItem
                           key={opt.value}
@@ -272,6 +308,35 @@ export function UploadModal({
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-xs text-ghibli-bark">
+                          Curriculum
+                        </Label>
+                        <Select
+                          value={newCourseCurriculum}
+                          onValueChange={handleNewCourseCurriculumChange}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select curriculum" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CURRICULA.map((c) => (
+                              // A-Level has no per-course DB slot; offer it only
+                              // as the account default (Settings), not per course.
+                              <SelectItem
+                                key={c.id}
+                                value={c.id}
+                                disabled={c.id === "a-level"}
+                              >
+                                {c.label}
+                                {c.id === "a-level"
+                                  ? " — set at account level"
+                                  : ""}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs text-ghibli-bark">
                           Target passing grade
                         </Label>
                         <Select
@@ -284,7 +349,7 @@ export function UploadModal({
                             <SelectValue placeholder="Select target grade" />
                           </SelectTrigger>
                           <SelectContent>
-                            {getCurriculum(userCurriculum).gradeOptions.map(
+                            {getCurriculum(newCourseCurriculum).gradeOptions.map(
                               (opt) => (
                                 <SelectItem
                                   key={opt.value}

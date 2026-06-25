@@ -21,6 +21,7 @@ export interface Database {
           title: string;
           description: string | null;
           target_grade: number;
+          curriculum_type: string | null;
           test_date: string | null;
           created_at: string;
           updated_at: string | null;
@@ -31,6 +32,7 @@ export interface Database {
           title: string;
           description?: string | null;
           target_grade?: number;
+          curriculum_type?: string | null;
           test_date?: string | null;
           created_at?: string;
           updated_at?: string | null;
@@ -41,6 +43,7 @@ export interface Database {
           title?: string;
           description?: string | null;
           target_grade?: number;
+          curriculum_type?: string | null;
           test_date?: string | null;
           created_at?: string;
           updated_at?: string | null;

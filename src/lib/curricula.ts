@@ -116,6 +116,57 @@ const curriculumMap = new Map(CURRICULA.map((c) => [c.id, c]));
 
 export const DEFAULT_CURRICULUM_ID = "percentage";
 
+// ---------------------------------------------------------------------------
+// DB <-> frontend curriculum id mapping
+// ---------------------------------------------------------------------------
+//
+// The courses.curriculum_type column carries a CHECK constraint that allows
+// only NULL | 'IB' | 'AP' | 'GCSE'. The frontend uses lowercase ids, and
+// treats "percentage" — plus any curriculum that has no DB slot (e.g.
+// "a-level") — as "no per-course override; inherit the account default",
+// which is represented as NULL in the column.
+//
+// Write and read MUST go through these two functions so they can never drift.
+// NOTE: "a-level" cannot currently be persisted as a per-course override
+// because the DB constraint has no slot for it; it round-trips to NULL
+// (inherit). Widening the constraint is a separate DB-owned change.
+
+const CURRICULUM_TO_DB: Record<string, string> = {
+  ib: "IB",
+  ap: "AP",
+  gcse: "GCSE",
+};
+
+const CURRICULUM_FROM_DB: Record<string, string> = {
+  IB: "ib",
+  AP: "ap",
+  GCSE: "gcse",
+};
+
+/**
+ * Map a frontend curriculum id to the value stored in courses.curriculum_type.
+ * "percentage" and any id without a DB slot map to NULL ("inherit account
+ * default"). Pass `undefined` only when you intend to SKIP the column entirely
+ * (the caller, not this fn, decides skip-vs-write).
+ */
+export function toDbCurriculum(
+  curriculumId: string | null | undefined,
+): string | null {
+  if (!curriculumId) return null;
+  return CURRICULUM_TO_DB[curriculumId] ?? null;
+}
+
+/**
+ * Map a stored courses.curriculum_type value back to a frontend curriculum id.
+ * NULL (no override) returns null so callers fall back to the account default.
+ */
+export function fromDbCurriculum(
+  dbValue: string | null | undefined,
+): string | null {
+  if (!dbValue) return null;
+  return CURRICULUM_FROM_DB[dbValue] ?? null;
+}
+
 /**
  * Get a curriculum by ID. Falls back to Percentage if not found.
  */

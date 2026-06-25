@@ -114,10 +114,11 @@ export function SettingsPage() {
                 <CardContent className="pt-8 pb-8 px-8 space-y-6">
                   <div className="space-y-3">
                     <Label htmlFor="curriculum" className="text-base font-medium text-ghibli-canopy">
-                      Curriculum
+                      Default curriculum for new courses
                     </Label>
                     <p className="text-sm text-ghibli-bark">
-                      Choose the grading system used by your school or exam board.
+                      The grading system applied to new courses by default. You can
+                      override it per course when creating or editing one.
                     </p>
                     <Select value={activeCurriculum} onValueChange={setSelectedCurriculum}>
                       <SelectTrigger

@@ -23,15 +23,18 @@ import {
   Sparkles,
   ChevronRight,
   FilePlus,
+  Pencil,
 } from "lucide-react";
 import {
   fetchPassChance,
   generateQuiz,
 } from "@/features/test/services/testService";
-import { testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
+import { updateCourse } from "@/features/courses/services/courseService";
+import { EditCourseDialog } from "@/features/dashboard/components/EditCourseDialog";
+import { courseQueryKeys, testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
 import { supabase } from "@/lib/supabase";
 import { fetchProfile } from "@/features/settings";
-import { getGradeLabel } from "@/lib/curricula";
+import { getGradeLabel, fromDbCurriculum } from "@/lib/curricula";
 import type { CourseQuiz } from "@/features/test/types";
 import { QuizDetailModal } from "@/features/test/components/QuizDetailModal";
 
@@ -43,13 +46,14 @@ export function CourseDetailPage() {
   const [generating, setGenerating] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<CourseQuiz | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
 
   const { data: course, isLoading: courseLoading } = useQuery({
-    queryKey: ["courses", "detail", courseId],
+    queryKey: courseQueryKeys.detail(courseId ?? ""),
     queryFn: async () => {
       const { data, error } = await supabase
         .from("courses")
-        .select("id, title, description, created_at, target_grade")
+        .select("id, title, description, created_at, target_grade, curriculum_type")
         .eq("id", courseId!)
         .single();
       if (error) throw error;
@@ -110,7 +114,10 @@ export function CourseDetailPage() {
     passChanceData?.avg_mastery != null
       ? Math.round(passChanceData.avg_mastery * 100)
       : null;
-  const curriculum = profileData?.curriculum ?? "percentage";
+  const curriculum =
+    fromDbCurriculum(course?.curriculum_type) ??
+    profileData?.curriculum ??
+    "percentage";
   const targetGrade = course?.target_grade ?? 1.0;
   const targetLabel = getGradeLabel(curriculum, targetGrade);
   const completedCount = quizzes.filter((q) =>
@@ -145,6 +152,20 @@ export function CourseDetailPage() {
   const handleOpenQuizModal = (quiz: CourseQuiz) => {
     setSelectedQuiz(quiz);
     setModalOpen(true);
+  };
+
+  const handleSaveCourse = async (
+    id: string,
+    title: string,
+    description: string,
+    targetGrade?: number,
+    curriculumType?: string | null,
+  ) => {
+    await updateCourse(id, { title, description, targetGrade, curriculumType });
+    queryClient.invalidateQueries({ queryKey: courseQueryKeys.detail(id) });
+    queryClient.invalidateQueries({ queryKey: courseQueryKeys.curriculum(id) });
+    queryClient.invalidateQueries({ queryKey: testQueryKeys.all });
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
   };
 
   if (generating) {
@@ -213,9 +234,18 @@ export function CourseDetailPage() {
               <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
                 Your Garden
               </span>
-              <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight mb-4">
-                {course.title}
-              </h1>
+              <div className="flex items-center gap-2 justify-center md:justify-start mb-4">
+                <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight">
+                  {course.title}
+                </h1>
+                <button
+                  onClick={() => setEditOpen(true)}
+                  aria-label="Edit course settings"
+                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full text-ghibli-canopy-medium hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
               {course.description && (
                 <p className="font-sans text-base text-ghibli-bark-strong leading-relaxed mb-4 max-w-md mx-auto md:mx-0">
                   {course.description}
@@ -231,6 +261,10 @@ export function CourseDetailPage() {
                   <ClipboardCheck className="w-4 h-4" />
                   {completedCount} {completedCount === 1 ? "quiz" : "quizzes"}{" "}
                   completed
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4" />
+                  Target: {targetLabel}
                 </span>
               </div>
               <div className="flex flex-wrap gap-3 justify-center md:justify-start">
@@ -385,6 +419,20 @@ export function CourseDetailPage() {
         onOpenChange={setModalOpen}
         onStart={handleStartQuiz}
         onResume={handleResumeQuiz}
+      />
+
+      <EditCourseDialog
+        open={editOpen}
+        onOpenChange={setEditOpen}
+        course={{
+          id: course.id,
+          title: course.title,
+          description: course.description ?? null,
+          targetGrade: course.target_grade ?? 1.0,
+          curriculumType: fromDbCurriculum(course.curriculum_type),
+        }}
+        curriculum={profileData?.curriculum ?? "percentage"}
+        onSave={handleSaveCourse}
       />
     </>
   );

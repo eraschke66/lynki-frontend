@@ -15,6 +15,8 @@ export const courseQueryKeys = {
   list: (userId: string) => [...courseQueryKeys.all, "list", userId] as const,
   detail: (courseId: string) =>
     [...courseQueryKeys.all, "detail", courseId] as const,
+  curriculum: (courseId: string) =>
+    [...courseQueryKeys.all, "curriculum", courseId] as const,
 };
 
 export const testQueryKeys = {

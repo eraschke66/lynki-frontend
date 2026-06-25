@@ -10,6 +10,9 @@ export interface Course {
   title: string;
   description: string | null;
   targetGrade: number;
+  /** Per-course grading system id (e.g. "ib", "ap"). Null falls back to the
+   *  account-level default curriculum. */
+  curriculumType: string | null;
   testDate: string | null;
   createdAt: string;
   updatedAt: string | null;

@@ -3,9 +3,10 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import LogoSvg from "@/assets/logo.svg?react";
-import { Home, FileText, Settings, Volume2, VolumeOff, Sparkles, Menu } from "lucide-react";
+import { Home, FileText, Settings, Volume2, VolumeOff, Sparkles, Menu, Shield } from "lucide-react";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
 import { useSubscription } from "@/features/subscription/hooks/useSubscription";
+import { isAdminEmail } from "@/features/admin/adminAccess";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 
@@ -15,6 +16,7 @@ export function Header() {
   const { playing, toggle: toggleMusic } = useAmbientMusic();
   const { isPremium, isLoading: subLoading } = useSubscription();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isAdmin = isAdminEmail(user?.email);
 
   const handleLogout = async () => {
     await signOut();
@@ -76,6 +78,12 @@ export function Header() {
               <Settings className="w-4 h-4" />
               Settings
             </NavLink>
+            {isAdmin && (
+              <NavLink to="/admin" className={pillClass}>
+                <Shield className="w-4 h-4" />
+                Admin
+              </NavLink>
+            )}
           </div>
         )}
 
@@ -164,6 +172,19 @@ export function Header() {
                       <Settings className="w-5 h-5" />
                       Settings
                     </NavLink>
+                    {isAdmin && (
+                      <NavLink
+                        to="/admin"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className={({ isActive }) => cn(
+                          "flex items-center gap-3 px-4 py-3 rounded-xl text-base font-sans font-medium transition-colors",
+                          isActive ? "bg-ghibli-canopy text-primary-foreground" : "text-ghibli-canopy hover:bg-ghibli-mist/60"
+                        )}
+                      >
+                        <Shield className="w-5 h-5" />
+                        Admin
+                      </NavLink>
+                    )}
                     <div className="border-t border-ghibli-moss/20 mt-6 pt-6 px-4 space-y-3">
                       {!subLoading && !isPremium && (
                         <Button

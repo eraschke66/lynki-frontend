@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { RefreshCw, Users, FileText, ClipboardCheck, ArrowLeft } from "lucide-react";
 import { StudentOutcomes } from "./components/StudentOutcomes";
-
-const ADMIN_EMAILS = ["erik@shryn.ai", "erikraschke@gmail.com", "erikraschke@me.com"];
+import { isAdminEmail } from "./adminAccess";
 
 interface UserRow {
   user_id: string;
@@ -30,7 +29,7 @@ export function AdminPage() {
   const [recentDocs, setRecentDocs] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const isAdmin = user && ADMIN_EMAILS.includes(user.email ?? "");
+  const isAdmin = isAdminEmail(user?.email);
 
   const fetchData = useCallback(async () => {
     if (!isAdmin) return;

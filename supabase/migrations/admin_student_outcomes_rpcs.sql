@@ -30,7 +30,8 @@ as $$
   select coalesce(lower(auth.jwt() ->> 'email'), '') in (
     'erik@shryn.ai',
     'erikraschke@gmail.com',
-    'erikraschke@me.com'
+    'erikraschke@me.com',
+    'kaninip254@gmail.com'
   );
 $$;
 

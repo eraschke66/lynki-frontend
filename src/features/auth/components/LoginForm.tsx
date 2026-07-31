@@ -1,6 +1,6 @@
 import { reportError } from "@/lib/sentry";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,9 +21,16 @@ type LoginFormData = z.infer<typeof loginSchema>;
  */
 export function LoginForm() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { signIn, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // AuthCallback sends users here when the code exchange fails, rather than
+  // leaving them on a spinner with no explanation.
+  const [error, setError] = useState<string | null>(
+    searchParams.get("error") === "auth_callback"
+      ? "We couldn't finish signing you in. Please try again."
+      : null,
+  );
   const [showPassword, setShowPassword] = useState(false);
 
   const {

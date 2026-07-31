@@ -65,7 +65,7 @@ export function LandingPage() {
               <Link to="/login">Log in</Link>
             </Button>
             <Button asChild className="bg-ghibli-canopy hover:bg-ghibli-forest text-white shadow-md transition-all duration-300 font-serif rounded-full px-4 md:px-5">
-              <Link to="/signup">Start Free</Link>
+              <Link to="/signup">Start Free Trial</Link>
             </Button>
           </div>
         </div>
@@ -95,8 +95,8 @@ export function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start pt-2">
               <Button asChild size="lg" className="h-14 px-8 text-base bg-ghibli-canopy hover:bg-ghibli-forest text-white shadow-md hover:shadow-lg transition-all duration-300 font-serif rounded-full">
                 <Link to="/signup">
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Your Materials Free
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Try Free for 7 Days
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="h-14 px-8 text-base border-ghibli-moss/30 text-ghibli-canopy hover:bg-white/60 font-serif rounded-full">
@@ -106,6 +106,10 @@ export function LandingPage() {
 
             <p className="text-sm text-ghibli-bark font-sans max-w-md mx-auto lg:mx-0 leading-relaxed">
               Upload one document. Take your first quiz. See what needs work.
+            </p>
+            <p className="text-sm text-ghibli-bark font-sans max-w-md mx-auto lg:mx-0 leading-relaxed">
+              The whole garden, free for 7 days. No credit card. After that it is
+              $9.99/month or $79/year.
             </p>
           </div>
 
@@ -342,19 +346,29 @@ export function LandingPage() {
               Your exam materials are already there. Find out what you actually know.
             </h2>
             <p className="text-ghibli-bark font-serif text-base md:text-lg leading-relaxed">
-              Upload your materials, take your first quiz and begin growing toward your target grade.
+              Try the whole garden free for 7 days. No credit card, nothing held back.
             </p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div className="parchment-solid rounded-[2rem] p-8 border border-ghibli-moss/10 flex flex-col hover:-translate-y-1 transition-transform duration-500">
-              <h3 className="text-xl font-bold font-serif text-ghibli-canopy mb-1">Starter</h3>
-              <p className="text-4xl font-bold font-serif text-ghibli-canopy mb-6">Free</p>
+            {/* Trial card — full access, time-limited. There is no permanent free tier. */}
+            <div className="parchment-solid rounded-[2rem] p-8 border-2 border-ghibli-gold shadow-md flex flex-col relative hover:-translate-y-1 transition-transform duration-500">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-ghibli-gold text-ghibli-canopy text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
+                Start here
+              </div>
+              <h3 className="text-xl font-bold font-serif text-ghibli-canopy mb-1">Your first 7 days</h3>
+              <div className="mb-1">
+                <span className="text-4xl font-bold font-serif text-ghibli-canopy">Free</span>
+              </div>
+              <p className="text-xs text-ghibli-bark font-sans mb-6">
+                No credit card required
+              </p>
               <ul className="space-y-3 mb-8 flex-1 font-sans">
                 {[
-                  "Unlimited courses",
-                  "Quizzes from your own materials",
-                  "Knowledge Garden topic view",
+                  "Unlimited courses from your own materials",
+                  "Adaptive quizzes and mock exams",
+                  "Full Knowledge Garden — concept-level mastery",
+                  "Smart Study Plan tailored to your exam",
                   "Pass-probability tracking",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-ghibli-bark">
@@ -363,29 +377,26 @@ export function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button asChild variant="outline" className="w-full h-12 rounded-full border-ghibli-moss/30 text-ghibli-canopy font-serif">
-                <Link to="/signup">Upload Materials Free</Link>
+              <Button asChild className="w-full h-12 rounded-full bg-ghibli-canopy hover:bg-ghibli-forest text-white font-serif">
+                <Link to="/signup">Start Your 7-Day Free Trial</Link>
               </Button>
             </div>
 
-            <div className="parchment-solid rounded-[2rem] p-8 border-2 border-ghibli-gold shadow-md flex flex-col relative hover:-translate-y-1 transition-transform duration-500">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-ghibli-gold text-ghibli-canopy text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest shadow-sm">
-                Recommended
-              </div>
-              <h3 className="text-xl font-bold font-serif text-ghibli-canopy mb-1">Pass Pro</h3>
+            <div className="parchment-solid rounded-[2rem] p-8 border border-ghibli-moss/10 flex flex-col hover:-translate-y-1 transition-transform duration-500">
+              <h3 className="text-xl font-bold font-serif text-ghibli-canopy mb-1">Pass Pro, after day 7</h3>
               <div className="mb-1">
                 <span className="text-4xl font-bold font-serif text-ghibli-canopy">$79</span>
-                <span className="text-ghibli-bark font-serif opacity-60">/year</span>
+                <span className="text-ghibli-bark font-serif">/year</span>
               </div>
               <p className="text-xs text-ghibli-bark font-sans mb-6">
                 or $9.99/month — see <Link to="/pricing" className="underline underline-offset-2 hover:text-ghibli-canopy">all plans</Link>
               </p>
               <ul className="space-y-3 mb-8 flex-1 font-sans">
                 {[
-                  "Everything in Starter",
-                  "Full Knowledge Garden — concept-level mastery",
-                  "Smart Study Plan tailored to your exam",
+                  "Everything from your trial, kept growing",
+                  "Your garden and study plan carry over",
                   "Priority AI generation",
+                  "Cancel any time before day 7 and you are not charged",
                 ].map((item) => (
                   <li key={item} className="flex items-center gap-3 text-sm text-ghibli-bark">
                     <Sparkles className="w-4 h-4 text-ghibli-gold shrink-0" />
@@ -393,8 +404,8 @@ export function LandingPage() {
                   </li>
                 ))}
               </ul>
-              <Button asChild className="w-full h-12 rounded-full bg-ghibli-canopy hover:bg-ghibli-forest text-white font-serif">
-                <Link to="/signup">Begin 7-Day Trial</Link>
+              <Button asChild variant="outline" className="w-full h-12 rounded-full border-ghibli-moss/30 text-ghibli-canopy font-serif">
+                <Link to="/pricing">See Plans</Link>
               </Button>
             </div>
           </div>
@@ -402,14 +413,19 @@ export function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
             <Button asChild size="lg" className="h-13 px-8 bg-ghibli-canopy hover:bg-ghibli-forest text-white shadow-md font-serif rounded-full">
               <Link to="/signup">
-                <Upload className="w-4 h-4 mr-2" />
-                Upload Materials Free
+                <Sparkles className="w-4 h-4 mr-2" />
+                Start Your 7-Day Free Trial
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="h-13 px-8 border-ghibli-moss/30 text-ghibli-canopy hover:bg-white/60 font-serif rounded-full">
               <Link to="/login">Log In</Link>
             </Button>
           </div>
+
+          <p className="text-center text-sm text-ghibli-bark font-sans mt-6 max-w-xl mx-auto leading-relaxed">
+            Free for 7 days, no credit card. After that, Pass Pro is $9.99/month or
+            $79/year — and you will not be charged unless you choose to continue.
+          </p>
         </div>
       </section>
 

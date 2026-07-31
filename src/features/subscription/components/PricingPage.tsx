@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Check, Sprout, BookOpenCheck, Sparkles, Zap, Calendar, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth";
@@ -12,16 +12,24 @@ import { useSubscription } from "../hooks/useSubscription";
 import { createCheckoutSession } from "../services/subscriptionService";
 import { posthog } from "@/lib/posthog";
 
-const FREE_FEATURES = [
+/**
+ * The trial is 7 days of full Pass Pro access, granted at signup with no card.
+ * There is no permanent free tier — when the trial lapses, premium features
+ * lock until the user subscribes. Keep this list identical in substance to
+ * PREMIUM_FEATURES: the whole point is that the trial holds nothing back.
+ */
+const TRIAL_FEATURES = [
   "Unlimited courses",
   "Document upload & AI processing",
   "Adaptive quizzes (BKT engine)",
   "Mock exam sessions",
   "Pass probability tracking",
+  "Knowledge Garden — visualise mastery as a living garden",
+  "Smart Study Plan — AI-tailored growth guide",
 ];
 
 const PREMIUM_FEATURES = [
-  "Everything in Free",
+  "Everything in your trial, kept growing",
   "Knowledge Garden — visualise mastery as a living garden",
   "Smart Study Plan — AI-tailored growth guide",
   "More premium features coming soon",
@@ -57,7 +65,7 @@ function FeatureList() {
 export function PricingPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
-  const { isPremium, interval, isLoading: subLoading } = useSubscription();
+  const { isPremium, status, interval, isLoading: subLoading } = useSubscription();
   const [loadingPlan, setLoadingPlan] = useState<"monthly" | "annual" | null>(null);
 
   const handleUpgrade = async (plan: "monthly" | "annual") => {
@@ -97,27 +105,35 @@ export function PricingPage() {
           {/* Heading */}
           <div className="text-center mb-12">
             <h1 className="font-serif text-3xl font-bold text-ghibli-canopy mb-3">
-              Grow further with Pass Pro
+              Try the whole garden free for 7 days
             </h1>
             <p className="text-ghibli-bark max-w-md mx-auto">
-              Unlock the full garden — visual mastery tracking and AI-guided
-              study plans, built around your exam date.
+              Every new account starts with full Pass Pro access — no credit card.
+              Keep it for $9.99/month or $79/year when the week is up.
             </p>
           </div>
 
           {/* Tier cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* ── Free tier ── */}
+            {/* ── 7-day trial ── full access, time-limited. Not a permanent free tier. */}
             <ParchmentCard className="p-7 flex flex-col">
               <div className="mb-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-ghibli-bark mb-2">
-                  Free
+                  7-day free trial
                 </p>
-                <p className="text-3xl font-bold text-ghibli-canopy">$0</p>
+                <p className="text-3xl font-bold text-ghibli-canopy">
+                  $0
+                  <span className="text-sm font-medium text-ghibli-bark ml-1">
+                    / first 7 days
+                  </span>
+                </p>
+                <p className="text-xs text-ghibli-bark mt-1">
+                  No credit card required
+                </p>
               </div>
 
               <ul className="space-y-2.5 mb-8 flex-1">
-                {FREE_FEATURES.map((f) => (
+                {TRIAL_FEATURES.map((f) => (
                   <li
                     key={f}
                     className="flex items-start gap-2 text-sm text-ghibli-canopy"
@@ -128,9 +144,22 @@ export function PricingPage() {
                 ))}
               </ul>
 
-              <Button variant="outline" disabled className="w-full">
-                Current plan
-              </Button>
+              {session ? (
+                <Button variant="outline" disabled className="w-full">
+                  {isPremium && status === "trialing"
+                    ? "Your trial is running"
+                    : "Trial started"}
+                </Button>
+              ) : (
+                <Button asChild variant="outline" className="w-full">
+                  <Link to="/signup">Start your 7-day trial</Link>
+                </Button>
+              )}
+
+              <p className="text-xs text-ghibli-bark mt-3 text-center">
+                Then $9.99/mo or $79/yr · cancel before day 7 and you are not
+                charged
+              </p>
             </ParchmentCard>
 
             {/* ── Monthly tier ── */}
@@ -183,7 +212,7 @@ export function PricingPage() {
               )}
 
               <p className="text-xs text-ghibli-bark mt-3 text-center">
-                7-day free trial · cancel anytime
+                7-day free trial, then $9.99/month · cancel anytime
               </p>
               <p className="text-xs text-ghibli-bark mt-1 text-center">
                 Secured by Stripe
@@ -244,7 +273,7 @@ export function PricingPage() {
               )}
 
               <p className="text-xs text-ghibli-bark mt-3 text-center">
-                7-day free trial · cancel anytime
+                7-day free trial, then $79/year · cancel anytime
               </p>
               <p className="text-xs text-ghibli-bark mt-1 text-center">
                 Secured by Stripe
@@ -254,8 +283,10 @@ export function PricingPage() {
 
           {/* Bottom note */}
           <p className="text-center text-xs text-ghibli-bark mt-8">
-            Both plans unlock all premium features. Upgrade or downgrade anytime
-            via your account settings.
+            Your trial is the full garden — nothing is held back for 7 days. After
+            that, both paid plans unlock the same features; upgrade, downgrade or
+            cancel anytime via your account settings. There is no permanent free
+            plan.
           </p>
         </div>
       </div>

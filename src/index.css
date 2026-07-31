@@ -42,6 +42,14 @@
   --color-ghibli-gold:     hsl(36 75% 58%);
   --color-ghibli-amber:    hsl(36 75% 58%);
   --color-ghibli-coral:    hsl(8 62% 66%);
+  /* Readable coral. ghibli-coral is a fill, not a text color — at 66% lightness
+     it lands at 2.3-3.4 on every light surface. coral-deep is the same hue and
+     saturation dropped to 41% lightness, the lightest value that still clears
+     AA body text where it is used: 4.65 on the wrong-answer row
+     (bg-ghibli-petal/15 over parchment) and 4.96 on parchment itself.
+     Purpose: keep "wrong" reading as red without dropping below 4.5.
+     Verify with `node scripts/contrast-audit.mjs` before changing it. */
+  --color-ghibli-coral-deep: hsl(8 62% 41%);
   --color-ghibli-teal:     hsl(175 35% 48%);
   --color-ghibli-mist:     hsl(130 18% 92%);
   --color-ghibli-bark:     hsl(28 32% 32%);
@@ -177,6 +185,7 @@
     --ghibli-gold: 36 75% 58%;
     --ghibli-amber: 36 75% 58%;
     --ghibli-coral: 8 62% 66%;
+    --ghibli-coral-deep: 8 62% 41%;
     --ghibli-teal: 175 35% 48%;
     --ghibli-mist: 130 18% 92%;
     --ghibli-bark: 28 32% 32%;

@@ -78,7 +78,17 @@ const SURFACES = ['parchment', 'cream', 'ivory', 'mist', 'gold', 'sunlight', 'co
 // Dark surfaces (buttons, hero tiles) — checked separately for white/light text.
 const DARK_SURFACES = ['canopy', 'forest', 'jungle', 'bark', 'moss', 'teal', 'destructive']
 // Foregrounds used for words.
-const FOREGROUNDS = ['bark', 'forest', 'canopy', 'jungle', 'moss', 'gold', 'coral', 'teal', 'white']
+const FOREGROUNDS = ['bark', 'forest', 'canopy', 'jungle', 'moss', 'gold', 'coral', 'coral-deep', 'teal', 'white']
+
+/**
+ * Tinted surfaces: `bg-ghibli-X/NN` composited over the page. These are real
+ * backgrounds text sits on, but sections 3 and 4 only see them when the tint
+ * and the text token share one className string — the wrong-answer row puts
+ * them on sibling elements, so it is checked here instead.
+ */
+const TINTED = [
+  { label: 'petal/15 (wrong-answer row)', base: 'petal', alpha: 0.15, fgs: ['coral-deep', 'bark', 'canopy'] },
+]
 
 const WHITE = [255, 255, 255]
 function resolve(name, bgRgb) {
@@ -140,8 +150,25 @@ for (const name of Object.keys(ALPHA).sort()) {
   console.log(pad(name, 24) + row.join(''))
 }
 
-// ---------- 3. shipped pairings ----------
+// ---------- 2b. tinted surfaces ----------
 const PAGE = SOLID.parchment // default page surface when no bg is co-located
+const label = (t) => (t === 'white' ? 'text-white' : `text-ghibli-${t}`)
+
+console.log('\n=== text on tinted surfaces (tint composited over parchment) ===')
+let tintedFails = 0
+for (const { label: name, base, alpha, fgs } of TINTED) {
+  const bg = over(SOLID[base], PAGE, alpha)
+  for (const fg of fgs) {
+    const f = resolve(fg, bg)
+    if (!f) continue
+    const r = ratio(f, bg)
+    const mark = r >= BODY ? 'ok  ' : 'FAIL'
+    if (r < BODY) tintedFails++
+    console.log(`  ${mark} ${fmt(r).padStart(5)}  ${label(fg)} on ${name}`)
+  }
+}
+
+// ---------- 3. shipped pairings ----------
 
 /**
  * Known-good pairings the static scan can't judge, keyed `file::text-token`.
@@ -195,7 +222,6 @@ let failures = 0
 let checked = 0
 const unpaired = new Map()
 const exempted = []
-const label = (t) => (t === 'white' ? 'text-white' : `text-ghibli-${t}`)
 
 for (const file of files) {
   const rel = file.replace(ROOT + '/', '')
@@ -266,6 +292,6 @@ console.log(`\n  ${unpairedFails} unexplained on-page text usages below ${BODY}.
 console.log(`\n=== documented exemptions (${exempted.length}) ===`)
 for (const e of exempted.sort()) console.log(e)
 
-const total = failures + unpairedFails
+const total = failures + unpairedFails + tintedFails
 console.log(`\n${total === 0 ? 'PASS' : 'FAIL'} — ${total} readable text pairing(s) below AA.`)
 process.exit(total ? 1 : 0)

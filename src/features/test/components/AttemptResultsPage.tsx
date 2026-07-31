@@ -171,7 +171,11 @@ function QuestionResultCard({
               </span>
               <span className="flex-1">{option.text}</span>
               {isSelected && (
-                <span className="shrink-0 text-xs font-medium text-ghibli-bark">
+                <span
+                  className={`shrink-0 text-xs font-medium ${
+                    isWrongPick ? "text-ghibli-coral-deep" : "text-ghibli-bark"
+                  }`}
+                >
                   Your answer
                 </span>
               )}
@@ -179,7 +183,11 @@ function QuestionResultCard({
                 <CheckCircle2 className="w-5 h-5 shrink-0 text-ghibli-jungle" />
               )}
               {isWrongPick && (
-                <XCircle className="w-5 h-5 shrink-0 text-ghibli-bark" />
+                /* coral-deep, not coral: the wrong-answer row is petal-tinted and
+                   plain coral only reaches 3.4 there. Colour is a reinforcement
+                   here, never the only signal — the row also carries the petal
+                   border, the petal tint and the "Your answer" label. */
+                <XCircle className="w-5 h-5 shrink-0 text-ghibli-coral-deep" />
               )}
             </div>
           );

@@ -185,7 +185,7 @@ export function StudyPlanPage() {
           {/* Back link */}
           <button
             onClick={() => navigate(`/course/${courseId}`)}
-            className="flex items-center gap-1.5 text-sm text-ghibli-canopy-medium hover:text-ghibli-jungle transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-ghibli-forest hover:text-ghibli-jungle transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Course
@@ -193,7 +193,7 @@ export function StudyPlanPage() {
 
           {/* Page header */}
           <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-ghibli-moss/8 to-transparent border border-ghibli-moss/20">
-            <p className="text-xs font-semibold text-ghibli-moss uppercase tracking-wider mb-1">
+            <p className="text-xs font-semibold text-ghibli-forest uppercase tracking-wider mb-1">
               Study Plan
             </p>
             <h1 className="text-2xl font-bold text-ghibli-canopy">{course?.title ?? "Your Course"}</h1>
@@ -267,7 +267,7 @@ export function StudyPlanPage() {
               {/* Generating spinner */}
               {(isGenerating || planLoading) && (
                 <ParchmentCard className="p-10 flex flex-col items-center gap-3 text-center">
-                  <Loader2 className="w-7 h-7 text-ghibli-moss animate-spin" />
+                  <Loader2 className="w-7 h-7 text-ghibli-forest animate-spin" />
                   <p className="text-sm text-ghibli-bark">
                     Growing your plan… this takes a few seconds.
                   </p>

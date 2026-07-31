@@ -33,13 +33,13 @@ function FeatureList() {
       {PREMIUM_FEATURES.map((f, i) => (
         <li key={f} className="flex items-start gap-2 text-sm">
           {i === 0 ? (
-            <Check className="w-4 h-4 text-ghibli-moss mt-0.5 shrink-0" />
+            <Check className="w-4 h-4 text-ghibli-forest mt-0.5 shrink-0" />
           ) : i === 1 ? (
-            <Sprout className="w-4 h-4 text-ghibli-moss mt-0.5 shrink-0" />
+            <Sprout className="w-4 h-4 text-ghibli-forest mt-0.5 shrink-0" />
           ) : i === 2 ? (
-            <BookOpenCheck className="w-4 h-4 text-ghibli-moss mt-0.5 shrink-0" />
+            <BookOpenCheck className="w-4 h-4 text-ghibli-forest mt-0.5 shrink-0" />
           ) : (
-            <Sparkles className="w-4 h-4 text-ghibli-moss mt-0.5 shrink-0" />
+            <Sparkles className="w-4 h-4 text-ghibli-forest mt-0.5 shrink-0" />
           )}
           <span
             className={
@@ -122,7 +122,7 @@ export function PricingPage() {
                     key={f}
                     className="flex items-start gap-2 text-sm text-ghibli-canopy"
                   >
-                    <Check className="w-4 h-4 text-ghibli-moss mt-0.5 shrink-0" />
+                    <Check className="w-4 h-4 text-ghibli-forest mt-0.5 shrink-0" />
                     {f}
                   </li>
                 ))}
@@ -136,8 +136,8 @@ export function PricingPage() {
             {/* ── Monthly tier ── */}
             <ParchmentCard className="p-7 flex flex-col relative overflow-hidden border-t-[3px] border-[hsl(146_42%_62%)]">
               <div className="flex items-center gap-1.5 mb-5">
-                <Clock className="w-3.5 h-3.5 text-ghibli-moss" />
-                <p className="text-xs font-semibold uppercase tracking-wider text-ghibli-moss">
+                <Clock className="w-3.5 h-3.5 text-ghibli-forest" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-ghibli-forest">
                   Monthly
                 </p>
               </div>
@@ -182,7 +182,7 @@ export function PricingPage() {
                 </Button>
               )}
 
-              <p className="text-xs text-ghibli-bark-strong mt-3 text-center">
+              <p className="text-xs text-ghibli-bark mt-3 text-center">
                 7-day free trial · cancel anytime
               </p>
               <p className="text-xs text-ghibli-bark mt-1 text-center">
@@ -198,8 +198,8 @@ export function PricingPage() {
               </div>
 
               <div className="flex items-center gap-1.5 mb-5">
-                <Calendar className="w-3.5 h-3.5 text-ghibli-moss" />
-                <p className="text-xs font-semibold uppercase tracking-wider text-ghibli-moss">
+                <Calendar className="w-3.5 h-3.5 text-ghibli-forest" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-ghibli-forest">
                   Annual · Best Value
                 </p>
               </div>
@@ -243,7 +243,7 @@ export function PricingPage() {
                 </Button>
               )}
 
-              <p className="text-xs text-ghibli-bark-strong mt-3 text-center">
+              <p className="text-xs text-ghibli-bark mt-3 text-center">
                 7-day free trial · cancel anytime
               </p>
               <p className="text-xs text-ghibli-bark mt-1 text-center">

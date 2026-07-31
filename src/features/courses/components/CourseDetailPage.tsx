@@ -221,7 +221,7 @@ export function CourseDetailPage() {
         {/* Back link */}
         <button
           onClick={() => navigate("/home")}
-          className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy-medium hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
+          className="flex items-center gap-1.5 text-sm font-sans text-ghibli-forest hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Dashboard
@@ -231,7 +231,7 @@ export function CourseDetailPage() {
         <ParchmentCard className="p-5 md:p-12 mb-6 md:mb-10 overflow-hidden" glow>
           <div className="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
             <div className="text-center md:text-left order-2 md:order-1">
-              <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
+              <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-forest mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
                 Your Garden
               </span>
               <div className="flex items-center gap-2 justify-center md:justify-start mb-4">
@@ -241,17 +241,17 @@ export function CourseDetailPage() {
                 <button
                   onClick={() => setEditOpen(true)}
                   aria-label="Edit course settings"
-                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full text-ghibli-canopy-medium hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
+                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full text-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
                 >
                   <Pencil className="w-4 h-4" />
                 </button>
               </div>
               {course.description && (
-                <p className="font-sans text-base text-ghibli-bark-strong leading-relaxed mb-4 max-w-md mx-auto md:mx-0">
+                <p className="font-sans text-base text-ghibli-bark leading-relaxed mb-4 max-w-md mx-auto md:mx-0">
                   {course.description}
                 </p>
               )}
-              <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark-medium mb-4 md:mb-6 justify-center md:justify-start">
+              <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark mb-4 md:mb-6 justify-center md:justify-start">
                 <span className="flex items-center gap-1.5">
                   <FileText className="w-4 h-4" />
                   {docCount ?? 0}{" "}
@@ -317,7 +317,7 @@ export function CourseDetailPage() {
                     glow
                     showPercent
                   />
-                  <p className="font-sans text-xs text-ghibli-bark-strong italic">
+                  <p className="font-sans text-xs text-ghibli-bark italic">
                     growing toward {targetLabel}
                   </p>
                 </>
@@ -328,7 +328,7 @@ export function CourseDetailPage() {
                     size="xl"
                     showPercent={false}
                   />
-                  <p className="font-sans text-xs text-ghibli-bark-medium italic max-w-56 text-center leading-relaxed">
+                  <p className="font-sans text-xs text-ghibli-bark italic max-w-56 text-center leading-relaxed">
                     Generate a quiz to see your garden
                   </p>
                 </>
@@ -350,7 +350,7 @@ export function CourseDetailPage() {
               <p className="font-serif text-lg font-semibold text-ghibli-canopy">
                 Your garden soil is ready
               </p>
-              <p className="font-sans text-sm text-ghibli-bark-strong mt-0.5">
+              <p className="font-sans text-sm text-ghibli-bark mt-0.5">
                 Your material has been processed. Generate your first quiz to
                 start tracking mastery.
               </p>
@@ -483,7 +483,7 @@ function QuizCard({
             className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 transition-colors ${
               hasCompleted
                 ? "bg-ghibli-moss/12 text-ghibli-jungle group-hover:bg-ghibli-moss/20"
-                : "bg-ghibli-moss/8 text-ghibli-moss group-hover:bg-ghibli-moss/12"
+                : "bg-ghibli-moss/8 text-ghibli-forest group-hover:bg-ghibli-moss/12"
             }`}
           >
             {hasCompleted ? (
@@ -515,7 +515,7 @@ function QuizCard({
                 {bestScore}%
               </span>
             )}
-            <ChevronRight className="w-4 h-4 text-ghibli-canopy-medium transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ghibli-canopy" />
+            <ChevronRight className="w-4 h-4 text-ghibli-forest transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ghibli-canopy" />
           </div>
         </div>
       </CardContent>

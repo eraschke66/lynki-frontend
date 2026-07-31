@@ -81,7 +81,7 @@ export function AttemptResultsPage() {
           {/* Back */}
           <button
             onClick={() => navigate(`/course/${data.course_id}`)}
-            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-ghibli-canopy-strong hover:text-ghibli-canopy transition-colors"
+            className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-ghibli-canopy hover:text-ghibli-canopy transition-colors"
             aria-label="Back to course"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -98,7 +98,7 @@ export function AttemptResultsPage() {
             )}
             <p className="mt-2 font-serif text-3xl font-bold text-ghibli-canopy tabular-nums">
               {data.correct_count} / {data.total_questions}
-              <span className="mx-2 text-ghibli-bark-weak">·</span>
+              <span className="mx-2 text-ghibli-bark">·</span>
               {scorePercent}%
             </p>
             <p className={`text-sm font-semibold ${status.color}`}>
@@ -134,7 +134,7 @@ function QuestionResultCard({
     <ParchmentCard className="p-6" hover={false}>
       <div className="flex items-start justify-between gap-3 mb-4">
         <h2 className="font-serif text-base md:text-lg font-semibold text-ghibli-canopy leading-relaxed">
-          <span className="text-ghibli-bark-medium mr-2">{index + 1}.</span>
+          <span className="text-ghibli-bark mr-2">{index + 1}.</span>
           {question.question_text}
         </h2>
         {notAnswered && (
@@ -171,7 +171,11 @@ function QuestionResultCard({
               </span>
               <span className="flex-1">{option.text}</span>
               {isSelected && (
-                <span className="shrink-0 text-xs font-medium text-ghibli-bark-medium">
+                <span
+                  className={`shrink-0 text-xs font-medium ${
+                    isWrongPick ? "text-ghibli-coral-deep" : "text-ghibli-bark"
+                  }`}
+                >
                   Your answer
                 </span>
               )}
@@ -179,7 +183,11 @@ function QuestionResultCard({
                 <CheckCircle2 className="w-5 h-5 shrink-0 text-ghibli-jungle" />
               )}
               {isWrongPick && (
-                <XCircle className="w-5 h-5 shrink-0 text-ghibli-petal" />
+                /* coral-deep, not coral: the wrong-answer row is petal-tinted and
+                   plain coral only reaches 3.4 there. Colour is a reinforcement
+                   here, never the only signal — the row also carries the petal
+                   border, the petal tint and the "Your answer" label. */
+                <XCircle className="w-5 h-5 shrink-0 text-ghibli-coral-deep" />
               )}
             </div>
           );

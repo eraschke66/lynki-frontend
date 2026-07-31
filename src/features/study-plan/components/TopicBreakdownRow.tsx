@@ -66,9 +66,9 @@ export function TopicBreakdownRow({
             Study
           </Button>
           {expanded ? (
-            <ChevronUp className="w-4 h-4 text-ghibli-canopy-medium" />
+            <ChevronUp className="w-4 h-4 text-ghibli-forest" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-ghibli-canopy-medium" />
+            <ChevronDown className="w-4 h-4 text-ghibli-forest" />
           )}
         </div>
       </div>

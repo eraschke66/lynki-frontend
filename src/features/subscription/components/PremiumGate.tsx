@@ -49,7 +49,7 @@ function UpgradeWall({
           {/* Lock icon */}
           <div className="flex justify-center mb-5">
             <div className="w-14 h-14 rounded-full flex items-center justify-center bg-ghibli-moss/12">
-              <Lock className="w-6 h-6 text-ghibli-moss" />
+              <Lock className="w-6 h-6 text-ghibli-forest" />
             </div>
           </div>
 
@@ -66,7 +66,7 @@ function UpgradeWall({
             {PREMIUM_FEATURES.map(({ icon: Icon, title, description }) => (
               <div key={title} className="flex items-start gap-3">
                 <div className="mt-0.5 w-7 h-7 rounded-md flex items-center justify-center shrink-0 bg-ghibli-moss/10">
-                  <Icon className="w-4 h-4 text-ghibli-moss" />
+                  <Icon className="w-4 h-4 text-ghibli-forest" />
                 </div>
                 <div>
                   <p className="text-sm font-medium text-ghibli-canopy">{title}</p>

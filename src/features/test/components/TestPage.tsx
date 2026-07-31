@@ -432,7 +432,7 @@ export function TestPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy-medium hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-forest hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
@@ -456,7 +456,7 @@ export function TestPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy-medium hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-forest hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
@@ -500,7 +500,7 @@ export function TestPage() {
         <GhibliBackground />
         <button
           onClick={handleExit}
-          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-canopy-medium hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-forest hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
           aria-label="Exit quiz"
         >
           <X className="w-6 h-6" />
@@ -547,7 +547,7 @@ export function TestPage() {
                         ? "text-ghibli-canopy"
                         : diff < 0
                           ? "text-amber-700"
-                          : "text-ghibli-bark-weak";
+                          : "text-ghibli-bark";
                     const deltaLabel =
                       diff > 0
                         ? `+${diff} points`
@@ -576,7 +576,7 @@ export function TestPage() {
                     );
                   })()
                 ) : (
-                  <p className="text-sm font-sans text-ghibli-canopy-strong mt-2">
+                  <p className="text-sm font-sans text-ghibli-canopy mt-2">
                     Pass probability:{" "}
                     <span className="tabular-nums">{passPercent}%</span>
                   </p>

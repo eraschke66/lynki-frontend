@@ -42,6 +42,14 @@
   --color-ghibli-gold:     hsl(36 75% 58%);
   --color-ghibli-amber:    hsl(36 75% 58%);
   --color-ghibli-coral:    hsl(8 62% 66%);
+  /* Readable coral. ghibli-coral is a fill, not a text color — at 66% lightness
+     it lands at 2.3-3.4 on every light surface. coral-deep is the same hue and
+     saturation dropped to 41% lightness, the lightest value that still clears
+     AA body text where it is used: 4.65 on the wrong-answer row
+     (bg-ghibli-petal/15 over parchment) and 4.96 on parchment itself.
+     Purpose: keep "wrong" reading as red without dropping below 4.5.
+     Verify with `node scripts/contrast-audit.mjs` before changing it. */
+  --color-ghibli-coral-deep: hsl(8 62% 41%);
   --color-ghibli-teal:     hsl(175 35% 48%);
   --color-ghibli-mist:     hsl(130 18% 92%);
   --color-ghibli-bark:     hsl(28 32% 32%);
@@ -68,22 +76,29 @@
   --color-marketing-status-blooming:  hsl(137 40% 30%);  /* #2d6a3e */
   --color-marketing-status-thriving:  hsl(147 49% 24%);  /* #1f5a3a */
 
-  /* Muted text-color tokens — semantic bands per color (V9 Tier C2).
-     Replaces alpha-modifier sprawl (text-ghibli-canopy/70 etc.) with
-     fixed strong/medium/weak intensities. Two exception tokens preserve
-     the disabled-state signal on FileUploader and the near-ghost decorative
-     wavy dividers in the quiz cards. */
-  --color-ghibli-canopy-strong: hsl(var(--ghibli-canopy) / 0.80);
-  --color-ghibli-canopy-medium: hsl(var(--ghibli-canopy) / 0.70);
-  --color-ghibli-canopy-weak:   hsl(var(--ghibli-canopy) / 0.60);
-  --color-ghibli-bark-strong:   hsl(var(--ghibli-bark) / 0.80);
-  --color-ghibli-bark-medium:   hsl(var(--ghibli-bark) / 0.70);
-  --color-ghibli-bark-weak:     hsl(var(--ghibli-bark) / 0.60);
+  /* ── Text-color contract (WCAG AA) ────────────────────────────────────
+     Verified by `node scripts/contrast-audit.mjs`. Ratios below are against
+     parchment/cream/ivory/mist, the four light surfaces text lands on.
+
+       body text on light   -> text-ghibli-bark (5.8-7.1) or
+                               text-ghibli-forest (7.2-8.9)
+       headings on light    -> text-ghibli-canopy (9.7-11.9)
+       text on gold/coral/  -> text-ghibli-canopy is the ONLY dark token that
+         petal/sunlight        clears 4.5 on gold (5.72). Never text-white on
+                               these (1.5-2.8).
+       light text on dark   -> text-white on canopy/forest/jungle/bark only
+                               (7.1-12.4). White on moss is 4.40 — fails body.
+
+     ghibli-moss is NOT a text color: 3.4-4.2 on every light surface. Keep it
+     for decorative fills, borders and tints only.
+
+     The strong/medium/weak alpha bands that used to live here were removed —
+     Tailwind opacity on a mid-tone token lands at 2.0-4.4, i.e. below AA, so
+     "muted" text now uses a solid darker token instead. The two survivors are
+     genuinely non-readable: a disabled-state signal (paired with
+     pointer-events-none) and the near-ghost decorative wavy dividers. */
   --color-ghibli-bark-disabled: hsl(var(--ghibli-bark) / 0.65);
   --color-ghibli-bark-ghost:    hsl(var(--ghibli-bark) / 0.30);
-  --color-ghibli-moss-strong:   hsl(var(--ghibli-moss) / 0.80);
-  --color-ghibli-moss-medium:   hsl(var(--ghibli-moss) / 0.70);
-  --color-ghibli-moss-weak:     hsl(var(--ghibli-moss) / 0.60);
 
   /* Ghibli border-radius */
   --radius-parchment: 1.75rem;
@@ -170,6 +185,7 @@
     --ghibli-gold: 36 75% 58%;
     --ghibli-amber: 36 75% 58%;
     --ghibli-coral: 8 62% 66%;
+    --ghibli-coral-deep: 8 62% 41%;
     --ghibli-teal: 175 35% 48%;
     --ghibli-mist: 130 18% 92%;
     --ghibli-bark: 28 32% 32%;

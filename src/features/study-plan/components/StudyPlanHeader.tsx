@@ -17,7 +17,7 @@ export function StudyPlanHeader({
   return (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Sparkles className="w-4 h-4 text-ghibli-moss" />
+        <Sparkles className="w-4 h-4 text-ghibli-forest" />
         <h2 className="text-base font-semibold text-ghibli-canopy">Your Growth Guide</h2>
       </div>
       {hasPlan && !isGenerating && generatedAt && (
@@ -32,7 +32,7 @@ export function StudyPlanHeader({
           <Button
             variant="ghost"
             size="sm"
-            className="gap-1.5 text-xs text-ghibli-canopy-medium hover:text-ghibli-jungle"
+            className="gap-1.5 text-xs text-ghibli-forest hover:text-ghibli-jungle"
             onClick={onRegenerate}
           >
             <RefreshCw className="w-3.5 h-3.5" />

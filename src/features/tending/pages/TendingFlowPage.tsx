@@ -200,7 +200,7 @@ function TendingFlowInner() {
               <p className="font-serif text-ghibli-canopy mb-4">{generateError}</p>
               <button
                 type="button"
-                className="text-sm text-ghibli-moss hover:underline"
+                className="text-sm text-ghibli-forest hover:underline"
                 onClick={() => setGenerateAttempt((n) => n + 1)}
               >
                 Try again

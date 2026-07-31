@@ -95,7 +95,7 @@ export function SettingsPage() {
         <div className="max-w-2xl mx-auto px-6">
           <button
             onClick={() => navigate("/home")}
-            className="flex items-center gap-1.5 text-sm text-ghibli-canopy-medium hover:text-ghibli-jungle transition-colors mb-6"
+            className="flex items-center gap-1.5 text-sm text-ghibli-forest hover:text-ghibli-jungle transition-colors mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Dashboard
@@ -160,7 +160,7 @@ export function SettingsPage() {
                 <Card className="rounded-2xl overflow-hidden border-t-[3px] border-ghibli-moss/40">
                   <CardContent className="pt-8 pb-8 px-8 space-y-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <Sparkles className="w-4 h-4 text-ghibli-moss" />
+                      <Sparkles className="w-4 h-4 text-ghibli-forest" />
                       <p className="text-base font-medium text-ghibli-canopy">Subscription</p>
                     </div>
 
@@ -226,7 +226,7 @@ export function SettingsPage() {
               <Card className="rounded-2xl overflow-hidden border-t-[3px] border-ghibli-moss/40">
                 <CardContent className="pt-8 pb-8 px-8 space-y-4">
                   <div className="flex items-center gap-2 mb-1">
-                    <Shield className="w-4 h-4 text-ghibli-moss" />
+                    <Shield className="w-4 h-4 text-ghibli-forest" />
                     <p className="text-base font-medium text-ghibli-canopy">Privacy & Cookies</p>
                   </div>
                   <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm">

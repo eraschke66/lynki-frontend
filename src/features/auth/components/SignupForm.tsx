@@ -281,7 +281,7 @@ export function SignupForm() {
           {/* Divider */}
           <div className="flex items-center gap-3 my-1">
             <div className="flex-1 h-px bg-ghibli-moss/30" />
-            <span className="font-sans text-[10px] uppercase tracking-widest text-ghibli-bark-weak">
+            <span className="font-sans text-[10px] uppercase tracking-widest text-ghibli-bark">
               or email
             </span>
             <div className="flex-1 h-px bg-ghibli-moss/30" />
@@ -306,7 +306,7 @@ export function SignupForm() {
                 placeholder="gardener@passai.app"
                 {...register("email")}
                 disabled={loading}
-                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark-weak outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
               />
               {errors.email && (
                 <p className="font-sans text-xs text-destructive mt-1">{errors.email.message}</p>
@@ -326,7 +326,7 @@ export function SignupForm() {
                   placeholder="••••••••"
                   {...register("password")}
                   disabled={loading}
-                  className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark-weak outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                  className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
                 />
                 <button
                   type="button"
@@ -354,7 +354,7 @@ export function SignupForm() {
                   placeholder="••••••••"
                   {...register("confirmPassword")}
                   disabled={loading}
-                  className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark-weak outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
+                  className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
                 />
                 <button
                   type="button"

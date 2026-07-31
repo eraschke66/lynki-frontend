@@ -134,7 +134,7 @@ export function Dashboard() {
         <div className="relative z-10 max-w-6xl mx-auto px-6 py-16 flex items-center justify-center">
           <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm w-full">
             <AlertCircle className="w-10 h-10 text-destructive" />
-            <p className="font-sans text-sm text-ghibli-bark-strong">Failed to load dashboard</p>
+            <p className="font-sans text-sm text-ghibli-bark">Failed to load dashboard</p>
             <Button
               variant="outline"
               size="sm"
@@ -184,7 +184,7 @@ export function Dashboard() {
                       <Loader2 className="w-5 h-5 animate-spin text-ghibli-canopy" />
                       <h3 className="font-serif text-xl font-bold text-ghibli-canopy">Reading your materials...</h3>
                     </div>
-                    <p className="font-sans text-xs text-ghibli-bark-strong max-w-xs mx-auto">
+                    <p className="font-sans text-xs text-ghibli-bark max-w-xs mx-auto">
                       We're extracting concepts from {processingCourses.length === 1 ? processingCourses[0].title : `${processingCourses.length} courses`}. This usually takes 1-2 minutes.
                     </p>
                   </div>
@@ -210,7 +210,7 @@ export function Dashboard() {
                 <h3 className="font-serif text-2xl md:text-3xl font-semibold text-ghibli-canopy">
                   Your Study Garden
                 </h3>
-                <p className="font-sans text-sm text-ghibli-bark-medium italic mt-1">
+                <p className="font-sans text-sm text-ghibli-bark italic mt-1">
                   {dashboardData!.courses.length} {dashboardData!.courses.length === 1 ? "course" : "courses"} planted • last tended today
                 </p>
               </div>
@@ -232,7 +232,7 @@ export function Dashboard() {
             </div>
 
             {/* Footer */}
-            <p className="text-center text-ghibli-bark-weak text-xs font-sans italic mt-10 md:mt-16 mb-4 tracking-wide">
+            <p className="text-center text-ghibli-bark text-xs font-sans italic mt-10 md:mt-16 mb-4 tracking-wide">
               🌿 Study gently · grow steadily · breathe deeply 🌿
             </p>
           </>
@@ -297,7 +297,7 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
     <ParchmentCard className="p-5 md:p-12 mb-6 md:mb-10 overflow-hidden" glow>
       <div className="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
         <div className="text-center md:text-left order-2 md:order-1">
-          <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
+          <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-forest mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
             Your Sanctuary
           </span>
           <h2 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight mb-4">
@@ -323,13 +323,13 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
                   style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px" }}
                 />
               </div>
-              <div className="flex justify-between mt-1 text-[10px] text-ghibli-canopy-medium">
+              <div className="flex justify-between mt-1 text-[10px] text-ghibli-forest">
                 <span>Needs water</span>
                 <span className="mr-[13%]">Thriving</span>
               </div>
             </div>
           ) : (
-            <p className="font-sans text-base text-ghibli-bark-strong leading-relaxed mb-4 md:mb-6 max-w-md mx-auto md:mx-0">
+            <p className="font-sans text-base text-ghibli-bark leading-relaxed mb-4 md:mb-6 max-w-md mx-auto md:mx-0">
               Take your first quiz to see your pass probability.
             </p>
           )}
@@ -389,7 +389,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
           <div onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-ghibli-canopy-weak hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors shrink-0">
+                <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-ghibli-forest hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors shrink-0">
                   <MoreVertical className="w-4 h-4" />
                 </button>
               </DropdownMenuTrigger>
@@ -468,7 +468,7 @@ function EmptyState({ onUpload }: { onUpload: () => void }) {
       <ParchmentCard glow className="p-6 md:p-12 flex flex-col items-center gap-6">
         <div className="space-y-3">
           <h1 className="font-serif text-3xl md:text-4xl font-semibold text-ghibli-canopy">Your garden is ready.</h1>
-          <p className="text-ghibli-bark-strong font-sans leading-relaxed">
+          <p className="text-ghibli-bark font-sans leading-relaxed">
             Plant your first seed — upload your study materials and we'll show you where you stand before the exam does.
           </p>
         </div>

@@ -173,7 +173,7 @@ export function QuizDetailModal({
                           <ChevronRight className="h-3 w-3" />
                         </span>
                       ) : (
-                        <p className="text-xs font-medium text-ghibli-amber">
+                        <p className="text-xs font-medium text-ghibli-bark">
                           In Progress
                         </p>
                       )}
@@ -193,7 +193,7 @@ export function QuizDetailModal({
                           <Button
                             size="sm"
                             variant="outline"
-                            className="h-7 text-xs bg-ghibli-amber/10 text-ghibli-amber hover:bg-ghibli-amber/20 border-ghibli-amber/20"
+                            className="h-7 text-xs bg-ghibli-amber/10 text-ghibli-canopy hover:bg-ghibli-amber/20 border-ghibli-amber/20"
                             onClick={() => {
                               onOpenChange(false);
                               onResume(quiz.id, attempt.id);

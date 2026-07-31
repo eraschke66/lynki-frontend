@@ -181,7 +181,7 @@ export function UploadModal({
               <DialogTitle className="font-serif text-2xl text-ghibli-canopy flex items-center gap-2">
                 <span>🌱 Step 1: Create a Course</span>
               </DialogTitle>
-              <DialogDescription className="font-sans text-sm text-ghibli-bark-strong leading-relaxed">
+              <DialogDescription className="font-sans text-sm text-ghibli-bark leading-relaxed">
                 Before uploading study materials, let's create a course space to plant your first seed.
               </DialogDescription>
             </DialogHeader>
@@ -258,7 +258,7 @@ export function UploadModal({
                     )}
                   </SelectContent>
                 </Select>
-                <p className="text-[11px] font-sans italic text-ghibli-bark-weak">
+                <p className="text-[11px] font-sans italic text-ghibli-bark">
                   This target will be used to calculate your pass probability.
                 </p>
               </div>
@@ -280,7 +280,7 @@ export function UploadModal({
               <DialogTitle className="font-serif text-2xl text-ghibli-canopy">
                 {courses.length === 1 && selectedCourseId === courses[0].id ? "🌿 Step 2: Upload Study Materials" : "Upload Study Materials"}
               </DialogTitle>
-              <DialogDescription className="font-sans text-sm text-ghibli-bark-strong leading-relaxed">
+              <DialogDescription className="font-sans text-sm text-ghibli-bark leading-relaxed">
                 {courses.length === 1 && selectedCourseId === courses[0].id
                   ? `Your course "${courses[0].title}" is ready! Upload your materials to auto-extract concepts.`
                   : "Select a course, then upload your study materials (PDF, DOCX, PPTX, PNG, JPEG)."}
@@ -427,7 +427,7 @@ export function UploadModal({
                 <div
                   className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                     !canUpload
-                      ? "border-ghibli-moss/30 bg-ghibli-mist/30 cursor-not-allowed text-ghibli-bark-weak"
+                      ? "border-ghibli-moss/30 bg-ghibli-mist/30 cursor-not-allowed text-ghibli-bark"
                       : uploading
                         ? "border-ghibli-jungle bg-ghibli-moss/20"
                         : "border-ghibli-moss/45 hover:border-ghibli-jungle hover:bg-ghibli-ivory/60 cursor-pointer"

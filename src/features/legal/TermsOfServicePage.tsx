@@ -31,35 +31,33 @@ export function TermsOfServicePage() {
         </ul>
       </Section>
 
-      <Section title="5. Free and Paid Tiers">
-        <H3>Starter (Free)</H3>
+      <Section title="5. Trial and Paid Access">
+        <H3>7-day free trial</H3>
+        <P>Every new account begins with a 7-day free trial of Pass Pro. The trial requires no credit card and includes the full feature set — nothing is withheld during the trial period.</P>
+        <H3>Pass Pro ($9.99/month or $79/year)</H3>
         <ul className="list-disc pl-5 space-y-1 text-sm text-ghibli-bark">
           <li>Upload study materials</li>
-          <li>AI-generated quizzes</li>
+          <li>AI-generated quizzes and mock exam sessions</li>
           <li>Pass probability snapshot after each quiz</li>
           <li>Unlimited subjects</li>
-          <li>Mock exam sessions</li>
-        </ul>
-        <H3>Pass Pro ($79/year)</H3>
-        <ul className="list-disc pl-5 space-y-1 text-sm text-ghibli-bark">
-          <li>Everything in Starter</li>
           <li>Knowledge Garden (topic-by-topic progress)</li>
           <li>Smart study plans</li>
           <li>Priority AI generation</li>
           <li>Progress tracking over time</li>
         </ul>
+        <P>PassAI does not offer a permanent free tier. When your trial ends, Pass Pro features become unavailable until you subscribe. Your uploaded materials and past results are retained and become accessible again if you subscribe later.</P>
       </Section>
 
       <Section title="6. Subscriptions and Billing">
         <H3>Trial</H3>
-        <P>Pass Pro includes a 7-day free trial. You can cancel at any time during the trial without being charged.</P>
+        <P>Your account starts with a 7-day free trial of Pass Pro, granted at signup with no credit card. You are not charged during the trial, and you are never charged unless you choose to subscribe.</P>
 
         <H3>Billing</H3>
-        <P>Pass Pro is billed annually at $79 USD. Your subscription renews automatically unless you cancel before the renewal date.</P>
+        <P>Pass Pro is billed at $9.99 USD per month or $79 USD per year, depending on the plan you choose. Your subscription renews automatically unless you cancel before the renewal date.</P>
 
         <H3>Refund policy</H3>
         <P>You may request a full refund within 14 days of your first payment. After 14 days, no refunds are available. Refund requests must be sent to <a href="mailto:passai.study@gmail.com" className="text-primary hover:underline">passai.study@gmail.com</a>.</P>
-        <P>If you cancel your subscription, you retain access to Pass Pro features until the end of your current billing period. After that, your account reverts to the Starter (free) tier. Your data is not deleted.</P>
+        <P>If you cancel your subscription, you retain access to Pass Pro features until the end of your current billing period. After that, Pass Pro features become unavailable until you subscribe again. Your data is not deleted.</P>
 
         <H3>Price changes</H3>
         <P>We may change our pricing. If we increase the price of your current subscription, we will notify you at least 30 days in advance. The new price applies at your next renewal. If you do not agree, you may cancel before renewal.</P>

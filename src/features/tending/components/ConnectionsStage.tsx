@@ -86,11 +86,11 @@ export function ConnectionsStage({ pairs, type, onComplete, onSkip }: Connection
   return (
     <div className="max-w-2xl mx-auto w-full">
       <div className="text-center mb-5">
-        <p className="text-xs uppercase tracking-wider text-ghibli-moss-strong font-medium">
+        <p className="text-xs uppercase tracking-wider text-ghibli-forest font-medium">
           {matchedIds.size} of {pairs.length} connected
         </p>
         {isTouch && !allMatched && (
-          <p className="text-xs text-ghibli-moss-weak mt-1">
+          <p className="text-xs text-ghibli-forest mt-1">
             Tap a {leftHeader.toLowerCase()}, then tap its {rightHeader.toLowerCase()}.
           </p>
         )}
@@ -99,7 +99,7 @@ export function ConnectionsStage({ pairs, type, onComplete, onSkip }: Connection
       <ParchmentCard className="p-5 md:p-6" hover={false}>
         <div className="grid grid-cols-2 gap-3 md:gap-4">
           <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-wider text-ghibli-moss-medium font-medium pb-1 border-b border-ghibli-moss/15">
+            <p className="text-xs uppercase tracking-wider text-ghibli-forest font-medium pb-1 border-b border-ghibli-moss/15">
               {leftHeader}
             </p>
             {pairs.map((p) => {
@@ -124,7 +124,7 @@ export function ConnectionsStage({ pairs, type, onComplete, onSkip }: Connection
                   className={[
                     "rounded-md border p-3 text-sm font-sans transition-all select-none",
                     isMatched
-                      ? "bg-ghibli-moss/10 border-ghibli-moss/40 text-ghibli-canopy-medium line-through cursor-default"
+                      ? "bg-ghibli-moss/10 border-ghibli-moss/40 text-ghibli-forest line-through cursor-default"
                       : "bg-cream-50 border-ghibli-moss/30 text-ghibli-canopy cursor-grab active:cursor-grabbing hover:border-ghibli-moss/60",
                     isSelected ? "ring-2 ring-ghibli-canopy/60" : "",
                     isPulsing ? "bg-emerald-100/70 border-emerald-500/60" : "",
@@ -140,7 +140,7 @@ export function ConnectionsStage({ pairs, type, onComplete, onSkip }: Connection
           </div>
 
           <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-wider text-ghibli-moss-medium font-medium pb-1 border-b border-ghibli-moss/15">
+            <p className="text-xs uppercase tracking-wider text-ghibli-forest font-medium pb-1 border-b border-ghibli-moss/15">
               {rightHeader}
             </p>
             {rightOrder.map((p) => {
@@ -170,7 +170,7 @@ export function ConnectionsStage({ pairs, type, onComplete, onSkip }: Connection
                   className={[
                     "rounded-md border p-3 text-sm font-sans transition-all select-none",
                     isMatched
-                      ? "bg-ghibli-moss/10 border-ghibli-moss/40 text-ghibli-canopy-medium cursor-default"
+                      ? "bg-ghibli-moss/10 border-ghibli-moss/40 text-ghibli-forest cursor-default"
                       : "bg-cream-50 border-ghibli-moss/30 text-ghibli-canopy hover:border-ghibli-moss/60",
                     isTouch && !isMatched && selectedLeftId ? "cursor-pointer" : "",
                     isFlashing ? "bg-amber-100 border-amber-500/70" : "",
@@ -191,7 +191,7 @@ export function ConnectionsStage({ pairs, type, onComplete, onSkip }: Connection
         </div>
       )}
       {!showContinue && stuck && (
-        <p className="text-xs text-ghibli-moss-medium text-center mt-4">
+        <p className="text-xs text-ghibli-forest text-center mt-4">
           Stuck? Skip when you're ready.
         </p>
       )}

@@ -207,7 +207,7 @@ export function TopicQuizSession({
               <button
                 type="button"
                 onClick={() => refetch()}
-                className="mt-4 text-xs text-ghibli-bark-weak hover:text-ghibli-canopy hover:underline"
+                className="mt-4 text-xs text-ghibli-bark hover:text-ghibli-canopy hover:underline"
               >
                 This is taking longer than usual — try again?
               </button>

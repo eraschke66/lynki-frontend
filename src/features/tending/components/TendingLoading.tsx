@@ -90,7 +90,7 @@ export function TendingLoading({ onRetry, staticMessage }: TendingLoadingProps) 
         <button
           type="button"
           onClick={onRetry}
-          className="mt-12 text-sm text-ghibli-bark-weak hover:text-ghibli-canopy hover:underline transition-colors relative z-10"
+          className="mt-12 text-sm text-ghibli-bark hover:text-ghibli-canopy hover:underline transition-colors relative z-10"
         >
           This is taking longer than usual — try again?
         </button>

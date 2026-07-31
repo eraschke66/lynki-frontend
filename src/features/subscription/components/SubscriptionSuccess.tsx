@@ -94,7 +94,7 @@ export function SubscriptionSuccess() {
             {timedOut ? (
               <>
                 <div className="flex justify-center mb-5">
-                  <Sprout className="w-10 h-10 text-ghibli-moss" />
+                  <Sprout className="w-10 h-10 text-ghibli-forest" />
                 </div>
                 <h2 className="font-serif text-xl font-bold text-ghibli-canopy mb-3">
                   Almost there…
@@ -120,7 +120,7 @@ export function SubscriptionSuccess() {
             ) : (
               <>
                 <div className="flex justify-center mb-5">
-                  <Loader2 className="w-10 h-10 text-ghibli-moss animate-spin" />
+                  <Loader2 className="w-10 h-10 text-ghibli-forest animate-spin" />
                 </div>
                 <h2 className="font-serif text-xl font-bold text-ghibli-canopy mb-3">
                   Activating your garden…

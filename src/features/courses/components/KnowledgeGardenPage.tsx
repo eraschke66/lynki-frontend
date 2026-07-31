@@ -209,7 +209,7 @@ function TopicCard({
           {topic.concepts.length > 4 && (
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="mt-2 text-xs text-ghibli-canopy-medium hover:text-ghibli-jungle transition-colors flex items-center gap-1"
+              className="mt-2 text-xs text-ghibli-forest hover:text-ghibli-jungle transition-colors flex items-center gap-1"
             >
               {expanded
                 ? "Show less"
@@ -357,7 +357,7 @@ export function KnowledgeGardenPage() {
             {/* Back link */}
             <button
               onClick={() => navigate(`/course/${courseId}`)}
-              className="flex items-center gap-1.5 text-sm font-sans text-ghibli-canopy-medium hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
+              className="flex items-center gap-1.5 text-sm font-sans text-ghibli-forest hover:text-ghibli-forest transition-colors mb-4 md:mb-6"
             >
               <ArrowLeft className="w-4 h-4" />
               Back to Course
@@ -367,7 +367,7 @@ export function KnowledgeGardenPage() {
             <ParchmentCard glow className="p-5 md:p-12 mb-6 md:mb-10 overflow-hidden">
               <div className="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
                 <div className="text-center md:text-left order-2 md:order-1">
-                  <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-moss mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
+                  <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-forest mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
                     Knowledge Garden
                   </span>
                   <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight mb-4">
@@ -376,7 +376,7 @@ export function KnowledgeGardenPage() {
                   <p className={`font-sans text-base font-semibold mb-2 ${gardenStatus.color}`}>
                     {gardenStatus.label} · {Math.round(overallProgress)}% average mastery
                   </p>
-                  <p className="font-sans text-base text-ghibli-bark-strong leading-relaxed max-w-md mx-auto md:mx-0">
+                  <p className="font-sans text-base text-ghibli-bark leading-relaxed max-w-md mx-auto md:mx-0">
                     {gardenData?.mastered_concepts ?? 0} of {gardenData?.total_concepts ?? 0} concepts fully mastered.
                     {topics.length > 0 && (
                       <>
@@ -416,7 +416,7 @@ export function KnowledgeGardenPage() {
                   <h2 className="font-serif text-xl font-semibold text-ghibli-canopy mb-1">
                     Your garden is still taking shape
                   </h2>
-                  <p className="font-sans text-sm text-ghibli-bark-strong max-w-xs mx-auto">
+                  <p className="font-sans text-sm text-ghibli-bark max-w-xs mx-auto">
                     Your materials are being processed. Check back soon to see your topics bloom.
                   </p>
                 </div>

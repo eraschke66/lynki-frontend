@@ -190,7 +190,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
               </p>
             )}
             {courseReady && selectedCourse && (
-              <p className="text-xs text-ghibli-moss pl-8 font-medium">
+              <p className="text-xs text-ghibli-forest pl-8 font-medium">
                 Planting into: {selectedCourse.title}
               </p>
             )}
@@ -300,7 +300,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                     {upload.error ? (
                       <X className="h-4 w-4 text-destructive shrink-0" />
                     ) : upload.complete ? (
-                      <CheckCircle className="h-4 w-4 text-ghibli-moss shrink-0" />
+                      <CheckCircle className="h-4 w-4 text-ghibli-forest shrink-0" />
                     ) : (
                       <span className="text-xs text-ghibli-bark shrink-0">{upload.progress}%</span>
                     )}

@@ -32,6 +32,7 @@ import {
   generateSession,
 } from "../services/tendingApi";
 import { useTendingMachine } from "../state/tendingMachine";
+import { posthog } from "@/lib/posthog";
 import type { AllStageResults } from "../types";
 
 function TendingFlowInner() {
@@ -46,6 +47,7 @@ function TendingFlowInner() {
   const machine = useTendingMachine(courseId ?? "", topicId ?? "");
   const { state, isInitialized, init } = machine;
   const completeFiredRef = useRef(false);
+  const startedFiredRef = useRef(false);
   const preTendSnapshotRef = useRef(false);
 
   // Snapshot the topic's current overall_progress from the garden query cache
@@ -78,6 +80,13 @@ function TendingFlowInner() {
       .then((payload) => {
         if (cancelled) return;
         setGenerateError(null);
+        if (!startedFiredRef.current) {
+          startedFiredRef.current = true;
+          posthog.capture("tending_started", {
+            topic_id: topicId,
+            course_id: courseId,
+          });
+        }
         init(payload);
       })
       .catch((err: unknown) => {
@@ -129,6 +138,10 @@ function TendingFlowInner() {
       .then((delta) => {
         if (cancelled) return;
         machine.recordMastery(delta);
+        posthog.capture("tending_completed", {
+          topic_id: topicId,
+          course_id: courseId,
+        });
         // Marker for KnowledgeGardenPage: it pulses semantic edges and
         // animates the tended topic's own progress bar on return. Garden
         // treats anything <30s old as "just tended". (Commit 3.)

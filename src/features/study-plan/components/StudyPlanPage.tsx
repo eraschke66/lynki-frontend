@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Loader2, Sparkles } from "lucide-react";
@@ -39,6 +40,14 @@ export function StudyPlanPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // Fire study_plan_viewed once when the study plan opens.
+  const studyPlanViewedFiredRef = useRef(false);
+  useEffect(() => {
+    if (!courseId || studyPlanViewedFiredRef.current) return;
+    studyPlanViewedFiredRef.current = true;
+    posthog.capture("study_plan_viewed", { course_id: courseId });
+  }, [courseId]);
 
   // ── Course ─────────────────────────────────────────────────────────────────
   const { data: course, isLoading: courseLoading } = useQuery({

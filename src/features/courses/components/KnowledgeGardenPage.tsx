@@ -16,6 +16,7 @@ import { VineDecoration } from "@/components/garden/VineDecoration";
 import { fetchCourseGardenData } from "../services/courseService";
 import type { TopicMastery, ConceptMastery } from "../types";
 import { PremiumGate } from "@/features/subscription/components/PremiumGate";
+import { posthog } from "@/lib/posthog";
 
 function getConceptIcon(status: ConceptMastery["status"]): string {
   if (status === "mastered") return "🌸";
@@ -91,13 +92,11 @@ function RecommendedTopicCard({
 
 function TopicCard({
   topic,
-  courseId: _courseId,
   onStudy,
   animateProgressFrom,
 }: {
   topic: TopicMastery;
-  courseId: string;
-  onStudy: (topicId: string) => void;
+  onStudy: (topicId: string, masteryAtOpen: number) => void;
   /** If set and != topic.overall_progress, the bar paints first at this
    *  value then transitions up to topic.overall_progress over ~1.5s.
    *  Used by the post-Tending tick-up on the just-tended topic. */
@@ -152,7 +151,7 @@ function TopicCard({
           size="sm"
           variant="outline"
           className="shrink-0 gap-1.5"
-          onClick={() => onStudy(topic.topic_id)}
+          onClick={() => onStudy(topic.topic_id, topic.overall_progress)}
           disabled={topic.total_concepts === 0}
         >
           <BookOpen className="w-3.5 h-3.5" />
@@ -233,6 +232,14 @@ export function KnowledgeGardenPage() {
   const topicsContainerRef = useRef<HTMLDivElement | null>(null);
   const [searchParams] = useSearchParams();
 
+  // Fire garden_viewed once when the Knowledge Garden view opens.
+  const gardenViewedFiredRef = useRef(false);
+  useEffect(() => {
+    if (!courseId || gardenViewedFiredRef.current) return;
+    gardenViewedFiredRef.current = true;
+    posthog.capture("garden_viewed", { course_id: courseId });
+  }, [courseId]);
+
   // "Just tended" signal — either from ?just_tended= (set by the View
   // Garden button on MasteryDeltaStage) or from sessionStorage (set by
   // TendingFlowPage on completion; covers users who navigate to the
@@ -307,7 +314,12 @@ export function KnowledgeGardenPage() {
   });
 
   const handleStudyTopic = useCallback(
-    (topicId: string) => {
+    (topicId: string, masteryAtOpen: number) => {
+      posthog.capture("topic_opened", {
+        topic_id: topicId,
+        mastery_at_open: masteryAtOpen,
+        course_id: courseId,
+      });
       navigate(`/course/${courseId}/topic-quiz/${topicId}`);
     },
     [courseId, navigate],
@@ -441,7 +453,6 @@ export function KnowledgeGardenPage() {
                   <TopicCard
                     key={topic.topic_id}
                     topic={topic}
-                    courseId={courseId}
                     onStudy={handleStudyTopic}
                     animateProgressFrom={
                       topic.topic_id === justTendedTopicId &&

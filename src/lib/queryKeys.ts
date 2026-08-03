@@ -35,6 +35,8 @@ export const testQueryKeys = {
     [...testQueryKeys.all, "quizzes", courseId, userId] as const,
   attemptResults: (attemptId: string) =>
     [...testQueryKeys.all, "attempt-results", attemptId] as const,
+  generation: (courseId: string, userId: string) =>
+    [...testQueryKeys.all, "generation", courseId, userId] as const,
 };
 
 export const profileQueryKeys = {

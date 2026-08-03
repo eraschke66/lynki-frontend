@@ -28,7 +28,9 @@ import {
 import {
   fetchPassChance,
   generateQuiz,
+  fetchLatestQuizGeneration,
 } from "@/features/test/services/testService";
+import { QuizActivationCard } from "@/features/test/components/QuizActivationCard";
 import { updateCourse } from "@/features/courses/services/courseService";
 import { EditCourseDialog } from "@/features/dashboard/components/EditCourseDialog";
 import { courseQueryKeys, testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
@@ -105,6 +107,18 @@ export function CourseDetailPage() {
     enabled: !!user && !!courseId,
   });
 
+  // Latest question-bank build. Polls only while it is still working, so a
+  // student watching the screen sees it flip to ready without a manual reload.
+  const { data: generation } = useQuery({
+    queryKey: testQueryKeys.generation(courseId ?? "", user?.id ?? ""),
+    queryFn: () => fetchLatestQuizGeneration(user!.id, courseId!),
+    enabled: !!user && !!courseId,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      return status === "pending" || status === "generating" ? 4000 : false;
+    },
+  });
+
   if (!user || !courseId) {
     navigate("/home");
     return null;
@@ -124,6 +138,27 @@ export function CourseDetailPage() {
     q.quiz_attempts.some((a) => a.status === "completed"),
   ).length;
 
+  // The sitting a student generated but never opened. `quizzes` comes back
+  // newest-first, so the first one with no attempts at all is the one they
+  // were left staring at.
+  const freshQuiz = quizzes.find((q) => (q.quiz_attempts ?? []).length === 0);
+
+  // The activation moment. Ordered by urgency: something in flight beats a
+  // failure to report, which beats a quiz waiting to be started.
+  const activationState =
+    generation?.status === "pending" || generation?.status === "generating"
+      ? ("growing" as const)
+      : generation?.status === "failed"
+        ? ("failed" as const)
+        : freshQuiz
+          ? ("ready" as const)
+          : null;
+
+  // While the activation card is showing it owns the only button on screen.
+  // The hero's four equal-weight CTAs are what the student bounced off, so
+  // they drop to text links until the quiz has been started.
+  const demoteHeroCtas = activationState !== null;
+
   const handleGenerateQuiz = async () => {
     if (generating) return;
     setGenerating(true);
@@ -131,6 +166,9 @@ export function CourseDetailPage() {
       const result = await generateQuiz(user.id, courseId);
       queryClient.invalidateQueries({
         queryKey: testQueryKeys.quizzes(courseId, user.id),
+      });
+      queryClient.invalidateQueries({
+        queryKey: testQueryKeys.generation(courseId, user.id),
       });
       // Navigate to TestPage to start the quiz immediately
       navigate(`/test/${courseId}?quiz=${result.quiz_id}`);
@@ -267,46 +305,76 @@ export function CourseDetailPage() {
                   Target: {targetLabel}
                 </span>
               </div>
-              <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                <Button
-                  size="lg"
-                  onClick={handleGenerateQuiz}
-                  disabled={!docCount || docCount === 0}
-                  className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
-                >
-                  <Sparkles className="w-4 h-4" />
-                  {quizzes.length > 0 ? "Generate New Quiz" : "Begin Growing"}
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => navigate(`/course/${courseId}/garden`)}
-                  disabled={!docCount || docCount === 0}
-                  className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
-                >
-                  <Leaf className="w-4 h-4" />
-                  Knowledge Garden
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => navigate(`/course/${courseId}/study-plan`)}
-                  disabled={!docCount || docCount === 0}
-                  className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
-                >
-                  <CalendarDays className="w-4 h-4" />
-                  Study Plan
-                </Button>
-                <Button
-                  variant="outline"
-                  size="lg"
-                  onClick={() => navigate(`/documents?courseId=${courseId}`)}
-                  className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
-                >
-                  <FilePlus className="w-4 h-4" />
-                  Add materials
-                </Button>
-              </div>
+              {demoteHeroCtas ? (
+                /* Activation moment — the card below carries the only button.
+                   These stay reachable, but as links, so nothing competes. */
+                <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center md:justify-start font-sans text-sm">
+                  <button
+                    onClick={() => navigate(`/course/${courseId}/garden`)}
+                    disabled={!docCount || docCount === 0}
+                    className="inline-flex items-center gap-1.5 py-1 text-ghibli-forest hover:text-ghibli-canopy hover:underline transition-colors disabled:opacity-40 disabled:hover:no-underline"
+                  >
+                    <Leaf className="w-3.5 h-3.5" aria-hidden="true" />
+                    Knowledge Garden
+                  </button>
+                  <button
+                    onClick={() => navigate(`/course/${courseId}/study-plan`)}
+                    disabled={!docCount || docCount === 0}
+                    className="inline-flex items-center gap-1.5 py-1 text-ghibli-forest hover:text-ghibli-canopy hover:underline transition-colors disabled:opacity-40 disabled:hover:no-underline"
+                  >
+                    <CalendarDays className="w-3.5 h-3.5" aria-hidden="true" />
+                    Study Plan
+                  </button>
+                  <button
+                    onClick={() => navigate(`/documents?courseId=${courseId}`)}
+                    className="inline-flex items-center gap-1.5 py-1 text-ghibli-forest hover:text-ghibli-canopy hover:underline transition-colors"
+                  >
+                    <FilePlus className="w-3.5 h-3.5" aria-hidden="true" />
+                    Add materials
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+                  <Button
+                    size="lg"
+                    onClick={handleGenerateQuiz}
+                    disabled={!docCount || docCount === 0}
+                    className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    {quizzes.length > 0 ? "Generate New Quiz" : "Begin Growing"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => navigate(`/course/${courseId}/garden`)}
+                    disabled={!docCount || docCount === 0}
+                    className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
+                  >
+                    <Leaf className="w-4 h-4" />
+                    Knowledge Garden
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => navigate(`/course/${courseId}/study-plan`)}
+                    disabled={!docCount || docCount === 0}
+                    className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
+                  >
+                    <CalendarDays className="w-4 h-4" />
+                    Study Plan
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={() => navigate(`/documents?courseId=${courseId}`)}
+                    className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
+                  >
+                    <FilePlus className="w-4 h-4" />
+                    Add materials
+                  </Button>
+                </div>
+              )}
             </div>
             <div className="order-1 md:order-2 flex flex-col items-center gap-2">
               {passPercent !== null ? (
@@ -337,8 +405,21 @@ export function CourseDetailPage() {
           </div>
         </ParchmentCard>
 
-        {/* First-quiz banner */}
-        {docCount && docCount > 0 && quizzes.length === 0 && (
+        {/* Activation moment — quiz generated, not yet started. One action. */}
+        {activationState && (
+          <QuizActivationCard
+            state={activationState}
+            totalQuestions={freshQuiz?.total_questions}
+            onBegin={() =>
+              freshQuiz && navigate(`/test/${courseId}?quiz=${freshQuiz.id}`)
+            }
+            onRetry={handleGenerateQuiz}
+            retrying={generating}
+          />
+        )}
+
+        {/* First-quiz banner — only when nothing has been generated at all */}
+        {!activationState && docCount && docCount > 0 && quizzes.length === 0 && (
           <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6 flex flex-col sm:flex-row items-center gap-5">
             <img
               src="/plant-stage-1.png"

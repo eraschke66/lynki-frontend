@@ -81,6 +81,28 @@ export interface GeneratedQuizInfo {
   course_id: string;
 }
 
+/**
+ * Lifecycle of the AI question-bank build on `quizzes.generation_status`.
+ *
+ * "failed" is not only set by the generator giving up — a pg_cron sweep
+ * (`sweep_stale_quiz_generations(15)`, every 5 minutes) marks anything still
+ * "pending"/"generating" after 15 minutes as failed. So a student can land on
+ * a failed quiz that never reported an error, and the UI has to offer a retry
+ * rather than spin forever.
+ */
+export type QuizGenerationStatus =
+  | "pending"
+  | "generating"
+  | "completed"
+  | "failed";
+
+/** Latest question-bank build for a course. */
+export interface QuizGeneration {
+  id: string;
+  status: QuizGenerationStatus;
+  createdAt: string;
+}
+
 /** Legacy — used by test_sessions-backed history (deprecated, kept for compatibility) */
 export interface TestSession {
   id: string;

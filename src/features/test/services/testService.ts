@@ -13,6 +13,8 @@ import type {
   GeneratedQuizInfo,
   AttemptResultsData,
   AttemptQuestionResult,
+  QuizGeneration,
+  QuizGenerationStatus,
 } from "../types";
 import { supabase } from "@/lib/supabase";
 import { computePassProbability } from "@/lib/passProbability";
@@ -238,6 +240,40 @@ export async function generateQuiz(
     throw new Error(err.detail || "Failed to generate quiz");
   }
   return res.json();
+}
+
+/**
+ * Latest question-bank build for a course, so the UI can tell "still growing"
+ * from "ready" from "generation didn't finish".
+ *
+ * `quizzes` has no course_id — it hangs off `documents`, which does. Hence the
+ * inner join. Ordered newest-first because the newest build is the one the
+ * student just triggered.
+ */
+export async function fetchLatestQuizGeneration(
+  userId: string,
+  courseId: string,
+): Promise<QuizGeneration | null> {
+  // The generated Database types predate this schema — same `any` cast the
+  // rest of this file uses for course_quizzes / quiz_attempts.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from("quizzes")
+    .select("id, generation_status, created_at, documents!inner(course_id)")
+    .eq("user_id", userId)
+    .eq("documents.course_id", courseId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) return null;
+
+  return {
+    id: data.id as string,
+    status: (data.generation_status ?? "pending") as QuizGenerationStatus,
+    createdAt: data.created_at as string,
+  };
 }
 
 /**

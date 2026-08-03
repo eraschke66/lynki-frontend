@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { BrowserRouter, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/features/auth";
+// Direct path, not the "@/features/auth" barrel: the barrel re-exports every
+// auth screen, which would pull them all back into the entry chunk.
+import { AuthProvider } from "@/features/auth/hooks/useAuth";
 import { AppRoutes } from "./routes";
 import { queryClient } from "@/lib/queryClient";
 import { posthog } from "@/lib/posthog";

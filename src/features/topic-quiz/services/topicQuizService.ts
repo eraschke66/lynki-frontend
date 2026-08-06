@@ -1,4 +1,9 @@
 import { supabase } from "@/lib/supabase";
+import {
+  cacheQuizSession,
+  isOfflineError,
+  readCachedQuizSession,
+} from "@/lib/offline/quizSessionCache";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
@@ -44,14 +49,30 @@ export async function fetchTopicQuizSession(
   courseId: string,
   topicId: string,
 ): Promise<TopicQuizSession> {
-  const res = await fetch(
-    `${API_URL}/topic-quiz/session/${userId}/${courseId}/${topicId}`,
-  );
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail ?? `Failed to load topic quiz (${res.status})`);
+  try {
+    const res = await fetch(
+      `${API_URL}/topic-quiz/session/${userId}/${courseId}/${topicId}`,
+    );
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail ?? `Failed to load topic quiz (${res.status})`);
+    }
+
+    const session: TopicQuizSession = await res.json();
+    // Fire and forget — a storage failure must not fail the fetch.
+    void cacheQuizSession(userId, courseId, topicId, session);
+    return session;
+  } catch (err) {
+    // Only a lost connection falls back to the cache. A 4xx/5xx from the
+    // backend still surfaces, so a real failure isn't hidden behind stale
+    // questions.
+    if (!isOfflineError(err)) throw err;
+
+    const cached = await readCachedQuizSession(userId, courseId, topicId);
+    if (!cached) throw err;
+
+    return cached;
   }
-  return res.json();
 }
 
 export async function submitTopicQuizAnswer(

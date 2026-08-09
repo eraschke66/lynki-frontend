@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface GardenVideoLoaderProps {
   message?: string;
@@ -7,17 +7,31 @@ interface GardenVideoLoaderProps {
 /**
  * Full-screen loading overlay using the Sora garden video as background.
  * Used for long Render cold-start waits and quiz generation.
+ *
+ * PERF: the video is 4.3 MB, and this loader is the loading state on nine
+ * surfaces — including several that resolve in a few hundred milliseconds. It
+ * used to mount the <video> immediately, so every one of those screens paid a
+ * multi-megabyte download for a flash of motion nobody saw. Now a 39 KB still
+ * paints instantly and the video is only attached if the wait is actually long
+ * enough to be worth it; short waits never touch the MP4 at all.
  */
+const VIDEO_AFTER_MS = 1200;
+
 export function GardenVideoLoader({ message = "Tending the garden..." }: GardenVideoLoaderProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Autoplay blocked — video stays on first frame, still looks fine
-      });
-    }
+    const t = setTimeout(() => setShowVideo(true), VIDEO_AFTER_MS);
+    return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    if (!showVideo) return;
+    videoRef.current?.play().catch(() => {
+      // Autoplay blocked — the poster still shows, which looks fine.
+    });
+  }, [showVideo]);
 
   return (
     <div
@@ -29,23 +43,30 @@ export function GardenVideoLoader({ message = "Tending the garden..." }: GardenV
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        // The poster doubles as the backdrop until (and unless) the video loads.
+        backgroundImage: "url(/garden-loader-poster.webp)",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
       }}
     >
-      {/* Background video */}
-      <video
-        ref={videoRef}
-        src="/garden-loader.mp4"
-        loop
-        muted
-        playsInline
-        style={{
-          position: "absolute",
-          inset: 0,
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-        }}
-      />
+      {showVideo && (
+        <video
+          ref={videoRef}
+          src="/garden-loader.mp4"
+          poster="/garden-loader-poster.webp"
+          preload="none"
+          loop
+          muted
+          playsInline
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+          }}
+        />
+      )}
 
       {/* Dark wash overlay so text is readable */}
       <div

@@ -8,6 +8,7 @@ import GhibliBackground from "@/components/garden/GhibliBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -27,11 +28,11 @@ import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { Link } from "react-router-dom";
 
 const gardenLevels = [
-  { img: "/plant-stage-4.png", label: "Thriving",    range: "85%+",   color: "text-emerald-700" },
-  { img: "/plant-stage-3.png", label: "Blooming",    range: "70–84%", color: "text-yellow-600"  },
-  { img: "/plant-stage-3.png", label: "Growing",     range: "55–69%", color: "text-green-600"   },
-  { img: "/plant-stage-2.png", label: "Sprouting",   range: "40–54%", color: "text-teal-600"    },
-  { img: "/plant-stage-1.png", label: "Needs Water", range: "<40%",   color: "text-blue-500"    },
+  { img: "/plant-stage-4.webp", label: "Thriving",    range: "85%+",   color: "text-emerald-700" },
+  { img: "/plant-stage-3.webp", label: "Blooming",    range: "70–84%", color: "text-yellow-600"  },
+  { img: "/plant-stage-3.webp", label: "Growing",     range: "55–69%", color: "text-green-600"   },
+  { img: "/plant-stage-2.webp", label: "Sprouting",   range: "40–54%", color: "text-teal-600"    },
+  { img: "/plant-stage-1.webp", label: "Needs Water", range: "<40%",   color: "text-blue-500"    },
 ];
 
 export function SettingsPage() {
@@ -40,7 +41,8 @@ export function SettingsPage() {
   const queryClient = useQueryClient();
   const { isPremium, currentPeriodEnd, isLoading: subLoading } = useSubscription();
   const { balance: seedBalance, isLoading: seedLoading } = useSeedBalance();
-  const { consent, clearConsent } = useCookieConsent();
+  const { consent, analyticsEnabled, setAnalytics, clearConsent } =
+    useCookieConsent();
   const [portalLoading, setPortalLoading] = useState(false);
 
   const handleManageSubscription = async () => {
@@ -240,14 +242,38 @@ export function SettingsPage() {
                       Cookie Policy
                     </Link>
                   </div>
-                  <div className="pt-1">
-                    <p className="text-sm text-ghibli-bark mb-3">
-                      Analytics cookies are currently{" "}
-                      <strong>{consent === "all" ? "enabled" : "disabled"}</strong>.
-                    </p>
-                    <Button variant="outline" onClick={clearConsent}>
-                      Change cookie preferences
-                    </Button>
+                  <div className="pt-1 space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <Label
+                          htmlFor="analytics-cookies"
+                          className="text-sm font-medium text-ghibli-canopy cursor-pointer"
+                        >
+                          Analytics cookies
+                        </Label>
+                        <p className="text-sm text-ghibli-bark mt-0.5">
+                          {analyticsEnabled
+                            ? "On — anonymous usage data helps us improve PassAI."
+                            : "Off — only the essential cookies that keep you logged in."}
+                        </p>
+                      </div>
+                      <Switch
+                        id="analytics-cookies"
+                        checked={analyticsEnabled}
+                        onCheckedChange={setAnalytics}
+                        aria-label="Analytics cookies"
+                        className="mt-0.5 shrink-0"
+                      />
+                    </div>
+                    {consent !== null && (
+                      <button
+                        type="button"
+                        onClick={clearConsent}
+                        className="text-xs text-ghibli-forest hover:text-ghibli-canopy underline underline-offset-2 transition-colors"
+                      >
+                        Show the cookie banner again
+                      </button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

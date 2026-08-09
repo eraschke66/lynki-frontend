@@ -1,7 +1,7 @@
 import { reportError } from "@/lib/sentry";
 import { useRef, useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
-import { X, CheckCircle, AlertCircle, FileText, Plus, ChevronRight } from "lucide-react";
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { X, CheckCircle, AlertCircle, FileText, Plus, ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,7 @@ interface FileUploaderProps {
 
 export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialCourseId = searchParams.get("courseId") ?? "";
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploading, uploads, error, handleFilesSelected, resetUploads } =
@@ -102,6 +103,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
 
   const hasUploads = uploads.length > 0;
   const allDone = hasUploads && uploads.every((u) => u.complete || u.error);
+  const anySucceeded = uploads.some((u) => u.complete && !u.error);
   const selectedCourse = courses.find((c) => c.id === selectedCourseId);
   // Course chosen but the backend warm-up ping hasn't resolved yet.
   const showWarming = courseReady && !backendReady;
@@ -238,7 +240,7 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
                   </span>
                 </div>
                 <img
-                  src="/plant-stage-2.png"
+                  src="/plant-stage-2.webp"
                   alt=""
                   className="w-14 h-14 object-contain"
                   style={{ mixBlendMode: "darken", opacity: courseReady ? 0.85 : 0.3 }}
@@ -273,11 +275,6 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
               <span className="text-ghibli-jungle">
                 {uploading ? "Planting your materials…" : "Materials planted"}
               </span>
-              {!uploading && (
-                <Button variant="ghost" size="sm" onClick={resetUploads}>
-                  Upload More
-                </Button>
-              )}
             </div>
 
             <div className="space-y-3">
@@ -324,20 +321,41 @@ export function FileUploader({ userId, onUploadComplete }: FileUploaderProps) {
               ))}
             </div>
 
-            {allDone && !uploads.some((u) => u.error) && (
+            {allDone && anySucceeded && (
               <div className="flex items-start gap-3 rounded-xl p-4 bg-ghibli-moss/8 border border-ghibli-moss/30">
                 <img
-                  src="/plant-stage-1.png"
+                  src="/plant-stage-1.webp"
                   alt=""
-                  className="w-10 h-10 object-contain shrink-0 animate-pulse-soft"
+                  className="w-10 h-10 object-contain shrink-0"
                   style={{ mixBlendMode: "darken" }}
                 />
                 <div>
                   <p className="text-sm font-medium text-ghibli-jungle">Your garden is growing</p>
                   <p className="text-xs text-ghibli-bark mt-0.5">
-                    Materials are being processed — this takes 2–5 minutes. Your quiz will be ready shortly.
+                    Materials are being processed — this takes 2–5 minutes. Head to
+                    {selectedCourse ? ` ${selectedCourse.title}` : " your course"} to
+                    watch the concepts appear and start your first quiz.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Where next. Without this the page dead-ends: the only way
+                forward was the header nav or the per-file "..." menu. */}
+            {allDone && (
+              <div className="flex flex-wrap gap-2 justify-end">
+                <Button variant="outline" onClick={resetUploads}>
+                  Upload more
+                </Button>
+                {anySucceeded && selectedCourseId && (
+                  <Button
+                    onClick={() => navigate(`/course/${selectedCourseId}`)}
+                    className="gap-1.5"
+                  >
+                    Go to {selectedCourse?.title ?? "course"}
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             )}
           </div>

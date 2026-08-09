@@ -16,10 +16,10 @@
  */
 
 const PLANT_STAGES = [
-  "/plant-stage-1.png",
-  "/plant-stage-2.png",
-  "/plant-stage-3.png",
-  "/plant-stage-4.png",
+  "/plant-stage-1.webp",
+  "/plant-stage-2.webp",
+  "/plant-stage-3.webp",
+  "/plant-stage-4.webp",
 ];
 
 const PLANT_LABELS = ["Seedling", "Sprouting", "Growing", "In Full Bloom"];

@@ -162,7 +162,7 @@ export function SignupForm() {
         <WoodenFrame>
           <div className="text-center">
             <img
-              src="/plant-stage-1.png"
+              src="/plant-stage-1.webp"
               alt=""
               className="w-16 h-16 object-contain mx-auto mb-3 animate-pulse-soft"
               style={{ mixBlendMode: "darken" }}

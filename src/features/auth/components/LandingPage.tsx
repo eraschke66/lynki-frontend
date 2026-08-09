@@ -178,25 +178,25 @@ export function LandingPage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <StepCard
               number="01"
-              plant="/plant-stage-1.png"
+              plant="/plant-stage-1.webp"
               title="Upload what you are studying"
               text="Add your class notes, teacher's slides, readings or revision documents."
             />
             <StepCard
               number="02"
-              plant="/plant-stage-2.png"
+              plant="/plant-stage-2.webp"
               title="Take quizzes from your course"
               text="PassAI generates targeted questions from the materials your exam is based on."
             />
             <StepCard
               number="03"
-              plant="/plant-stage-3.png"
+              plant="/plant-stage-3.webp"
               title="Find what needs water"
               text="See which concepts are weak, which are growing and where to focus next."
             />
             <StepCard
               number="04"
-              plant="/plant-stage-4.png"
+              plant="/plant-stage-4.webp"
               title="Grow toward your target grade"
               text="Set your exam date and target grade, then follow a study plan shaped by your progress."
             />

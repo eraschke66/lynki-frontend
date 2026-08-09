@@ -50,7 +50,7 @@ export function TendingLoading({ onRetry, staticMessage }: TendingLoadingProps) 
         {/* The "Flower" - using multiple leaf/petal layers */}
         <div className="relative animate-float-leaf">
           <img
-            src="/plant-stage-2.png"
+            src="/plant-stage-2.webp"
             alt=""
             aria-hidden="true"
             className="w-32 md:w-40 relative z-10 animate-pulse-soft drop-shadow-glow"

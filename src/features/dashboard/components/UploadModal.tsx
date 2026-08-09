@@ -1,5 +1,6 @@
 import { reportError } from "@/lib/sentry";
 import { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ import {
   X,
   AlertCircle,
   Plus,
+  ArrowRight,
 } from "lucide-react";
 import { useFileUpload } from "@/features/documents/hooks/useFileUpload";
 import { fetchUserCourses, createCourse } from "@/features/courses";
@@ -49,6 +51,7 @@ export function UploadModal({
   onUploadComplete,
   defaultCourseId,
 }: UploadModalProps) {
+  const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploading, uploads, error, handleFilesSelected, resetUploads } =
     useFileUpload(() => {
@@ -170,7 +173,15 @@ export function UploadModal({
 
   const hasUploads = uploads.length > 0;
   const allComplete = hasUploads && uploads.every((u) => u.complete || u.error);
+  const anySucceeded = uploads.some((u) => u.complete && !u.error);
   const canUpload = !!selectedCourseId && !uploading;
+  const selectedCourse = courses.find((c) => c.id === selectedCourseId);
+
+  const handleGoToCourse = () => {
+    const target = selectedCourseId;
+    handleClose();
+    if (target) navigate(`/course/${target}`);
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -511,17 +522,43 @@ export function UploadModal({
               )}
 
               {allComplete && (
-                <div className="flex justify-end gap-2 pt-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      resetUploads();
-                    }}
-                    className="rounded-full"
-                  >
-                    Upload More
-                  </Button>
-                  <Button onClick={handleClose} className="rounded-full bg-ghibli-canopy hover:bg-ghibli-forest text-white">Done</Button>
+                <div className="space-y-3 pt-2">
+                  {anySucceeded && (
+                    <p className="text-xs text-ghibli-bark text-center">
+                      We're extracting concepts now — this takes 2–5 minutes.
+                      Open the course to watch them appear and start your first
+                      quiz.
+                    </p>
+                  )}
+                  {/* "Done" only closed the modal, which left the user back on
+                      the dashboard with no obvious next step. */}
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        resetUploads();
+                      }}
+                      className="rounded-full"
+                    >
+                      Upload more
+                    </Button>
+                    {anySucceeded && selectedCourseId ? (
+                      <Button
+                        onClick={handleGoToCourse}
+                        className="rounded-full gap-1.5 bg-ghibli-canopy hover:bg-ghibli-forest text-white"
+                      >
+                        Go to {selectedCourse?.title ?? "course"}
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleClose}
+                        className="rounded-full bg-ghibli-canopy hover:bg-ghibli-forest text-white"
+                      >
+                        Close
+                      </Button>
+                    )}
+                  </div>
                 </div>
               )}
 

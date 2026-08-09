@@ -84,14 +84,31 @@ export function GardenRoots({
 }: GardenRootsProps) {
   const [edges, setEdges] = useState<RenderedEdge[]>([]);
 
+  // PERF: `topics` is a fresh array on every background refetch (the garden
+  // query re-runs on a 30s stale time), so memoizing on the array identity
+  // recomputed the O(topics^2 x concepts) overlap scan — and tore down and
+  // rebuilt the ResizeObserver below — every time, for identical data. Key on
+  // the topic + concept identities instead, which only change when the garden
+  // actually changes.
+  const topicsKey = topics
+    .map((t) => `${t.topic_id}:${t.concepts.length}`)
+    .join("|");
+
   const semanticEdges = useMemo(
     () => computeSemanticEdges(topics),
-    [topics],
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- topicsKey is the stable identity of `topics`; see above.
+    [topicsKey],
   );
+
+  // Keeps the pulse decision out of the measure effect's dependency list.
+  const topicIdsKey = topics.map((t) => t.topic_id).join("|");
 
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+
+    const topicIds = topicIdsKey ? topicIdsKey.split("|") : [];
+    let frame = 0;
 
     const measure = () => {
       const containerRect = el.getBoundingClientRect();
@@ -145,8 +162,8 @@ export function GardenRoots({
         const side = idx % 2 === 0 ? sideMag : -sideMag;
         const pulse =
           !!justTendedTopicId &&
-          (topics[edge.i]?.topic_id === justTendedTopicId ||
-            topics[edge.j]?.topic_id === justTendedTopicId);
+          (topicIds[edge.i] === justTendedTopicId ||
+            topicIds[edge.j] === justTendedTopicId);
         next.push({
           d:
             `M ${a.cx} ${a.cy} ` +
@@ -161,11 +178,26 @@ export function GardenRoots({
       setEdges(next);
     };
 
+    // Every measure reads getBoundingClientRect for each card, which forces a
+    // synchronous layout. Coalescing into one animation frame means a burst of
+    // resize notifications (expanding a topic card resizes the container)
+    // costs one layout pass instead of one per notification.
+    const scheduleMeasure = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        measure();
+      });
+    };
+
     measure();
-    const ro = new ResizeObserver(measure);
+    const ro = new ResizeObserver(scheduleMeasure);
     ro.observe(el);
-    return () => ro.disconnect();
-  }, [containerRef, semanticEdges, justTendedTopicId, topics]);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      ro.disconnect();
+    };
+  }, [containerRef, semanticEdges, justTendedTopicId, topicIdsKey]);
 
   if (edges.length === 0) return null;
 

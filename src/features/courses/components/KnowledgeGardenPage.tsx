@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, RefreshCw, BookOpen } from "lucide-react";
 import { gardenQueryKeys } from "@/lib/queryKeys";
 import { getGardenStatus } from "@/lib/garden";
-import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
+import { KnowledgeGardenSkeleton } from "@/components/garden/GardenSkeletons";
 import { GardenRoots } from "@/components/garden/GardenRoots";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
@@ -89,14 +89,15 @@ function RecommendedTopicCard({
 // TopicCard
 // ---------------------------------------------------------------------------
 
+/** Concept rows shown before the user asks to see the rest. */
+const COLLAPSED_CONCEPTS = 4;
+
 function TopicCard({
   topic,
-  courseId: _courseId,
   onStudy,
   animateProgressFrom,
 }: {
   topic: TopicMastery;
-  courseId: string;
   onStudy: (topicId: string) => void;
   /** If set and != topic.overall_progress, the bar paints first at this
    *  value then transitions up to topic.overall_progress over ~1.5s.
@@ -105,6 +106,9 @@ function TopicCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const gardenStatus = getGardenStatus(topic.overall_progress);
+  const visibleConcepts = expanded
+    ? topic.concepts
+    : topic.concepts.slice(0, COLLAPSED_CONCEPTS);
 
   const shouldAnimate =
     animateProgressFrom !== undefined &&
@@ -174,11 +178,15 @@ function TopicCard({
         />
       </div>
 
-      {/* Concept rows */}
+      {/* Concept rows.
+          PERF: collapsed cards used to render every concept and hide the
+          overflow with max-height. A course with 20 topics x 40 concepts
+          mounted 800 rows to show 80. Now the collapsed view only builds the
+          rows it actually shows. */}
       {topic.concepts.length > 0 && (
         <>
-          <div className={`space-y-2 ${!expanded && topic.concepts.length > 4 ? "max-h-[140px] overflow-hidden relative" : ""}`}>
-            {topic.concepts.map((concept) => (
+          <div className="space-y-2">
+            {visibleConcepts.map((concept) => (
               <div
                 key={concept.concept_id}
                 className="flex items-center gap-2.5 py-1 px-2 rounded-lg hover:bg-ghibli-ivory/70 transition-colors"
@@ -201,12 +209,9 @@ function TopicCard({
                 )}
               </div>
             ))}
-            {!expanded && topic.concepts.length > 4 && (
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-card/80 to-transparent" />
-            )}
           </div>
 
-          {topic.concepts.length > 4 && (
+          {topic.concepts.length > COLLAPSED_CONCEPTS && (
             <button
               onClick={() => setExpanded((v) => !v)}
               className="mt-2 text-xs text-ghibli-forest hover:text-ghibli-jungle transition-colors flex items-center gap-1"
@@ -340,7 +345,7 @@ export function KnowledgeGardenPage() {
         featureDescription="Watch your knowledge bloom — a visual map of every topic and concept you've mastered."
       >
         {isLoading ? (
-          <GardenVideoLoader message="Reading the garden..." />
+          <KnowledgeGardenSkeleton />
         ) : error ? (
           <div className="relative z-10 min-h-screen flex items-center justify-center px-6">
             <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4 max-w-sm w-full">
@@ -407,7 +412,7 @@ export function KnowledgeGardenPage() {
             {topics.length === 0 ? (
               <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4">
                 <img
-                  src="/plant-stage-1.png"
+                  src="/plant-stage-1.webp"
                   alt=""
                   className="w-16 h-16 object-contain animate-pulse-soft"
                   style={{ mixBlendMode: "darken" }}
@@ -441,7 +446,6 @@ export function KnowledgeGardenPage() {
                   <TopicCard
                     key={topic.topic_id}
                     topic={topic}
-                    courseId={courseId}
                     onStudy={handleStudyTopic}
                     animateProgressFrom={
                       topic.topic_id === justTendedTopicId &&

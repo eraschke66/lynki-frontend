@@ -36,7 +36,7 @@ const gardenLevels = [
 ];
 
 export function SettingsPage() {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isPremium, currentPeriodEnd, isLoading: subLoading } = useSubscription();
@@ -46,13 +46,25 @@ export function SettingsPage() {
   const [portalLoading, setPortalLoading] = useState(false);
 
   const handleManageSubscription = async () => {
-    if (!session?.access_token) return;
+    // This used to `return` silently when the context session was missing or
+    // its token had expired, which is exactly the reported "button does
+    // nothing": no redirect, no spinner, no error. createPortalSession reads
+    // the session through supabase.auth.getSession(), which refreshes an
+    // expired token on its own, so the check here was both silent and wrong.
     setPortalLoading(true);
     try {
       const url = await createPortalSession();
       window.location.href = url;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to open billing portal");
+      const message = err instanceof Error ? err.message : "";
+      if (/not authenticated/i.test(message)) {
+        toast.error("Your session expired", {
+          description: "Please log in again to manage your subscription.",
+        });
+        navigate("/login");
+      } else {
+        toast.error(message || "Failed to open billing portal");
+      }
       setPortalLoading(false);
     }
   };

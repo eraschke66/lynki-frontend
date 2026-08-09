@@ -19,7 +19,10 @@
 -- =============================================================================
 
 -- Server-side admin check. STABLE, reads only the request JWT. Keep the
--- allowlist in sync with ADMIN_EMAILS in src/features/admin/AdminPage.tsx.
+-- allowlist in sync with ADMIN_EMAILS in src/features/admin/adminAccess.ts.
+--
+-- Narrowed to a single admin on 2026-08-09. This is the gate that matters: the
+-- frontend list only decides whether the link and the page render.
 create or replace function public.is_lynki_admin()
 returns boolean
 language sql
@@ -28,10 +31,7 @@ security definer
 set search_path = ''
 as $$
   select coalesce(lower(auth.jwt() ->> 'email'), '') in (
-    'erik@shryn.ai',
-    'erikraschke@gmail.com',
-    'erikraschke@me.com',
-    'kaninip254@gmail.com'
+    'erikraschke@gmail.com'
   );
 $$;
 

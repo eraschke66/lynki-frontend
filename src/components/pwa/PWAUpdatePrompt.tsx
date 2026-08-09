@@ -1,5 +1,6 @@
 import { useRegisterSW } from "virtual:pwa-register/react";
 import { RefreshCw } from "lucide-react";
+import { useCookieConsent } from "@/hooks/useCookieConsent";
 
 /** How often an open app re-checks for a new build. */
 const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
@@ -13,6 +14,13 @@ const UPDATE_CHECK_INTERVAL_MS = 60 * 60 * 1000;
  * mid-question.
  */
 export function PWAUpdatePrompt() {
+  // Both this and the cookie banner pin themselves to the bottom centre, and
+  // the banner sits on a higher layer — so a returning user who had not yet
+  // answered the consent question never saw the update offer at all, and their
+  // app quietly stayed on the old build. Consent is the one-time, blocking
+  // question; wait for it and then offer the refresh.
+  const { consent } = useCookieConsent();
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
@@ -34,7 +42,7 @@ export function PWAUpdatePrompt() {
     },
   });
 
-  if (!needRefresh) return null;
+  if (!needRefresh || consent === null) return null;
 
   return (
     <div

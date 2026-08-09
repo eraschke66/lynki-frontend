@@ -7,6 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 
 import { Eye, EyeOff } from "lucide-react";
 import { signInWithGoogle } from "../services/authService";
+import { humanAuthMessage } from "../authErrors";
 
 const signupSchema = z
   .object({
@@ -57,11 +58,10 @@ export function SignupForm() {
         password: data.password,
       });
       if (signUpError) {
-        if (signUpError.message.includes("already registered")) {
-          setError("This email is already registered. Please sign in instead.");
-        } else {
-          setError(signUpError.message);
-        }
+        // Every branch goes through the mapper now — the old `else` put the
+        // raw Supabase string on screen, which is how a student met
+        // "email rate limit exceeded".
+        setError(humanAuthMessage(signUpError));
         return;
       }
       if (session) {
@@ -83,7 +83,9 @@ export function SignupForm() {
       setError(null);
       const { error: resendError } = await resendVerificationEmail(registeredEmail);
       if (resendError) {
-        setError("Failed to resend verification email. Please try again.");
+        // Resend is the single most likely place to hit the send rate limit,
+        // so it needs the real reason, not a flat "failed".
+        setError(humanAuthMessage(resendError));
       } else {
         setError("Verification email resent! Please check your inbox.");
       }
@@ -226,7 +228,7 @@ export function SignupForm() {
             type="button"
             onClick={async () => {
               const { error: gError } = await signInWithGoogle();
-              if (gError) setError(gError.message);
+              if (gError) setError(humanAuthMessage(gError));
             }}
             className="w-full rounded-parchment border-2 border-ghibli-moss/45 bg-ghibli-ivory/85 py-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
           >

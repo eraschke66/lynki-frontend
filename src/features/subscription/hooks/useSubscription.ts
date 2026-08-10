@@ -4,6 +4,12 @@ import { useAuth } from "@/features/auth";
 import { supabase } from "@/lib/supabase";
 import { subscriptionQueryKeys } from "@/lib/queryKeys";
 import { posthog } from "@/lib/posthog";
+import {
+  hasFullAccess,
+  isOnTrial,
+  trialEndsAt,
+  type AccessProfile,
+} from "../access";
 
 export type SubscriptionTier = "free" | "premium";
 export type SubscriptionStatus = "active" | "canceled" | "past_due" | "trialing" | null;
@@ -15,8 +21,12 @@ export interface SubscriptionInfo {
   /** Billing cadence — null for legacy records and free users. */
   interval: SubscriptionInterval;
   currentPeriodEnd: Date | null;
-  /** True when the user has an active premium subscription. */
+  /** True when the user may use the paid features — paying OR on an unexpired trial. */
   isPremium: boolean;
+  /** True only during the free trial (isPremium is also true then). */
+  isOnTrial: boolean;
+  /** When the free trial ends, or null if it cannot be determined. */
+  trialEndsAt: Date | null;
   isLoading: boolean;
 }
 
@@ -35,11 +45,13 @@ export function useSubscription(): SubscriptionInfo {
   const { data, isLoading: queryLoading } = useQuery({
     queryKey: subscriptionQueryKeys.status(user?.id ?? ""),
     queryFn: async () => {
+      // `*` on purpose. The trial needs created_at, and it needs trial_ends_at
+      // the moment that column is added — naming columns explicitly would make
+      // this query fail with 42703 before the migration and silently miss the
+      // column after it. One self-scoped row; the over-fetch is nothing.
       const { data, error } = await supabase
         .from("user_profiles")
-        .select(
-          "subscription_tier, subscription_status, subscription_interval, current_period_end"
-        )
+        .select("*")
         .eq("user_id", user!.id)
         .maybeSingle();
 
@@ -63,20 +75,15 @@ export function useSubscription(): SubscriptionInfo {
     ? new Date(data.current_period_end)
     : null;
 
-  // A user is premium if:
-  // 1. Their tier is "premium"
-  // 2. Their status is active / trialing (past_due kept during Stripe retry window)
-  // 3. Their period hasn't expired yet (catches subscriptions Stripe marked deleted
-  //    but our webhook hasn't fully processed yet)
-  const premiumStatuses: SubscriptionStatus[] = ["active", "trialing", "past_due"];
-  const periodValid =
-    currentPeriodEnd === null || currentPeriodEnd > new Date();
-
-  const isPremium =
-    tier === "premium" &&
-    status !== null &&
-    premiumStatuses.includes(status) &&
-    periodValid;
+  // Entitlement now lives in one place — features/subscription/access.ts — so
+  // the paying check and the trial check can never drift apart. `isPremium`
+  // keeps its name (it is what every gate already reads) but its meaning is now
+  // "has full access", which includes an unexpired 7-day trial. That is what the
+  // landing page has been promising all along.
+  const profile = (data ?? null) as AccessProfile | null;
+  const isPremium = hasFullAccess(profile);
+  const onTrial = isOnTrial(profile);
+  const trialEnds = trialEndsAt(profile);
 
   useEffect(() => {
     if (!queryLoading && data) {
@@ -84,5 +91,14 @@ export function useSubscription(): SubscriptionInfo {
     }
   }, [queryLoading, data, tier, status, interval]);
 
-  return { tier, status, interval, currentPeriodEnd, isPremium, isLoading };
+  return {
+    tier,
+    status,
+    interval,
+    currentPeriodEnd,
+    isPremium,
+    isOnTrial: onTrial,
+    trialEndsAt: trialEnds,
+    isLoading,
+  };
 }

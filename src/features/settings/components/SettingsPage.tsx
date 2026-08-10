@@ -39,7 +39,13 @@ export function SettingsPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isPremium, currentPeriodEnd, isLoading: subLoading } = useSubscription();
+  const {
+    isPremium,
+    isOnTrial,
+    trialEndsAt,
+    currentPeriodEnd,
+    isLoading: subLoading,
+  } = useSubscription();
   const { balance: seedBalance, isLoading: seedLoading } = useSeedBalance();
   const { consent, analyticsEnabled, setAnalytics, clearConsent } =
     useCookieConsent();
@@ -178,7 +184,23 @@ export function SettingsPage() {
                       <p className="text-base font-medium text-ghibli-canopy">Subscription</p>
                     </div>
 
-                    {isPremium ? (
+                    {isOnTrial ? (
+                      // During the trial: state the fact once and stop. No
+                      // countdown, no "hurry", no badge that implies a debt —
+                      // the garden is an environment, not an urgency system.
+                      <>
+                        <p className="text-sm text-ghibli-bark">
+                          Your garden is open
+                          {trialEndsAt
+                            ? ` until ${trialEndsAt.toLocaleDateString(undefined, {
+                                day: "numeric",
+                                month: "long",
+                              })}`
+                            : ""}
+                          . Everything is unlocked, and there is no card on file.
+                        </p>
+                      </>
+                    ) : isPremium ? (
                       <>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-moss/12 text-ghibli-jungle">

@@ -31,6 +31,8 @@ import {
   fetchLatestQuizGeneration,
 } from "@/features/test/services/testService";
 import { QuizActivationCard } from "@/features/test/components/QuizActivationCard";
+import { GenerationWait } from "@/features/test/components/GenerationWait";
+import { isGenerationStalled } from "@/features/test/generationState";
 import { updateCourse } from "@/features/courses/services/courseService";
 import { EditCourseDialog } from "@/features/dashboard/components/EditCourseDialog";
 import { courseQueryKeys, testQueryKeys, profileQueryKeys } from "@/lib/queryKeys";
@@ -39,35 +41,6 @@ import { fetchProfile } from "@/features/settings";
 import { getGradeLabel, fromDbCurriculum } from "@/lib/curricula";
 import type { CourseQuiz } from "@/features/test/types";
 import { QuizDetailModal } from "@/features/test/components/QuizDetailModal";
-
-/**
- * How long a question-bank build may sit in pending/generating before the
- * frontend stops believing it.
- *
- * Measured, not guessed. The backend abandons a failing build at about 2m19s
- * (its validation retry is capped at 3 attempts per question), and every build
- * that has actually succeeded did so in 41-74 seconds. So anything still
- * "generating" at three minutes is past the point where the backend would have
- * either finished or given up.
- *
- * Before this, the only thing that ever set status='failed' was a pg_cron sweep
- * at 15 minutes — so a student sat watching "your questions are still growing"
- * for a quarter of an hour after the work had already died. The failure card and
- * its Retry action existed the whole time; nothing ever put them on screen.
- */
-const GENERATION_STALL_MS = 3 * 60_000;
-
-function isGenerationStalled(
-  generation: { status: string; createdAt: string } | null | undefined,
-): boolean {
-  if (!generation) return false;
-  if (generation.status !== "pending" && generation.status !== "generating") {
-    return false;
-  }
-  const started = new Date(generation.createdAt).getTime();
-  if (Number.isNaN(started)) return false;
-  return Date.now() - started > GENERATION_STALL_MS;
-}
 
 export function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -439,17 +412,29 @@ export function CourseDetailPage() {
           </div>
         </ParchmentCard>
 
-        {/* Activation moment — quiz generated, not yet started. One action. */}
-        {activationState && (
-          <QuizActivationCard
-            state={activationState}
-            totalQuestions={freshQuiz?.total_questions}
-            onBegin={() =>
-              freshQuiz && navigate(`/test/${courseId}?quiz=${freshQuiz.id}`)
-            }
-            onRetry={handleGenerateQuiz}
-            retrying={generating}
-          />
+        {/* The wait is its own place now — the sprinkler garden with one quiet
+            line — rather than a card with a spinner in the corner. Ready and
+            failed keep the activation card, which carries the single action. */}
+        {activationState === "growing" ? (
+          <div className="mb-4 md:mb-6">
+            <GenerationWait
+              generation={generation}
+              onRetry={handleGenerateQuiz}
+              retrying={generating}
+            />
+          </div>
+        ) : (
+          activationState && (
+            <QuizActivationCard
+              state={activationState}
+              totalQuestions={freshQuiz?.total_questions}
+              onBegin={() =>
+                freshQuiz && navigate(`/test/${courseId}?quiz=${freshQuiz.id}`)
+              }
+              onRetry={handleGenerateQuiz}
+              retrying={generating}
+            />
+          )
         )}
 
         {/* First-quiz banner — only when nothing has been generated at all */}

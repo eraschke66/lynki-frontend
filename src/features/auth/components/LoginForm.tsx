@@ -241,9 +241,19 @@ export function LoginForm() {
 
                   {/* Password */}
                   <div>
-                    <label htmlFor="login-password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
-                      Password
-                    </label>
+                    <div className="flex items-baseline justify-between mb-1.5">
+                      <label htmlFor="login-password" className="font-sans text-xs font-medium text-ghibli-bark block">
+                        Password
+                      </label>
+                      {/* There was no way out of a forgotten password at all —
+                          no link, no route, no page. */}
+                      <Link
+                        to="/forgot-password"
+                        className="font-sans text-xs text-ghibli-jungle hover:text-ghibli-canopy underline underline-offset-2"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
                     <div className="relative">
                       <input
                         id="login-password"

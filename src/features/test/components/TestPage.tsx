@@ -596,13 +596,28 @@ export function TestPage() {
               </p>
               <p className="text-sm font-sans text-ghibli-bark">
                 {scorePercent >= 80
-                  ? "A perfect bloom! Your garden flourishes."
+                  ? "Every seed you planted took root."
                   : scorePercent >= 60
-                    ? "Your garden is growing well. Keep tending to it!"
+                    ? "Your garden is growing well."
                     : scorePercent >= 40
                       ? "The soil is getting richer."
-                      : "Every garden needs patience. Water your knowledge and try again."}
+                      : "Every garden has days like this."}
               </p>
+              {/* The praise above reads the quiz score; the number above THAT
+                  reads pass probability, and they are different measurements.
+                  Rendered adjacent with nothing reconciling them, a perfect
+                  score sat under "A perfect bloom!" and over 56% — which reads
+                  as the product contradicting itself at the exact moment the
+                  student is deciding whether to believe the number at all.
+                  Pass probability is an estimate over every concept in the
+                  course, most of which this quiz never touched; say so. */}
+              {passPercent !== null && scorePercent - passPercent >= 20 && (
+                <p className="text-sm font-sans text-ghibli-bark italic pt-1">
+                  Your pass estimate is still early — it covers every concept in
+                  the course, and this quiz asked about {totalQuestions}. It will
+                  sharpen as you tend more of the garden.
+                </p>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">

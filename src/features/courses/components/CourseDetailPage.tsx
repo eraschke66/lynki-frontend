@@ -40,6 +40,35 @@ import { getGradeLabel, fromDbCurriculum } from "@/lib/curricula";
 import type { CourseQuiz } from "@/features/test/types";
 import { QuizDetailModal } from "@/features/test/components/QuizDetailModal";
 
+/**
+ * How long a question-bank build may sit in pending/generating before the
+ * frontend stops believing it.
+ *
+ * Measured, not guessed. The backend abandons a failing build at about 2m19s
+ * (its validation retry is capped at 3 attempts per question), and every build
+ * that has actually succeeded did so in 41-74 seconds. So anything still
+ * "generating" at three minutes is past the point where the backend would have
+ * either finished or given up.
+ *
+ * Before this, the only thing that ever set status='failed' was a pg_cron sweep
+ * at 15 minutes — so a student sat watching "your questions are still growing"
+ * for a quarter of an hour after the work had already died. The failure card and
+ * its Retry action existed the whole time; nothing ever put them on screen.
+ */
+const GENERATION_STALL_MS = 3 * 60_000;
+
+function isGenerationStalled(
+  generation: { status: string; createdAt: string } | null | undefined,
+): boolean {
+  if (!generation) return false;
+  if (generation.status !== "pending" && generation.status !== "generating") {
+    return false;
+  }
+  const started = new Date(generation.createdAt).getTime();
+  if (Number.isNaN(started)) return false;
+  return Date.now() - started > GENERATION_STALL_MS;
+}
+
 export function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
@@ -114,8 +143,12 @@ export function CourseDetailPage() {
     queryFn: () => fetchLatestQuizGeneration(user!.id, courseId!),
     enabled: !!user && !!courseId,
     refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      return status === "pending" || status === "generating" ? 4000 : false;
+      const g = query.state.data;
+      if (!g) return false;
+      const working = g.status === "pending" || g.status === "generating";
+      // Stop once we've given up on it — otherwise a row that never changes
+      // status polls every four seconds for the rest of the session.
+      return working && !isGenerationStalled(g) ? 4000 : false;
     },
   });
 
@@ -143,13 +176,14 @@ export function CourseDetailPage() {
   // were left staring at.
   const freshQuiz = quizzes.find((q) => (q.quiz_attempts ?? []).length === 0);
 
-  // The activation moment. Ordered by urgency: something in flight beats a
-  // failure to report, which beats a quiz waiting to be started.
+  // The activation moment. A failure we can see beats work we merely believe is
+  // still in flight — the old order put "growing" first, which is why a stalled
+  // build showed a spinner instead of a way out.
   const activationState =
-    generation?.status === "pending" || generation?.status === "generating"
-      ? ("growing" as const)
-      : generation?.status === "failed"
-        ? ("failed" as const)
+    generation?.status === "failed" || isGenerationStalled(generation)
+      ? ("failed" as const)
+      : generation?.status === "pending" || generation?.status === "generating"
+        ? ("growing" as const)
         : freshQuiz
           ? ("ready" as const)
           : null;

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Sprout, X } from "lucide-react";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 
@@ -12,6 +13,9 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const DISMISSED_KEY = "passai_install_dismissed_at";
+
+/** Routes where the install offer must never appear. */
+const AUTH_ROUTES = new Set(["/signup", "/login", "/auth/callback"]);
 /** Once waved off, stay quiet for a month. */
 const DISMISS_TTL_MS = 1000 * 60 * 60 * 24 * 30;
 const MOBILE_MAX_WIDTH = 768;
@@ -44,6 +48,7 @@ function alreadyInstalled(): boolean {
  */
 export function InstallPrompt() {
   const { consent } = useCookieConsent();
+  const { pathname } = useLocation();
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [hidden, setHidden] = useState(false);
   const [isMobile, setIsMobile] = useState(
@@ -100,6 +105,14 @@ export function InstallPrompt() {
     setDeferred(null);
     if (outcome === "dismissed") dismiss();
   };
+
+  // Never on the auth pages. The banner is bottom-anchored and 91px tall, so on
+  // any viewport under ~731px it covers the submit button — measured at 390px,
+  // banner y610-701 against a button at y596-640, and it sits on z-9990 while
+  // the button's highest ancestor is z-10, so it takes the tap as well as the
+  // pixels. Asking a stranger to install before they have an account is the
+  // wrong moment regardless.
+  if (AUTH_ROUTES.has(pathname)) return null;
 
   if (!isMobile || hidden || !deferred || consent === null) return null;
 

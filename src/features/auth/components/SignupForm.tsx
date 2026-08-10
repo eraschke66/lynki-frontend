@@ -47,6 +47,13 @@ export function SignupForm() {
     formState: { errors },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
+    // onTouched, not onBlur: validate once they leave a field, then correct
+    // live as they fix it. onBlur alone turns a half-typed email red mid-flow.
+    mode: "onTouched",
+    // Zod already returns every failing rule at once; react-hook-form's default
+    // ("firstError") threw all but the first away, which is why a student
+    // discovered a four-part password policy one submit at a time.
+    criteriaMode: "all",
   });
 
   const onSubmit = async (data: SignupFormData) => {
@@ -338,8 +345,26 @@ export function SignupForm() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {/* State the whole policy before they type. Discovering it one
+                  failed submit at a time was the first thing the product ever
+                  said to a new student. */}
+              {!errors.password && (
+                <p className="font-sans text-xs text-ghibli-bark mt-1">
+                  At least 8 characters, with an uppercase letter, a lowercase
+                  letter and a number.
+                </p>
+              )}
               {errors.password && (
-                <p className="font-sans text-xs text-destructive mt-1">{errors.password.message}</p>
+                <ul className="font-sans text-xs text-destructive mt-1 space-y-0.5 list-none">
+                  {(errors.password.types
+                    ? Object.values(errors.password.types).flat()
+                    : [errors.password.message]
+                  )
+                    .filter(Boolean)
+                    .map((msg) => (
+                      <li key={String(msg)}>{String(msg)}</li>
+                    ))}
+                </ul>
               )}
             </div>
 

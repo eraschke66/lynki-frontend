@@ -41,6 +41,16 @@ const SignupForm = lazy(() =>
 const AuthCallback = lazy(() =>
   import("@/features/auth/components/AuthCallback").then((m) => ({ default: m.AuthCallback })),
 );
+const ForgotPasswordForm = lazy(() =>
+  import("@/features/auth/components/ForgotPasswordForm").then((m) => ({
+    default: m.ForgotPasswordForm,
+  })),
+);
+const ResetPasswordForm = lazy(() =>
+  import("@/features/auth/components/ResetPasswordForm").then((m) => ({
+    default: m.ResetPasswordForm,
+  })),
+);
 
 // Dashboard + Knowledge Garden.
 const Dashboard = lazy(() =>
@@ -111,6 +121,8 @@ export function AppRoutes() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/forgot-password" element={<ForgotPasswordForm />} />
+        <Route path="/reset-password" element={<ResetPasswordForm />} />
         <Route
           path="/home"
           element={

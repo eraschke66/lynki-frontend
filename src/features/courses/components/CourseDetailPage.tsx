@@ -1,5 +1,5 @@
 import { reportError } from "@/lib/sentry";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
@@ -125,6 +125,18 @@ export function CourseDetailPage() {
     },
   });
 
+  // When a build reports itself finished, re-read the sittings list before
+  // anyone judges it. Without this the list can still hold the empty snapshot
+  // taken while the build was running, and a successful generation would be
+  // mistaken for one that produced nothing.
+  const generationStatus = generation?.status;
+  useEffect(() => {
+    if (generationStatus !== "completed" || !user || !courseId) return;
+    queryClient.invalidateQueries({
+      queryKey: testQueryKeys.quizzes(courseId, user.id),
+    });
+  }, [generationStatus, queryClient, courseId, user]);
+
   if (!user || !courseId) {
     navigate("/home");
     return null;
@@ -149,11 +161,46 @@ export function CourseDetailPage() {
   // were left staring at.
   const freshQuiz = quizzes.find((q) => (q.quiz_attempts ?? []).length === 0);
 
+  /**
+   * A build that says it finished but produced nothing.
+   *
+   * This is the failure that actually happens. Observed on all three audit
+   * accounts: generation_status flips to "completed" with zero sittings in
+   * course_quizzes, because the per-question retry cap abandons every question
+   * and the job then reports success. Neither the stall check nor the 15-minute
+   * pg_cron sweep can catch it — both look for work that never finished, and
+   * this work claims it did. The student was shown "generate your first quiz",
+   * i.e. a normal starting state, with no hint anything had gone wrong.
+   *
+   * Judged per build, not per course. "No sittings at all" would only ever
+   * catch a student's first attempt — someone who already has one quiz and then
+   * runs a second build that produces nothing would see no warning. So this asks
+   * the narrower question: did a sitting appear for THIS build? Anything created
+   * at or after the build started belongs to it.
+   *
+   * Note `!freshQuiz` is not the test either: freshQuiz only counts sittings
+   * with no attempts, so it goes undefined the moment someone takes their quiz,
+   * which would call a perfectly healthy course broken.
+   *
+   * Gated on the sittings query having settled, so a slow list can't flash a
+   * failure at someone whose quiz is merely still loading.
+   */
+  const completedWithNothing = (() => {
+    if (generation?.status !== "completed" || quizzesLoading) return false;
+    const startedAt = new Date(generation.createdAt).getTime();
+    if (Number.isNaN(startedAt)) return quizzes.length === 0;
+    return !quizzes.some(
+      (q) => new Date(q.created_at).getTime() >= startedAt,
+    );
+  })();
+
   // The activation moment. A failure we can see beats work we merely believe is
   // still in flight — the old order put "growing" first, which is why a stalled
   // build showed a spinner instead of a way out.
   const activationState =
-    generation?.status === "failed" || isGenerationStalled(generation)
+    generation?.status === "failed" ||
+    isGenerationStalled(generation) ||
+    completedWithNothing
       ? ("failed" as const)
       : generation?.status === "pending" || generation?.status === "generating"
         ? ("growing" as const)

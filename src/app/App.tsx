@@ -10,6 +10,10 @@ import { posthog } from "@/lib/posthog";
 import { Sentry } from "@/lib/sentry";
 import { CookieConsentBanner } from "@/components/CookieConsentBanner";
 import { Footer } from "@/components/layout/Footer";
+import { initPwa } from "@/pwa/register";
+import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
+import { OfflineStatus } from "@/components/pwa/OfflineStatus";
 
 function PageViewTracker() {
   const location = useLocation();
@@ -20,6 +24,10 @@ function PageViewTracker() {
 }
 
 export default function App() {
+  // Clears user-scoped caches on sign-out. Service worker registration itself
+  // happens in PWAUpdatePrompt.
+  useEffect(() => initPwa(), []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
@@ -31,6 +39,9 @@ export default function App() {
               <Footer />
             </div>
             <CookieConsentBanner />
+            <OfflineStatus />
+            <InstallPrompt />
+            <PWAUpdatePrompt />
           </Sentry.ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>

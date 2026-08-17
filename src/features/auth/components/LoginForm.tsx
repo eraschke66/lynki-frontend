@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "../hooks/useAuth";
+import { humanAuthMessage } from "../authErrors";
 
 import { Eye, EyeOff } from "lucide-react";
 
@@ -47,15 +48,7 @@ export function LoginForm() {
       setError(null);
       const { error: signInError } = await signIn(data);
       if (signInError) {
-        if (signInError.message.includes("Email not confirmed")) {
-          setError(
-            "Please verify your email before logging in. Check your inbox for the verification link.",
-          );
-        } else if (signInError.message.includes("Invalid login credentials")) {
-          setError("Invalid email or password. Please try again.");
-        } else {
-          setError(signInError.message);
-        }
+        setError(humanAuthMessage(signInError));
         return;
       }
       navigate("/home");
@@ -154,7 +147,7 @@ export function LoginForm() {
                   type="button"
                   onClick={async () => {
                     const { error: gError } = await signInWithGoogle();
-                    if (gError) setError(gError.message);
+                    if (gError) setError(humanAuthMessage(gError));
                   }}
                   className="w-full rounded-parchment border-2 border-ghibli-moss/45 bg-ghibli-ivory/85 py-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
                 >
@@ -248,9 +241,19 @@ export function LoginForm() {
 
                   {/* Password */}
                   <div>
-                    <label htmlFor="login-password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
-                      Password
-                    </label>
+                    <div className="flex items-baseline justify-between mb-1.5">
+                      <label htmlFor="login-password" className="font-sans text-xs font-medium text-ghibli-bark block">
+                        Password
+                      </label>
+                      {/* There was no way out of a forgotten password at all —
+                          no link, no route, no page. */}
+                      <Link
+                        to="/forgot-password"
+                        className="font-sans text-xs text-ghibli-jungle hover:text-ghibli-canopy underline underline-offset-2"
+                      >
+                        Forgot password?
+                      </Link>
+                    </div>
                     <div className="relative">
                       <input
                         id="login-password"

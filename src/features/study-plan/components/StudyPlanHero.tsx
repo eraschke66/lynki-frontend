@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Calendar } from "lucide-react";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
+import { describeGrowingWindow, formatExamDate } from "@/lib/examDate";
 
 interface StudyPlanHeroProps {
   daysRemaining: number;
@@ -20,11 +21,7 @@ export function StudyPlanHero({
 }: StudyPlanHeroProps) {
   const queryClient = useQueryClient();
 
-  const formattedDate = new Date(testDate).toLocaleDateString(undefined, {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+  const formattedDate = formatExamDate(testDate);
 
   return (
     <ParchmentCard glow className="p-8 md:p-12 mb-10 overflow-hidden">
@@ -32,16 +29,21 @@ export function StudyPlanHero({
         <div className="text-center md:text-left order-2 md:order-1">
           <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-forest mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
             <Calendar className="inline w-3 h-3 mr-1 -mt-0.5" />
-            Until Your Exam
+            Countdown To Your Exam
           </span>
           <h2 className="font-serif text-6xl md:text-7xl font-semibold text-ghibli-canopy leading-none mb-3">
             {daysRemaining}
           </h2>
-          <p className="font-sans text-lg text-ghibli-canopy mb-2">
-            {daysRemaining === 1 ? "day" : "days"} of growing time
+          {/* Spell out what the number counts. "23 / days of growing time"
+              left students guessing what was being measured from when. */}
+          <p className="font-sans text-lg text-ghibli-canopy mb-1">
+            {daysRemaining === 1 ? "day" : "days"} until your exam
+          </p>
+          <p className="font-sans text-sm text-ghibli-bark mb-1">
+            Exam day: <span className="font-medium">{formattedDate}</span>
           </p>
           <p className="font-sans text-sm text-ghibli-bark italic mb-4">
-            {formattedDate}
+            {describeGrowingWindow(daysRemaining)}
           </p>
           <button
             onClick={() => {

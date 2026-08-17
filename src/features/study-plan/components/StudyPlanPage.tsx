@@ -26,6 +26,7 @@ import {
 import { supabase } from "@/lib/supabase";
 import { generateStudyPlan, getWeakTopics } from "../services/studyPlanService";
 import { posthog } from "@/lib/posthog";
+import { daysUntil, formatExamDate } from "@/lib/examDate";
 import { isMarkdownPlan, type PlanJson } from "../types";
 import { DateSetupCard } from "./DateSetupCard";
 import { StudyPlanHero } from "./StudyPlanHero";
@@ -80,8 +81,7 @@ export function StudyPlanPage() {
   // ── Flags ──────────────────────────────────────────────────────────────────
   const hasDocuments = (gardenData?.total_concepts ?? 0) > 0;
   const testDate: string | null = course?.test_date ?? null;
-  const isTestDatePast =
-    testDate !== null && new Date(testDate) < new Date(new Date().toDateString());
+  const isTestDatePast = testDate !== null && (daysUntil(testDate) ?? 0) < 0;
 
   // ── Saved plan ─────────────────────────────────────────────────────────────
   const { data: savedPlan, isLoading: planLoading } = useQuery({
@@ -155,15 +155,7 @@ export function StudyPlanPage() {
   const targetLabel = getGradeLabel(curriculum, targetGrade);
   const passPercent =
     gardenData != null ? gardenData.overall_progress : null;
-  const daysRemaining = testDate
-    ? Math.max(
-        0,
-        Math.round(
-          (new Date(testDate).getTime() - new Date(new Date().toDateString()).getTime()) /
-            86_400_000,
-        ),
-      )
-    : 0;
+  const daysRemaining = testDate ? Math.max(0, daysUntil(testDate) ?? 0) : 0;
   const weakTopics = gardenData ? getWeakTopics(gardenData.topics) : [];
 
   const planJson = savedPlan?.plan_json ?? null;
@@ -206,7 +198,7 @@ export function StudyPlanPage() {
           {!hasDocuments && (
             <ParchmentCard className="p-10 text-center flex flex-col items-center gap-4">
               <img
-                src="/plant-stage-1.png"
+                src="/plant-stage-1.webp"
                 alt=""
                 className="w-16 h-16 object-contain"
                 style={{ mixBlendMode: "darken" }}
@@ -235,7 +227,7 @@ export function StudyPlanPage() {
             <>
               {isTestDatePast && testDate && (
                 <div className="mb-4 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-800">
-                  Your previous exam date ({new Date(testDate).toLocaleDateString()}) has passed.
+                  Your previous exam date ({formatExamDate(testDate)}) has passed.
                   Set a new one to update your plan.
                 </div>
               )}
@@ -278,7 +270,7 @@ export function StudyPlanPage() {
               {!isGenerating && !planLoading && !planJson && (
                 <ParchmentCard className="p-10 flex flex-col items-center gap-4 text-center">
                   <img
-                    src="/plant-stage-2.png"
+                    src="/plant-stage-2.webp"
                     alt=""
                     className="w-14 h-14 object-contain"
                     style={{ mixBlendMode: "darken" }}

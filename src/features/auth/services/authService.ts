@@ -138,3 +138,30 @@ export async function getUser() {
 
   return data.user;
 }
+
+/**
+ * Send a password-reset link.
+ *
+ * The redirect lands on /reset-password. Supabase puts the recovery session in
+ * the URL, and because the client runs the PKCE flow the SDK exchanges it and
+ * strips it from the address bar before ResetPasswordPage renders — so the page
+ * only has to check that a session exists.
+ */
+export async function sendPasswordReset(
+  email: string,
+): Promise<{ error: AuthError | null }> {
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${window.location.origin}/reset-password`,
+  });
+  return { error };
+}
+
+/**
+ * Set a new password for the user holding a valid recovery session.
+ */
+export async function updatePassword(
+  password: string,
+): Promise<{ error: AuthError | null }> {
+  const { error } = await supabase.auth.updateUser({ password });
+  return { error };
+}

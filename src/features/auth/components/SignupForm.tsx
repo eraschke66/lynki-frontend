@@ -7,6 +7,7 @@ import { useAuth } from "../hooks/useAuth";
 
 import { Eye, EyeOff } from "lucide-react";
 import { signInWithGoogle } from "../services/authService";
+import { humanAuthMessage } from "../authErrors";
 
 const signupSchema = z
   .object({
@@ -46,6 +47,13 @@ export function SignupForm() {
     formState: { errors },
   } = useForm<SignupFormData>({
     resolver: zodResolver(signupSchema),
+    // onTouched, not onBlur: validate once they leave a field, then correct
+    // live as they fix it. onBlur alone turns a half-typed email red mid-flow.
+    mode: "onTouched",
+    // Zod already returns every failing rule at once; react-hook-form's default
+    // ("firstError") threw all but the first away, which is why a student
+    // discovered a four-part password policy one submit at a time.
+    criteriaMode: "all",
   });
 
   const onSubmit = async (data: SignupFormData) => {
@@ -57,11 +65,10 @@ export function SignupForm() {
         password: data.password,
       });
       if (signUpError) {
-        if (signUpError.message.includes("already registered")) {
-          setError("This email is already registered. Please sign in instead.");
-        } else {
-          setError(signUpError.message);
-        }
+        // Every branch goes through the mapper now — the old `else` put the
+        // raw Supabase string on screen, which is how a student met
+        // "email rate limit exceeded".
+        setError(humanAuthMessage(signUpError));
         return;
       }
       if (session) {
@@ -83,7 +90,9 @@ export function SignupForm() {
       setError(null);
       const { error: resendError } = await resendVerificationEmail(registeredEmail);
       if (resendError) {
-        setError("Failed to resend verification email. Please try again.");
+        // Resend is the single most likely place to hit the send rate limit,
+        // so it needs the real reason, not a flat "failed".
+        setError(humanAuthMessage(resendError));
       } else {
         setError("Verification email resent! Please check your inbox.");
       }
@@ -162,7 +171,7 @@ export function SignupForm() {
         <WoodenFrame>
           <div className="text-center">
             <img
-              src="/plant-stage-1.png"
+              src="/plant-stage-1.webp"
               alt=""
               className="w-16 h-16 object-contain mx-auto mb-3 animate-pulse-soft"
               style={{ mixBlendMode: "darken" }}
@@ -226,7 +235,7 @@ export function SignupForm() {
             type="button"
             onClick={async () => {
               const { error: gError } = await signInWithGoogle();
-              if (gError) setError(gError.message);
+              if (gError) setError(humanAuthMessage(gError));
             }}
             className="w-full rounded-parchment border-2 border-ghibli-moss/45 bg-ghibli-ivory/85 py-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
           >
@@ -336,8 +345,26 @@ export function SignupForm() {
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
               </div>
+              {/* State the whole policy before they type. Discovering it one
+                  failed submit at a time was the first thing the product ever
+                  said to a new student. */}
+              {!errors.password && (
+                <p className="font-sans text-xs text-ghibli-bark mt-1">
+                  At least 8 characters, with an uppercase letter, a lowercase
+                  letter and a number.
+                </p>
+              )}
               {errors.password && (
-                <p className="font-sans text-xs text-destructive mt-1">{errors.password.message}</p>
+                <ul className="font-sans text-xs text-destructive mt-1 space-y-0.5 list-none">
+                  {(errors.password.types
+                    ? Object.values(errors.password.types).flat()
+                    : [errors.password.message]
+                  )
+                    .filter(Boolean)
+                    .map((msg) => (
+                      <li key={String(msg)}>{String(msg)}</li>
+                    ))}
+                </ul>
               )}
             </div>
 

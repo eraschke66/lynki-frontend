@@ -45,7 +45,7 @@ export function QuizActivationCard({
           aria-live="polite"
         >
           <img
-            src="/plant-stage-1.png"
+            src="/plant-stage-1.webp"
             alt=""
             className="w-14 h-14 object-contain shrink-0 animate-pulse-soft"
             style={{ mixBlendMode: "darken" }}
@@ -76,7 +76,7 @@ export function QuizActivationCard({
           role="alert"
         >
           <img
-            src="/plant-stage-1.png"
+            src="/plant-stage-1.webp"
             alt=""
             className="w-14 h-14 object-contain shrink-0 opacity-60 grayscale"
             style={{ mixBlendMode: "darken" }}
@@ -113,7 +113,7 @@ export function QuizActivationCard({
     <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6" glow>
       <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5">
         <img
-          src="/plant-stage-2.png"
+          src="/plant-stage-2.webp"
           alt=""
           className="w-14 h-14 object-contain shrink-0 animate-pulse-soft"
           style={{ mixBlendMode: "darken" }}

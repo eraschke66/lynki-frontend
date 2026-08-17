@@ -1,5 +1,5 @@
 import { reportError } from "@/lib/sentry";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
@@ -416,7 +416,6 @@ export function CourseDetailPage() {
           </div>
         </ParchmentCard>
 
-        {/* Activation moment — quiz generated, not yet started. One action. */}
         {activationState && (
           <QuizActivationCard
             state={activationState}
@@ -433,7 +432,7 @@ export function CourseDetailPage() {
         {!activationState && docCount && docCount > 0 && quizzes.length === 0 && (
           <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6 flex flex-col sm:flex-row items-center gap-5">
             <img
-              src="/plant-stage-1.png"
+              src="/plant-stage-1.webp"
               alt=""
               className="w-14 h-14 object-contain shrink-0 animate-pulse-soft"
               style={{ mixBlendMode: "darken" }}
@@ -480,7 +479,7 @@ export function CourseDetailPage() {
             <Card className="rounded-2xl border-t-2 border-ghibli-moss/15">
               <CardContent className="py-6 md:py-12 text-center">
                 <img
-                  src="/plant-stage-1.png"
+                  src="/plant-stage-1.webp"
                   alt=""
                   className="w-16 h-16 object-contain mx-auto mb-3"
                   style={{ mixBlendMode: "darken" }}

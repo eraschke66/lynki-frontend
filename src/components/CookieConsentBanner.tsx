@@ -1,35 +1,32 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
-import { initPostHog } from "@/lib/posthog";
 
 export function CookieConsentBanner() {
   const { consent, acceptAll, acceptEssential } = useCookieConsent();
-  const [visible, setVisible] = useState(false);
   const [dismissing, setDismissing] = useState(false);
+  const [seenConsent, setSeenConsent] = useState(consent);
 
-  useEffect(() => {
-    if (consent === null) {
-      setVisible(true);
-    }
-  }, [consent]);
+  // Consent lives in a shared store, so clearing it from Settings re-opens the
+  // banner immediately. Reset the slide-out state when that happens, otherwise
+  // the banner would come back already translated off-screen. Adjusted during
+  // render rather than in an effect so there's no visible intermediate frame.
+  if (consent !== seenConsent) {
+    setSeenConsent(consent);
+    if (consent === null) setDismissing(false);
+  }
 
+  // acceptAll / acceptEssential flip the shared consent value, which unmounts
+  // this component. Delay the write so the slide-down transition can play.
   const dismiss = (action: () => void) => {
     setDismissing(true);
-    action();
-    setTimeout(() => setVisible(false), 350);
+    setTimeout(action, 350);
   };
 
-  const handleAcceptAll = () => {
-    dismiss(acceptAll);
-    initPostHog();
-  };
+  const handleAcceptAll = () => dismiss(acceptAll);
+  const handleEssentialOnly = () => dismiss(acceptEssential);
 
-  const handleEssentialOnly = () => {
-    dismiss(acceptEssential);
-  };
-
-  if (!visible) return null;
+  if (consent !== null) return null;
 
   return (
     <div

@@ -343,11 +343,17 @@
   box-shadow: var(--shadow-parchment);
 }
 
-/* ── Parchment-solid — opaque reading surface ── */
+/* ── Parchment-solid — opaque reading surface ──
+ *
+ * PERF: these two used to carry backdrop-filter: blur(). Backdrop blur is
+ * re-computed whenever anything behind the element changes, and the scene
+ * behind every card (GhibliBackground) animates continuously — so each card on
+ * a page re-blurred the whole backdrop every frame. The surfaces are ~95%
+ * opaque, so the blur was doing almost nothing visible; making them fully
+ * opaque is visually near-identical and removes the cost entirely.
+ */
 .parchment-solid {
-  background: linear-gradient(180deg, hsl(48 80% 97% / 0.96), hsl(45 70% 93% / 0.94));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, hsl(48 80% 97%), hsl(45 70% 93%));
   border: 1.5px solid hsl(140 25% 65% / 0.5);
   box-shadow:
     0 2px 8px hsl(152 45% 16% / 0.08),
@@ -356,9 +362,7 @@
 
 /* Variant — flatter, no inner highlight, for nested rows inside parchment-solid containers */
 .parchment-row {
-  background: hsl(48 78% 95% / 0.94);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: hsl(48 78% 95%);
   border: 1px solid hsl(140 25% 65% / 0.4);
 }
 
@@ -402,9 +406,12 @@
   0%, 100% { transform: scale(1); opacity: 0.92; }
   50% { transform: scale(1.04); opacity: 1; }
 }
+/* PERF: this animated `filter`, which repaints the element every frame and
+ * cannot run on the compositor. Same look, driven by opacity on a pre-rendered
+ * shadow, which the compositor can animate for free. */
 @keyframes glow-soft {
-  0%, 100% { filter: drop-shadow(0 0 18px hsl(42 90% 72% / 0.35)); }
-  50% { filter: drop-shadow(0 0 32px hsl(42 90% 72% / 0.6)); }
+  0%, 100% { opacity: 0.9; }
+  50% { opacity: 1; }
 }
 @keyframes drop-fall {
   0% { transform: translateY(-10px); opacity: 0; }
@@ -421,9 +428,26 @@
 .animate-drift { animation: drift 12s ease-in-out infinite; }
 .animate-shimmer { animation: shimmer 4s ease-in-out infinite; }
 .animate-pulse-soft { animation: pulse-soft 3.5s ease-in-out infinite; }
-.animate-glow-soft { animation: glow-soft 4s ease-in-out infinite; }
+.animate-glow-soft {
+  animation: glow-soft 4s ease-in-out infinite;
+  filter: drop-shadow(0 0 24px hsl(42 90% 72% / 0.45));
+}
 .animate-drop { animation: drop-fall 0.6s ease-in forwards; }
 .animate-scale-in { animation: scale-in-bounce 0.5s ease-out forwards; }
+
+/* PERF + a11y: the ambient loops (drifting foliage, shimmering light, breathing
+ * plants) are decorative. Stop them for anyone who has asked the OS for less
+ * motion — which also gives low-end devices a way out of the constant repaint.
+ * Transitions on real interactions are left alone. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-leaf,
+  .animate-drift,
+  .animate-shimmer,
+  .animate-pulse-soft,
+  .animate-glow-soft {
+    animation: none;
+  }
+}
 
 /* ── Roaming cat — walks across the page, stops to groom, walks off ── */
 

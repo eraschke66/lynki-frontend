@@ -16,4 +16,21 @@ export function initPostHog() {
   initialized = true;
 }
 
+/**
+ * Turn analytics capture on or off at runtime.
+ *
+ * PostHog cannot be un-initialized, so opting out is done through
+ * opt_out_capturing() rather than by tearing the client down. Enabling for the
+ * first time in a session initializes it lazily — a user who accepts from
+ * Settings gets analytics without needing a reload.
+ */
+export function setAnalyticsEnabled(enabled: boolean) {
+  if (enabled) {
+    initPostHog();
+    if (initialized) posthog.opt_in_capturing();
+    return;
+  }
+  if (initialized) posthog.opt_out_capturing();
+}
+
 export { posthog };

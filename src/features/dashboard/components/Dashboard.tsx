@@ -36,6 +36,7 @@ import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { AddCourseCard } from "@/components/garden/AddCourseCard";
+import { DashboardSkeleton } from "@/components/garden/GardenSkeletons";
 
 const dashboardQueryKeys = {
   data: (userId: string) => ["dashboard", userId] as const,
@@ -104,24 +105,14 @@ export function Dashboard() {
     return null;
   }
 
+  // A 4.3 MB video used to cover this wait, which usually lasts a few hundred
+  // milliseconds. The skeleton paints instantly in the real layout instead.
   if (isLoading) {
     return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center overflow-hidden"
-        style={{ background: "hsl(38 48% 87%)" }}>
-        <video
-          src="/garden-loader.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-ghibli-canopy/20" />
-        <div className="relative z-10 text-center pb-16 space-y-3">
-          <p className="text-white text-base font-medium tracking-wide text-shadow-hero">
-            Getting your materials together...
-          </p>
-        </div>
+      <div className="relative min-h-screen overflow-hidden">
+        <GhibliBackground />
+        <Header />
+        <DashboardSkeleton />
       </div>
     );
   }
@@ -170,13 +161,12 @@ export function Dashboard() {
             {hasProcessing && (
               <ParchmentCard className="p-0 mb-10 overflow-hidden border-ghibli-moss/30 shadow-glow-soft animate-in fade-in slide-in-from-top-4 duration-700">
                 <div className="relative h-32 md:h-40 flex items-center justify-center">
-                  <video
-                    src="/garden-loader.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover opacity-60"
+                  {/* Still frame, not the 4.3 MB video: this banner can sit on
+                      screen for minutes while materials process, and the motion
+                      was almost entirely hidden by the wash above it anyway. */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center opacity-60"
+                    style={{ backgroundImage: "url(/garden-loader-poster.webp)" }}
                   />
                   <div className="absolute inset-0 bg-linear-to-r from-ghibli-cream via-ghibli-cream/20 to-ghibli-cream" />
                   <div className="relative z-10 text-center space-y-2">

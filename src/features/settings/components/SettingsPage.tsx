@@ -8,6 +8,7 @@ import GhibliBackground from "@/components/garden/GhibliBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
@@ -27,30 +28,49 @@ import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { Link } from "react-router-dom";
 
 const gardenLevels = [
-  { img: "/plant-stage-4.png", label: "Thriving",    range: "85%+",   color: "text-emerald-700" },
-  { img: "/plant-stage-3.png", label: "Blooming",    range: "70–84%", color: "text-yellow-600"  },
-  { img: "/plant-stage-3.png", label: "Growing",     range: "55–69%", color: "text-green-600"   },
-  { img: "/plant-stage-2.png", label: "Sprouting",   range: "40–54%", color: "text-teal-600"    },
-  { img: "/plant-stage-1.png", label: "Needs Water", range: "<40%",   color: "text-blue-500"    },
+  { img: "/plant-stage-4.webp", label: "Thriving",    range: "85%+",   color: "text-emerald-700" },
+  { img: "/plant-stage-3.webp", label: "Blooming",    range: "70–84%", color: "text-yellow-600"  },
+  { img: "/plant-stage-3.webp", label: "Growing",     range: "55–69%", color: "text-green-600"   },
+  { img: "/plant-stage-2.webp", label: "Sprouting",   range: "40–54%", color: "text-teal-600"    },
+  { img: "/plant-stage-1.webp", label: "Needs Water", range: "<40%",   color: "text-blue-500"    },
 ];
 
 export function SettingsPage() {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { isPremium, currentPeriodEnd, isLoading: subLoading } = useSubscription();
+  const {
+    isPremium,
+    isOnTrial,
+    trialEndsAt,
+    currentPeriodEnd,
+    isLoading: subLoading,
+  } = useSubscription();
   const { balance: seedBalance, isLoading: seedLoading } = useSeedBalance();
-  const { consent, clearConsent } = useCookieConsent();
+  const { consent, analyticsEnabled, setAnalytics, clearConsent } =
+    useCookieConsent();
   const [portalLoading, setPortalLoading] = useState(false);
 
   const handleManageSubscription = async () => {
-    if (!session?.access_token) return;
+    // This used to `return` silently when the context session was missing or
+    // its token had expired, which is exactly the reported "button does
+    // nothing": no redirect, no spinner, no error. createPortalSession reads
+    // the session through supabase.auth.getSession(), which refreshes an
+    // expired token on its own, so the check here was both silent and wrong.
     setPortalLoading(true);
     try {
       const url = await createPortalSession();
       window.location.href = url;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Failed to open billing portal");
+      const message = err instanceof Error ? err.message : "";
+      if (/not authenticated/i.test(message)) {
+        toast.error("Your session expired", {
+          description: "Please log in again to manage your subscription.",
+        });
+        navigate("/login");
+      } else {
+        toast.error(message || "Failed to open billing portal");
+      }
       setPortalLoading(false);
     }
   };
@@ -164,7 +184,23 @@ export function SettingsPage() {
                       <p className="text-base font-medium text-ghibli-canopy">Subscription</p>
                     </div>
 
-                    {isPremium ? (
+                    {isOnTrial ? (
+                      // During the trial: state the fact once and stop. No
+                      // countdown, no "hurry", no badge that implies a debt —
+                      // the garden is an environment, not an urgency system.
+                      <>
+                        <p className="text-sm text-ghibli-bark">
+                          Your garden is open
+                          {trialEndsAt
+                            ? ` until ${trialEndsAt.toLocaleDateString(undefined, {
+                                day: "numeric",
+                                month: "long",
+                              })}`
+                            : ""}
+                          . Everything is unlocked, and there is no card on file.
+                        </p>
+                      </>
+                    ) : isPremium ? (
                       <>
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-moss/12 text-ghibli-jungle">
@@ -240,14 +276,38 @@ export function SettingsPage() {
                       Cookie Policy
                     </Link>
                   </div>
-                  <div className="pt-1">
-                    <p className="text-sm text-ghibli-bark mb-3">
-                      Analytics cookies are currently{" "}
-                      <strong>{consent === "all" ? "enabled" : "disabled"}</strong>.
-                    </p>
-                    <Button variant="outline" onClick={clearConsent}>
-                      Change cookie preferences
-                    </Button>
+                  <div className="pt-1 space-y-3">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <Label
+                          htmlFor="analytics-cookies"
+                          className="text-sm font-medium text-ghibli-canopy cursor-pointer"
+                        >
+                          Analytics cookies
+                        </Label>
+                        <p className="text-sm text-ghibli-bark mt-0.5">
+                          {analyticsEnabled
+                            ? "On — anonymous usage data helps us improve PassAI."
+                            : "Off — only the essential cookies that keep you logged in."}
+                        </p>
+                      </div>
+                      <Switch
+                        id="analytics-cookies"
+                        checked={analyticsEnabled}
+                        onCheckedChange={setAnalytics}
+                        aria-label="Analytics cookies"
+                        className="mt-0.5 shrink-0"
+                      />
+                    </div>
+                    {consent !== null && (
+                      <button
+                        type="button"
+                        onClick={clearConsent}
+                        className="text-xs text-ghibli-forest hover:text-ghibli-canopy underline underline-offset-2 transition-colors"
+                      >
+                        Show the cookie banner again
+                      </button>
+                    )}
                   </div>
                 </CardContent>
               </Card>

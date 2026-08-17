@@ -5,12 +5,10 @@
 // The frontend list only controls UI visibility (the /admin route and the
 // navbar link). Actual access to per-student data is enforced server-side by
 // is_lynki_admin() inside the SECURITY DEFINER RPCs, so both lists must match.
-export const ADMIN_EMAILS = [
-  "erik@shryn.ai",
-  "erikraschke@gmail.com",
-  "erikraschke@me.com",
-  "kaninip254@gmail.com",
-];
+// One admin, deliberately. Adding an address here alone does NOT grant access
+// to student data — is_lynki_admin() in the DB is the real gate and has its own
+// copy of this list. Change both, or the two disagree and the UI lies.
+export const ADMIN_EMAILS = ["erikraschke@gmail.com"];
 
 // Mirrors the DB gate, which lowercases the JWT email before comparing.
 export function isAdminEmail(email: string | null | undefined): boolean {

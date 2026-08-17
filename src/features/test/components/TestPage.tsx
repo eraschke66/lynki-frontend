@@ -33,6 +33,7 @@ import {
   fetchBktSession,
   fetchPassChance,
   completeTest,
+  fetchQuizGenerationStatus,
 } from "../services/testService";
 import {
   courseQueryKeys,
@@ -103,6 +104,25 @@ export function TestPage() {
     return fetchResumeTest(user!.id, sessionId!);
   };
 
+  // A freshly-generated quiz (quizId present, no attemptId yet) is generated
+  // as a backend background job — poll course_quizzes.status directly rather
+  // than block on the generate request. Existing attempts (attemptId set) or
+  // other session types skip this entirely.
+  const isFreshQuiz = !!quizId && !attemptId;
+  const { data: generationStatus, isLoading: isLoadingGenerationStatus } =
+    useQuery({
+      queryKey: testQueryKeys.quizGenerationStatus(quizId ?? ""),
+      queryFn: () => fetchQuizGenerationStatus(quizId!),
+      enabled: isFreshQuiz,
+      refetchInterval: (query) =>
+        query.state.data?.status === "generating" ? 3000 : false,
+    });
+  const quizStillGenerating =
+    isFreshQuiz &&
+    (isLoadingGenerationStatus || generationStatus?.status === "generating");
+  const quizGenerationFailed =
+    isFreshQuiz && generationStatus?.status === "failed";
+
   const {
     data: testData,
     isLoading,
@@ -114,7 +134,9 @@ export function TestPage() {
     enabled:
       !!user &&
       !!courseId &&
-      (!!quizId || !!topicId || !!conceptIds || !!sessionId),
+      (!!quizId || !!topicId || !!conceptIds || !!sessionId) &&
+      !quizStillGenerating &&
+      !quizGenerationFailed,
   });
 
   const { data: profileData } = useQuery({
@@ -249,17 +271,7 @@ export function TestPage() {
         ).catch((err) => reportError("Background BKT update failed:", err));
       }
     },
-    [
-      feedback,
-      currentQuestion,
-      user,
-      courseId,
-      quizId,
-      topicId,
-      testData?.test_id,
-      questions.length,
-      currentIndex,
-    ],
+    [feedback, currentQuestion, user, courseId, quizId, topicId, testData?.test_id],
   );
 
   const handleNext = useCallback(async () => {
@@ -305,6 +317,7 @@ export function TestPage() {
   }, [
     currentIndex,
     totalQuestions,
+    correctCount,
     user,
     courseId,
     quizId,
@@ -385,20 +398,6 @@ export function TestPage() {
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [quizComplete, currentIndex, testData]);
 
-  if (!user || !courseId) {
-    navigate("/home");
-    return null;
-  }
-
-  // Confirm before exiting mid-quiz; results screen exits directly.
-  const handleExitRequest = () => {
-    if (quizComplete) {
-      handleExit();
-    } else {
-      setShowExitConfirm(true);
-    }
-  };
-
   const handleExit = useCallback(() => {
     // V13: respect the source page so X button returns where the user came from.
     // - from=study-plan → back to /course/:id/study-plan
@@ -415,12 +414,66 @@ export function TestPage() {
     navigate(`/course/${courseId}`);
   }, [navigate, courseId, fromParam]);
 
+  if (!user || !courseId) {
+    navigate("/home");
+    return null;
+  }
+
+  // Confirm before exiting mid-quiz; results screen exits directly.
+  const handleExitRequest = () => {
+    if (quizComplete) {
+      handleExit();
+    } else {
+      setShowExitConfirm(true);
+    }
+  };
+
   const loadingMessage =
     quizId && !attemptId
       ? "Growing your questions..."
       : topicId
         ? "Tending this patch..."
         : "Resuming your walk...";
+
+  if (quizStillGenerating) {
+    return <GardenVideoLoader message="Growing your questions..." />;
+  }
+
+  if (quizGenerationFailed) {
+    return (
+      <div className="fixed inset-0 z-50 overflow-y-auto">
+        <GhibliBackground />
+        <button
+          onClick={handleExit}
+          className="absolute top-5 right-5 p-2 rounded-full text-ghibli-forest hover:text-ghibli-canopy hover:bg-ghibli-mist/70 transition-colors z-30"
+          aria-label="Exit quiz"
+        >
+          <X className="w-6 h-6" />
+        </button>
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4 max-w-sm">
+            <AlertCircle className="w-10 h-10 text-destructive" />
+            <div>
+              <h2 className="font-serif text-lg font-semibold mb-1">
+                That batch didn&rsquo;t finish growing
+              </h2>
+              <p className="text-sm text-ghibli-bark">
+                {generationStatus?.error_message ||
+                  "Generation didn't finish. Nothing you did — give it another go."}
+              </p>
+            </div>
+            <Button
+              variant="outline"
+              className="rounded-parchment"
+              onClick={handleExit}
+            >
+              Back to Garden
+            </Button>
+          </ParchmentCard>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <GardenVideoLoader message={loadingMessage} />;

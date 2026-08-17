@@ -25,11 +25,7 @@ import {
   FilePlus,
   Pencil,
 } from "lucide-react";
-import {
-  fetchPassChance,
-  generateQuiz,
-  fetchLatestQuizGeneration,
-} from "@/features/test/services/testService";
+import { fetchPassChance, generateQuiz } from "@/features/test/services/testService";
 import { QuizActivationCard } from "@/features/test/components/QuizActivationCard";
 import { updateCourse } from "@/features/courses/services/courseService";
 import { EditCourseDialog } from "@/features/dashboard/components/EditCourseDialog";
@@ -77,6 +73,34 @@ export function CourseDetailPage() {
     enabled: !!courseId,
   });
 
+  // Readiness for the activation card's "growing" state: derived for free
+  // from document status (a document only reaches 'completed' once concepts
+  // exist — see extraction_service.py), no separate quiz-generation signal
+  // needed. Polls while anything is still pending/processing so the card
+  // flips to "ready" on its own once materials finish.
+  const { data: docStatusSummary } = useQuery({
+    queryKey: ["courses", "doc-status-summary", courseId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("status")
+        .eq("course_id", courseId!);
+      if (error) throw error;
+      const rows = data ?? [];
+      return {
+        hasCompleted: rows.some((r) => r.status === "completed"),
+        hasProcessing: rows.some(
+          (r) => r.status === "pending" || r.status === "processing",
+        ),
+      };
+    },
+    enabled: !!courseId,
+    refetchInterval: (query) =>
+      query.state.data?.hasProcessing && !query.state.data?.hasCompleted
+        ? 4000
+        : false,
+  });
+
   const { data: passChanceData } = useQuery({
     queryKey: testQueryKeys.passChance(courseId ?? "", user?.id ?? ""),
     queryFn: () => fetchPassChance(user!.id, courseId!),
@@ -107,18 +131,6 @@ export function CourseDetailPage() {
     enabled: !!user && !!courseId,
   });
 
-  // Latest question-bank build. Polls only while it is still working, so a
-  // student watching the screen sees it flip to ready without a manual reload.
-  const { data: generation } = useQuery({
-    queryKey: testQueryKeys.generation(courseId ?? "", user?.id ?? ""),
-    queryFn: () => fetchLatestQuizGeneration(user!.id, courseId!),
-    enabled: !!user && !!courseId,
-    refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      return status === "pending" || status === "generating" ? 4000 : false;
-    },
-  });
-
   if (!user || !courseId) {
     navigate("/home");
     return null;
@@ -143,16 +155,17 @@ export function CourseDetailPage() {
   // were left staring at.
   const freshQuiz = quizzes.find((q) => (q.quiz_attempts ?? []).length === 0);
 
-  // The activation moment. Ordered by urgency: something in flight beats a
-  // failure to report, which beats a quiz waiting to be started.
+  // The activation moment. Materials still processing (no completed document
+  // yet) beats a quiz waiting to be started — there's nothing to generate
+  // from yet either way. On-demand generation failures surface directly on
+  // TestPage now (it's a fast, user-triggered action), not as a pre-emptive
+  // dashboard state, so there's no "failed" case to compute here anymore.
   const activationState =
-    generation?.status === "pending" || generation?.status === "generating"
+    docStatusSummary?.hasProcessing && !docStatusSummary?.hasCompleted
       ? ("growing" as const)
-      : generation?.status === "failed"
-        ? ("failed" as const)
-        : freshQuiz
-          ? ("ready" as const)
-          : null;
+      : freshQuiz
+        ? ("ready" as const)
+        : null;
 
   // While the activation card is showing it owns the only button on screen.
   // The hero's four equal-weight CTAs are what the student bounced off, so
@@ -167,10 +180,8 @@ export function CourseDetailPage() {
       queryClient.invalidateQueries({
         queryKey: testQueryKeys.quizzes(courseId, user.id),
       });
-      queryClient.invalidateQueries({
-        queryKey: testQueryKeys.generation(courseId, user.id),
-      });
-      // Navigate to TestPage to start the quiz immediately
+      // Navigate to TestPage — it polls course_quizzes.status itself and
+      // shows the "growing" loader until generation actually completes.
       navigate(`/test/${courseId}?quiz=${result.quiz_id}`);
     } catch (err) {
       reportError("Quiz generation failed:", err);

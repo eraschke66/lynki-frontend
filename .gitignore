@@ -142,3 +142,6 @@ vite.config.ts.timestamp-*
 
 # MCP server config (contains secrets — never commit)
 .mcp.json
+
+# macOS
+.DS_Store

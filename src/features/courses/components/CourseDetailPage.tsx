@@ -24,8 +24,11 @@ import {
   ChevronRight,
   FilePlus,
   Pencil,
+  RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { fetchPassChance, generateQuiz } from "@/features/test/services/testService";
+import { retryDocumentProcessing } from "@/features/documents/services/documentService";
 import { QuizActivationCard } from "@/features/test/components/QuizActivationCard";
 import { updateCourse } from "@/features/courses/services/courseService";
 import { EditCourseDialog } from "@/features/dashboard/components/EditCourseDialog";
@@ -42,6 +45,7 @@ export function CourseDetailPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [generating, setGenerating] = useState(false);
+  const [retryingUpload, setRetryingUpload] = useState(false);
   const [selectedQuiz, setSelectedQuiz] = useState<CourseQuiz | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -83,7 +87,7 @@ export function CourseDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("documents")
-        .select("status")
+        .select("id, status, error_message")
         .eq("course_id", courseId!);
       if (error) throw error;
       const rows = data ?? [];
@@ -92,6 +96,7 @@ export function CourseDetailPage() {
         hasProcessing: rows.some(
           (r) => r.status === "pending" || r.status === "processing",
         ),
+        failedDocs: rows.filter((r) => r.status === "failed"),
       };
     },
     enabled: !!courseId,
@@ -167,10 +172,38 @@ export function CourseDetailPage() {
         ? ("ready" as const)
         : null;
 
+  // If every upload for this course failed to process (no completed document
+  // and nothing still running), the student has no materials to generate
+  // from — surface it here rather than leaving the page looking idle, since
+  // the upload flow itself already reported "complete" once the backend
+  // accepted the file (processing happens async and can still fail after).
+  const materialsFailed =
+    !docStatusSummary?.hasProcessing &&
+    !docStatusSummary?.hasCompleted &&
+    (docStatusSummary?.failedDocs?.length ?? 0) > 0;
+
+  const handleRetryFailedMaterials = async () => {
+    const failedDocs = docStatusSummary?.failedDocs ?? [];
+    if (retryingUpload || failedDocs.length === 0) return;
+    setRetryingUpload(true);
+    try {
+      await Promise.all(
+        failedDocs.map((doc) => retryDocumentProcessing(doc.id)),
+      );
+      queryClient.invalidateQueries({
+        queryKey: ["courses", "doc-status-summary", courseId],
+      });
+    } catch (err) {
+      reportError("Failed to retry document processing:", err);
+    } finally {
+      setRetryingUpload(false);
+    }
+  };
+
   // While the activation card is showing it owns the only button on screen.
   // The hero's four equal-weight CTAs are what the student bounced off, so
   // they drop to text links until the quiz has been started.
-  const demoteHeroCtas = activationState !== null;
+  const demoteHeroCtas = activationState !== null || materialsFailed;
 
   const handleGenerateQuiz = async () => {
     if (generating) return;
@@ -428,8 +461,46 @@ export function CourseDetailPage() {
           />
         )}
 
+        {!activationState && materialsFailed && (
+          <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6">
+            <div
+              className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5"
+              role="alert"
+            >
+              <img
+                src="/plant-stage-1.webp"
+                alt=""
+                className="w-14 h-14 object-contain shrink-0 opacity-60 grayscale"
+                style={{ mixBlendMode: "darken" }}
+              />
+              <div className="flex-1 text-center sm:text-left">
+                <p className="font-serif text-lg font-semibold text-ghibli-canopy">
+                  That upload didn&rsquo;t take root
+                </p>
+                <p className="font-sans text-sm text-ghibli-bark mt-0.5">
+                  {docStatusSummary?.failedDocs?.[0]?.error_message ||
+                    "We couldn't process that file. Give it another try, or upload a different version."}
+                </p>
+              </div>
+              <Button
+                size="lg"
+                onClick={handleRetryFailedMaterials}
+                disabled={retryingUpload}
+                className="w-full sm:w-auto shrink-0 gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
+              >
+                {retryingUpload ? (
+                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
+                ) : (
+                  <RefreshCw className="w-4 h-4" aria-hidden="true" />
+                )}
+                {retryingUpload ? "Retrying…" : "Retry"}
+              </Button>
+            </div>
+          </ParchmentCard>
+        )}
+
         {/* First-quiz banner — only when nothing has been generated at all */}
-        {!activationState && docCount && docCount > 0 && quizzes.length === 0 && (
+        {!activationState && !materialsFailed && docCount && docCount > 0 && quizzes.length === 0 && (
           <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6 flex flex-col sm:flex-row items-center gap-5">
             <img
               src="/plant-stage-1.webp"

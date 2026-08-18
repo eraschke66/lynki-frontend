@@ -20,6 +20,8 @@ export interface CourseSummary {
   progressPercent: number;
   /** Whether at least one document is still processing */
   hasProcessing: boolean;
+  /** Count of documents currently pending or processing */
+  processingDocumentCount: number;
   createdAt: string;
   updatedAt: string;
 }

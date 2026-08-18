@@ -42,6 +42,8 @@ interface UploadModalProps {
   onUploadComplete?: () => void;
   /** Pre-select a course when opening modal from a course context */
   defaultCourseId?: string;
+  /** Always open on the "create a course" step, even if the user already has courses */
+  startInCreateMode?: boolean;
 }
 
 export function UploadModal({
@@ -50,6 +52,7 @@ export function UploadModal({
   userId,
   onUploadComplete,
   defaultCourseId,
+  startInCreateMode,
 }: UploadModalProps) {
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -88,7 +91,10 @@ export function UploadModal({
         setNewCourseCurriculum(profile.curriculum);
         const curriculum = getCurriculum(profile.curriculum);
         setNewCourseTargetGrade(curriculum.defaultTarget);
-        if (defaultCourseId) {
+        if (startInCreateMode) {
+          setSelectedCourseId("");
+          setStep("create_course");
+        } else if (defaultCourseId) {
           setSelectedCourseId(defaultCourseId);
           setStep("upload_files");
         } else if (data.length === 1) {
@@ -110,7 +116,7 @@ export function UploadModal({
     return () => {
       cancelled = true;
     };
-  }, [open, userId, defaultCourseId]);
+  }, [open, userId, defaultCourseId, startInCreateMode]);
 
   const handleNewCourseCurriculumChange = (next: string) => {
     setNewCourseCurriculum(next);

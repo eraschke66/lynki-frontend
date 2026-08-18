@@ -61,6 +61,7 @@ export async function fetchDashboardData(
   // Count documents per course, track processing
   const docCountByCourse = new Map<string, number>();
   const processingByCourse = new Map<string, boolean>();
+  const processingCountByCourse = new Map<string, number>();
   const allDocIds: string[] = [];
 
   documents?.forEach((doc) => {
@@ -70,6 +71,10 @@ export async function fetchDashboardData(
     );
     if (doc.status === "pending" || doc.status === "processing") {
       processingByCourse.set(doc.course_id, true);
+      processingCountByCourse.set(
+        doc.course_id,
+        (processingCountByCourse.get(doc.course_id) || 0) + 1,
+      );
     }
     allDocIds.push(doc.id);
   });
@@ -160,6 +165,7 @@ export async function fetchDashboardData(
         return count > 0 ? Math.round((sum / count) * 100) : 0;
       })(),
       hasProcessing: processingByCourse.get(c.id) || false,
+      processingDocumentCount: processingCountByCourse.get(c.id) || 0,
       createdAt: c.created_at,
       updatedAt: c.updated_at || c.created_at,
     };

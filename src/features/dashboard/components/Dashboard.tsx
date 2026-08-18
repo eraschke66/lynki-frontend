@@ -47,6 +47,7 @@ export function Dashboard() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadModalCreateMode, setUploadModalCreateMode] = useState(false);
   const [editingCourse, setEditingCourse] = useState<CourseSummary | null>(null);
   const [deletingCourse, setDeletingCourse] = useState<CourseSummary | null>(null);
 
@@ -64,6 +65,11 @@ export function Dashboard() {
 
   const handleUploadComplete = () => {
     queryClient.invalidateQueries({ queryKey: dashboardQueryKeys.data(user!.id) });
+  };
+
+  const openUploadModal = (createMode = false) => {
+    setUploadModalCreateMode(createMode);
+    setUploadModalOpen(true);
   };
 
   const handleEditCourse = async (
@@ -154,7 +160,7 @@ export function Dashboard() {
       {/* Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 pt-6 md:pt-8 pb-8 md:pb-16">
         {hasNoCourses ? (
-          <EmptyState onUpload={() => setUploadModalOpen(true)} />
+          <EmptyState onUpload={() => openUploadModal()} />
         ) : (
           <>
             {/* Prominent Processing Indicator */}
@@ -191,7 +197,7 @@ export function Dashboard() {
               onStartStudying={() => {
                 if (nextItem) navigate(`/course/${nextItem.courseId}`);
               }}
-              onUpload={() => setUploadModalOpen(true)}
+              onUpload={() => openUploadModal()}
             />
 
             {/* Section heading */}
@@ -218,7 +224,7 @@ export function Dashboard() {
                   onDelete={() => setDeletingCourse(course)}
                 />
               ))}
-              <AddCourseCard onClick={() => setUploadModalOpen(true)} />
+              <AddCourseCard onClick={() => openUploadModal(true)} />
             </div>
 
             {/* Footer */}
@@ -234,6 +240,7 @@ export function Dashboard() {
         onOpenChange={setUploadModalOpen}
         userId={user.id}
         onUploadComplete={handleUploadComplete}
+        startInCreateMode={uploadModalCreateMode}
       />
       <EditCourseDialog
         open={!!editingCourse}
@@ -401,8 +408,15 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
       {/* Centerpiece: large plant illustration */}
       <div className="flex justify-center py-4 relative z-10">
         {isProcessing && course.totalConcepts === 0 ? (
-          <div className="flex items-center justify-center" style={{ width: 140, height: 140 }}>
-            <Loader2 className="w-12 h-12 animate-spin text-ghibli-forest" />
+          <div className="flex flex-col items-center justify-center gap-2 text-center" style={{ width: 140, height: 140 }}>
+            <Loader2 className="w-10 h-10 animate-spin text-ghibli-forest" />
+            <span className="text-xs text-ghibli-bark px-2 leading-snug">
+              {course.documentCount > 0
+                ? `Reading ${course.processingDocumentCount} of ${course.documentCount} ${course.documentCount === 1 ? "material" : "materials"}`
+                : "Reading your materials"}
+              <br />
+              <span className="italic">usually 1–2 min</span>
+            </span>
           </div>
         ) : (
           <div className="relative">

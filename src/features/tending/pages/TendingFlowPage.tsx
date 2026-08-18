@@ -176,7 +176,7 @@ function TendingFlowInner() {
 
   const handleConfirmLeave = useCallback(() => {
     machine.clearPersisted();
-    navigate(`/course/${courseId}/study-plan`);
+    navigate(`/course/${courseId}/garden`);
   }, [machine, navigate, courseId]);
 
   if (!courseId || !topicId) {
@@ -193,7 +193,7 @@ function TendingFlowInner() {
             topicTitle="Tending session"
             currentStage={state.currentStage}
             stagesSkipped={state.stagesSkipped}
-            onExit={() => navigate(`/course/${courseId}/study-plan`)}
+            onExit={() => navigate(`/course/${courseId}/garden`)}
           />
           <main className="flex-1 flex items-center justify-center px-6">
             <div className="max-w-md text-center">
@@ -216,7 +216,7 @@ function TendingFlowInner() {
           topicTitle="Loading…"
           currentStage="loading"
           stagesSkipped={[]}
-          onExit={() => navigate(`/course/${courseId}/study-plan`)}
+          onExit={() => navigate(`/course/${courseId}/garden`)}
         />
         <main className="flex-1 flex flex-col">
           <TendingLoading onRetry={() => setGenerateAttempt((n) => n + 1)} />

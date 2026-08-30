@@ -395,7 +395,7 @@ export function KnowledgeGardenPage() {
                   </p>
                 </div>
                 <div className="order-1 md:order-2 flex justify-center">
-                  <PlantIndicator probability={overallProgress} size="xl" glow showPercent={false} />
+                  <PlantIndicator value={overallProgress} size="xl" glow showPercent={false} />
                 </div>
               </div>
             </ParchmentCard>

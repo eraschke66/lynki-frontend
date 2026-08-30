@@ -61,14 +61,14 @@ export function StudyPlanHero({
         <div className="order-1 md:order-2 flex flex-col items-center gap-2">
           {passPercent !== null ? (
             <>
-              <PlantIndicator probability={passPercent} size="xl" glow showPercent />
+              <PlantIndicator value={passPercent} size="xl" glow showPercent />
               <p className="font-sans text-xs text-ghibli-bark italic">
                 growing toward {targetLabel}
               </p>
             </>
           ) : (
             <>
-              <PlantIndicator probability={0} size="xl" showPercent={false} />
+              <PlantIndicator value={0} size="xl" showPercent={false} />
               <p className="font-sans text-xs text-ghibli-bark italic max-w-[14rem] text-center leading-relaxed">
                 Take your first quiz to see your pass chance
               </p>

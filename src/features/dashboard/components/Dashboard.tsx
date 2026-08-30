@@ -317,12 +317,11 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
                 />
                 <div
                   className="absolute bg-ghibli-canopy-dark"
-                  style={{ left: "85%", width: "2px", top: "-3px", bottom: "-3px" }}
+                  style={{ left: `${Math.round(targetGrade * 100)}%`, width: "2px", top: "-3px", bottom: "-3px" }}
                 />
               </div>
-              <div className="flex justify-between mt-1 text-[10px] text-ghibli-forest">
-                <span>Needs water</span>
-                <span className="mr-[13%]">Thriving</span>
+              <div className="mt-1 text-[10px] text-ghibli-forest">
+                Marker shows your target
               </div>
             </div>
           ) : (
@@ -344,7 +343,7 @@ function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
           </Button>
         </div>
         <div className="order-1 md:order-2 flex justify-center">
-          <PlantIndicator probability={data.overallProgress} size="xl" glow showPercent />
+          <PlantIndicator value={data.overallProgress} size="xl" glow showPercent />
         </div>
       </div>
     </ParchmentCard>
@@ -376,7 +375,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
         <div className="flex items-center gap-1 shrink-0">
           {course.totalConcepts > 0 ? (
             <span className={`text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 ${status.color}`}>
-              {status.label} · {course.passProbability}%
+              {status.label} · {course.passProbability}% pass
             </span>
           ) : isProcessing ? (
             <span className="text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 text-primary">
@@ -422,7 +421,7 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
           <div className="relative">
             {/* Soft glow halo behind plant */}
             <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/30 blur-2xl scale-110 -z-10" />
-            <PlantIndicator probability={course.progressPercent} size="lg" showPercent={false} />
+            <PlantIndicator value={course.progressPercent} size="lg" showPercent={false} />
           </div>
         )}
       </div>

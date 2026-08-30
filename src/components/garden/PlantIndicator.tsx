@@ -1,5 +1,5 @@
 interface PlantIndicatorProps {
-  probability: number;
+  value: number;
   size?: "sm" | "md" | "lg" | "xl";
   showPercent?: boolean;
   glow?: boolean;
@@ -22,12 +22,12 @@ const sizeMap = {
   xl:  { img: "h-48 w-48",  px: 192, labelPx: 13, pctPx: 13 },
 };
 
-export function PlantIndicator({ probability, size = "md", showPercent = true, glow = false }: PlantIndicatorProps) {
+export function PlantIndicator({ value, size = "md", showPercent = true, glow = false }: PlantIndicatorProps) {
   const stageIndex =
-    probability >= 85 ? 4 :
-    probability >= 70 ? 3 :
-    probability >= 55 ? 2 :
-    probability >= 40 ? 1 : 0;
+    value >= 85 ? 4 :
+    value >= 70 ? 3 :
+    value >= 55 ? 2 :
+    value >= 40 ? 1 : 0;
   const { img, px, labelPx, pctPx } = sizeMap[size];
 
   // PERF: the breathing animation used to run on every instance. A dashboard
@@ -74,7 +74,7 @@ export function PlantIndicator({ probability, size = "md", showPercent = true, g
             letterSpacing: "0.02em",
           }}
         >
-          {Math.round(probability)}%
+          {Math.round(value)}%
         </span>
       )}
     </div>

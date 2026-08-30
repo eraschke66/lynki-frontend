@@ -516,7 +516,7 @@ export function TestPage() {
         </button>
         <div className="relative z-10 flex items-center justify-center min-h-screen">
           <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-4 max-w-sm">
-            <PlantIndicator probability={20} size="lg" />
+            <PlantIndicator value={20} size="lg" />
             <div>
               <h2 className="font-serif text-lg font-semibold mb-1">
                 No Questions Available
@@ -562,7 +562,7 @@ export function TestPage() {
           <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-6 w-full max-w-lg">
             {loadingPassChance ? (
               <div className="space-y-3">
-                <PlantIndicator probability={40} size="lg" />
+                <PlantIndicator value={40} size="lg" />
                 <Loader2 className="w-8 h-8 animate-spin mx-auto text-primary" />
                 <p className="text-sm font-sans text-ghibli-bark">
                   Reading the garden...
@@ -573,7 +573,7 @@ export function TestPage() {
                 <p className="text-xs font-semibold text-ghibli-forest uppercase tracking-wider">
                   Garden Walk Complete
                 </p>
-                <PlantIndicator probability={passPercent} size="xl" />
+                <PlantIndicator value={passPercent} size="xl" />
                 <p
                   className={`text-sm font-semibold ${getGardenStatus(passPercent).color}`}
                 >

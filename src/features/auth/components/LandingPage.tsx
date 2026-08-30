@@ -641,7 +641,7 @@ function HeroProductPreview() {
               <span className="mr-[13%]">Target</span>
             </div>
           </div>
-          <PlantIndicator probability={72} size="lg" showPercent={false} />
+          <PlantIndicator value={72} size="lg" showPercent={false} />
         </div>
       </div>
 
@@ -810,7 +810,7 @@ function GardenPreview() {
             key={t.name}
             className="flex items-center gap-3 rounded-2xl bg-white/55 border border-ghibli-moss/15 px-3.5 py-3"
           >
-            <PlantIndicator probability={t.plant} size="sm" showPercent={false} />
+            <PlantIndicator value={t.plant} size="sm" showPercent={false} />
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 mb-1.5">
                 <p className="font-serif text-sm font-semibold text-ghibli-canopy truncate">
@@ -916,7 +916,7 @@ function BigGardenPreview() {
         <PreviewBadge />
       </div>
       <div className="grid md:grid-cols-[auto_1fr] gap-7 items-center mb-6">
-        <PlantIndicator probability={64} size="xl" glow showPercent />
+        <PlantIndicator value={64} size="xl" glow showPercent />
         <div>
           <p className="font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-forest mb-1.5">
             Biology · Year 12 · Example

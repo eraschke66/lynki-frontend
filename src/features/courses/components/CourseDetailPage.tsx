@@ -429,7 +429,7 @@ export function CourseDetailPage() {
               {passPercent !== null ? (
                 <>
                   <PlantIndicator
-                    probability={passPercent}
+                    value={passPercent}
                     size="xl"
                     glow
                     showPercent
@@ -441,7 +441,7 @@ export function CourseDetailPage() {
               ) : (
                 <>
                   <PlantIndicator
-                    probability={0}
+                    value={0}
                     size="xl"
                     showPercent={false}
                   />

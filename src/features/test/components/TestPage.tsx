@@ -106,8 +106,10 @@ export function TestPage() {
 
   // A freshly-generated quiz (quizId present, no attemptId yet) is generated
   // as a backend background job — poll course_quizzes.status directly rather
-  // than block on the generate request. Existing attempts (attemptId set) or
-  // other session types skip this entirely.
+  // than block on the generate request, and start the attempt once the job
+  // reaches a terminal state. This poll is the only latency the frontend adds
+  // to generation, so the interval stays well under the time a single
+  // question takes to generate.
   const isFreshQuiz = !!quizId && !attemptId;
   const { data: generationStatus, isLoading: isLoadingGenerationStatus } =
     useQuery({
@@ -115,7 +117,7 @@ export function TestPage() {
       queryFn: () => fetchQuizGenerationStatus(quizId!),
       enabled: isFreshQuiz,
       refetchInterval: (query) =>
-        query.state.data?.status === "generating" ? 3000 : false,
+        query.state.data?.status === "generating" ? 1000 : false,
     });
   const quizStillGenerating =
     isFreshQuiz &&
@@ -137,6 +139,13 @@ export function TestPage() {
       (!!quizId || !!topicId || !!conceptIds || !!sessionId) &&
       !quizStillGenerating &&
       !quizGenerationFailed,
+    // The fresh-quiz queryFn POSTs /quiz-attempts/start, which creates an
+    // attempt row — a refetch would create a duplicate attempt. Never refetch
+    // this query (the global default is refetchOnMount: "always"); retake
+    // explicitly removes the cache entry first, and mid-generation question
+    // growth is merged in via setQueryData, not refetch.
+    staleTime: Infinity,
+    refetchOnMount: false,
   });
 
   const { data: profileData } = useQuery({
@@ -188,7 +197,12 @@ export function TestPage() {
       testData.answered_count > 0
     ) {
       resumeApplied.current = true;
-      setCurrentIndex(testData.answered_count);
+      const available = testData.questions?.length ?? 0;
+      // May land one past the end when the attempt's answers already cover
+      // every question it holds (the user left before the completion write
+      // landed); the finish-on-overrun effect below resolves that.
+      const seekTo = Math.min(testData.answered_count, available);
+      setCurrentIndex(seekTo);
       setAnsweredCount(testData.answered_count);
       setCorrectCount(testData.correct_count ?? 0);
     }
@@ -274,48 +288,41 @@ export function TestPage() {
     [feedback, currentQuestion, user, courseId, quizId, topicId, testData?.test_id],
   );
 
-  const handleNext = useCallback(async () => {
-    if (currentIndex + 1 >= totalQuestions) {
-      posthog.capture("quiz_completed", {
-        course_id: courseId,
-        questions_answered: totalQuestions,
-        correct_count: correctCount,
-      });
-      setQuizComplete(true);
-      setLoadingPassChance(true);
-      try {
-        if (quizId && testData?.test_id) {
-          completeQuizAttempt(user!.id, courseId!, testData.test_id).catch(
-            (err) => reportError("Failed to complete quiz attempt:", err),
-          );
-        } else if (!topicId && testData?.test_id) {
-          completeTest(user!.id, courseId!, testData.test_id).catch((err) =>
-            reportError("Failed to complete test session:", err),
-          );
-        }
-        const pc = await fetchPassChance(user!.id, courseId!);
-        setPassChance(pc.pass_probability);
-        setTargetGrade(pc.target_grade ?? 1.0);
-      } catch (err) {
-        reportError("Failed to fetch pass chance:", err);
-        setPassChance(null);
-      } finally {
-        setLoadingPassChance(false);
+  const finishQuiz = useCallback(async () => {
+    posthog.capture("quiz_completed", {
+      course_id: courseId,
+      questions_answered: totalQuestions,
+      correct_count: correctCount,
+    });
+    setQuizComplete(true);
+    setLoadingPassChance(true);
+    try {
+      if (quizId && testData?.test_id) {
+        completeQuizAttempt(user!.id, courseId!, testData.test_id).catch(
+          (err) => reportError("Failed to complete quiz attempt:", err),
+        );
+      } else if (!topicId && testData?.test_id) {
+        completeTest(user!.id, courseId!, testData.test_id).catch((err) =>
+          reportError("Failed to complete test session:", err),
+        );
       }
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
-      queryClient.invalidateQueries({
-        queryKey: testQueryKeys.quizzes(courseId!, user!.id),
-      });
-      queryClient.invalidateQueries({
-        queryKey: gardenQueryKeys.progress(courseId!, user!.id),
-      });
-    } else {
-      setCurrentIndex((prev) => prev + 1);
-      setSelectedOption(null);
-      setFeedback(null);
+      const pc = await fetchPassChance(user!.id, courseId!);
+      setPassChance(pc.pass_probability);
+      setTargetGrade(pc.target_grade ?? 1.0);
+    } catch (err) {
+      reportError("Failed to fetch pass chance:", err);
+      setPassChance(null);
+    } finally {
+      setLoadingPassChance(false);
     }
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    queryClient.invalidateQueries({
+      queryKey: testQueryKeys.quizzes(courseId!, user!.id),
+    });
+    queryClient.invalidateQueries({
+      queryKey: gardenQueryKeys.progress(courseId!, user!.id),
+    });
   }, [
-    currentIndex,
     totalQuestions,
     correctCount,
     user,
@@ -325,6 +332,27 @@ export function TestPage() {
     queryClient,
     testData?.test_id,
   ]);
+
+  const handleNext = useCallback(async () => {
+    if (currentIndex + 1 >= totalQuestions) {
+      await finishQuiz();
+    } else {
+      setCurrentIndex((prev) => prev + 1);
+      setSelectedOption(null);
+      setFeedback(null);
+    }
+  }, [currentIndex, totalQuestions, finishQuiz]);
+
+  // Finish-on-overrun: a resumed attempt seeks one past the end when its
+  // answers already cover every question it holds (the user left before the
+  // completion write landed). Complete it rather than render past the end of
+  // the array — the attempt would otherwise sit in_progress forever.
+  useEffect(() => {
+    if (!testData || quizComplete) return;
+    if (questions.length > 0 && currentIndex >= questions.length) {
+      void finishQuiz();
+    }
+  }, [testData, quizComplete, currentIndex, questions.length, finishQuiz]);
 
   const handleRetake = useCallback(() => {
     setCurrentIndex(0);
@@ -439,7 +467,10 @@ export function TestPage() {
     return <GardenVideoLoader message="Growing your questions..." />;
   }
 
-  if (quizGenerationFailed) {
+  // Only surface a generation failure before the session has data — under the
+  // backend's "failed ⇔ zero questions" invariant a started session can't
+  // flip to failed, but guard anyway.
+  if (quizGenerationFailed && !testData) {
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <GhibliBackground />
@@ -703,7 +734,13 @@ export function TestPage() {
   }
 
   // ── Active question ──
-  const progress = (currentIndex + (feedback ? 1 : 0)) / totalQuestions;
+  // A resumed, fully-answered attempt sits one past the end for the tick
+  // before the finish-on-overrun effect fires — clamp what the progress UI
+  // shows.
+  const shownStep = Math.min(currentIndex + 1, totalQuestions);
+  const progress =
+    Math.min(currentIndex + (feedback ? 1 : 0), totalQuestions) /
+    totalQuestions;
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -748,8 +785,8 @@ export function TestPage() {
                 {testData?.course_name ?? "Quiz"}
               </span>
               <span className="font-sans text-xs text-ghibli-bark">
-                Step {currentIndex + 1} of {totalQuestions} &middot;{" "}
-                {correctCount} took root
+                Step {shownStep} of {totalQuestions} &middot; {correctCount}{" "}
+                took root
               </span>
             </div>
             <div className="relative h-5 rounded-full bg-ghibli-mist/70 border border-ghibli-moss/40 overflow-hidden parchment-texture">
@@ -776,6 +813,19 @@ export function TestPage() {
             </div>
           </div>
 
+          {!currentQuestion ? (
+            /* Transient: a resumed, fully-answered attempt, for the tick
+               before the finish-on-overrun effect completes it. */
+            <ParchmentCard className="p-8 md:p-10 mb-6">
+              <div className="flex flex-col items-center gap-4 py-6 text-center">
+                <Loader2 className="w-8 h-8 animate-spin text-ghibli-forest" />
+                <h2 className="font-serif text-lg font-semibold text-ghibli-canopy">
+                  Gathering what grew&hellip;
+                </h2>
+              </div>
+            </ParchmentCard>
+          ) : (
+            <>
           {/* Question scroll card */}
           <ParchmentCard className="p-8 md:p-10 mb-6">
             <div className="flex justify-center mb-4">
@@ -940,6 +990,8 @@ export function TestPage() {
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

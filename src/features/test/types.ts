@@ -87,7 +87,7 @@ export interface GeneratedQuizInfo {
   course_id: string;
 }
 
-/** Row shape of `course_quizzes.status` + `error_message`, as polled by TestPage. */
+/** Generation status polled by TestPage until it reaches a terminal state. */
 export interface QuizGenerationStatusRow {
   status: "generating" | "completed" | "failed";
   error_message: string | null;

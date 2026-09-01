@@ -165,9 +165,16 @@ export function CourseDetailPage() {
   // were left staring at.
   const freshQuiz = quizzes.find((q) => (q.quiz_attempts ?? []).length === 0);
 
-  // The activation moment. Materials still processing (no completed document
-  // yet) beats a quiz waiting to be started — there's nothing to generate
-  // from yet either way. On-demand generation failures surface directly on
+  // The activation moment. On first upload (no completed document yet),
+  // materials processing beats a quiz waiting to be started — there's
+  // nothing to generate from yet either way. Once the course already has
+  // completed materials, a fresh quiz waiting to be started is the more
+  // useful thing to surface than a second/third upload still processing in
+  // the background — that in-flight upload still gets a lightweight inline
+  // signal next to the document count (see the hero meta row) rather than
+  // competing for the one big CTA slot. If nothing is waiting either way,
+  // fall back to showing the processing card so an incremental upload isn't
+  // silently invisible. On-demand generation failures surface directly on
   // TestPage now (it's a fast, user-triggered action), not as a pre-emptive
   // dashboard state, so there's no "failed" case to compute here anymore.
   const activationState =
@@ -175,16 +182,16 @@ export function CourseDetailPage() {
       ? ("materials_processing" as const)
       : freshQuiz
         ? ("ready" as const)
-        : null;
+        : docStatusSummary?.hasProcessing
+          ? ("materials_processing" as const)
+          : null;
 
-  // If every upload for this course failed to process (no completed document
-  // and nothing still running), the student has no materials to generate
-  // from — surface it here rather than leaving the page looking idle, since
-  // the upload flow itself already reported "complete" once the backend
-  // accepted the file (processing happens async and can still fail after).
+  // A failed document should surface a retry regardless of whether other
+  // documents in the course succeeded — a second upload can fail on a course
+  // that already has completed materials. Gated on "nothing else still
+  // processing" so we don't show a stale failure while a retry is in flight.
   const materialsFailed =
     !docStatusSummary?.hasProcessing &&
-    !docStatusSummary?.hasCompleted &&
     (docStatusSummary?.failedDocs?.length ?? 0) > 0;
 
   const handleRetryFailedMaterials = async () => {
@@ -343,6 +350,16 @@ export function CourseDetailPage() {
                   <FileText className="w-4 h-4" />
                   {docCount ?? 0}{" "}
                   {(docCount ?? 0) === 1 ? "document" : "documents"}
+                  {activationState !== "materials_processing" &&
+                    docStatusSummary?.hasProcessing && (
+                      <span
+                        className="inline-flex items-center gap-1 text-ghibli-forest"
+                        title="New material is being read"
+                      >
+                        <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
+                        {docStatusSummary.processingDocs.length} processing
+                      </span>
+                    )}
                 </span>
                 <span className="flex items-center gap-1.5">
                   <ClipboardCheck className="w-4 h-4" />

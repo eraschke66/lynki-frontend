@@ -375,9 +375,19 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
         </h3>
         <div className="flex items-center gap-1 shrink-0">
           {course.totalConcepts > 0 ? (
-            <span className={`text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 ${status.color}`}>
-              {status.label} · {course.passProbability}%
-            </span>
+            <>
+              <span className={`text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 ${status.color}`}>
+                {status.label} · {course.passProbability}%
+              </span>
+              {isProcessing && (
+                <span
+                  className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-ghibli-mist/70 text-ghibli-forest"
+                  title={`New material processing (${course.processingDocumentCount} of ${course.documentCount})`}
+                >
+                  <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
+                </span>
+              )}
+            </>
           ) : isProcessing ? (
             <span className="text-[10px] font-sans font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full bg-ghibli-mist/70 text-primary">
               Processing…
@@ -449,7 +459,9 @@ function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }: {
           />
         </svg>
         <span className="font-sans text-xs text-ghibli-bark italic text-center">
-          Tend regularly to keep it thriving
+          {isProcessing && course.totalConcepts > 0
+            ? `Reading new material — ${course.processingDocumentCount} of ${course.documentCount} ${course.documentCount === 1 ? "document" : "documents"} processing`
+            : "Tend regularly to keep it thriving"}
         </span>
       </div>
 

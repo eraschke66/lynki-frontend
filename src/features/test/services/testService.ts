@@ -246,8 +246,8 @@ export async function generateQuiz(
 
 /**
  * Poll target for a single quiz's generation status directly from Supabase.
- * Used by TestPage to wait for a freshly-generated quiz to become ready
- * before calling startQuizAttempt, instead of blocking on generateQuiz.
+ * TestPage polls this until the row reaches a terminal state ('completed' or
+ * 'failed'), then starts the attempt.
  */
 export async function fetchQuizGenerationStatus(
   quizId: string,
@@ -259,7 +259,11 @@ export async function fetchQuizGenerationStatus(
     .eq("id", quizId)
     .maybeSingle();
   if (error) throw new Error(error.message);
-  return data as QuizGenerationStatusRow | null;
+  if (!data) return null;
+  return {
+    status: data.status,
+    error_message: data.error_message,
+  };
 }
 
 /**

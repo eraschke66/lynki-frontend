@@ -4,10 +4,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useAuth } from "../hooks/AuthContext";
-
-import { Eye, EyeOff } from "lucide-react";
-import { signInWithGoogle } from "../services/authService";
 import { humanAuthMessage } from "../authErrors";
+import { AuthScene, WoodenFrame } from "./AuthScene";
+import { GoogleSignInButton } from "./GoogleSignInButton";
+import { PasswordField } from "./PasswordField";
+import { EmailField } from "./EmailField";
+import { SubmitButton } from "./SubmitButton";
+import { OrDivider } from "./OrDivider";
+import { AgeConfirmationField } from "./AgeConfirmationField";
 
 const signupSchema = z
   .object({
@@ -30,16 +34,82 @@ const signupSchema = z
 
 type SignupFormData = z.infer<typeof signupSchema>;
 
+function SignupSuccess({ registeredEmail }: { registeredEmail: string }) {
+  const { resendVerificationEmail } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const isResent = error?.includes("resent");
+
+  const handleResend = async () => {
+    try {
+      setResending(true);
+      setError(null);
+      const { error: resendError } = await resendVerificationEmail(registeredEmail);
+      // Resend is the single most likely place to hit the send rate limit,
+      // so it needs the real reason, not a flat "failed".
+      setError(resendError ? humanAuthMessage(resendError) : "Verification email resent! Please check your inbox.");
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  return (
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
+      <AuthScene />
+      <WoodenFrame>
+        <div className="text-center">
+          <img
+            src="/plant-stage-1.webp"
+            alt=""
+            className="w-16 h-16 object-contain mx-auto mb-3 animate-pulse-soft"
+            style={{ mixBlendMode: "darken" }}
+          />
+          <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
+            Your seed has been planted
+          </h1>
+          <p className="font-sans text-sm text-ghibli-bark mb-2">
+            We sent a verification link to{" "}
+            <strong className="text-ghibli-forest">{registeredEmail}</strong>
+          </p>
+          <p className="font-sans text-xs text-ghibli-bark italic mb-6">
+            Click the link in the email to begin tending your garden.
+          </p>
+          {error && (
+            <div
+              className={`mb-4 p-3 rounded-parchment border text-sm font-sans ${
+                isResent
+                  ? "bg-ghibli-moss/10 border-ghibli-moss/30 text-ghibli-canopy"
+                  : "bg-destructive/10 border-destructive/20 text-destructive"
+              }`}
+            >
+              {error}
+            </div>
+          )}
+          <button
+            onClick={handleResend}
+            disabled={resending}
+            className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory py-3 mb-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-forest hover:shadow-glow disabled:opacity-50"
+          >
+            {resending ? "Sending..." : "Resend Verification Email"}
+          </button>
+          <Link to="/login" className="font-sans text-sm text-primary font-semibold hover:underline">
+            Back to the garden gate
+          </Link>
+        </div>
+      </WoodenFrame>
+    </div>
+  );
+}
+
 export function SignupForm() {
   const navigate = useNavigate();
-  const { signUp, resendVerificationEmail } = useAuth();
+  const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState<string>("");
-  const [resendingEmail, setResendingEmail] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
@@ -84,217 +154,25 @@ export function SignupForm() {
     }
   };
 
-  const handleResendEmail = async () => {
-    try {
-      setResendingEmail(true);
-      setError(null);
-      const { error: resendError } = await resendVerificationEmail(registeredEmail);
-      if (resendError) {
-        // Resend is the single most likely place to hit the send rate limit,
-        // so it needs the real reason, not a flat "failed".
-        setError(humanAuthMessage(resendError));
-      } else {
-        setError("Verification email resent! Please check your inbox.");
-      }
-    } catch {
-      setError("An unexpected error occurred. Please try again.");
-    } finally {
-      setResendingEmail(false);
-    }
-  };
-
-  // Shared scene background
-  const Background = () => (
-    <>
-      <div
-        className="fixed inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url(/garden-login-bg.jpg)" }}
-      />
-      <div
-        className="fixed inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse at 50% 30%, hsl(45 85% 70% / 0.2) 0%, transparent 60%), linear-gradient(to bottom, hsl(45 60% 50% / 0.08), hsl(33 30% 20% / 0.25))",
-        }}
-      />
-      <div className="fixed inset-0 mist-overlay pointer-events-none" />
-      <img
-        src="/foliage-left.png"
-        alt=""
-        className="fixed left-0 bottom-0 w-72 lg:w-96 pointer-events-none z-20 animate-drift select-none"
-        style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
-      />
-      <img
-        src="/foliage-right.png"
-        alt=""
-        className="fixed right-0 top-0 w-64 lg:w-80 pointer-events-none z-20 animate-drift select-none"
-        style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
-      />
-      <div className="fixed top-16 left-1/3 w-48 h-48 rounded-full bg-ghibli-sunlight/15 blur-3xl animate-shimmer pointer-events-none" />
-      <div
-        className="fixed bottom-32 right-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none"
-        style={{ animationDelay: "2.5s" }}
-      />
-    </>
-  );
-
-  // Shared wooden notice board frame
-  const WoodenFrame = ({ children }: { children: React.ReactNode }) => (
-    <div className="relative z-10 w-full max-w-md mx-4 sm:mx-auto">
-      <div
-        className="rounded-3xl p-[10px]"
-        style={{
-          background: "linear-gradient(145deg, hsl(30 35% 38%), hsl(25 30% 28%))",
-          boxShadow:
-            "0 12px 40px -8px hsl(30 30% 15% / 0.5), inset 0 1px 0 hsl(35 40% 50% / 0.3), inset 0 -1px 0 hsl(25 25% 18% / 0.5)",
-        }}
-      >
-        <div
-          className="absolute inset-0 rounded-3xl opacity-10 pointer-events-none"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(90deg, transparent, transparent 8px, hsl(30 20% 60% / 0.3) 8px, hsl(30 20% 60% / 0.3) 9px)",
-          }}
-        />
-        <div className="relative parchment-solid rounded-[1.1rem] p-8">
-          <div className="relative z-10">{children}</div>
-        </div>
-      </div>
-    </div>
-  );
-
   if (success) {
-    const isResent = error?.includes("resent");
-    return (
-      <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
-        <Background />
-        <WoodenFrame>
-          <div className="text-center">
-            <img
-              src="/plant-stage-1.webp"
-              alt=""
-              className="w-16 h-16 object-contain mx-auto mb-3 animate-pulse-soft"
-              style={{ mixBlendMode: "darken" }}
-            />
-            <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
-              Your seed has been planted
-            </h1>
-            <p className="font-sans text-sm text-ghibli-bark mb-2">
-              We sent a verification link to{" "}
-              <strong className="text-ghibli-forest">{registeredEmail}</strong>
-            </p>
-            <p className="font-sans text-xs text-ghibli-bark italic mb-6">
-              Click the link in the email to begin tending your garden.
-            </p>
-            {error && (
-              <div
-                className={`mb-4 p-3 rounded-parchment border text-sm font-sans ${
-                  isResent
-                    ? "bg-ghibli-moss/10 border-ghibli-moss/30 text-ghibli-canopy"
-                    : "bg-destructive/10 border-destructive/20 text-destructive"
-                }`}
-              >
-                {error}
-              </div>
-            )}
-            <button
-              onClick={handleResendEmail}
-              disabled={resendingEmail}
-              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory py-3 mb-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-forest hover:shadow-glow disabled:opacity-50"
-            >
-              {resendingEmail ? "Sending..." : "Resend Verification Email"}
-            </button>
-            <Link
-              to="/login"
-              className="font-sans text-sm text-primary font-semibold hover:underline"
-            >
-              Back to the garden gate
-            </Link>
-          </div>
-        </WoodenFrame>
-      </div>
-    );
+    return <SignupSuccess registeredEmail={registeredEmail} />;
   }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4 py-8">
-      <Background />
+      <AuthScene />
       <WoodenFrame>
         <div className="text-center mb-6">
           <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-1">
             Plant your first seed
           </h1>
-          <p className="font-sans text-sm text-ghibli-bark">
-            Your knowledge garden awaits 🌿
-          </p>
+          <p className="font-sans text-sm text-ghibli-bark">Your knowledge garden awaits 🌿</p>
         </div>
 
         <div className="flex flex-col gap-4">
-          {/* Google sign-in — organic 4-petal style */}
-          <button
-            type="button"
-            onClick={async () => {
-              const { error: gError } = await signInWithGoogle();
-              if (gError) setError(humanAuthMessage(gError));
-            }}
-            className="w-full rounded-parchment border-2 border-ghibli-moss/45 bg-ghibli-ivory/85 py-3 font-sans font-medium text-sm text-ghibli-canopy transition-all duration-300 hover:border-ghibli-amber/50 hover:shadow-glow flex items-center justify-center gap-2"
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 18 18"
-              className="shrink-0"
-            >
-              <circle
-                cx="9"
-                cy="9"
-                r="3"
-                fill="hsl(var(--ghibli-amber))"
-              />
-              <ellipse
-                cx="9"
-                cy="3"
-                rx="2.5"
-                ry="3"
-                fill="hsl(0 65% 55%)"
-                opacity="0.85"
-              />
-              <ellipse
-                cx="15"
-                cy="9"
-                rx="3"
-                ry="2.5"
-                fill="hsl(45 80% 55%)"
-                opacity="0.85"
-              />
-              <ellipse
-                cx="9"
-                cy="15"
-                rx="2.5"
-                ry="3"
-                fill="hsl(140 45% 40%)"
-                opacity="0.85"
-              />
-              <ellipse
-                cx="3"
-                cy="9"
-                rx="3"
-                ry="2.5"
-                fill="hsl(210 55% 50%)"
-                opacity="0.85"
-              />
-            </svg>
-            Sign up with Google
-          </button>
+          <GoogleSignInButton label="Sign up with Google" onError={setError} />
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 my-1">
-            <div className="flex-1 h-px bg-ghibli-moss/30" />
-            <span className="font-sans text-[10px] uppercase tracking-widest text-ghibli-bark">
-              or email
-            </span>
-            <div className="flex-1 h-px bg-ghibli-moss/30" />
-          </div>
+          <OrDivider />
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
             {error && (
@@ -303,152 +181,35 @@ export function SignupForm() {
               </div>
             )}
 
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                autoComplete="username"
-                placeholder="gardener@passai.app"
-                {...register("email")}
-                disabled={loading}
-                className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-              />
-              {errors.email && (
-                <p className="font-sans text-xs text-destructive mt-1">{errors.email.message}</p>
-              )}
-            </div>
+            <EmailField id="email" registration={register("email")} error={errors.email} disabled={loading} />
 
-            {/* Password */}
-            <div>
-              <label htmlFor="password" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
-                Password
-              </label>
-              <div className="relative">
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  {...register("password")}
-                  disabled={loading}
-                  className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {/* State the whole policy before they type. Discovering it one
-                  failed submit at a time was the first thing the product ever
-                  said to a new student. */}
-              {!errors.password && (
-                <p className="font-sans text-xs text-ghibli-bark mt-1">
-                  At least 8 characters, with an uppercase letter, a lowercase
-                  letter and a number.
-                </p>
-              )}
-              {errors.password && (
-                <ul className="font-sans text-xs text-destructive mt-1 space-y-0.5 list-none">
-                  {(errors.password.types
-                    ? Object.values(errors.password.types).flat()
-                    : [errors.password.message]
-                  )
-                    .filter(Boolean)
-                    .map((msg) => (
-                      <li key={String(msg)}>{String(msg)}</li>
-                    ))}
-                </ul>
-              )}
-            </div>
-
-            {/* Confirm Password */}
-            <div>
-              <label htmlFor="confirmPassword" className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  autoComplete="new-password"
-                  placeholder="••••••••"
-                  {...register("confirmPassword")}
-                  disabled={loading}
-                  className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword((prev) => !prev)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
-                >
-                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {errors.confirmPassword && (
-                <p className="font-sans text-xs text-destructive mt-1">
-                  {errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-
-            {/* Age confirmation */}
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="ageConfirmed" className="flex items-start gap-2.5 cursor-pointer">
-                <input
-                  id="ageConfirmed"
-                  type="checkbox"
-                  {...register("ageConfirmed")}
-                  disabled={loading}
-                  className="mt-0.5 w-4 h-4 accent-primary cursor-pointer"
-                />
-                <span className="font-sans text-xs text-ghibli-bark leading-snug">
-                  I confirm that I am at least 13 years old
-                </span>
-              </label>
-              {errors.ageConfirmed && (
-                <p className="font-sans text-xs text-destructive ml-6">
-                  {errors.ageConfirmed.message}
-                </p>
-              )}
-              <p className="font-sans text-[11px] text-ghibli-bark text-center leading-relaxed mt-1">
-                By signing up, you agree to our{" "}
-                <Link to="/terms" className="text-primary font-semibold hover:underline">
-                  Terms of Service
-                </Link>{" "}
-                and{" "}
-                <Link to="/privacy" className="text-primary font-semibold hover:underline">
-                  Privacy Policy
-                </Link>
-                .
-              </p>
-            </div>
-
-            {/* Submit */}
-            <button
-              type="submit"
+            <PasswordField
+              id="password"
+              label="Password"
+              autoComplete="new-password"
               disabled={loading}
-              className="w-full rounded-parchment bg-primary text-primary-foreground py-3 font-sans font-semibold text-sm tracking-wide transition-all duration-300 hover:shadow-glow hover:brightness-110 relative overflow-hidden disabled:opacity-50"
-            >
-              <span className="relative z-10">
-                {loading ? "Planting your seed..." : "Walk the Path →"}
-              </span>
-              <div
-                className="absolute inset-0 opacity-[0.07] pointer-events-none"
-                style={{
-                  backgroundImage:
-                    "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M30 5 Q40 15 35 30 Q30 20 25 30 Q20 15 30 5Z' fill='%23fff' opacity='0.5'/%3E%3C/svg%3E\")",
-                }}
-              />
-            </button>
+              registration={register("password")}
+              error={errors.password}
+              hint="At least 8 characters, with an uppercase letter, a lowercase letter and a number."
+            />
 
-            {/* Sign in link */}
+            <PasswordField
+              id="confirmPassword"
+              label="Confirm Password"
+              autoComplete="new-password"
+              disabled={loading}
+              registration={register("confirmPassword")}
+              error={errors.confirmPassword}
+            />
+
+            <AgeConfirmationField
+              registration={register("ageConfirmed")}
+              error={errors.ageConfirmed}
+              disabled={loading}
+            />
+
+            <SubmitButton loading={loading} label="Walk the Path →" loadingLabel="Planting your seed..." />
+
             <p className="text-center font-sans text-xs text-ghibli-bark mt-1">
               Already have an account?{" "}
               <Link to="/login" className="text-primary font-medium hover:underline">
@@ -458,13 +219,8 @@ export function SignupForm() {
           </form>
         </div>
 
-        {/* Cat paw print */}
         <div className="flex justify-center mt-4">
-          <img
-            src="/cat-pawprint.png"
-            alt=""
-            className="w-8 h-8 object-contain opacity-40 select-none"
-          />
+          <img src="/cat-pawprint.png" alt="" className="w-8 h-8 object-contain opacity-40 select-none" />
         </div>
       </WoodenFrame>
     </div>

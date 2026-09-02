@@ -1,14 +1,6 @@
 import type { ReactNode } from "react";
 
-/**
- * The garden backdrop and wooden notice board shared by the auth screens.
- *
- * LoginForm and SignupForm each carry their own inline copy of this markup.
- * Those are deliberately left alone — this module exists so the two new
- * password-reset screens match them without a third and fourth transcription,
- * and without editing two working, shipped forms to prove a point about reuse.
- */
-
+/** Garden backdrop and wooden notice board frame shared by every auth screen. */
 export function AuthScene() {
   return (
     <>
@@ -29,13 +21,19 @@ export function AuthScene() {
         alt=""
         aria-hidden
         className="fixed left-0 bottom-0 w-72 lg:w-96 pointer-events-none z-20 animate-drift select-none"
+        style={{ filter: "drop-shadow(4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
       />
       <img
         src="/foliage-right.png"
         alt=""
         aria-hidden
         className="fixed right-0 top-0 w-64 lg:w-80 pointer-events-none z-20 animate-drift select-none"
-        style={{ animationDelay: "3s" }}
+        style={{ animationDelay: "3s", filter: "drop-shadow(-4px 0 15px hsl(var(--ghibli-canopy) / 0.3))" }}
+      />
+      <div className="fixed top-16 left-1/3 w-48 h-48 rounded-full bg-ghibli-sunlight/15 blur-3xl animate-shimmer pointer-events-none" />
+      <div
+        className="fixed bottom-32 right-1/4 w-40 h-40 rounded-full bg-ghibli-sunlight/10 blur-3xl animate-shimmer pointer-events-none"
+        style={{ animationDelay: "2.5s" }}
       />
     </>
   );

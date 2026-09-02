@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Database } from "@/types/database";
+import type { Database, Json } from "@/types/database";
 import type {
   ActiveRecallResult,
   ConnectionResult,
@@ -113,7 +113,7 @@ export function mapRowToTendingSession(row: TendingSessionRow): TendingSession {
 
   const connectionRows = row.concept_pair_results;
   const connectionResults: ConnectionResult[] | null = Array.isArray(connectionRows)
-    ? (connectionRows as ConnectionResult[])
+    ? (connectionRows as unknown as ConnectionResult[])
     : null;
 
   const quizResults = (row.quiz_results as QuizResult | null) ?? null;
@@ -188,7 +188,7 @@ export async function persistConnectionStage(sessionId: string, results: Connect
   const { error } = await supabase
     .from(TABLE)
     .update({
-      concept_pair_results: results,
+      concept_pair_results: results as unknown as Json,
       current_step: "quiz",
       updated_at: nowIso(),
     })
@@ -200,7 +200,7 @@ export async function persistQuizStage(sessionId: string, result: QuizResult): P
   const { error } = await supabase
     .from(TABLE)
     .update({
-      quiz_results: result,
+      quiz_results: result as unknown as Json,
       current_step: "mastery_delta",
       updated_at: nowIso(),
     })

@@ -3,11 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { updatePassword } from "../services/authService";
 import { humanAuthMessage } from "../authErrors";
 import { AuthScene, WoodenFrame } from "./AuthScene";
+import { PasswordField } from "./PasswordField";
 
 // Identical rules to signup. Two different password policies in one product is
 // how a student ends up locked out by a rule they already satisfied once.
@@ -30,32 +30,8 @@ type ResetPasswordData = z.infer<typeof resetPasswordSchema>;
 
 type LinkState = "checking" | "valid" | "invalid";
 
-/**
- * Set a new password, reached from the emailed recovery link.
- *
- * Supabase's client picks the recovery session out of the URL and strips it, so
- * by the time this renders the only question is whether a session exists. The
- * PASSWORD_RECOVERY event is also handled, because the exchange can land just
- * after first paint.
- */
-export function ResetPasswordForm() {
-  const navigate = useNavigate();
+function useRecoverySession() {
   const [linkState, setLinkState] = useState<LinkState>("checking");
-  const [error, setError] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [done, setDone] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ResetPasswordData>({
-    resolver: zodResolver(resetPasswordSchema),
-    mode: "onTouched",
-    criteriaMode: "all",
-  });
 
   useEffect(() => {
     let cancelled = false;
@@ -75,6 +51,43 @@ export function ResetPasswordForm() {
       sub.subscription.unsubscribe();
     };
   }, []);
+
+  return linkState;
+}
+
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
+      <AuthScene />
+      <WoodenFrame>{children}</WoodenFrame>
+    </div>
+  );
+}
+
+/**
+ * Set a new password, reached from the emailed recovery link.
+ *
+ * Supabase's client picks the recovery session out of the URL and strips it, so
+ * by the time this renders the only question is whether a session exists. The
+ * PASSWORD_RECOVERY event is also handled, because the exchange can land just
+ * after first paint.
+ */
+export function ResetPasswordForm() {
+  const navigate = useNavigate();
+  const linkState = useRecoverySession();
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [done, setDone] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ResetPasswordData>({
+    resolver: zodResolver(resetPasswordSchema),
+    mode: "onTouched",
+    criteriaMode: "all",
+  });
 
   const onSubmit = async (data: ResetPasswordData) => {
     setSaving(true);
@@ -97,68 +110,59 @@ export function ResetPasswordForm() {
     }
   };
 
-  const shell = (children: React.ReactNode) => (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden px-4">
-      <AuthScene />
-      <WoodenFrame>{children}</WoodenFrame>
-    </div>
-  );
-
   if (linkState === "checking") {
-    return shell(
-      <p className="text-center font-sans text-sm text-ghibli-bark py-6">
-        Checking your link…
-      </p>,
+    return (
+      <Shell>
+        <p className="text-center font-sans text-sm text-ghibli-bark py-6">Checking your link…</p>
+      </Shell>
     );
   }
 
   if (linkState === "invalid") {
-    return shell(
-      <div className="text-center">
-        <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
-          That link has wilted
-        </h1>
-        <p className="font-sans text-sm text-ghibli-bark mb-6">
-          Reset links only last about an hour. Ask for a fresh one and it'll work.
-        </p>
-        <Link
-          to="/forgot-password"
-          className="inline-block rounded-parchment border-0 bg-gradient-to-br from-ghibli-jungle to-ghibli-canopy px-6 py-3 font-sans font-medium text-sm text-primary-foreground"
-        >
-          Send a new link
-        </Link>
-      </div>,
+    return (
+      <Shell>
+        <div className="text-center">
+          <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
+            That link has wilted
+          </h1>
+          <p className="font-sans text-sm text-ghibli-bark mb-6">
+            Reset links only last about an hour. Ask for a fresh one and it'll work.
+          </p>
+          <Link
+            to="/forgot-password"
+            className="inline-block rounded-parchment border-0 bg-gradient-to-br from-ghibli-jungle to-ghibli-canopy px-6 py-3 font-sans font-medium text-sm text-primary-foreground"
+          >
+            Send a new link
+          </Link>
+        </div>
+      </Shell>
     );
   }
 
   if (done) {
-    return shell(
-      <div className="text-center">
-        <img
-          src="/plant-stage-2.webp"
-          alt=""
-          className="w-16 h-16 object-contain mx-auto mb-3"
-          style={{ mixBlendMode: "darken" }}
-        />
-        <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
-          Your new password is set
-        </h1>
-        <p className="font-sans text-sm text-ghibli-bark">
-          Taking you back to your garden.
-        </p>
-      </div>,
+    return (
+      <Shell>
+        <div className="text-center">
+          <img
+            src="/plant-stage-2.webp"
+            alt=""
+            className="w-16 h-16 object-contain mx-auto mb-3"
+            style={{ mixBlendMode: "darken" }}
+          />
+          <h1 className="font-serif text-2xl font-semibold text-ghibli-canopy mb-2">
+            Your new password is set
+          </h1>
+          <p className="font-sans text-sm text-ghibli-bark">Taking you back to your garden.</p>
+        </div>
+      </Shell>
     );
   }
 
-  return shell(
-    <>
+  return (
+    <Shell>
       <div className="text-center mb-6">
-        <h1 className="font-serif text-2xl font-bold text-primary mb-1">
-          Choose a new password
-        </h1>
-        <p className="font-sans text-sm text-ghibli-bark">
-          Then we'll take you straight back in.
-        </p>
+        <h1 className="font-serif text-2xl font-bold text-primary mb-1">Choose a new password</h1>
+        <p className="font-sans text-sm text-ghibli-bark">Then we'll take you straight back in.</p>
       </div>
 
       {error && (
@@ -168,84 +172,24 @@ export function ResetPasswordForm() {
       )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label
-            htmlFor="password"
-            className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block"
-          >
-            New password
-          </label>
-          <div className="relative">
-            <input
-              id="password"
-              type={showPassword ? "text" : "password"}
-              autoComplete="new-password"
-              placeholder="••••••••"
-              {...register("password")}
-              disabled={saving}
-              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-          {!errors.password && (
-            <p className="font-sans text-xs text-ghibli-bark mt-1">
-              At least 8 characters, with an uppercase letter, a lowercase letter
-              and a number.
-            </p>
-          )}
-          {errors.password && (
-            <ul className="font-sans text-xs text-destructive mt-1 space-y-0.5 list-none">
-              {(errors.password.types
-                ? Object.values(errors.password.types).flat()
-                : [errors.password.message]
-              )
-                .filter(Boolean)
-                .map((msg) => (
-                  <li key={String(msg)}>{String(msg)}</li>
-                ))}
-            </ul>
-          )}
-        </div>
+        <PasswordField
+          id="password"
+          label="New password"
+          autoComplete="new-password"
+          disabled={saving}
+          registration={register("password")}
+          error={errors.password}
+          hint="At least 8 characters, with an uppercase letter, a lowercase letter and a number."
+        />
 
-        <div>
-          <label
-            htmlFor="confirmPassword"
-            className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block"
-          >
-            Confirm password
-          </label>
-          <div className="relative">
-            <input
-              id="confirmPassword"
-              type={showConfirm ? "text" : "password"}
-              autoComplete="new-password"
-              placeholder="••••••••"
-              {...register("confirmPassword")}
-              disabled={saving}
-              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 pr-10 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-            />
-            <button
-              type="button"
-              onClick={() => setShowConfirm((v) => !v)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-ghibli-bark hover:text-ghibli-canopy transition-colors"
-              aria-label={showConfirm ? "Hide password" : "Show password"}
-            >
-              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </div>
-          {errors.confirmPassword && (
-            <p className="font-sans text-xs text-destructive mt-1">
-              {errors.confirmPassword.message}
-            </p>
-          )}
-        </div>
+        <PasswordField
+          id="confirmPassword"
+          label="Confirm password"
+          autoComplete="new-password"
+          disabled={saving}
+          registration={register("confirmPassword")}
+          error={errors.confirmPassword}
+        />
 
         <button
           type="submit"
@@ -255,6 +199,6 @@ export function ResetPasswordForm() {
           {saving ? "Saving…" : "Set new password"}
         </button>
       </form>
-    </>,
+    </Shell>
   );
 }

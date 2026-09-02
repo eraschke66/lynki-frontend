@@ -6,6 +6,7 @@ import * as z from "zod";
 import { sendPasswordReset } from "../services/authService";
 import { humanAuthMessage } from "../authErrors";
 import { AuthScene, WoodenFrame } from "./AuthScene";
+import { EmailField } from "./EmailField";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -114,28 +115,7 @@ export function ForgotPasswordForm() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label
-              htmlFor="email"
-              className="font-sans text-xs font-medium text-ghibli-bark mb-1.5 block"
-            >
-              Email
-            </label>
-            <input
-              id="email"
-              type="email"
-              autoComplete="username"
-              placeholder="gardener@passai.app"
-              {...register("email")}
-              disabled={loading}
-              className="w-full rounded-parchment border-2 border-ghibli-moss/30 bg-ghibli-ivory px-4 py-3 font-sans text-sm text-ghibli-canopy placeholder:text-ghibli-bark outline-none transition-all duration-300 focus:border-primary focus:shadow-glow disabled:opacity-50"
-            />
-            {errors.email && (
-              <p className="font-sans text-xs text-destructive mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
+          <EmailField id="email" registration={register("email")} error={errors.email} disabled={loading} />
 
           <button
             type="submit"

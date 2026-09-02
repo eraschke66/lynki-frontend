@@ -1,11 +1,15 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, RefreshCw, BookOpen } from "lucide-react";
-import { gardenQueryKeys } from "@/lib/queryKeys";
+import { gardenQueryKeys, tendingQueryKeys } from "@/lib/queryKeys";
 import { getGardenStatus } from "@/lib/garden";
+import {
+  findIncompleteSessionForCourse,
+  markSessionAbandoned,
+} from "@/features/tending/services/tendingProgressApi";
 import { KnowledgeGardenSkeleton } from "@/components/garden/GardenSkeletons";
 import { GardenRoots } from "@/components/garden/GardenRoots";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
@@ -57,28 +61,43 @@ function selectRecommendedTopic(topics: TopicMastery[]): TopicMastery | null {
 function RecommendedTopicCard({
   topic,
   onBegin,
+  incompleteSessionId,
+  onStartFresh,
 }: {
   topic: TopicMastery;
   onBegin: (topicId: string) => void;
+  /** Set when an in-flight, unfinished session exists for this topic. */
+  incompleteSessionId?: string;
+  onStartFresh?: (sessionId: string) => void;
 }) {
   const gardenStatus = getGardenStatus(topic.overall_progress);
+  const isResuming = !!incompleteSessionId;
 
   return (
     <ParchmentCard className="p-6 mb-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="min-w-0 flex-1">
           <h2 className="font-serif text-base font-semibold text-foreground leading-snug">
-            Today: tend {topic.topic_name}
+            {isResuming ? `Pick up where you left off: ${topic.topic_name}` : `Today: tend ${topic.topic_name}`}
           </h2>
           <p className="text-xs text-ghibli-bark mt-1">
             15 min · {gardenStatus.label}
           </p>
+          {isResuming && (
+            <button
+              type="button"
+              onClick={() => onStartFresh?.(incompleteSessionId)}
+              className="text-xs text-ghibli-forest hover:underline mt-1"
+            >
+              Start fresh instead
+            </button>
+          )}
         </div>
         <Button
           onClick={() => onBegin(topic.topic_id)}
           className="shrink-0"
         >
-          Begin →
+          {isResuming ? "Resume →" : "Begin →"}
         </Button>
       </div>
     </ParchmentCard>
@@ -235,6 +254,7 @@ export function KnowledgeGardenPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const topicsContainerRef = useRef<HTMLDivElement | null>(null);
   const [searchParams] = useSearchParams();
 
@@ -311,6 +331,16 @@ export function KnowledgeGardenPage() {
     staleTime: 30_000,
   });
 
+  // An in-flight tending session takes priority over the normal
+  // recommendation algorithm below, so the resume affordance for it can't
+  // get buried by an unrelated topic's progress numbers.
+  const { data: incompleteSession } = useQuery({
+    queryKey: tendingQueryKeys.incompleteSession(courseId ?? "", user?.id ?? ""),
+    queryFn: () => findIncompleteSessionForCourse(user!.id, courseId!),
+    enabled: !!user && !!courseId,
+    staleTime: 30_000,
+  });
+
   const handleStudyTopic = useCallback(
     (topicId: string) => {
       navigate(`/course/${courseId}/topic-quiz/${topicId}`);
@@ -325,6 +355,18 @@ export function KnowledgeGardenPage() {
     [courseId, navigate],
   );
 
+  const handleStartFresh = useCallback(
+    async (sessionId: string) => {
+      await markSessionAbandoned(sessionId);
+      if (user && courseId) {
+        queryClient.invalidateQueries({
+          queryKey: tendingQueryKeys.incompleteSession(courseId, user.id),
+        });
+      }
+    },
+    [courseId, user, queryClient],
+  );
+
   if (!user || !courseId) {
     navigate("/home");
     return null;
@@ -333,7 +375,10 @@ export function KnowledgeGardenPage() {
   const topics = gardenData?.topics ?? [];
   const overallProgress = gardenData?.overall_progress ?? 0;
   const gardenStatus = getGardenStatus(overallProgress);
-  const recommendedTopic = selectRecommendedTopic(topics);
+  const incompleteTopic = incompleteSession
+    ? (topics.find((t) => t.topic_id === incompleteSession.topic_id) ?? null)
+    : null;
+  const recommendedTopic = incompleteTopic ?? selectRecommendedTopic(topics);
 
   return (
     <>
@@ -405,6 +450,8 @@ export function KnowledgeGardenPage() {
               <RecommendedTopicCard
                 topic={recommendedTopic}
                 onBegin={handleBeginTending}
+                incompleteSessionId={incompleteTopic ? incompleteSession?.id : undefined}
+                onStartFresh={handleStartFresh}
               />
             )}
 

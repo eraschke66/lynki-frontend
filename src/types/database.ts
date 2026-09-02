@@ -127,6 +127,97 @@ export interface Database {
           },
         ];
       };
+      topic_tending_sessions: {
+        Row: {
+          id: string;
+          user_id: string;
+          course_id: string;
+          topic_id: string;
+          started_at: string;
+          completed_at: string | null;
+          abandoned_at: string | null;
+          current_step: string | null;
+          generated_content: Json;
+          recall_card_results: Json;
+          active_recall_input: string | null;
+          active_recall_evaluation: Json | null;
+          concept_pair_results: Json;
+          quiz_attempt_id: string | null;
+          stages_skipped: Json;
+          mnemonic_results: Json;
+          quiz_results: Json | null;
+          mastery_before: number | null;
+          mastery_after: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          course_id: string;
+          topic_id: string;
+          started_at?: string;
+          completed_at?: string | null;
+          abandoned_at?: string | null;
+          current_step?: string | null;
+          generated_content?: Json;
+          recall_card_results?: Json;
+          active_recall_input?: string | null;
+          active_recall_evaluation?: Json | null;
+          concept_pair_results?: Json;
+          quiz_attempt_id?: string | null;
+          stages_skipped?: Json;
+          mnemonic_results?: Json;
+          quiz_results?: Json | null;
+          mastery_before?: number | null;
+          mastery_after?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          course_id?: string;
+          topic_id?: string;
+          started_at?: string;
+          completed_at?: string | null;
+          abandoned_at?: string | null;
+          current_step?: string | null;
+          generated_content?: Json;
+          recall_card_results?: Json;
+          active_recall_input?: string | null;
+          active_recall_evaluation?: Json | null;
+          concept_pair_results?: Json;
+          quiz_attempt_id?: string | null;
+          stages_skipped?: Json;
+          mnemonic_results?: Json;
+          quiz_results?: Json | null;
+          mastery_before?: number | null;
+          mastery_after?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "topic_tending_sessions_user_id_fkey";
+            columns: ["user_id"];
+            referencedRelation: "users";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "topic_tending_sessions_course_id_fkey";
+            columns: ["course_id"];
+            referencedRelation: "courses";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "topic_tending_sessions_topic_id_fkey";
+            columns: ["topic_id"];
+            referencedRelation: "topics";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       quizzes: {
         Row: {
           id: string;

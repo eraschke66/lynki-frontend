@@ -63,6 +63,12 @@ export const topicQuizQueryKeys = {
     [...topicQuizQueryKeys.all, "session", courseId, topicId, userId] as const,
 };
 
+export const tendingQueryKeys = {
+  all: ["tending"] as const,
+  incompleteSession: (courseId: string, userId: string) =>
+    [...tendingQueryKeys.all, "incomplete", courseId, userId] as const,
+};
+
 export const subscriptionQueryKeys = {
   all: ["subscription"] as const,
   status: (userId: string) =>

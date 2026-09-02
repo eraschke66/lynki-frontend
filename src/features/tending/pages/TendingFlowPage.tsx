@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { toast } from "sonner";
-import { gardenQueryKeys } from "@/lib/queryKeys";
+import { gardenQueryKeys, tendingQueryKeys } from "@/lib/queryKeys";
 import type { CourseGardenData } from "@/features/courses/types";
 import {
   AlertDialog,
@@ -31,7 +31,17 @@ import {
   fetchCourseMasterySnapshot,
   generateSession,
 } from "../services/tendingApi";
-import { useTendingMachine } from "../state/tendingMachine";
+import {
+  findIncompleteSessionForTopic,
+  mapRowToTendingSession,
+  persistActiveRecallStage,
+  persistConnectionStage,
+  persistMnemonicStage,
+  persistQuizStage,
+  persistRecallStage,
+  persistSkipStage,
+} from "../services/tendingProgressApi";
+import { nextStage, useTendingMachine } from "../state/tendingMachine";
 import type { AllStageResults } from "../types";
 
 function TendingFlowInner() {
@@ -42,11 +52,43 @@ function TendingFlowInner() {
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [generateAttempt, setGenerateAttempt] = useState(0);
+  const [completeError, setCompleteError] = useState<string | null>(null);
+  const [completeAttempt, setCompleteAttempt] = useState(0);
+  const [checkedForResume, setCheckedForResume] = useState(false);
 
   const machine = useTendingMachine(courseId ?? "", topicId ?? "");
   const { state, isInitialized, init } = machine;
   const completeFiredRef = useRef(false);
   const preTendSnapshotRef = useRef(false);
+
+  // Resume check — runs once on mount, before the generate effect. Finds an
+  // in-flight DB session for this course+topic and hydrates directly from
+  // it; a completed/abandoned session is never returned by this lookup (see
+  // tendingProgressApi.ts), so this can never resurface stale results.
+  useEffect(() => {
+    if (!courseId || !topicId || !user) return;
+    if (checkedForResume) return;
+    let cancelled = false;
+    findIncompleteSessionForTopic(user.id, courseId, topicId)
+      .then((row) => {
+        if (cancelled) return;
+        if (row) {
+          machine.hydrate(mapRowToTendingSession(row));
+          toast.success("Resuming your tending session");
+        }
+      })
+      .catch(() => {
+        // Lookup failure — fall through to a fresh session rather than
+        // blocking the page forever.
+      })
+      .finally(() => {
+        if (!cancelled) setCheckedForResume(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- useTendingMachine returns a new wrapper object every render (only its dispatch is stable); including `machine` here would re-fire this lookup on every render instead of once.
+  }, [courseId, topicId, user, checkedForResume]);
 
   // Snapshot the topic's current overall_progress from the garden query cache
   // BEFORE Tending starts changing it. Used by the garden's "tended-topic
@@ -69,9 +111,12 @@ function TendingFlowInner() {
     }
   }, [courseId, topicId, user, queryClient]);
 
-  // Generate session on mount if no hydrated session is present.
+  // Generate a fresh session on mount, but only once the resume check has
+  // run and found nothing to hydrate — otherwise this would race the
+  // resume-check effect and generate a redundant session.
   useEffect(() => {
     if (!courseId || !topicId || !user) return;
+    if (!checkedForResume) return;
     if (isInitialized) return;
     let cancelled = false;
     generateSession({ userId: user.id, courseId, topicId })
@@ -88,14 +133,20 @@ function TendingFlowInner() {
     return () => {
       cancelled = true;
     };
-  }, [courseId, topicId, user, isInitialized, init, generateAttempt]);
+  }, [courseId, topicId, user, checkedForResume, isInitialized, init, generateAttempt]);
 
   // Snapshot course-level concept mastery once per session so MasteryDelta can
   // render pass-probability before/after. Runs in parallel with generateSession;
   // failure is silent and the screen falls back to topic-only mastery.
+  // Ref-guarded (not just the state.masterySnapshot check) so a legitimate
+  // state change elsewhere in the flow — e.g. init()/hydrate() firing after
+  // this effect's first pass — can't trigger a second fetch before the first
+  // one resolves.
+  const masterySnapshotFetchedRef = useRef(false);
   useEffect(() => {
     if (!courseId || !user) return;
-    if (state.masterySnapshot) return;
+    if (masterySnapshotFetchedRef.current) return;
+    masterySnapshotFetchedRef.current = true;
     let cancelled = false;
     fetchCourseMasterySnapshot(user.id, courseId).then((snap) => {
       if (cancelled || !snap) return;
@@ -104,7 +155,7 @@ function TendingFlowInner() {
     return () => {
       cancelled = true;
     };
-  }, [courseId, user, state.masterySnapshot, machine]);
+  }, [courseId, user, machine]);
 
   // Fire /complete once the machine reaches mastery_delta with no delta yet.
   // This pattern reads the latest state cleanly — earlier closure-based versions
@@ -128,6 +179,7 @@ function TendingFlowInner() {
     completeSession({ sessionId: state.sessionId, results })
       .then((delta) => {
         if (cancelled) return;
+        setCompleteError(null);
         machine.recordMastery(delta);
         // Marker for KnowledgeGardenPage: it pulses semantic edges and
         // animates the tended topic's own progress bar on return. Garden
@@ -145,6 +197,12 @@ function TendingFlowInner() {
             queryClient.invalidateQueries({
               queryKey: gardenQueryKeys.progress(courseId, user.id),
             });
+            // Without this, the garden's incomplete-session query can still
+            // hold the pre-completion cached result (staleTime 30s) and keep
+            // showing "Resume →" for a session that just finished.
+            queryClient.invalidateQueries({
+              queryKey: tendingQueryKeys.incompleteSession(courseId, user.id),
+            });
           }
         }
       })
@@ -152,6 +210,7 @@ function TendingFlowInner() {
         if (cancelled) return;
         completeFiredRef.current = false; // allow retry via stage re-entry
         const msg = err instanceof Error ? err.message : "Couldn't save your session.";
+        setCompleteError(msg);
         toast.error(msg);
       });
     return () => {
@@ -172,12 +231,31 @@ function TendingFlowInner() {
     courseId,
     user,
     queryClient,
+    completeAttempt,
   ]);
 
+  const handleRetryComplete = useCallback(() => {
+    setCompleteError(null);
+    completeFiredRef.current = false;
+    setCompleteAttempt((n) => n + 1);
+  }, []);
+
   const handleConfirmLeave = useCallback(() => {
-    machine.clearPersisted();
+    // No network call needed here — current_step and every completed stage's
+    // results are already durably persisted by each stage's onComplete/onSkip
+    // handler as the session progressed.
     navigate(`/course/${courseId}/garden`);
-  }, [machine, navigate, courseId]);
+  }, [navigate, courseId]);
+
+  const handleSkip = useCallback(() => {
+    const sessionId = state.sessionId;
+    const next = nextStage(state.currentStage);
+    const skipped = [...state.stagesSkipped, state.currentStage];
+    machine.skip();
+    void persistSkipStage(sessionId, next, skipped).catch(() => {
+      // Fire-and-forget — a failed skip-progress write shouldn't block the UI.
+    });
+  }, [state.sessionId, state.currentStage, state.stagesSkipped, machine]);
 
   if (!courseId || !topicId) {
     navigate("/home");
@@ -241,8 +319,9 @@ function TendingFlowInner() {
             onComplete={(results) => {
               machine.recordRecall(results);
               machine.advance();
+              void persistRecallStage(state.sessionId, results).catch(() => {});
             }}
-            onSkip={machine.skip}
+            onSkip={handleSkip}
           />
         )}
 
@@ -254,8 +333,9 @@ function TendingFlowInner() {
             onComplete={(result) => {
               machine.recordActiveRecall(result);
               machine.advance();
+              void persistActiveRecallStage(state.sessionId).catch(() => {});
             }}
-            onSkip={machine.skip}
+            onSkip={handleSkip}
           />
         )}
 
@@ -265,8 +345,9 @@ function TendingFlowInner() {
             onComplete={(results) => {
               machine.recordMnemonics(results);
               machine.advance();
+              void persistMnemonicStage(state.sessionId, results).catch(() => {});
             }}
-            onSkip={machine.skip}
+            onSkip={handleSkip}
           />
         )}
 
@@ -277,8 +358,9 @@ function TendingFlowInner() {
             onComplete={(results) => {
               machine.recordConnections(results);
               machine.advance();
+              void persistConnectionStage(state.sessionId, results).catch(() => {});
             }}
-            onSkip={machine.skip}
+            onSkip={handleSkip}
           />
         )}
 
@@ -289,8 +371,9 @@ function TendingFlowInner() {
             onComplete={(result) => {
               machine.recordQuiz(result);
               machine.advance();
+              void persistQuizStage(state.sessionId, result).catch(() => {});
             }}
-            onSkip={machine.skip}
+            onSkip={handleSkip}
           />
         )}
 
@@ -318,6 +401,19 @@ function TendingFlowInner() {
                 return { before: passBefore, after: passAfter };
               })()}
             />
+          ) : completeError ? (
+            <div className="flex-1 flex items-center justify-center px-6">
+              <div className="max-w-md text-center">
+                <p className="font-serif text-ghibli-canopy mb-4">{completeError}</p>
+                <button
+                  type="button"
+                  className="text-sm text-ghibli-forest hover:underline"
+                  onClick={handleRetryComplete}
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
           ) : (
             <TendingLoading staticMessage="Measuring how much your bed grew…" />
           ))}
@@ -327,7 +423,9 @@ function TendingFlowInner() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Leave session?</AlertDialogTitle>
-            <AlertDialogDescription>Your progress will be saved.</AlertDialogDescription>
+            <AlertDialogDescription>
+              Your progress is saved — come back anytime to pick up where you left off.
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>

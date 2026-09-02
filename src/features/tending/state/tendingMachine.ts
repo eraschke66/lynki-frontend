@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useMemo, useReducer } from "react";
 import {
   STAGE_ORDER,
   type ActiveRecallResult,
@@ -12,9 +12,6 @@ import {
   type TendingSession,
   type TendingSessionPayload,
 } from "../types";
-
-const STORAGE_PREFIX = "tending:v1:";
-const storageKey = (courseId: string, topicId: string) => `${STORAGE_PREFIX}${courseId}:${topicId}`;
 
 type Action =
   | {
@@ -51,7 +48,7 @@ const emptyState: TendingSession = {
   masterySnapshot: null,
 };
 
-function nextStage(current: Stage): Stage {
+export function nextStage(current: Stage): Stage {
   const idx = STAGE_ORDER.indexOf(current);
   return STAGE_ORDER[idx + 1] ?? "done";
 }
@@ -104,6 +101,7 @@ export interface TendingMachine {
   state: TendingSession;
   isInitialized: boolean;
   init: (sessionPayload: TendingSessionPayload) => void;
+  hydrate: (session: TendingSession) => void;
   advance: () => void;
   skip: () => void;
   recordRecall: (r: RecallResult[]) => void;
@@ -113,78 +111,99 @@ export interface TendingMachine {
   recordQuiz: (r: QuizResult) => void;
   recordMastery: (r: MasteryDelta) => void;
   setMasterySnapshot: (s: CourseMasterySnapshot) => void;
-  clearPersisted: () => void;
 }
 
 /**
- * Drives the linear Tending Flow stage progression and mirrors state to
- * sessionStorage so a refresh mid-flow doesn't nuke the session.
+ * Drives the linear Tending Flow stage progression. Purely in-memory —
+ * durability lives in `topic_tending_sessions` (written per-stage via
+ * tendingProgressApi.ts as the page calls advance()/skip()), not in this
+ * hook. TendingFlowPage is responsible for calling `hydrate()` with a
+ * DB-loaded session when resuming, and `init()` when starting fresh.
  *
- * Storage is keyed by course+topic — one in-flight session per topic is
- * allowed; starting a new session for the same topic discards the prior one.
+ * Every action creator is wrapped in useCallback, and the returned object in
+ * useMemo, so the whole `TendingMachine` identity (and each individual
+ * method) only changes when `state` actually changes — never on an
+ * unrelated re-render. This matters: several effects in TendingFlowPage
+ * depend on `machine` or its methods (e.g. `init`), and if those weren't
+ * stable, any unrelated re-render (a sibling query refetching, a resume
+ * check resolving, React StrictMode's dev double-invoke) would look like a
+ * "changed dependency" and re-fire those effects — including the one that
+ * calls /topic-tending/generate, which has no request-cancellation wired to
+ * effect cleanup, so a spurious re-fire is a real, uncancelable, duplicate
+ * Claude generation + DB insert, not just a harmless re-render.
  */
 export function useTendingMachine(courseId: string, topicId: string): TendingMachine {
   const [state, dispatch] = useReducer(reducer, emptyState);
-  const hydratedRef = useRef(false);
 
-  // Hydrate from sessionStorage on mount if a matching session is parked there.
-  useEffect(() => {
-    if (hydratedRef.current) return;
-    hydratedRef.current = true;
-    if (typeof window === "undefined") return;
-    try {
-      const raw = window.sessionStorage.getItem(storageKey(courseId, topicId));
-      if (!raw) return;
-      const parsed = JSON.parse(raw) as TendingSession;
-      if (parsed.courseId !== courseId || parsed.topicId !== topicId || !parsed.sessionId) {
-        return;
-      }
-      // Reject sessions that already completed. Hydrating one would resurface
-      // the old MasteryDelta with a stale startedAt — which is how the
-      // "+15% in 276 minutes" bug rendered on V19.
-      const isCompleted = parsed.currentStage === "mastery_delta" && !!parsed.masteryDelta;
-      if (isCompleted) {
-        window.sessionStorage.removeItem(storageKey(courseId, topicId));
-        return;
-      }
-      dispatch({ type: "hydrate", payload: parsed });
-    } catch {
-      // Bad JSON in storage — ignore and start fresh.
-    }
-  }, [courseId, topicId]);
-
-  // Persist whenever state changes, except for empty initial state and
-  // anything past completion (a session with masteryDelta set is "done" for
-  // hydration purposes — we never want to resurface an old delta).
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (!state.sessionId) return;
-    if (state.currentStage === "done" || state.masteryDelta) {
-      window.sessionStorage.removeItem(storageKey(state.courseId, state.topicId));
-      return;
-    }
-    window.sessionStorage.setItem(storageKey(state.courseId, state.topicId), JSON.stringify(state));
-  }, [state]);
-
-  const clearPersisted = useCallback(() => {
-    if (typeof window === "undefined") return;
-    window.sessionStorage.removeItem(storageKey(courseId, topicId));
-  }, [courseId, topicId]);
-
-  return {
-    state,
-    isInitialized: !!state.sessionId,
-    init: (sessionPayload) =>
+  const init = useCallback(
+    (sessionPayload: TendingSessionPayload) =>
       dispatch({ type: "init", payload: { courseId, topicId, sessionPayload } }),
-    advance: () => dispatch({ type: "advance" }),
-    skip: () => dispatch({ type: "skip" }),
-    recordRecall: (r) => dispatch({ type: "recordRecall", payload: r }),
-    recordActiveRecall: (r) => dispatch({ type: "recordActiveRecall", payload: r }),
-    recordMnemonics: (r) => dispatch({ type: "recordMnemonics", payload: r }),
-    recordConnections: (r) => dispatch({ type: "recordConnections", payload: r }),
-    recordQuiz: (r) => dispatch({ type: "recordQuiz", payload: r }),
-    recordMastery: (r) => dispatch({ type: "recordMastery", payload: r }),
-    setMasterySnapshot: (s) => dispatch({ type: "setMasterySnapshot", payload: s }),
-    clearPersisted,
-  };
+    [courseId, topicId],
+  );
+  const hydrate = useCallback(
+    (session: TendingSession) => dispatch({ type: "hydrate", payload: session }),
+    [],
+  );
+  const advance = useCallback(() => dispatch({ type: "advance" }), []);
+  const skip = useCallback(() => dispatch({ type: "skip" }), []);
+  const recordRecall = useCallback(
+    (r: RecallResult[]) => dispatch({ type: "recordRecall", payload: r }),
+    [],
+  );
+  const recordActiveRecall = useCallback(
+    (r: ActiveRecallResult) => dispatch({ type: "recordActiveRecall", payload: r }),
+    [],
+  );
+  const recordMnemonics = useCallback(
+    (r: MnemonicResult[]) => dispatch({ type: "recordMnemonics", payload: r }),
+    [],
+  );
+  const recordConnections = useCallback(
+    (r: ConnectionResult[]) => dispatch({ type: "recordConnections", payload: r }),
+    [],
+  );
+  const recordQuiz = useCallback(
+    (r: QuizResult) => dispatch({ type: "recordQuiz", payload: r }),
+    [],
+  );
+  const recordMastery = useCallback(
+    (r: MasteryDelta) => dispatch({ type: "recordMastery", payload: r }),
+    [],
+  );
+  const setMasterySnapshot = useCallback(
+    (s: CourseMasterySnapshot) => dispatch({ type: "setMasterySnapshot", payload: s }),
+    [],
+  );
+
+  return useMemo(
+    () => ({
+      state,
+      isInitialized: !!state.sessionId,
+      init,
+      hydrate,
+      advance,
+      skip,
+      recordRecall,
+      recordActiveRecall,
+      recordMnemonics,
+      recordConnections,
+      recordQuiz,
+      recordMastery,
+      setMasterySnapshot,
+    }),
+    [
+      state,
+      init,
+      hydrate,
+      advance,
+      skip,
+      recordRecall,
+      recordActiveRecall,
+      recordMnemonics,
+      recordConnections,
+      recordQuiz,
+      recordMastery,
+      setMasterySnapshot,
+    ],
+  );
 }

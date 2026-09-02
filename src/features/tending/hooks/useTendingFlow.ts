@@ -14,10 +14,11 @@ import { useCompleteOnMasteryDelta } from "./useCompleteOnMasteryDelta";
  * resuming an in-flight DB session, generating a fresh one, snapshotting
  * pre-session mastery, and firing /complete once the flow reaches
  * mastery_delta. See tendingMachine.ts for why `machine`'s identity is kept
- * out of several of the composed effects' dependency arrays: the generate
- * effect has no request-cancellation wired to cleanup, so a spurious re-fire
- * would be an uncancelable duplicate Claude generation + DB insert, not just
- * a harmless re-render.
+ * out of several of the composed effects' dependency arrays: a spurious
+ * re-fire of the generate effect would be an uncancelable duplicate Claude
+ * generation + DB insert, not just a harmless re-render. Note that `user` is
+ * passed down as-is but the hooks key off `user.id` — the object identity
+ * changes on every supabase auth event.
  */
 export function useTendingFlow(courseId: string | undefined, topicId: string | undefined) {
   const navigate = useNavigate();

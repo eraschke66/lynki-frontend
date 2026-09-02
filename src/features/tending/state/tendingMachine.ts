@@ -128,9 +128,10 @@ export interface TendingMachine {
  * stable, any unrelated re-render (a sibling query refetching, a resume
  * check resolving, React StrictMode's dev double-invoke) would look like a
  * "changed dependency" and re-fire those effects — including the one that
- * calls /topic-tending/generate, which has no request-cancellation wired to
- * effect cleanup, so a spurious re-fire is a real, uncancelable, duplicate
- * Claude generation + DB insert, not just a harmless re-render.
+ * calls /topic-tending/generate, where a spurious re-fire is a real,
+ * uncancelable, duplicate Claude generation + DB insert, not just a harmless
+ * re-render. Stable identities are the first line of defence; the in-flight
+ * promise ref in useResumeOrGenerateSession is the backstop.
  */
 export function useTendingMachine(courseId: string, topicId: string): TendingMachine {
   const [state, dispatch] = useReducer(reducer, emptyState);

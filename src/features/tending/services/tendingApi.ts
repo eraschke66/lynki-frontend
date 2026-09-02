@@ -17,7 +17,16 @@ const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://
 const MOCK_LATENCY_MS = 1500;
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-async function postJSON<T>(path: string, body: unknown, timeoutMs = 90_000): Promise<T> {
+/**
+ * 150s, not 90s. The backend now caps its own Claude call (75s for /generate,
+ * 45s for /evaluate-recall) and returns a real error when it blows that, so
+ * this only needs to be loose enough to cover the backend budget *plus* a
+ * Render free-tier cold start. At 90s a cold dyno could eat the whole budget
+ * before FastAPI saw the request, and the client would abort a generation that
+ * was about to succeed — sending the user to the "try again" screen, which
+ * started yet another one.
+ */
+async function postJSON<T>(path: string, body: unknown, timeoutMs = 150_000): Promise<T> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {

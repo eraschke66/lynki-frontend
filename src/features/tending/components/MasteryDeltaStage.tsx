@@ -4,6 +4,7 @@ import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { Button } from "@/components/ui/button";
 import type { MasteryDelta, Stage } from "../types";
 import { STAGE_LABEL } from "../types";
+import { PassProbabilitySummary } from "./mastery-delta/PassProbabilitySummary";
 
 interface MasteryDeltaStageProps {
   courseId: string;
@@ -68,14 +69,6 @@ export function MasteryDeltaStage({
 
   const heroTier = plantTierFromPercent(afterPct);
 
-  const showPass =
-    passProbability &&
-    passProbability.before !== null &&
-    passProbability.after !== null;
-  const passBefore = passProbability ? Math.round(passProbability.before * 100) : null;
-  const passAfter = passProbability ? Math.round(passProbability.after * 100) : null;
-  const passDiff = passBefore !== null && passAfter !== null ? passAfter - passBefore : null;
-
   return (
     <div className="max-w-2xl mx-auto w-full flex flex-col items-center">
       {/* Hero plant — dominant visual on the page. The plant IS the celebration. */}
@@ -100,33 +93,7 @@ export function MasteryDeltaStage({
         {minutes === 1 ? "minute" : "minutes"}
       </p>
 
-      {showPass && passBefore !== null && passAfter !== null && passDiff !== null && (() => {
-        const verdictColor =
-          passDiff > 0
-            ? "text-ghibli-canopy"
-            : passDiff < 0
-              ? "text-amber-700"
-              : "text-ghibli-bark";
-        const deltaLabel =
-          passDiff > 0
-            ? `+${passDiff} points`
-            : passDiff < 0
-              ? `${passDiff} points`
-              : "0 points";
-        return (
-          <div
-            className={`mt-3 w-full max-w-md flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 text-sm ${verdictColor}`}
-          >
-            <span>
-              Your pass probability moved from{" "}
-              <span className="tabular-nums font-semibold">{passBefore}%</span>{" "}
-              to{" "}
-              <span className="tabular-nums font-semibold">{passAfter}%</span>.
-            </span>
-            <span className="tabular-nums font-semibold">{deltaLabel}</span>
-          </div>
-        );
-      })()}
+      <PassProbabilitySummary passProbability={passProbability} />
 
       {delta.kc_breakdown.length > 0 && (
         <details className="mt-5 text-left max-w-md w-full px-4">

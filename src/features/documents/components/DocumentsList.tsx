@@ -54,6 +54,8 @@ import {
 import type { Document } from "../types";
 import { supabase } from "@/lib/supabase";
 import type { Database } from "@/types/database";
+import { useElapsedTime } from "../hooks/useElapsedTime";
+import { getProcessingStageMessage } from "@/lib/garden";
 
 // Content-quality failures mean the document itself needs changing — retrying won't help.
 // Technical failures are transient and worth retrying.
@@ -64,6 +66,28 @@ function classifyDocumentError(msg: string | null | undefined): "content" | "tec
     return "content";
   }
   return "technical";
+}
+
+// Own component (not inlined in the row map) so useElapsedTime's per-second
+// tick is a proper hook instance per document, not a hook call inside a loop.
+function ProcessingStatusLabel({ doc }: { doc: Document }) {
+  const elapsedMs = useElapsedTime(doc.processingStartedAt);
+  const message = getProcessingStageMessage(doc.processingStage, elapsedMs);
+  const label = doc.processingStage === "analyzing" ? "Analyzing" : "Extracting";
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <div className="flex items-center text-blue-500 text-xs cursor-help">
+          <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+          {label}
+        </div>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-xs">
+        <p className="text-xs">{message.detail}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
 }
 
 interface DocumentsListProps {
@@ -125,6 +149,8 @@ export function DocumentsList({
                 fileType: data.file_type,
                 fileSize: data.file_size,
                 status: data.status as Document["status"],
+                processingStage: data.processing_stage as Document["processingStage"],
+                processingStartedAt: data.processing_started_at,
                 createdAt: data.created_at,
                 updatedAt: data.updated_at,
                 errorMessage: data.error_message,
@@ -310,10 +336,7 @@ export function DocumentsList({
                         Queued
                       </div>
                     ) : doc.status === "processing" ? (
-                      <div className="flex items-center text-blue-500 text-xs">
-                        <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                        Processing
-                      </div>
+                      <ProcessingStatusLabel doc={doc} />
                     ) : doc.status === "completed" ? (
                       <div className="flex items-center text-green-600 text-xs">
                         <CheckCircle className="w-3 h-3 mr-1" />

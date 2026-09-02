@@ -483,6 +483,8 @@ export interface Database {
           file_type: string;
           file_size: number;
           status: "pending" | "processing" | "completed" | "failed";
+          processing_stage: "extracting" | "analyzing" | null;
+          processing_started_at: string | null;
           extracted_text: string | null;
           error_message: string | null;
           created_at: string;
@@ -497,6 +499,8 @@ export interface Database {
           file_type: string;
           file_size: number;
           status?: "pending" | "processing" | "completed" | "failed";
+          processing_stage?: "extracting" | "analyzing" | null;
+          processing_started_at?: string | null;
           extracted_text?: string | null;
           error_message?: string | null;
           created_at?: string;
@@ -511,6 +515,8 @@ export interface Database {
           file_type?: string;
           file_size?: number;
           status?: "pending" | "processing" | "completed" | "failed";
+          processing_stage?: "extracting" | "analyzing" | null;
+          processing_started_at?: string | null;
           extracted_text?: string | null;
           error_message?: string | null;
           created_at?: string;

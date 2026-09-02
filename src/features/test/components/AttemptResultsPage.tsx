@@ -12,7 +12,7 @@ import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { getGardenStatus } from "@/lib/garden";
-import { fetchAttemptResults } from "../services/testService";
+import { fetchAttemptResults } from "../services/quizAttemptService";
 import { testQueryKeys } from "@/lib/queryKeys";
 import type { AttemptQuestionResult } from "../types";
 

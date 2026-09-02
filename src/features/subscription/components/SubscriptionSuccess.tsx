@@ -34,7 +34,7 @@ export function SubscriptionSuccess() {
   const { user } = useAuth();
   const { isPremium, interval } = useSubscription();
   const [timedOut, setTimedOut] = useState(false);
-  const startedAt = useRef(Date.now());
+  const [startedAt] = useState(() => Date.now());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Prefer the webhook-resolved interval; fall back to the URL param for the
@@ -65,7 +65,7 @@ export function SubscriptionSuccess() {
 
     // Poll by invalidating the subscription query every 2 s
     intervalRef.current = setInterval(() => {
-      if (Date.now() - startedAt.current > MAX_WAIT_MS) {
+      if (Date.now() - startedAt > MAX_WAIT_MS) {
         if (intervalRef.current) clearInterval(intervalRef.current);
         setTimedOut(true);
         return;
@@ -80,7 +80,7 @@ export function SubscriptionSuccess() {
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isPremium, navigate, queryClient, user, isMonthly, resolvedPlan]);
+  }, [isPremium, navigate, queryClient, user, isMonthly, resolvedPlan, startedAt]);
 
   return (
     <>

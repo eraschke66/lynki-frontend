@@ -1,5 +1,6 @@
 // Auth feature exports
-export { AuthProvider, useAuth } from "./hooks/useAuth";
+export { AuthProvider } from "./hooks/useAuth";
+export { useAuth } from "./hooks/AuthContext";
 export { LandingPage } from "./components/LandingPage";
 export { LoginForm } from "./components/LoginForm";
 export { SignupForm } from "./components/SignupForm";

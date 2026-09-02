@@ -93,23 +93,6 @@ export interface QuizGenerationStatusRow {
   error_message: string | null;
 }
 
-/** Legacy — used by test_sessions-backed history (deprecated, kept for compatibility) */
-export interface TestSession {
-  id: string;
-  status: "in_progress" | "completed";
-  total_questions: number;
-  correct_count: number;
-  answered_count: number;
-  pass_chance: number | null;
-  created_at: string;
-  completed_at: string | null;
-}
-
-export interface TestHistoryData {
-  sessions: TestSession[];
-  total: number;
-}
-
 /** A single question's result within a completed attempt (v1 review page). */
 export interface AttemptQuestionResult {
   question_id: string;

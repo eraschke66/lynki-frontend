@@ -16,7 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/features/auth";
-import { PremiumGate } from "@/features/subscription/components/PremiumGate";
+import { PremiumGate } from "@/features/subscription";
 import { ActiveRecallStage } from "../components/ActiveRecallStage";
 import { ConnectionsStage } from "../components/ConnectionsStage";
 import { MasteryDeltaStage } from "../components/MasteryDeltaStage";

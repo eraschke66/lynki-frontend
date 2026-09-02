@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 import LogoSvg from "@/assets/logo.svg?react";
 import { Home, FileText, Settings, Volume2, VolumeOff, Sparkles, Menu, Shield } from "lucide-react";
 import { useAmbientMusic } from "@/hooks/useAmbientMusic";
-import { useSubscription } from "@/features/subscription/hooks/useSubscription";
-import { isAdminEmail } from "@/features/admin/adminAccess";
+import { useSubscription } from "@/features/subscription";
+import { isAdminEmail } from "@/features/admin";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useState } from "react";
 

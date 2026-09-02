@@ -21,9 +21,7 @@ import { toast } from "sonner";
 import { fetchProfile, updateProfile } from "../services/profileService";
 import { profileQueryKeys } from "@/lib/queryKeys";
 import { CURRICULA, getCurriculum } from "@/lib/curricula";
-import { useSubscription } from "@/features/subscription/hooks/useSubscription";
-import { useSeedBalance } from "@/features/subscription/hooks/useSeedBalance";
-import { createPortalSession } from "@/features/subscription/services/subscriptionService";
+import { useSubscription, useSeedBalance, createPortalSession } from "@/features/subscription";
 import { useCookieConsent } from "@/hooks/useCookieConsent";
 import { Link } from "react-router-dom";
 

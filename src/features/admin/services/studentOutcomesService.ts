@@ -16,7 +16,7 @@ import { computePassProbability } from "@/lib/passProbability";
 // timestamped, are charted over time.
 //
 // The RPCs are not in the generated Database types, so we cast through `any` --
-// the same pattern testService uses for the un-typed quiz tables.
+// the same pattern quizAttemptService uses for the un-typed quiz tables.
 
 export interface CohortStudent {
   user_id: string;

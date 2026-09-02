@@ -1,220 +1,18 @@
 /**
- * Service layer for the Test feature.
- * Communicates with the backend /api/v1/test endpoints, or Supabase directly
- * for operations that don't require server-side computation.
+ * Named/generated quiz flow: generate a course_quizzes row, start and resume
+ * attempts against it, submit answers, and review a completed attempt.
  */
-
 import type {
   TestData,
   AnswerFeedback,
-  PassChanceData,
-  TestHistoryData,
-  TestQuestion,
   GeneratedQuizInfo,
   AttemptResultsData,
   AttemptQuestionResult,
   QuizGenerationStatusRow,
 } from "../types";
 import { supabase } from "@/lib/supabase";
-import { computePassProbability } from "@/lib/passProbability";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
-
-/**
- * Fetch a test for a course. Returns one question per concept.
- */
-export async function fetchTest(
-  userId: string,
-  courseId: string,
-): Promise<TestData> {
-  const res = await fetch(`${API_URL}/test/${userId}/${courseId}`);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to load test");
-  }
-  return res.json();
-}
-
-/**
- * Resume an in-progress test session.
- */
-export async function fetchResumeTest(
-  userId: string,
-  sessionId: string,
-): Promise<TestData> {
-  const res = await fetch(`${API_URL}/test/resume/${userId}/${sessionId}`);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to resume test");
-  }
-  return res.json();
-}
-
-/**
- * Submit a single answer and get feedback.
- */
-export async function submitAnswer(
-  userId: string,
-  courseId: string,
-  questionId: string,
-  selectedOptionIndex: number,
-  testId?: string,
-): Promise<AnswerFeedback> {
-  const res = await fetch(`${API_URL}/test/answer`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: userId,
-      course_id: courseId,
-      question_id: questionId,
-      selected_option_index: selectedOptionIndex,
-      test_id: testId,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to submit answer");
-  }
-  return res.json();
-}
-
-/**
- * Fetch the current pass chance for a course.
- * Reads mastery directly from Supabase and computes the normal approximation client-side.
- */
-export async function fetchPassChance(
-  userId: string,
-  courseId: string,
-): Promise<PassChanceData> {
-  const [masteryResult, courseResult] = await Promise.all([
-    supabase
-      .from("bkt_mastery")
-      .select("p_mastery, n_attempts")
-      .eq("user_id", userId)
-      .eq("course_id", courseId),
-    supabase
-      .from("courses")
-      .select("target_grade")
-      .eq("id", courseId)
-      .maybeSingle(),
-  ]);
-
-  if (masteryResult.error) throw new Error(masteryResult.error.message);
-
-  const rows = masteryResult.data ?? [];
-  const targetGrade = (courseResult.data?.target_grade ?? 1.0) as number;
-  const totalAttempts = rows.reduce((s, r) => s + (r.n_attempts ?? 0), 0);
-
-  const avgMastery =
-    rows.length > 0
-      ? rows.reduce((s, r) => s + (r.p_mastery as number), 0) / rows.length
-      : null;
-
-  if (totalAttempts === 0 || rows.length === 0) {
-    return {
-      course_id: courseId,
-      pass_probability: null,
-      avg_mastery: null,
-      target_grade: targetGrade,
-      total_skills: rows.length,
-    };
-  }
-
-  return {
-    course_id: courseId,
-    pass_probability: computePassProbability(
-      rows.map((r) => r.p_mastery),
-      targetGrade,
-    ),
-    avg_mastery: avgMastery,
-    target_grade: targetGrade,
-    total_skills: rows.length,
-  };
-}
-
-/**
- * Fetch quiz history for a course directly from Supabase.
- */
-export async function fetchTestHistory(
-  userId: string,
-  courseId: string,
-): Promise<TestHistoryData> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
-    .from("test_sessions")
-    .select(
-      "id, status, total_questions, correct_count, answered_count, pass_chance, created_at, completed_at",
-    )
-    .eq("user_id", userId)
-    .eq("course_id", courseId)
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  if (error) throw new Error(error.message || "Failed to load test history");
-
-  const sessions = (data ?? []) as TestHistoryData["sessions"];
-  return { sessions, total: sessions.length };
-}
-
-/**
- * Fetch a BKT-native session, optionally scoped to a topic or specific concept IDs.
- * Priority: conceptIds > topicId > whole course.
- * Normalizes the response into TestData so TestPage can render it unchanged.
- */
-export async function fetchBktSession(
-  userId: string,
-  courseId: string,
-  topicId?: string | null,
-  conceptIds?: string | null,
-): Promise<TestData> {
-  const params = new URLSearchParams();
-  if (topicId) params.set("topic_id", topicId);
-  if (conceptIds) params.set("concept_ids", conceptIds);
-  const query = params.toString();
-  const url = `${API_URL}/bkt/session/${userId}/${courseId}${query ? `?${query}` : ""}`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to load focused session");
-  }
-  const data = await res.json();
-  return {
-    test_id: data.session_id,
-    course_id: courseId,
-    course_name: "Focused Study",
-    questions: data.questions as TestQuestion[],
-    total_questions: data.total_questions,
-    message: data.all_mastered ? "All concepts in this topic are mastered!" : undefined,
-  };
-}
-
-/**
- * Submit a single answer via the BKT answer endpoint (used for focused-topic sessions).
- */
-export async function submitBktAnswer(
-  userId: string,
-  courseId: string,
-  questionId: string,
-  selectedOptionIndex: number,
-  sessionId?: string,
-): Promise<AnswerFeedback> {
-  const res = await fetch(`${API_URL}/bkt/answer`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: userId,
-      course_id: courseId,
-      question_id: questionId,
-      selected_option_index: selectedOptionIndex,
-      session_id: sessionId,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to submit answer");
-  }
-  return res.json();
-}
 
 /**
  * Kick off generation of a fresh named quiz (BKT-guided). Returns as soon as
@@ -352,6 +150,60 @@ export async function completeQuizAttempt(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type RawRow = any;
+
+/**
+ * Build one question's review-page result from the raw rows fetched by
+ * fetchAttemptResults. Split out because the option-fallback and
+ * correct-index logic below is where nearly all of that function's
+ * complexity lived.
+ */
+function buildQuestionResult(
+  q: RawRow,
+  optionsByQuestion: Map<string, RawRow[]>,
+  answerByQuestion: Map<string, { selected_option_index: number | null; is_correct: boolean }>,
+  conceptNameById: Map<string, string>,
+): AttemptQuestionResult {
+  let options = (optionsByQuestion.get(q.id) ?? [])
+    .slice()
+    .sort((a, b) => a.option_index - b.option_index)
+    .map((o) => ({
+      index: o.option_index as number,
+      text: o.option_text as string,
+      is_correct: o.is_correct as boolean,
+      explanation: (o.explanation ?? null) as string | null,
+    }));
+
+  // Fallback: some older questions store options on the questions.options
+  // jsonb column instead of the relational table.
+  if (options.length === 0 && Array.isArray(q.options) && q.options.length) {
+    options = (q.options as unknown[]).map((opt, i) => ({
+      index: i,
+      text:
+        typeof opt === "string"
+          ? opt
+          : ((opt as RawRow)?.option_text ?? (opt as RawRow)?.text ?? String(opt)),
+      is_correct: i === q.correct_answer,
+      explanation: null as string | null,
+    }));
+  }
+
+  const correctOption = options.find((o) => o.is_correct);
+  const correctIndex = correctOption ? correctOption.index : (q.correct_answer ?? 0);
+
+  const answer = answerByQuestion.get(q.id);
+  return {
+    question_id: q.id,
+    question_text: q.question,
+    options,
+    selected_option_index: answer ? answer.selected_option_index : null,
+    correct_option_index: correctIndex,
+    is_correct: answer ? answer.is_correct : false,
+    concept_name: q.concept_id ? (conceptNameById.get(q.concept_id) ?? null) : null,
+  };
+}
+
 /**
  * Fetch the full per-question breakdown for a completed (or in-progress) quiz
  * attempt, for the v1 attempt-review page. Reads directly from Supabase.
@@ -393,13 +245,11 @@ export async function fetchAttemptResults(
     .eq("course_quiz_id", attempt.quiz_id)
     .order("order_index", { ascending: true });
   if (qErr) throw new Error(qErr.message);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const questions = (questionRows ?? []) as any[];
+  const questions = (questionRows ?? []) as RawRow[];
   const questionIds = questions.map((q) => q.id);
 
   // 4. Relational options, grouped by question_id.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const optionsByQuestion = new Map<string, any[]>();
+  const optionsByQuestion = new Map<string, RawRow[]>();
   if (questionIds.length > 0) {
     const { data: optionRows, error: oErr } = await sb
       .from("question_options")
@@ -463,60 +313,15 @@ export async function fetchAttemptResults(
     orderedQuestions = [...inOrder, ...remaining];
   }
 
-  const resultQuestions: AttemptQuestionResult[] = orderedQuestions.map((q) => {
-    let options = (optionsByQuestion.get(q.id) ?? [])
-      .slice()
-      .sort((a, b) => a.option_index - b.option_index)
-      .map((o) => ({
-        index: o.option_index as number,
-        text: o.option_text as string,
-        is_correct: o.is_correct as boolean,
-        explanation: (o.explanation ?? null) as string | null,
-      }));
-
-    // Fallback: some older questions store options on the questions.options
-    // jsonb column instead of the relational table.
-    if (options.length === 0 && Array.isArray(q.options) && q.options.length) {
-      options = (q.options as unknown[]).map((opt, i) => ({
-        index: i,
-        text:
-          typeof opt === "string"
-            ? opt
-            : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ((opt as any)?.option_text ??
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              (opt as any)?.text ??
-              String(opt)),
-        is_correct: i === q.correct_answer,
-        explanation: null as string | null,
-      }));
-    }
-
-    const correctOption = options.find((o) => o.is_correct);
-    const correctIndex = correctOption
-      ? correctOption.index
-      : (q.correct_answer ?? 0);
-
-    const answer = answerByQuestion.get(q.id);
-    return {
-      question_id: q.id,
-      question_text: q.question,
-      options,
-      selected_option_index: answer ? answer.selected_option_index : null,
-      correct_option_index: correctIndex,
-      is_correct: answer ? answer.is_correct : false,
-      concept_name: q.concept_id
-        ? (conceptNameById.get(q.concept_id) ?? null)
-        : null,
-    };
-  });
+  const resultQuestions = orderedQuestions.map((q) =>
+    buildQuestionResult(q, optionsByQuestion, answerByQuestion, conceptNameById),
+  );
 
   const answeredCount =
     attempt.answered_count ??
     resultQuestions.filter((q) => q.selected_option_index !== null).length;
   const correctCount =
-    attempt.correct_count ??
-    resultQuestions.filter((q) => q.is_correct).length;
+    attempt.correct_count ?? resultQuestions.filter((q) => q.is_correct).length;
 
   return {
     attempt_id: attempt.id,
@@ -530,27 +335,4 @@ export async function fetchAttemptResults(
     started_at: attempt.started_at,
     questions: resultQuestions,
   };
-}
-
-/**
- * Mark a test session as completed.
- */
-export async function completeTest(
-  userId: string,
-  courseId: string,
-  testId: string,
-): Promise<void> {
-  const res = await fetch(`${API_URL}/test/complete`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      user_id: userId,
-      course_id: courseId,
-      test_id: testId,
-    }),
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.detail || "Failed to complete test");
-  }
 }

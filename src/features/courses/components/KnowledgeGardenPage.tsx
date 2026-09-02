@@ -15,7 +15,7 @@ import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
 import { fetchCourseGardenData } from "../services/courseService";
 import type { TopicMastery, ConceptMastery } from "../types";
-import { PremiumGate } from "@/features/subscription/components/PremiumGate";
+import { PremiumGate } from "@/features/subscription";
 
 function getConceptIcon(status: ConceptMastery["status"]): string {
   if (status === "mastered") return "🌸";

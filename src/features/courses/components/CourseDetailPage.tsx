@@ -6,28 +6,11 @@ import { useAuth } from "@/features/auth";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { Header } from "@/components/layout/Header";
 import { VineDecoration } from "@/components/garden/VineDecoration";
-import { PlantIndicator } from "@/components/garden/PlantIndicator";
 import GhibliBackground from "@/components/garden/GhibliBackground";
-import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  AlertCircle,
-  ArrowLeft,
-  ClipboardCheck,
-  CheckCircle2,
-  FileText,
-  Play,
-  Leaf,
-  CalendarDays,
-  Sparkles,
-  ChevronRight,
-  FilePlus,
-  Pencil,
-  RefreshCw,
-  Loader2,
-} from "lucide-react";
-import { fetchPassChance, generateQuiz } from "@/features/test/services/testService";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import { fetchPassChance } from "@/features/test/services/passChanceService";
+import { generateQuiz } from "@/features/test/services/quizAttemptService";
 import { retryDocumentProcessing } from "@/features/documents/services/documentService";
 import { QuizActivationCard } from "@/features/test/components/QuizActivationCard";
 import { updateCourse } from "@/features/courses/services/courseService";
@@ -38,6 +21,11 @@ import { fetchProfile } from "@/features/settings";
 import { getGradeLabel, fromDbCurriculum } from "@/lib/curricula";
 import type { CourseQuiz } from "@/features/test/types";
 import { QuizDetailModal } from "@/features/test/components/QuizDetailModal";
+import { CourseHero } from "./course-detail/CourseHero";
+import { MaterialsProcessingCard } from "./course-detail/MaterialsProcessingCard";
+import { MaterialsFailedBanner } from "./course-detail/MaterialsFailedBanner";
+import { FirstQuizBanner } from "./course-detail/FirstQuizBanner";
+import { QuizzesList } from "./course-detail/QuizzesList";
 
 export function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -267,24 +255,7 @@ export function CourseDetailPage() {
   }
 
   if (courseLoading) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-end justify-center overflow-hidden">
-        <video
-          src="/garden-loader.mp4"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-ghibli-canopy/20" />
-        <div className="relative z-10 text-center pb-16 space-y-3">
-          <p className="text-white text-base font-medium tracking-wide text-shadow-hero">
-            Tending the garden...
-          </p>
-        </div>
-      </div>
-    );
+    return <GardenVideoLoader message="Tending the garden..." />;
   }
 
   if (!course) {
@@ -321,155 +292,24 @@ export function CourseDetailPage() {
           Back to Dashboard
         </button>
 
-        {/* Hero — oasis two-column pattern */}
-        <ParchmentCard className="p-5 md:p-12 mb-6 md:mb-10 overflow-hidden" glow>
-          <div className="grid md:grid-cols-2 gap-4 md:gap-8 items-center">
-            <div className="text-center md:text-left order-2 md:order-1">
-              <span className="inline-block font-sans text-[11px] uppercase tracking-[0.22em] text-ghibli-forest mb-3 px-3 py-1 rounded-full bg-ghibli-mist/60">
-                Your Garden
-              </span>
-              <div className="flex items-center gap-2 justify-center md:justify-start mb-4">
-                <h1 className="font-serif text-4xl md:text-5xl font-semibold text-ghibli-canopy leading-tight">
-                  {course.title}
-                </h1>
-                <button
-                  onClick={() => setEditOpen(true)}
-                  aria-label="Edit course settings"
-                  className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full text-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60 transition-colors"
-                >
-                  <Pencil className="w-4 h-4" />
-                </button>
-              </div>
-              {course.description && (
-                <p className="font-sans text-base text-ghibli-bark leading-relaxed mb-4 max-w-md mx-auto md:mx-0">
-                  {course.description}
-                </p>
-              )}
-              <div className="flex flex-wrap items-center gap-4 text-sm font-sans text-ghibli-bark mb-4 md:mb-6 justify-center md:justify-start">
-                <span className="flex items-center gap-1.5">
-                  <FileText className="w-4 h-4" />
-                  {docCount ?? 0}{" "}
-                  {(docCount ?? 0) === 1 ? "document" : "documents"}
-                  {activationState !== "materials_processing" &&
-                    docStatusSummary?.hasProcessing && (
-                      <span
-                        className="inline-flex items-center gap-1 text-ghibli-forest"
-                        title="New material is being read"
-                      >
-                        <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
-                        {docStatusSummary.processingDocs.length} processing
-                      </span>
-                    )}
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <ClipboardCheck className="w-4 h-4" />
-                  {completedCount} {completedCount === 1 ? "quiz" : "quizzes"}{" "}
-                  completed
-                </span>
-                <span className="flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4" />
-                  Target: {targetLabel}
-                </span>
-              </div>
-              {demoteHeroCtas ? (
-                /* Activation moment — the card below carries the only button.
-                   These stay reachable, but as links, so nothing competes. */
-                <div className="flex flex-wrap gap-x-5 gap-y-2 justify-center md:justify-start font-sans text-sm">
-                  <button
-                    onClick={() => navigate(`/course/${courseId}/garden`)}
-                    disabled={!docCount || docCount === 0}
-                    className="inline-flex items-center gap-1.5 py-1 text-ghibli-forest hover:text-ghibli-canopy hover:underline transition-colors disabled:opacity-40 disabled:hover:no-underline"
-                  >
-                    <Leaf className="w-3.5 h-3.5" aria-hidden="true" />
-                    Knowledge Garden
-                  </button>
-                  <button
-                    onClick={() => navigate(`/course/${courseId}/study-plan`)}
-                    disabled={!docCount || docCount === 0}
-                    className="inline-flex items-center gap-1.5 py-1 text-ghibli-forest hover:text-ghibli-canopy hover:underline transition-colors disabled:opacity-40 disabled:hover:no-underline"
-                  >
-                    <CalendarDays className="w-3.5 h-3.5" aria-hidden="true" />
-                    Study Plan
-                  </button>
-                  <button
-                    onClick={() => navigate(`/documents?courseId=${courseId}`)}
-                    className="inline-flex items-center gap-1.5 py-1 text-ghibli-forest hover:text-ghibli-canopy hover:underline transition-colors"
-                  >
-                    <FilePlus className="w-3.5 h-3.5" aria-hidden="true" />
-                    Add materials
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-3 justify-center md:justify-start">
-                  <Button
-                    size="lg"
-                    onClick={handleGenerateQuiz}
-                    disabled={!docCount || docCount === 0}
-                    className="gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
-                  >
-                    <Sparkles className="w-4 h-4" />
-                    {quizzes.length > 0 ? "Generate New Quiz" : "Begin Growing"}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => navigate(`/course/${courseId}/garden`)}
-                    disabled={!docCount || docCount === 0}
-                    className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
-                  >
-                    <Leaf className="w-4 h-4" />
-                    Knowledge Garden
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => navigate(`/course/${courseId}/study-plan`)}
-                    disabled={!docCount || docCount === 0}
-                    className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
-                  >
-                    <CalendarDays className="w-4 h-4" />
-                    Study Plan
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => navigate(`/documents?courseId=${courseId}`)}
-                    className="gap-2 rounded-full px-6 py-6 border-ghibli-moss/40 text-ghibli-canopy hover:border-ghibli-forest hover:text-ghibli-forest hover:bg-ghibli-ivory/60"
-                  >
-                    <FilePlus className="w-4 h-4" />
-                    Add materials
-                  </Button>
-                </div>
-              )}
-            </div>
-            <div className="order-1 md:order-2 flex flex-col items-center gap-2">
-              {passPercent !== null ? (
-                <>
-                  <PlantIndicator
-                    probability={passPercent}
-                    size="xl"
-                    glow
-                    showPercent
-                  />
-                  <p className="font-sans text-xs text-ghibli-bark italic">
-                    growing toward {targetLabel}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <PlantIndicator
-                    probability={0}
-                    size="xl"
-                    showPercent={false}
-                  />
-                  <p className="font-sans text-xs text-ghibli-bark italic max-w-56 text-center leading-relaxed">
-                    Generate a quiz to see your garden
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-        </ParchmentCard>
+        <CourseHero
+          courseId={courseId}
+          title={course.title}
+          description={course.description}
+          docCount={docCount ?? 0}
+          showProcessingHint={
+            activationState !== "materials_processing" &&
+            !!docStatusSummary?.hasProcessing
+          }
+          processingCount={docStatusSummary?.processingDocs.length ?? 0}
+          completedCount={completedCount}
+          targetLabel={targetLabel}
+          passPercent={passPercent}
+          quizzesCount={quizzes.length}
+          demoteHeroCtas={demoteHeroCtas}
+          onEditClick={() => setEditOpen(true)}
+          onGenerateQuiz={handleGenerateQuiz}
+        />
 
         {activationState === "materials_processing" && (
           <MaterialsProcessingCard
@@ -492,116 +332,23 @@ export function CourseDetailPage() {
         )}
 
         {!activationState && materialsFailed && (
-          <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6">
-            <div
-              className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5"
-              role="alert"
-            >
-              <img
-                src="/plant-stage-1.webp"
-                alt=""
-                className="w-14 h-14 object-contain shrink-0 opacity-60 grayscale"
-                style={{ mixBlendMode: "darken" }}
-              />
-              <div className="flex-1 text-center sm:text-left">
-                <p className="font-serif text-lg font-semibold text-ghibli-canopy">
-                  That upload didn&rsquo;t take root
-                </p>
-                <p className="font-sans text-sm text-ghibli-bark mt-0.5">
-                  {docStatusSummary?.failedDocs?.[0]?.error_message ||
-                    "We couldn't process that file. Give it another try, or upload a different version."}
-                </p>
-              </div>
-              <Button
-                size="lg"
-                onClick={handleRetryFailedMaterials}
-                disabled={retryingUpload}
-                className="w-full sm:w-auto shrink-0 gap-2 rounded-full px-8 py-6 text-base font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-lg hover:shadow-glow transition-all"
-              >
-                {retryingUpload ? (
-                  <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />
-                ) : (
-                  <RefreshCw className="w-4 h-4" aria-hidden="true" />
-                )}
-                {retryingUpload ? "Retrying…" : "Retry"}
-              </Button>
-            </div>
-          </ParchmentCard>
+          <MaterialsFailedBanner
+            errorMessage={docStatusSummary?.failedDocs?.[0]?.error_message}
+            retrying={retryingUpload}
+            onRetry={handleRetryFailedMaterials}
+          />
         )}
 
         {/* First-quiz banner — only when nothing has been generated at all */}
         {!activationState && !materialsFailed && docCount && docCount > 0 && quizzes.length === 0 && (
-          <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6 flex flex-col sm:flex-row items-center gap-5">
-            <img
-              src="/plant-stage-1.webp"
-              alt=""
-              className="w-14 h-14 object-contain shrink-0 animate-pulse-soft"
-              style={{ mixBlendMode: "darken" }}
-            />
-            <div className="flex-1 text-center sm:text-left">
-              <p className="font-serif text-lg font-semibold text-ghibli-canopy">
-                Your garden soil is ready
-              </p>
-              <p className="font-sans text-sm text-ghibli-bark mt-0.5">
-                Your material has been processed. Generate your first quiz to
-                start tracking mastery.
-              </p>
-            </div>
-            <Button
-              size="lg"
-              onClick={handleGenerateQuiz}
-              className="gap-2 shrink-0 rounded-full px-6 py-5 font-semibold bg-linear-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy shadow-md hover:shadow-glow transition-all"
-            >
-              <Play className="w-4 h-4" />
-              Generate First Quiz
-            </Button>
-          </ParchmentCard>
+          <FirstQuizBanner onGenerateQuiz={handleGenerateQuiz} />
         )}
 
-        {/* Quizzes list */}
-        <div>
-          <div className="flex items-center gap-2 mb-4">
-            <Sparkles
-              className="w-5 h-5 text-ghibli-jungle"
-              aria-hidden="true"
-            />
-            <h2 className="text-lg font-semibold text-ghibli-canopy">
-              Quizzes
-            </h2>
-          </div>
-
-          {quizzesLoading ? (
-            <div className="flex items-center justify-center py-6 md:py-12">
-              <p className="text-sm text-ghibli-bark animate-pulse">
-                Reading the garden path…
-              </p>
-            </div>
-          ) : quizzes.length === 0 ? (
-            <Card className="rounded-2xl border-t-2 border-ghibli-moss/15">
-              <CardContent className="py-6 md:py-12 text-center">
-                <img
-                  src="/plant-stage-1.webp"
-                  alt=""
-                  className="w-16 h-16 object-contain mx-auto mb-3"
-                  style={{ mixBlendMode: "darken" }}
-                />
-                <p className="text-sm text-ghibli-bark">
-                  No quizzes yet. Generate your first one above!
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {quizzes.map((quiz) => (
-                <QuizCard
-                  key={quiz.id}
-                  quiz={quiz}
-                  onClick={() => handleOpenQuizModal(quiz)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <QuizzesList
+          quizzes={quizzes}
+          loading={quizzesLoading}
+          onQuizClick={handleOpenQuizModal}
+        />
       </div>
 
       {/* Quiz detail modal */}
@@ -627,162 +374,5 @@ export function CourseDetailPage() {
         onSave={handleSaveCourse}
       />
     </>
-  );
-}
-
-/**
- * Shown while uploaded materials are still being read (text extraction +
- * concept extraction) and no quiz has been generated yet. Distinct from
- * QuizActivationCard's "ready"/quiz-generation copy — this is about the
- * documents themselves, so it surfaces per-document progress instead of a
- * bare spinner.
- */
-function MaterialsProcessingCard({
-  completed,
-  total,
-  processing,
-}: {
-  completed: number;
-  total: number;
-  processing: { id: string; title: string }[];
-}) {
-  const visibleProcessing = processing.slice(0, 3);
-  const extraCount = processing.length - visibleProcessing.length;
-
-  return (
-    <ParchmentCard className="p-5 md:p-6 mb-4 md:mb-6">
-      <div
-        className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5"
-        role="status"
-        aria-live="polite"
-      >
-        <img
-          src="/plant-stage-1.webp"
-          alt=""
-          className="w-14 h-14 object-contain shrink-0 animate-pulse-soft"
-          style={{ mixBlendMode: "darken" }}
-        />
-        <div className="flex-1 text-center sm:text-left min-w-0">
-          <p className="font-serif text-lg font-semibold text-ghibli-canopy">
-            Reading your materials...
-          </p>
-          <p className="font-sans text-sm text-ghibli-bark mt-0.5">
-            {total > 0
-              ? `${completed} of ${total} ${total === 1 ? "document" : "documents"} processed. This usually takes 1-2 minutes.`
-              : "This usually takes 1-2 minutes."}
-          </p>
-          {visibleProcessing.length > 0 && (
-            <ul className="mt-3 space-y-1.5 text-left inline-block">
-              {visibleProcessing.map((doc) => (
-                <li
-                  key={doc.id}
-                  className="flex items-center gap-2 text-xs text-ghibli-bark"
-                >
-                  <Loader2
-                    className="w-3.5 h-3.5 animate-spin text-ghibli-forest shrink-0"
-                    aria-hidden="true"
-                  />
-                  <span className="truncate max-w-[240px]">{doc.title}</span>
-                </li>
-              ))}
-              {extraCount > 0 && (
-                <li className="text-xs text-ghibli-bark italic pl-[22px]">
-                  +{extraCount} more
-                </li>
-              )}
-            </ul>
-          )}
-        </div>
-        <Loader2
-          className="w-5 h-5 shrink-0 animate-spin text-ghibli-forest"
-          aria-hidden="true"
-        />
-      </div>
-    </ParchmentCard>
-  );
-}
-
-function QuizCard({
-  quiz,
-  onClick,
-}: {
-  quiz: CourseQuiz;
-  onClick: () => void;
-}) {
-  const completedAttempts = (quiz.quiz_attempts ?? []).filter(
-    (a) => a.status === "completed",
-  );
-  const hasCompleted = completedAttempts.length > 0;
-
-  // Best score across all completed attempts
-  const bestScore = hasCompleted
-    ? Math.max(
-        ...completedAttempts.map((a) =>
-          quiz.total_questions > 0
-            ? Math.round((a.correct_count / quiz.total_questions) * 100)
-            : 0,
-        ),
-      )
-    : null;
-
-  const formattedDate = new Date(quiz.created_at).toLocaleDateString(
-    undefined,
-    {
-      month: "short",
-      day: "numeric",
-    },
-  );
-
-  return (
-    <Card
-      className={`group rounded-xl overflow-hidden transition-all duration-200 hover:shadow-[0_4px_20px_hsl(var(--ghibli-canopy)/0.10)] hover:border-ghibli-moss/45 cursor-pointer border-l-[3px] ${
-        hasCompleted ? "border-l-ghibli-moss/55" : "border-l-ghibli-moss/20"
-      }`}
-      onClick={onClick}
-    >
-      <CardContent className="py-4 px-5">
-        <div className="flex items-center gap-4">
-          {/* Status icon */}
-          <div
-            className={`flex items-center justify-center w-10 h-10 rounded-full shrink-0 transition-colors ${
-              hasCompleted
-                ? "bg-ghibli-moss/12 text-ghibli-jungle group-hover:bg-ghibli-moss/20"
-                : "bg-ghibli-moss/8 text-ghibli-forest group-hover:bg-ghibli-moss/12"
-            }`}
-          >
-            {hasCompleted ? (
-              <CheckCircle2 className="w-5 h-5" />
-            ) : (
-              <Play className="w-5 h-5" />
-            )}
-          </div>
-
-          {/* Name + meta */}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">{quiz.name}</p>
-            <p className="text-xs text-ghibli-bark mt-0.5">
-              {formattedDate} &middot; {quiz.total_questions} questions
-              {hasCompleted && (
-                <>
-                  {" "}
-                  &middot; {completedAttempts.length}{" "}
-                  {completedAttempts.length === 1 ? "attempt" : "attempts"}
-                </>
-              )}
-            </p>
-          </div>
-
-          {/* Best score + chevron */}
-          <div className="flex items-center gap-2 shrink-0">
-            {bestScore !== null && (
-              <span className="text-sm font-bold text-ghibli-jungle">
-                {bestScore}%
-              </span>
-            )}
-            <ChevronRight className="w-4 h-4 text-ghibli-forest transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-ghibli-canopy" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
   );
 }

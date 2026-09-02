@@ -8,13 +8,13 @@ import { VineDecoration } from "@/components/garden/VineDecoration";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
 import GhibliBackground from "@/components/garden/GhibliBackground";
 import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
-import { PremiumGate } from "@/features/subscription/components/PremiumGate";
+import { PremiumGate } from "@/features/subscription";
 import { Button } from "@/components/ui/button";
 import {
   fetchCourseGardenData,
   updateCourseTestDate,
 } from "@/features/courses/services/courseService";
-import { fetchPassChance } from "@/features/test/services/testService";
+import { fetchPassChance } from "@/features/test/services/passChanceService";
 import { fetchProfile } from "@/features/settings";
 import { getGradeLabel, fromDbCurriculum } from "@/lib/curricula";
 import {

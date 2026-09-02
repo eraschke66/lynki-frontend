@@ -19,14 +19,35 @@ interface StatRow {
   icon: React.ReactNode;
 }
 
+// test_sessions predates the current generated Database types and the
+// frontend's own legacy session-quiz path (removed) — no schema type exists
+// to select against, so this shape is asserted by hand from the query below.
+interface QuizSessionRow {
+  id: string;
+  status: string;
+  correct_count: number | null;
+  total_questions: number | null;
+  created_at: string;
+  courses: { title: string } | null;
+}
+
+interface DocumentRow {
+  id: string;
+  title: string;
+  file_size: number;
+  status: string;
+  created_at: string;
+  courses: { title: string } | null;
+}
+
 export function AdminPage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [users, setUsers] = useState<UserRow[]>([]);
   const [stats, setStats] = useState<StatRow[]>([]);
-  const [recentQuizzes, setRecentQuizzes] = useState<any[]>([]);
-  const [recentDocs, setRecentDocs] = useState<any[]>([]);
+  const [recentQuizzes, setRecentQuizzes] = useState<QuizSessionRow[]>([]);
+  const [recentDocs, setRecentDocs] = useState<DocumentRow[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   const isAdmin = isAdminEmail(user?.email);
@@ -53,16 +74,18 @@ export function AdminPage() {
         .select("id", { count: "exact", head: true });
 
       // Fetch total quiz sessions
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test_sessions has no generated type, see QuizSessionRow above
       const { count: quizCount } = await (supabase as any)
         .from("test_sessions")
         .select("id", { count: "exact", head: true });
 
       // Fetch recent quiz sessions with course info
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any -- test_sessions has no generated type, see QuizSessionRow above
       const { data: quizzes } = await (supabase as any)
         .from("test_sessions")
         .select("id, user_id, course_id, status, correct_count, total_questions, created_at, courses(title)")
         .order("created_at", { ascending: false })
-        .limit(20);
+        .limit(20) as { data: QuizSessionRow[] | null };
 
       // Fetch recent document uploads
       const { data: docs } = await supabase
@@ -72,7 +95,7 @@ export function AdminPage() {
         .limit(20);
 
       // Deduplicate user_ids
-      const uniqueUserIds = [...new Set((userRows ?? []).map((r: any) => r.user_id))];
+      const uniqueUserIds = [...new Set((userRows ?? []).map((r) => r.user_id))];
       const userList: UserRow[] = uniqueUserIds.map((uid) => ({ user_id: uid }));
 
       setUsers(userList);
@@ -211,7 +234,7 @@ export function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentQuizzes.map((q: any) => (
+                    {recentQuizzes.map((q) => (
                       <tr key={q.id} className="border-b last:border-0 hover:bg-ghibli-mist/50">
                         <td className="py-3 px-4 font-medium">{q.courses?.title ?? "—"}</td>
                         <td className="py-3 px-4">
@@ -258,7 +281,7 @@ export function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {recentDocs.map((d: any) => (
+                    {recentDocs.map((d) => (
                       <tr key={d.id} className="border-b last:border-0 hover:bg-ghibli-mist/50">
                         <td className="py-3 px-4 font-medium maw-w-[200px] truncate" title={d.title}>
                           {d.title}

@@ -75,7 +75,7 @@ export function CourseDetailPage() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("documents")
-        .select("id, title, status, error_message")
+        .select("id, title, status, error_message, processing_stage, processing_started_at")
         .eq("course_id", courseId!);
       if (error) throw error;
       const rows = data ?? [];

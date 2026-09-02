@@ -22,6 +22,10 @@ export interface CourseSummary {
   hasProcessing: boolean;
   /** Count of documents currently pending or processing */
   processingDocumentCount: number;
+  /** Furthest-along processing stage among this course's in-flight documents */
+  processingStage: "extracting" | "analyzing" | null;
+  /** Earliest processing_started_at among this course's in-flight documents */
+  processingStartedAt: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -33,16 +33,25 @@ async function fetchCourses(userId: string) {
 type CourseRow = Awaited<ReturnType<typeof fetchCourses>>[number];
 
 async function fetchDocumentsForCourses(courseIds: string[]) {
-  const { data } = await supabase.from("documents").select("id, course_id, status").in("course_id", courseIds);
+  const { data } = await supabase
+    .from("documents")
+    .select("id, course_id, status, processing_stage, processing_started_at")
+    .in("course_id", courseIds);
   return data ?? [];
 }
 
 type DocumentRow = Awaited<ReturnType<typeof fetchDocumentsForCourses>>[number];
 
+// "analyzing" is the more informative thing to say once any document in the
+// course has reached it, even if others are still queued/extracting.
+const STAGE_RANK: Record<string, number> = { extracting: 0, analyzing: 1 };
+
 function aggregateDocuments(documents: DocumentRow[]) {
   const docCountByCourse = new Map<string, number>();
   const processingByCourse = new Map<string, boolean>();
   const processingCountByCourse = new Map<string, number>();
+  const processingStageByCourse = new Map<string, "extracting" | "analyzing" | null>();
+  const processingStartedAtByCourse = new Map<string, string>();
   const allDocIds: string[] = [];
 
   documents.forEach((doc) => {
@@ -50,11 +59,39 @@ function aggregateDocuments(documents: DocumentRow[]) {
     if (doc.status === "pending" || doc.status === "processing") {
       processingByCourse.set(doc.course_id, true);
       processingCountByCourse.set(doc.course_id, (processingCountByCourse.get(doc.course_id) || 0) + 1);
+
+      // A retried document is reset to status "pending" but keeps its
+      // previous processing_stage until the backend restarts it — only
+      // trust the stage while the backend is actually mid-run on it.
+      const currentStage = processingStageByCourse.get(doc.course_id) ?? null;
+      if (
+        doc.status === "processing" &&
+        doc.processing_stage &&
+        (!currentStage || STAGE_RANK[doc.processing_stage] > STAGE_RANK[currentStage])
+      ) {
+        processingStageByCourse.set(doc.course_id, doc.processing_stage);
+      }
+
+      // Same staleness concern as the stage above — a "pending" retry keeps
+      // its previous processing_started_at until the backend restarts it.
+      if (doc.status === "processing" && doc.processing_started_at) {
+        const earliest = processingStartedAtByCourse.get(doc.course_id);
+        if (!earliest || doc.processing_started_at < earliest) {
+          processingStartedAtByCourse.set(doc.course_id, doc.processing_started_at);
+        }
+      }
     }
     allDocIds.push(doc.id);
   });
 
-  return { docCountByCourse, processingByCourse, processingCountByCourse, allDocIds };
+  return {
+    docCountByCourse,
+    processingByCourse,
+    processingCountByCourse,
+    processingStageByCourse,
+    processingStartedAtByCourse,
+    allDocIds,
+  };
 }
 
 type DocumentAggregates = ReturnType<typeof aggregateDocuments>;
@@ -154,6 +191,8 @@ function buildCourseSummary(
     progressPercent: masteryCount > 0 ? Math.round((masterySum / masteryCount) * 100) : 0,
     hasProcessing: docAgg.processingByCourse.get(c.id) || false,
     processingDocumentCount: docAgg.processingCountByCourse.get(c.id) || 0,
+    processingStage: docAgg.processingStageByCourse.get(c.id) ?? null,
+    processingStartedAt: docAgg.processingStartedAtByCourse.get(c.id) ?? null,
     createdAt: c.created_at,
     updatedAt: c.updated_at || c.created_at,
   };

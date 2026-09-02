@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { getProcessingStageMessage } from "@/lib/garden";
 import type { UploadModalState } from "../../hooks/useUploadModal";
 
 interface CompletionActionsProps {
@@ -9,11 +10,16 @@ interface CompletionActionsProps {
 }
 
 export function CompletionActions({ state, onGoToCourse, onClose }: CompletionActionsProps) {
+  // Same "usually takes 1-2 minutes" phrasing as the dashboard banner and
+  // course activation card — this used to say "2-5 minutes" here and
+  // "1-2 minutes" everywhere else.
+  const { detail } = getProcessingStageMessage(null, 0);
+
   return (
     <div className="space-y-3 pt-2">
       {state.anySucceeded && (
         <p className="text-xs text-ghibli-bark text-center">
-          We're extracting concepts now — this takes 2–5 minutes. Open the course to watch them appear and start your
+          We're extracting concepts now — {detail.toLowerCase()} Open the course to watch them appear and start your
           first quiz.
         </p>
       )}

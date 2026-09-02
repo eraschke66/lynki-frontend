@@ -217,6 +217,8 @@ export async function uploadDocument(
     status: processingResult.success
       ? (document.status as Document["status"])
       : "failed",
+    processingStage: document.processing_stage as Document["processingStage"],
+    processingStartedAt: document.processing_started_at,
     createdAt: document.created_at,
     updatedAt: document.updated_at,
     errorMessage: processingResult.success ? undefined : processingResult.error,
@@ -269,6 +271,8 @@ export async function fetchUserDocuments(userId: string): Promise<Document[]> {
     fileType: doc.file_type,
     fileSize: doc.file_size,
     status: doc.status as Document["status"],
+    processingStage: doc.processing_stage as Document["processingStage"],
+    processingStartedAt: doc.processing_started_at,
     createdAt: doc.created_at,
     updatedAt: doc.updated_at,
     errorMessage: doc.error_message,

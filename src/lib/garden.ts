@@ -121,3 +121,60 @@ export function getScoreSummary(correct: number, total: number): string {
   if (pct >= 40) return `${correct} of ${total} seeds took root. The soil is getting richer.`;
   return `${correct} of ${total} seeds took root. Every garden has days like this.`;
 }
+
+// --- Document processing (upload -> extraction -> analysis) ---
+//
+// A single source of truth for staged-processing copy and timing, so the
+// four surfaces that show this wait (upload modal, dashboard banner, course
+// activation card, documents table) never drift from each other again.
+
+export type DocumentProcessingStage = "extracting" | "analyzing" | null | undefined;
+export type DocumentProcessingStatus = "pending" | "processing" | "completed" | "failed";
+
+/** Past this many ms, surfaces should offer a "taking longer than usual" affordance. */
+export const PROCESSING_SLOW_THRESHOLD_MS = 90_000;
+
+export interface ProcessingStageMessage {
+  title: string;
+  detail: string;
+  isSlow: boolean;
+}
+
+export function getProcessingStageMessage(
+  stage: DocumentProcessingStage,
+  elapsedMs: number,
+): ProcessingStageMessage {
+  if (elapsedMs >= PROCESSING_SLOW_THRESHOLD_MS) {
+    return {
+      title: "Still tending to this one...",
+      detail: "Larger or scanned documents can take a little longer than usual.",
+      isSlow: true,
+    };
+  }
+  if (stage === "analyzing") {
+    return {
+      title: "Finding the key ideas...",
+      detail: "Identifying topics and concepts worth studying.",
+      isSlow: false,
+    };
+  }
+  // "extracting", or no stage yet (freshly queued) — the pending gap before
+  // the backend picks it up is short enough to read the same to a student.
+  return {
+    title: "Reading your materials...",
+    detail: "Usually takes 1-2 minutes.",
+    isSlow: false,
+  };
+}
+
+/** A determinate (not animated/fake) progress value driven off real state transitions. */
+export function getProcessingProgressPercent(
+  status: DocumentProcessingStatus,
+  stage: DocumentProcessingStage,
+): number {
+  if (status === "completed") return 100;
+  if (status === "failed") return 0;
+  if (stage === "analyzing") return 75;
+  if (stage === "extracting") return 35;
+  return 10; // pending — queued, not yet picked up
+}

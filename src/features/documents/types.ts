@@ -4,6 +4,8 @@ export type ProcessingStatus =
   | "completed"
   | "failed";
 
+export type ProcessingStage = "extracting" | "analyzing";
+
 export interface Document {
   id: string;
   userId: string;
@@ -13,6 +15,8 @@ export interface Document {
   fileType: string;
   fileSize: number;
   status: ProcessingStatus;
+  processingStage?: ProcessingStage | null;
+  processingStartedAt?: string | null;
   createdAt: string;
   updatedAt: string;
   errorMessage?: string | null;

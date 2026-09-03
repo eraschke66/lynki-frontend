@@ -21,7 +21,13 @@ export function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }:
 }) {
   const isProcessing = course.hasProcessing;
   const isClickable = course.totalConcepts > 0;
-  const status = getGardenStatus(course.progressPercent);
+  // Both the status label and the plant tier are keyed off pass probability
+  // (not progressPercent/mastery) so they always agree with the number shown
+  // next to them and with the Settings-page legend that defines these tiers
+  // as pass-probability ranges. progressPercent (mastery) still drives the
+  // vine bar below — a separate "material covered" signal, not paired with
+  // this label.
+  const status = getGardenStatus(course.passProbability);
 
   return (
     <ParchmentCard
@@ -53,7 +59,7 @@ export function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }:
               Processing…
             </span>
           ) : null}
-          <div onClick={(e) => e.stopPropagation()}>
+          <div className="pointer-events-auto" onClick={(e) => e.stopPropagation()}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="inline-flex items-center justify-center w-7 h-7 rounded-full text-ghibli-forest hover:text-ghibli-canopy hover:bg-ghibli-ivory/60 transition-colors shrink-0">
@@ -92,7 +98,7 @@ export function CourseCard({ course, isRecommended, onClick, onEdit, onDelete }:
           <div className="relative">
             {/* Soft glow halo behind plant */}
             <div className="absolute inset-0 rounded-full bg-ghibli-sunlight/30 blur-2xl scale-110 -z-10" />
-            <PlantIndicator probability={course.progressPercent} size="lg" showPercent={false} />
+            <PlantIndicator probability={course.passProbability} size="lg" showPercent={false} />
           </div>
         )}
       </div>

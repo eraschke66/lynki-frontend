@@ -61,9 +61,14 @@ export function DateSetupCard({
           </p>
         </div>
       )}
+      {value && value < today && (
+        <p aria-live="polite" className="text-xs text-amber-700">
+          That date has already passed — pick a date from today onward.
+        </p>
+      )}
       <Button
         onClick={() => onSave(value)}
-        disabled={!value || isPending}
+        disabled={!value || value < today || isPending}
         className="w-full max-w-xs shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)]"
       >
         {isPending ? "Saving…" : "Set Exam Date"}

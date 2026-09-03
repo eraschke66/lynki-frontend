@@ -91,7 +91,10 @@ export function HeroSection({ data, curriculum, onStartStudying, onUpload }: {
           </Button>
         </div>
         <div className="order-1 md:order-2 flex justify-center">
-          <PlantIndicator probability={data.overallProgress} size="xl" glow showPercent />
+          {/* Matches data.overallPassProbability, shown just to the left of
+              this plant — same metric driving both, so the plant's tier and
+              the "X% pass probability" text next to it never disagree. */}
+          <PlantIndicator probability={data.overallPassProbability} size="xl" glow showPercent />
         </div>
       </div>
     </ParchmentCard>

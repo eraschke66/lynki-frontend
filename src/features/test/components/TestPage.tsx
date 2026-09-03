@@ -2,6 +2,7 @@ import { GardenVideoLoader } from "@/components/garden/GardenVideoLoader";
 import { fromDbCurriculum } from "@/lib/curricula";
 import { useQuizAttempt } from "../hooks/useQuizAttempt";
 import { QuizGenerationFailedScreen } from "./quiz-screens/QuizGenerationFailedScreen";
+import { QuizGenerationSlowScreen } from "./quiz-screens/QuizGenerationSlowScreen";
 import { QuizErrorScreen } from "./quiz-screens/QuizErrorScreen";
 import { QuizEmptyScreen } from "./quiz-screens/QuizEmptyScreen";
 import { QuizResultsScreen } from "./quiz-screens/QuizResultsScreen";
@@ -14,7 +15,22 @@ export function TestPage() {
     return null;
   }
 
-  if (quiz.quizStillGenerating) {
+  // Gate on !quiz.testData too: once the quiz has actually loaded (questions
+  // fetched into testData), never fall back to this screen again, even if
+  // the generation-status poll re-enters a loading state on some later
+  // refetch (e.g. a stray `refetchOnMount: "always"` remount of the poll
+  // query). Without this, a transient blip in that unrelated poll paints the
+  // full-screen loader back over an already-working quiz with no way to
+  // dismiss it, since this is the very first check in the component.
+  if (quiz.quizStillGenerating && !quiz.testData) {
+    if (quiz.generationTimedOut) {
+      return (
+        <QuizGenerationSlowScreen
+          onCheckAgain={() => quiz.refetchGenerationStatus()}
+          onExit={quiz.handleExit}
+        />
+      );
+    }
     return <GardenVideoLoader message="Growing your questions..." />;
   }
 

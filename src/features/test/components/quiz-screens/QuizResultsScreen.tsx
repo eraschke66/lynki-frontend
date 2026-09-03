@@ -69,9 +69,6 @@ function PassProbabilityCard({
 
   return (
     <div className="space-y-3 flex flex-col items-center">
-      <p className="text-xs font-semibold text-ghibli-forest uppercase tracking-wider">
-        Garden Walk Complete
-      </p>
       <PlantIndicator probability={passPercent} size="xl" />
       <p className={`text-sm font-semibold ${getGardenStatus(passPercent).color}`}>
         {getGardenStatus(passPercent).label}
@@ -180,18 +177,26 @@ export function QuizResultsScreen({
       </button>
       <div className="relative z-10 flex items-center justify-center min-h-screen px-6">
         <ParchmentCard className="p-6 md:p-10 text-center flex flex-col items-center gap-6 w-full max-w-lg">
+          <p className="text-xs font-semibold text-ghibli-forest uppercase tracking-wider">
+            Garden Walk Complete
+          </p>
+
+          {/* Leads with this quiz's own result — the encouraging, immediate
+              feedback — before the course-wide pass-probability card below,
+              which can look discouraging in isolation right after a strong
+              quiz (that card's own divergence note explains why). */}
+          <ScoreSummary
+            correctCount={correctCount}
+            totalQuestions={totalQuestions}
+            passPercent={passPercent}
+          />
+
           <PassProbabilityCard
             loadingPassChance={loadingPassChance}
             passPercent={passPercent}
             passChanceBefore={passChanceBefore}
             curriculum={curriculum}
             targetGrade={targetGrade}
-          />
-
-          <ScoreSummary
-            correctCount={correctCount}
-            totalQuestions={totalQuestions}
-            passPercent={passPercent}
           />
 
           <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full">

@@ -14,6 +14,7 @@ import { initPwa } from "@/pwa/register";
 import { PWAUpdatePrompt } from "@/components/pwa/PWAUpdatePrompt";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { OfflineStatus } from "@/components/pwa/OfflineStatus";
+import { Toaster } from "@/components/ui/sonner";
 
 function PageViewTracker() {
   const location = useLocation();
@@ -42,6 +43,7 @@ export default function App() {
             <OfflineStatus />
             <InstallPrompt />
             <PWAUpdatePrompt />
+            <Toaster />
           </Sentry.ErrorBoundary>
         </AuthProvider>
       </BrowserRouter>

@@ -4,12 +4,13 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, RefreshCw, BookOpen } from "lucide-react";
-import { gardenQueryKeys, tendingQueryKeys } from "@/lib/queryKeys";
+import { gardenQueryKeys, tendingQueryKeys, topicQuizQueryKeys } from "@/lib/queryKeys";
 import { getGardenStatus } from "@/lib/garden";
 import {
   findIncompleteSessionForCourse,
   markSessionAbandoned,
 } from "@/features/tending/services/tendingProgressApi";
+import { findIncompleteTopicQuizSession } from "@/features/topic-quiz/services/topicQuizService";
 import { KnowledgeGardenSkeleton } from "@/components/garden/GardenSkeletons";
 import { GardenRoots } from "@/components/garden/GardenRoots";
 import { ParchmentCard } from "@/components/garden/ParchmentCard";
@@ -83,10 +84,10 @@ function RecommendedTopicCard({
           <p className="text-xs text-ghibli-bark mt-1">
             15 min · {gardenStatus.label}
           </p>
-          {isResuming && (
+          {isResuming && onStartFresh && (
             <button
               type="button"
-              onClick={() => onStartFresh?.(incompleteSessionId)}
+              onClick={() => onStartFresh(incompleteSessionId)}
               className="text-xs text-ghibli-forest hover:underline mt-1"
             >
               Start fresh instead
@@ -331,15 +332,48 @@ export function KnowledgeGardenPage() {
     staleTime: 30_000,
   });
 
-  // An in-flight tending session takes priority over the normal
+  // An in-flight session — in either the tending flow or the on-demand
+  // topic-quiz flow ("Study this topic") — takes priority over the normal
   // recommendation algorithm below, so the resume affordance for it can't
-  // get buried by an unrelated topic's progress numbers.
+  // get buried by an unrelated topic's progress numbers. A student can leave
+  // off mid-session in whichever flow they were last using, so both are
+  // checked and the more recent one wins — checking only the tending table
+  // left "pick up where you left off" stuck on a stale topic whenever the
+  // student's actual last session was a topic-quiz.
   const { data: incompleteSession } = useQuery({
     queryKey: tendingQueryKeys.incompleteSession(courseId ?? "", user?.id ?? ""),
     queryFn: () => findIncompleteSessionForCourse(user!.id, courseId!),
     enabled: !!user && !!courseId,
     staleTime: 30_000,
   });
+  const { data: incompleteTopicQuizSession } = useQuery({
+    queryKey: topicQuizQueryKeys.incompleteSession(courseId ?? "", user?.id ?? ""),
+    queryFn: () => findIncompleteTopicQuizSession(user!.id, courseId!),
+    enabled: !!user && !!courseId,
+    staleTime: 30_000,
+  });
+
+  const topics = gardenData?.topics ?? [];
+
+  // Whichever in-flight session — tending or topic-quiz — was started more
+  // recently wins the "pick up where you left off" slot.
+  const tendingStartedAt = incompleteSession?.started_at ?? null;
+  const topicQuizStartedAt = incompleteTopicQuizSession?.created_at ?? null;
+  const resumeKind: "tend" | "topic-quiz" | null =
+    tendingStartedAt && (!topicQuizStartedAt || tendingStartedAt >= topicQuizStartedAt)
+      ? "tend"
+      : topicQuizStartedAt
+        ? "topic-quiz"
+        : null;
+  const incompleteTopicId =
+    resumeKind === "tend"
+      ? (incompleteSession?.topic_id ?? null)
+      : resumeKind === "topic-quiz"
+        ? (incompleteTopicQuizSession?.topic_id ?? null)
+        : null;
+  const incompleteTopic = incompleteTopicId
+    ? (topics.find((t) => t.topic_id === incompleteTopicId) ?? null)
+    : null;
 
   const handleStudyTopic = useCallback(
     (topicId: string) => {
@@ -353,6 +387,21 @@ export function KnowledgeGardenPage() {
       navigate(`/course/${courseId}/tend/${topicId}`);
     },
     [courseId, navigate],
+  );
+
+  // The recommended-topic card's default action is the tending flow, unless
+  // the topic being begun is specifically an in-flight topic-quiz session
+  // being resumed — then it must return to that same flow, not start an
+  // unrelated tending session on the same topic.
+  const handleBeginRecommended = useCallback(
+    (topicId: string) => {
+      if (resumeKind === "topic-quiz" && incompleteTopic?.topic_id === topicId) {
+        navigate(`/course/${courseId}/topic-quiz/${topicId}`);
+        return;
+      }
+      handleBeginTending(topicId);
+    },
+    [courseId, navigate, resumeKind, incompleteTopic, handleBeginTending],
   );
 
   const handleStartFresh = useCallback(
@@ -372,12 +421,8 @@ export function KnowledgeGardenPage() {
     return null;
   }
 
-  const topics = gardenData?.topics ?? [];
   const overallProgress = gardenData?.overall_progress ?? 0;
   const gardenStatus = getGardenStatus(overallProgress);
-  const incompleteTopic = incompleteSession
-    ? (topics.find((t) => t.topic_id === incompleteSession.topic_id) ?? null)
-    : null;
   const recommendedTopic = incompleteTopic ?? selectRecommendedTopic(topics);
 
   return (
@@ -449,9 +494,19 @@ export function KnowledgeGardenPage() {
             {recommendedTopic && (
               <RecommendedTopicCard
                 topic={recommendedTopic}
-                onBegin={handleBeginTending}
-                incompleteSessionId={incompleteTopic ? incompleteSession?.id : undefined}
-                onStartFresh={handleStartFresh}
+                onBegin={handleBeginRecommended}
+                incompleteSessionId={
+                  !incompleteTopic
+                    ? undefined
+                    : resumeKind === "tend"
+                      ? incompleteSession?.id
+                      : incompleteTopicQuizSession?.id
+                }
+                // Abandon/start-fresh only exists for the tending flow today
+                // (topic_tending_sessions.abandoned_at) — topic_quiz_sessions
+                // has no equivalent, so the affordance is hidden rather than
+                // wired to a no-op for a resumed topic-quiz session.
+                onStartFresh={resumeKind === "tend" ? handleStartFresh : undefined}
               />
             )}
 

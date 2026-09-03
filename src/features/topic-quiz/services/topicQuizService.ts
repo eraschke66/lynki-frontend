@@ -96,6 +96,39 @@ export async function submitTopicQuizAnswer(
   return res.json();
 }
 
+export interface IncompleteTopicQuizSession {
+  id: string;
+  topic_id: string;
+  created_at: string;
+}
+
+/**
+ * Most recent unfinished topic-quiz session for a course, if any. Mirrors
+ * findIncompleteSessionForCourse in tendingProgressApi.ts (the tending-flow
+ * equivalent) — the two are checked side by side by the Knowledge Garden
+ * page's "pick up where you left off" recommendation, since a student can
+ * leave off mid-session in either flow. There's no abandon/start-fresh
+ * concept for this table yet (unlike topic_tending_sessions), so a session
+ * found here stays "in_progress" until it's resumed and finished.
+ */
+export async function findIncompleteTopicQuizSession(
+  userId: string,
+  courseId: string,
+): Promise<IncompleteTopicQuizSession | null> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from("topic_quiz_sessions")
+    .select("id, topic_id, created_at")
+    .eq("user_id", userId)
+    .eq("course_id", courseId)
+    .eq("status", "in_progress")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
 export async function completeTopicQuiz(sessionId: string): Promise<void> {
   const now = new Date().toISOString();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

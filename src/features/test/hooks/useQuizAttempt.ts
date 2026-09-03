@@ -12,6 +12,7 @@ import {
 } from "../services/quizAttemptService";
 import { submitBktAnswer, fetchBktSession } from "../services/bktSessionService";
 import { fetchPassChance } from "../services/passChanceService";
+import { useElapsedTime } from "@/features/documents/hooks/useElapsedTime";
 import {
   courseQueryKeys,
   testQueryKeys,
@@ -77,19 +78,36 @@ export function useQuizAttempt() {
   // to generation, so the interval stays well under the time a single
   // question takes to generate.
   const isFreshQuiz = !!quizId && !attemptId;
-  const { data: generationStatus, isLoading: isLoadingGenerationStatus } =
-    useQuery({
-      queryKey: testQueryKeys.quizGenerationStatus(quizId ?? ""),
-      queryFn: () => fetchQuizGenerationStatus(quizId!),
-      enabled: isFreshQuiz,
-      refetchInterval: (query) =>
-        query.state.data?.status === "generating" ? 1000 : false,
-    });
+  const {
+    data: generationStatus,
+    isLoading: isLoadingGenerationStatus,
+    refetch: refetchGenerationStatus,
+  } = useQuery({
+    queryKey: testQueryKeys.quizGenerationStatus(quizId ?? ""),
+    queryFn: () => fetchQuizGenerationStatus(quizId!),
+    enabled: isFreshQuiz,
+    refetchInterval: (query) =>
+      query.state.data?.status === "generating" ? 1000 : false,
+  });
   const quizStillGenerating =
     isFreshQuiz &&
     (isLoadingGenerationStatus || generationStatus?.status === "generating");
   const quizGenerationFailed =
     isFreshQuiz && generationStatus?.status === "failed";
+
+  // Backstop for a generation wait that's gone on unusually long — surfaces a
+  // manual "check again" instead of an indefinite spinner. `generationStartedAt`
+  // is captured once per fresh-quiz mount, not reset by the poll itself.
+  const generationStartedAtRef = useRef<string | null>(null);
+  if (isFreshQuiz && generationStartedAtRef.current === null) {
+    generationStartedAtRef.current = new Date().toISOString();
+  }
+  const generationElapsedMs = useElapsedTime(
+    isFreshQuiz ? generationStartedAtRef.current : null,
+  );
+  const GENERATION_SLOW_THRESHOLD_MS = 45_000;
+  const generationTimedOut =
+    quizStillGenerating && generationElapsedMs >= GENERATION_SLOW_THRESHOLD_MS;
 
   const {
     data: testData,
@@ -148,6 +166,27 @@ export function useQuizAttempt() {
       });
     }
   }, [testData, courseId, topicId, quizId, attemptId]);
+
+  // Promote the URL from `?quiz=X` to `?quiz=X&attempt=Y` once an attempt
+  // exists, so a reload (or the browser back/forward cache) resumes this
+  // same attempt via the well-tested resume path instead of re-running the
+  // fresh-quiz flow — which would otherwise re-poll generation status from
+  // scratch and mint another attempt every time.
+  useEffect(() => {
+    if (quizId && !attemptId && testData?.test_id) {
+      // Seed the cache under the key this same data will live at once the
+      // URL below flips `attemptId` in — otherwise switching query keys
+      // mid-session would force an immediate, unnecessary resume-fetch of
+      // data the app already has.
+      queryClient.setQueryData(
+        testQueryKeys.resumeAttempt(testData.test_id),
+        testData,
+      );
+      navigate(`/test/${courseId}?quiz=${quizId}&attempt=${testData.test_id}`, {
+        replace: true,
+      });
+    }
+  }, [quizId, attemptId, testData, courseId, navigate, queryClient]);
 
   useEffect(() => {
     if (
@@ -398,9 +437,13 @@ export function useQuizAttempt() {
     }
   };
 
+  // By the time this is read (TestPage's `quiz.isLoading` branch), the
+  // generation-status poll has already resolved to a terminal state — this
+  // is always the second, distinct stage: starting the attempt on an
+  // already-generated quiz, not waiting on generation itself.
   const loadingMessage =
     quizId && !attemptId
-      ? "Growing your questions..."
+      ? "Preparing your first question..."
       : topicId
         ? "Tending this patch..."
         : "Resuming your walk...";
@@ -421,6 +464,8 @@ export function useQuizAttempt() {
     quizStillGenerating,
     quizGenerationFailed,
     generationStatus,
+    generationTimedOut,
+    refetchGenerationStatus,
     isLoading,
     error,
     refetch,

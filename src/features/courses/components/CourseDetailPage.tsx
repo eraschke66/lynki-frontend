@@ -68,8 +68,9 @@ export function CourseDetailPage() {
   // Readiness for the activation card's "growing" state: derived for free
   // from document status (a document only reaches 'completed' once concepts
   // exist — see extraction_service.py), no separate quiz-generation signal
-  // needed. Polls while anything is still pending/processing so the card
-  // flips to "ready" on its own once materials finish.
+  // needed. Polls while anything is still pending/processing, whether or not
+  // the course already has a completed document — a second upload onto a
+  // finished course is still an upload the screen has to keep asking about.
   const { data: docStatusSummary } = useQuery({
     queryKey: ["courses", "doc-status-summary", courseId],
     queryFn: async () => {
@@ -93,10 +94,7 @@ export function CourseDetailPage() {
       };
     },
     enabled: !!courseId,
-    refetchInterval: (query) =>
-      query.state.data?.hasProcessing && !query.state.data?.hasCompleted
-        ? 4000
-        : false,
+    refetchInterval: (query) => (query.state.data?.hasProcessing ? 4000 : false),
   });
 
   const { data: passChanceData } = useQuery({
@@ -174,13 +172,12 @@ export function CourseDetailPage() {
           ? ("materials_processing" as const)
           : null;
 
-  // A failed document should surface a retry regardless of whether other
-  // documents in the course succeeded — a second upload can fail on a course
-  // that already has completed materials. Gated on "nothing else still
-  // processing" so we don't show a stale failure while a retry is in flight.
-  const materialsFailed =
-    !docStatusSummary?.hasProcessing &&
-    (docStatusSummary?.failedDocs?.length ?? 0) > 0;
+  // A failed document should surface a retry regardless of what else is
+  // happening in the course — a second upload can fail while a third is
+  // still extracting, and the student needs the retry either way. Retrying
+  // clears error_message and resets the row to pending, so the banner goes
+  // on its own once the retry lands.
+  const materialsFailed = (docStatusSummary?.failedDocs?.length ?? 0) > 0;
 
   const handleRetryFailedMaterials = async () => {
     const failedDocs = docStatusSummary?.failedDocs ?? [];
@@ -331,7 +328,7 @@ export function CourseDetailPage() {
           />
         )}
 
-        {!activationState && materialsFailed && (
+        {materialsFailed && (
           <MaterialsFailedBanner
             errorMessage={docStatusSummary?.failedDocs?.[0]?.error_message}
             retrying={retryingUpload}

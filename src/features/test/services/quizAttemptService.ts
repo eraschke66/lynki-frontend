@@ -10,9 +10,8 @@ import type {
   AttemptQuestionResult,
   QuizGenerationStatusRow,
 } from "../types";
+import { backendFetch } from "@/lib/backend";
 import { supabase } from "@/lib/supabase";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 /**
  * Kick off generation of a fresh named quiz (BKT-guided). Returns as soon as
@@ -26,9 +25,8 @@ export async function generateQuiz(
   courseId: string,
   quizSize = 10,
 ): Promise<GeneratedQuizInfo> {
-  const res = await fetch(`${API_URL}/quiz-sessions/generate`, {
+  const res = await backendFetch("/quiz-sessions/generate", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       user_id: userId,
       course_id: courseId,
@@ -72,9 +70,8 @@ export async function startQuizAttempt(
   quizId: string,
   courseId: string,
 ): Promise<TestData> {
-  const res = await fetch(`${API_URL}/quiz-attempts/start`, {
+  const res = await backendFetch("/quiz-attempts/start", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ user_id: userId, quiz_id: quizId, course_id: courseId }),
   });
   if (!res.ok) {
@@ -91,7 +88,7 @@ export async function resumeQuizAttempt(
   userId: string,
   attemptId: string,
 ): Promise<TestData> {
-  const res = await fetch(`${API_URL}/quiz-attempts/resume/${userId}/${attemptId}`);
+  const res = await backendFetch(`/quiz-attempts/resume/${userId}/${attemptId}`);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || "Failed to resume quiz");
@@ -109,9 +106,8 @@ export async function submitQuizAnswer(
   questionId: string,
   selectedOptionIndex: number,
 ): Promise<AnswerFeedback> {
-  const res = await fetch(`${API_URL}/quiz-attempts/answer`, {
+  const res = await backendFetch("/quiz-attempts/answer", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       user_id: userId,
       course_id: courseId,
@@ -135,9 +131,8 @@ export async function completeQuizAttempt(
   courseId: string,
   quizAttemptId: string,
 ): Promise<void> {
-  const res = await fetch(`${API_URL}/quiz-attempts/complete`, {
+  const res = await backendFetch("/quiz-attempts/complete", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       user_id: userId,
       course_id: courseId,

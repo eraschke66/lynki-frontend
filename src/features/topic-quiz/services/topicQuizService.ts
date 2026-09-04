@@ -1,11 +1,10 @@
+import { backendFetch } from "@/lib/backend";
 import { supabase } from "@/lib/supabase";
 import {
   cacheQuizSession,
   isOfflineError,
   readCachedQuizSession,
 } from "@/lib/offline/quizSessionCache";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 export interface TopicQuizOption {
   index: number;
@@ -50,8 +49,8 @@ export async function fetchTopicQuizSession(
   topicId: string,
 ): Promise<TopicQuizSession> {
   try {
-    const res = await fetch(
-      `${API_URL}/topic-quiz/session/${userId}/${courseId}/${topicId}`,
+    const res = await backendFetch(
+      `/topic-quiz/session/${userId}/${courseId}/${topicId}`,
     );
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -80,9 +79,8 @@ export async function submitTopicQuizAnswer(
   questionIndex: number,
   selectedOption: number,
 ): Promise<AnswerResult> {
-  const res = await fetch(`${API_URL}/topic-quiz/answer`, {
+  const res = await backendFetch("/topic-quiz/answer", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       session_id: sessionId,
       question_index: questionIndex,

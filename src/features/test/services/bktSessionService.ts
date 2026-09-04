@@ -3,9 +3,8 @@
  * mastery, as opposed to the named/generated course_quizzes flow in
  * quizAttemptService.ts.
  */
+import { backendFetch } from "@/lib/backend";
 import type { TestData, AnswerFeedback, TestQuestion } from "../types";
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 /**
  * Fetch a BKT-native session scoped to a topic.
@@ -19,8 +18,8 @@ export async function fetchBktSession(
   const params = new URLSearchParams();
   params.set("topic_id", topicId);
   const query = params.toString();
-  const url = `${API_URL}/bkt/session/${userId}/${courseId}${query ? `?${query}` : ""}`;
-  const res = await fetch(url);
+  const path = `/bkt/session/${userId}/${courseId}${query ? `?${query}` : ""}`;
+  const res = await backendFetch(path);
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || "Failed to load focused session");
@@ -46,9 +45,8 @@ export async function submitBktAnswer(
   selectedOptionIndex: number,
   sessionId?: string,
 ): Promise<AnswerFeedback> {
-  const res = await fetch(`${API_URL}/bkt/answer`, {
+  const res = await backendFetch("/bkt/answer", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       user_id: userId,
       course_id: courseId,

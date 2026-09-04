@@ -1,9 +1,9 @@
+import { backendFetch, pingBackend } from "@/lib/backend";
 import { reportError } from "@/lib/sentry";
 import { supabase } from "@/lib/supabase";
 import type { Document, StorageStats } from "../types";
 
 const BUCKET_NAME = "course-materials";
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1";
 
 /**
  * Retry configuration for the backend processing trigger.
@@ -36,21 +36,7 @@ const getRetryDelay = (attempt: number): number => {
  * Call this early (e.g., on page load) so the API is ready when needed
  */
 export async function wakeUpBackend(): Promise<boolean> {
-  try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout for cold start
-
-    const response = await fetch(`${API_URL.replace("/api/v1", "")}/`, {
-      method: "GET",
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-    return response.ok;
-  } catch (err) {
-    console.warn("Backend wake-up ping failed (may be cold starting):", err);
-    return false;
-  }
+  return pingBackend();
 }
 
 /**
@@ -70,13 +56,10 @@ async function triggerBackendProcessing(
           : PROCESS_TRIGGER_CONFIG.retryTimeoutMs;
       const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      const response = await fetch(
-        `${API_URL}/documents/process/${documentId}`,
-        {
-          method: "POST",
-          signal: controller.signal,
-        },
-      );
+      const response = await backendFetch(`/documents/process/${documentId}`, {
+        method: "POST",
+        signal: controller.signal,
+      });
 
       clearTimeout(timeoutId);
 

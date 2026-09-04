@@ -1,3 +1,4 @@
+import { backendFetch } from "@/lib/backend";
 import { USE_MOCK_TENDING_API } from "@/lib/flags";
 import { supabase } from "@/lib/supabase";
 import type {
@@ -11,8 +12,6 @@ import type {
 import generateMock from "../mocks/generateSession.mock.json";
 import evaluateMock from "../mocks/evaluateRecall.mock.json";
 import completeMock from "../mocks/completeSession.mock.json";
-
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000/api/v1";
 
 const MOCK_LATENCY_MS = 1500;
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
@@ -30,9 +29,8 @@ async function postJSON<T>(path: string, body: unknown, timeoutMs = 150_000): Pr
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(`${API_URL}${path}`, {
+    const res = await backendFetch(path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
       signal: controller.signal,
     });

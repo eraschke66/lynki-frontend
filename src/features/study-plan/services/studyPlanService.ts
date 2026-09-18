@@ -1,6 +1,5 @@
+import { backendFetch } from "@/lib/backend";
 import type { TopicMastery } from "@/features/courses/types";
-
-const API_URL = (import.meta.env.VITE_API_URL as string | undefined) ?? "http://localhost:8000/api/v1";
 
 /**
  * Call FastAPI to generate (or regenerate) an AI study plan for a user+course.
@@ -15,9 +14,8 @@ export async function generateStudyPlan(
   // 90s timeout to survive Render cold starts
   const timer = setTimeout(() => controller.abort(), 90_000);
   try {
-    const res = await fetch(`${API_URL}/study-plan/generate`, {
+    const res = await backendFetch("/study-plan/generate", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ user_id: userId, course_id: courseId }),
       signal: controller.signal,
     });

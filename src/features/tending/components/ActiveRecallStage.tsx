@@ -19,7 +19,11 @@ export function ActiveRecallStage({ sessionId, prompt, sourceParagraphFallback, 
     return <EmptyTimeoutScreen onRetry={stage.handleRetry} onSkip={onSkip} />;
   }
 
-  if (!stage.evaluation) {
+  // Stay on the prompt only while the student is still writing, or when a
+  // submit failed (the prompt screen owns the error + "Try again" UI). The
+  // instant they submit, flip to the results layout in its pending state so
+  // the wait is spent reading their answer and the source paragraph.
+  if (!stage.evaluation && !stage.submitting) {
     return (
       <RecallPromptScreen
         prompt={prompt}

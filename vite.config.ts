@@ -100,7 +100,7 @@ export default defineConfig(({ mode }) => {
         // Sentry uploads sourcemaps and then they are dead weight in the SW.
         globIgnores: ["**/*.map", "**/node_modules/**"],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//],
+        navigateFallbackDenylist: [/^\/api\//, /^\/robots\.txt$/, /^\/sitemap\.xml$/],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         runtimeCaching: [

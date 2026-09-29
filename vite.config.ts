@@ -100,7 +100,24 @@ export default defineConfig(({ mode }) => {
         // Sentry uploads sourcemaps and then they are dead weight in the SW.
         globIgnores: ["**/*.map", "**/node_modules/**"],
         navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//, /^\/robots\.txt$/, /^\/sitemap\.xml$/],
+        // The prerendered public routes must come from the network, not from the
+        // navigation fallback. scripts/prerender.mjs gives each of them its own
+        // document with its own title, description and canonical; letting the SW
+        // answer those navigations with the precached /index.html would hand a
+        // returning visitor the HOME title and the HOME canonical on /pricing.
+        // Verified on the preview deploy: with the SW in control, /pricing read
+        // back title "PassAI | Turn your course materials..." and canonical
+        // "https://www.passai.study/". Crawlers never run a service worker, so
+        // this was a visitor-facing bug rather than an indexing one.
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/robots\.txt$/,
+          /^\/sitemap\.xml$/,
+          /^\/pricing$/,
+          /^\/privacy$/,
+          /^\/terms$/,
+          /^\/cookies$/,
+        ],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         runtimeCaching: [

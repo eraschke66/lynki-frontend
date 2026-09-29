@@ -230,6 +230,17 @@ for (const r of ROUTES) {
   console.log(`prerendered ${r.path.padEnd(9)} -> dist/${r.out}  (title ${r.title.length}, desc ${r.description.length})`);
 }
 
+// The SPA fallback, byte-identical to the shell Vite produced.
+//
+// vercel.json rewrites everything with no file on disk to this, NOT to
+// index.html. index.html is now the prerendered HOME page, so leaving the
+// catch-all pointed at it would have served the home title, the home canonical
+// and a flash of home marketing copy on /login, /home and every /course/:id
+// deep link. Caught on the preview deploy: those three routes came back with
+// the home <title> and the prerender block in the body.
+writeFileSync(join(DIST, "app.html"), template, "utf8");
+console.log("wrote dist/app.html (SPA fallback, pristine shell)");
+
 for (const f of ["robots.txt", "sitemap.xml"]) {
   if (!existsSync(join(DIST, f))) throw new Error(`prerender: dist/${f} is missing after build`);
 }

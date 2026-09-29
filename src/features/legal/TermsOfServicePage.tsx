@@ -34,7 +34,7 @@ export function TermsOfServicePage() {
       <Section title="5. Trial and Paid Access">
         <H3>7-day free trial</H3>
         <P>Every new account begins with a 7-day free trial of Pass Pro. The trial requires no credit card and includes the full feature set — nothing is withheld during the trial period.</P>
-        <H3>Pass Pro ($9.99/month or $79/year)</H3>
+        <H3>Pass Pro ($9.99/month or $79.99/year)</H3>
         <ul className="list-disc pl-5 space-y-1 text-sm text-ghibli-bark">
           <li>Upload study materials</li>
           <li>AI-generated quizzes and mock exam sessions</li>
@@ -53,7 +53,7 @@ export function TermsOfServicePage() {
         <P>Your account starts with a 7-day free trial of Pass Pro, granted at signup with no credit card. You are not charged during the trial, and you are never charged unless you choose to subscribe.</P>
 
         <H3>Billing</H3>
-        <P>Pass Pro is billed at $9.99 USD per month or $79 USD per year, depending on the plan you choose. Your subscription renews automatically unless you cancel before the renewal date.</P>
+        <P>Pass Pro is billed at $9.99 USD per month or $79.99 USD per year, depending on the plan you choose. Your subscription renews automatically unless you cancel before the renewal date.</P>
 
         <H3>Refund policy</H3>
         <P>You may request a full refund within 14 days of your first payment. After 14 days, no refunds are available. Refund requests must be sent to <a href="mailto:passai.study@gmail.com" className="text-primary hover:underline">passai.study@gmail.com</a>.</P>
@@ -111,7 +111,7 @@ export function TermsOfServicePage() {
 
       <Section title="11. Limitation of Liability">
         <P>TO THE MAXIMUM EXTENT PERMITTED BY LAW, SHRYN, INC. SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES ARISING FROM YOUR USE OF THE SERVICE, INCLUDING BUT NOT LIMITED TO EXAM RESULTS, LOST DATA, OR INTERRUPTIONS TO YOUR STUDY SCHEDULE.</P>
-        <P>OUR TOTAL LIABILITY FOR ANY CLAIM ARISING FROM THESE TERMS OR THE SERVICE SHALL NOT EXCEED THE AMOUNT YOU PAID US IN THE 12 MONTHS PRECEDING THE CLAIM, OR $79, WHICHEVER IS GREATER.</P>
+        <P>OUR TOTAL LIABILITY FOR ANY CLAIM ARISING FROM THESE TERMS OR THE SERVICE SHALL NOT EXCEED THE AMOUNT YOU PAID US IN THE 12 MONTHS PRECEDING THE CLAIM, OR $79.99, WHICHEVER IS GREATER.</P>
       </Section>
 
       <Section title="12. Indemnification">

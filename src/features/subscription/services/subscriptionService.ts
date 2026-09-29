@@ -9,6 +9,24 @@ async function getAccessToken(): Promise<string> {
 }
 
 /**
+ * Which checkout function this build talks to.
+ *
+ * There is one Supabase project and stripe-checkout holds a LIVE Stripe key, so
+ * until now a checkout opened from a preview deployment was a real live session
+ * against a real card (cs_live_… showing "Total due today $9.99", seen on
+ * 2026-09-29). Preview and local builds now go to stripe-checkout-test, which
+ * refuses to run with anything but a Stripe test key.
+ *
+ * Production is decided by the deploy, not by a runtime check: VITE_DEPLOY_ENV
+ * is baked in from VERCEL_ENV at build time, so a preview build cannot be
+ * talked into using the live function.
+ */
+const CHECKOUT_FN =
+  import.meta.env.VITE_DEPLOY_ENV === "production"
+    ? "stripe-checkout"
+    : "stripe-checkout-test";
+
+/**
  * Creates a Stripe Checkout session for the chosen plan.
  * Passes `plan` in the POST body so the edge function picks the correct Price ID.
  *
@@ -18,7 +36,7 @@ export async function createCheckoutSession(
   plan: "monthly" | "annual" = "annual",
 ): Promise<string> {
   const token = await getAccessToken();
-  const { data, error } = await supabase.functions.invoke("stripe-checkout", {
+  const { data, error } = await supabase.functions.invoke(CHECKOUT_FN, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
     body: { plan },

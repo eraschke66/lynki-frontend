@@ -1,4 +1,17 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "missing": [
+        {
+          "type": "host",
+          "value": "(www\\.passai\\.study|passai\\.study|app\\.passai\\.study|.+-eraschke66s-projects\\.vercel\\.app)"
+        }
+      ],
+      "destination": "https://www.passai.study/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",

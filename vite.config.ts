@@ -37,6 +37,15 @@ export default defineConfig(({ mode }) => {
     : null;
 
   return {
+  // Vercel sets VERCEL_ENV to production / preview / development. It is a build
+  // variable, not a VITE_ one, so it has to be handed across explicitly.
+  // Sentry used import.meta.env.MODE, which is "production" for ANY vite build,
+  // so preview errors arrived tagged production and paged on noise.
+  define: {
+    "import.meta.env.VITE_DEPLOY_ENV": JSON.stringify(
+      env.VERCEL_ENV ?? (mode === "production" ? "production" : "development"),
+    ),
+  },
   plugins: [
     react(),
     svgr({

@@ -5,8 +5,12 @@ import App from "@/app/App";
 import { initSentry } from "@/lib/sentry";
 import { initPostHog } from "@/lib/posthog";
 import { pingBackend } from "@/lib/backend";
+import { installStaleChunkRecovery } from "@/lib/staleChunk";
 
 initSentry();
+// Before anything lazy-loads: a tab open across a deploy asks for the previous
+// build's chunk hashes and gets a 404.
+installStaleChunkRecovery();
 if (localStorage.getItem("passai_cookie_consent") === "all") {
   initPostHog();
 }

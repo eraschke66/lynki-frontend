@@ -13,7 +13,9 @@ export function initSentry() {
 
   Sentry.init({
     dsn,
-    environment: import.meta.env.MODE,
+    // Not import.meta.env.MODE: that is "production" for every vite build, so
+    // preview deployments reported as production and alerted on test traffic.
+    environment: import.meta.env.VITE_DEPLOY_ENV || "development",
     integrations: [
       Sentry.reactRouterV7BrowserTracingIntegration({
         useEffect,

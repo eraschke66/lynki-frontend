@@ -99,8 +99,25 @@ export default defineConfig(({ mode }) => {
         globPatterns: ["**/*.{js,css,html,svg,ico,woff,woff2}"],
         // Sentry uploads sourcemaps and then they are dead weight in the SW.
         globIgnores: ["**/*.map", "**/node_modules/**"],
-        navigateFallback: "/index.html",
-        navigateFallbackDenylist: [/^\/api\//, /^\/robots\.txt$/, /^\/sitemap\.xml$/],
+        navigateFallback: "/app.html",
+        // The prerendered public routes must come from the network, not from the
+        // navigation fallback. scripts/prerender.mjs gives each of them its own
+        // document with its own title, description and canonical; letting the SW
+        // answer those navigations with the precached fallback shell would hand a
+        // returning visitor a generic title in place of the page's own.
+        // Verified on the preview deploy: with the SW in control, /pricing read
+        // back title "PassAI | Turn your course materials..." and canonical
+        // "https://www.passai.study/". Crawlers never run a service worker, so
+        // this was a visitor-facing bug rather than an indexing one.
+        navigateFallbackDenylist: [
+          /^\/api\//,
+          /^\/robots\.txt$/,
+          /^\/sitemap\.xml$/,
+          /^\/pricing$/,
+          /^\/privacy$/,
+          /^\/terms$/,
+          /^\/cookies$/,
+        ],
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         runtimeCaching: [
@@ -185,6 +202,12 @@ export default defineConfig(({ mode }) => {
     // chunk per screen. These manual boundaries pin the heavy vendor libs so a
     // future static import can't quietly hoist them back into the entry.
     rollupOptions: {
+      // Two HTML entries: index.html becomes the prerendered home page, and
+      // app.html stays the pristine shell that the SPA rewrite and the service
+      // worker's navigateFallback both point at. app.html is a real build input
+      // so Vite stamps it with the same hashed asset tags and Workbox precaches
+      // it with a real revision, which a postbuild copy could not offer.
+      input: { main: "index.html", app: "app.html" },
       output: {
         manualChunks(id: string) {
           // Rollup's virtual CommonJS interop helpers live outside

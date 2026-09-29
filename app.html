@@ -1,0 +1,36 @@
+<!doctype html>
+  <!-- SPA fallback shell. Byte-for-byte the same document as index.html apart
+       from this note, and deliberately kept free of any prerendered content.
+
+       index.html is the PRERENDERED HOME PAGE (scripts/prerender.mjs), so it
+       cannot double as the fallback: vercel.json rewrites every path with no
+       file on disk here, and the service worker's navigateFallback precaches
+       this file. Pointing either at index.html served the home title and the
+       home canonical on /login, /home and every /course/:id.
+
+       Keep the <head> in sync with index.html. scripts/prerender.mjs asserts
+       that the two match and fails the build if they drift. -->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/src/assets/logo.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- PWA. The manifest link itself is injected by vite-plugin-pwa at build
+         time; these are the parts it does not handle. -->
+    <meta name="theme-color" content="#215037" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PassAI" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <title>PassAI - Transform Documents into AI-Powered Quizzes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5dad92b7-d25c-4698-8d47-d83adf7ede89"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

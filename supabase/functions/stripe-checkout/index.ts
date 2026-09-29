@@ -105,12 +105,22 @@ Deno.serve(async (req) => {
       customer: customerId,
       client_reference_id: user.id,
       mode: "subscription",
-      allow_promotion_codes: true,
       line_items: [{ price: priceId, quantity: 1 }],
-      // Attach plan to the Stripe Subscription metadata so the webhook can read it
+      // Allow beta comp codes, influencer codes and ambassador codes to be
+      // entered at checkout. Without this Stripe hides the promo code field
+      // entirely and every promotion code we create is unusable.
+      allow_promotion_codes: true,
+      // Attach plan to the Stripe Subscription metadata so the webhook can read it.
+      //
+      // NOTE (Jul 30): trial_period_days was REMOVED here. The 7-day free trial is
+      // now granted at signup by the handle_new_user DB trigger (tier=premium,
+      // status=trialing, current_period_end=now()+7d). Stripe adding its OWN
+      // trial_period_days on top caused a double-trial (~14 free days for anyone
+      // subscribing mid-trial). The DB grant is the single source of the trial;
+      // checkout now converts that trial into a paid subscription and charges per
+      // Stripe's normal billing.
       subscription_data: {
-        metadata: { plan },
-        trial_period_days: 7,
+        metadata: { plan, supabase_user_id: user.id },
       },
       success_url: `${Deno.env.get("FRONTEND_URL")}/subscription/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url: `${Deno.env.get("FRONTEND_URL")}/pricing`,

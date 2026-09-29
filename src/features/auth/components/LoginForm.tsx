@@ -33,7 +33,7 @@ export function LoginForm() {
   // leaving them on a spinner with no explanation.
   const [error, setError] = useState<string | null>(
     searchParams.get("error") === "auth_callback"
-      ? "We couldn't finish signing you in. Please try again."
+      ? "That link could not sign you in on this device. If you just confirmed your email, your account is ready: log in below with your email and password. If it still fails, ask for a new link."
       : null,
   );
 

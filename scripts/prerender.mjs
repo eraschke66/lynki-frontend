@@ -81,6 +81,7 @@ const ROUTES = [
     body: [
       "Every new account starts with full Pass Pro access, with no credit card. Keep it for $9.99/month or $79/year when the week is up.",
       "7-day free trial: $0 for the first 7 days. No credit card required.",
+      "No card needed to start. Subscribe any time during your 7 days and your first charge comes when the free week ends.",
       "Pass Pro: $9.99 per month, or $79 per year.",
     ],
     jsonLd: {

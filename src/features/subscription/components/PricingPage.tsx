@@ -65,7 +65,7 @@ function FeatureList() {
 export function PricingPage() {
   const { session } = useAuth();
   const navigate = useNavigate();
-  const { isPremium, status, interval, isLoading: subLoading } = useSubscription();
+  const { isPremium, status, interval, hasStripeSubscription, isLoading: subLoading } = useSubscription();
   const [loadingPlan, setLoadingPlan] = useState<"monthly" | "annual" | null>(null);
 
   const handleUpgrade = async (plan: "monthly" | "annual") => {
@@ -91,8 +91,28 @@ export function PricingPage() {
     }
   };
 
+  // "Is the visitor already on THIS plan." Gated on Stripe actually holding a
+  // subscription, because isPremium is also true throughout the free trial.
+  //
+  // This used to read `interval === null && plan === "annual"`, which treated
+  // "no plan at all" as "on the annual plan". During the trial that made the
+  // annual card render a disabled "Your plan" and, through the matching
+  // conditions below, disabled the monthly button too. A trialing user had no
+  // way to subscribe from anywhere in the app: /settings shows text only
+  // during the trial, and these two buttons are the only callers of
+  // createCheckoutSession. The null-means-annual fallback is kept for paying
+  // subscribers, where it is a real legacy case (older rows were written
+  // without an interval), but it now requires a Stripe subscription to apply.
   const isCurrentPlan = (plan: "monthly" | "annual") =>
-    isPremium && (interval === plan || (interval === null && plan === "annual"));
+    isPremium &&
+    hasStripeSubscription &&
+    (interval === plan || (interval === null && plan === "annual"));
+
+  // Matches isCurrentPlan: only somebody Stripe already bills is blocked from
+  // starting a new checkout for the other cadence. A trialing user is on no
+  // plan, so both buttons stay live for them.
+  const isOtherPaidPlan = (plan: "monthly" | "annual") =>
+    isPremium && hasStripeSubscription && interval !== plan;
 
   return (
     <>
@@ -157,8 +177,8 @@ export function PricingPage() {
               )}
 
               <p className="text-xs text-ghibli-bark mt-3 text-center">
-                Then $9.99/mo or $79/yr · cancel before day 7 and you are not
-                charged
+                No card needed to start. Subscribe any time during your 7 days
+                and your first charge comes when the free week ends.
               </p>
             </ParchmentCard>
 
@@ -193,7 +213,7 @@ export function PricingPage() {
               ) : (
                 <Button
                   onClick={() => handleUpgrade("monthly")}
-                  disabled={!!loadingPlan || subLoading || (isPremium && interval !== "monthly")}
+                  disabled={!!loadingPlan || subLoading || isOtherPaidPlan("monthly")}
                   variant="outline"
                   className="w-full"
                 >
@@ -255,7 +275,7 @@ export function PricingPage() {
               ) : (
                 <Button
                   onClick={() => handleUpgrade("annual")}
-                  disabled={!!loadingPlan || subLoading || (isPremium && interval !== "annual")}
+                  disabled={!!loadingPlan || subLoading || isOtherPaidPlan("annual")}
                   className="w-full shadow-[0_2px_12px_hsl(var(--ghibli-canopy)/0.25)] bg-gradient-to-b from-ghibli-jungle to-ghibli-canopy hover:from-ghibli-forest hover:to-ghibli-canopy text-primary-foreground"
                 >
                   {loadingPlan === "annual" ? (

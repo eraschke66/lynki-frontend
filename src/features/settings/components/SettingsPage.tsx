@@ -197,6 +197,18 @@ export function SettingsPage() {
                             : ""}
                           . Everything is unlocked, and there is no card on file.
                         </p>
+                        {/* Until now the trial branch was text only, so a
+                            trialing user had nowhere to go to start paying:
+                            /pricing had both plan buttons disabled and this
+                            card offered no way out. Same destination as the
+                            lapsed branch below. */}
+                        <Button
+                          onClick={() => navigate("/pricing")}
+                          className="shadow-[0_2px_8px_hsl(var(--ghibli-canopy)/0.2)] bg-gradient-to-br from-ghibli-moss to-ghibli-canopy text-primary-foreground hover:from-ghibli-jungle hover:to-ghibli-canopy"
+                        >
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Choose a plan
+                        </Button>
                       </>
                     ) : isPremium ? (
                       <>

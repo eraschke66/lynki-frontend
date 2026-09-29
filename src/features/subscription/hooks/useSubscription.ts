@@ -27,6 +27,15 @@ export interface SubscriptionInfo {
   isOnTrial: boolean;
   /** When the free trial ends, or null if it cannot be determined. */
   trialEndsAt: Date | null;
+  /**
+   * True when Stripe actually holds a subscription for this account.
+   *
+   * `interval` cannot answer "is this person on a plan": it is null both for
+   * someone who never subscribed and, historically, for legacy paid records.
+   * /pricing read that null as "annual" and disabled every button for anyone
+   * mid-trial, which left a trialing user with no way to pay at all.
+   */
+  hasStripeSubscription: boolean;
   isLoading: boolean;
 }
 
@@ -71,6 +80,8 @@ export function useSubscription(): SubscriptionInfo {
   const tier: SubscriptionTier = (data?.subscription_tier as SubscriptionTier) ?? "free";
   const status: SubscriptionStatus = (data?.subscription_status as SubscriptionStatus) ?? null;
   const interval: SubscriptionInterval = (data?.subscription_interval as SubscriptionInterval) ?? null;
+  // The query selects `*`, so this is already on the row.
+  const hasStripeSubscription = Boolean(data?.stripe_subscription_id);
   const currentPeriodEnd = data?.current_period_end
     ? new Date(data.current_period_end)
     : null;
@@ -99,6 +110,7 @@ export function useSubscription(): SubscriptionInfo {
     isPremium,
     isOnTrial: onTrial,
     trialEndsAt: trialEnds,
+    hasStripeSubscription,
     isLoading,
   };
 }

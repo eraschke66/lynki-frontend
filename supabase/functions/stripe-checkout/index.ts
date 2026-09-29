@@ -72,12 +72,67 @@ Deno.serve(async (req) => {
       ? Deno.env.get("STRIPE_MONTHLY_PRICE_ID")!
       : Deno.env.get("STRIPE_ANNUAL_PRICE_ID")!;
 
-  // Get or create Stripe customer — never create duplicates
+  // `*` on purpose: this needs stripe_customer_id, plus the columns the trial
+  // end is read from below, and it must keep working if trial_ends_at is added
+  // later. One self-scoped row.
   const { data: profile } = await supabaseAdmin
     .from("user_profiles")
-    .select("stripe_customer_id")
+    .select("*")
     .eq("user_id", user.id)
     .maybeSingle();
+
+  // WHEN THE FIRST CHARGE LANDS.
+  //
+  // Subscribing during the free week must not cut the week short: take the
+  // card now, charge when the free time actually runs out. Stripe does that
+  // with subscription_data.trial_end, an absolute timestamp.
+  //
+  // The trial end is read from current_period_end, NOT from created_at + 7
+  // days. handle_new_user writes an explicit end date at signup and it is not
+  // always 7 days out: is_beta_cohort() emails get 30. Deriving 7 days from
+  // created_at would bill a beta account on day 8 of a month it was promised.
+  // created_at + 7 days stays as the fallback for rows written before the
+  // trigger set current_period_end.
+  //
+  // Anyone whose free time has already run out, or is within Stripe's 48 hour
+  // minimum, gets no trial_end and is charged at checkout, which is what the
+  // /pricing copy now promises. Note this is also the group that used to be
+  // handed a whole extra free week by trial_period_days before that was
+  // removed in July.
+  const TRIAL_DAYS = 7;
+  const MIN_TRIAL_LEAD_MS = 48 * 60 * 60 * 1000;
+
+  const parseDate = (v: unknown): Date | null => {
+    if (typeof v !== "string" || !v) return null;
+    const d = new Date(v);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+
+  // Everything here hangs off status === "trialing", which is the only thing
+  // that says this account HAS free time left to protect. It matters for the
+  // accounts handle_new_user deliberately refuses a trial: a repeat signup
+  // caught by is_trial_eligible() is written tier=free, status=null, and
+  // deriving created_at + 7 days for them would hand Stripe a free week the
+  // signup path had just denied. Paying and lapsed accounts fall through here
+  // too, and are charged at checkout.
+  const onTrial = profile?.subscription_status === "trialing";
+
+  const derivedTrialEnd = (() => {
+    const created = parseDate(profile?.created_at);
+    if (!created) return null;
+    const d = new Date(created);
+    d.setDate(d.getDate() + TRIAL_DAYS);
+    return d;
+  })();
+
+  const trialEnd = !onTrial
+    ? null
+    : (parseDate(profile?.trial_ends_at) ??
+      parseDate(profile?.current_period_end) ??
+      derivedTrialEnd);
+
+  const chargeAtEndOfTrial =
+    trialEnd !== null && trialEnd.getTime() - Date.now() >= MIN_TRIAL_LEAD_MS;
 
   let customerId: string;
   if (profile?.stripe_customer_id) {
@@ -119,8 +174,14 @@ Deno.serve(async (req) => {
       // subscribing mid-trial). The DB grant is the single source of the trial;
       // checkout now converts that trial into a paid subscription and charges per
       // Stripe's normal billing.
+      // trial_end (absolute) rather than trial_period_days (relative): the free
+      // week started at signup, not at checkout, so a relative window would
+      // hand out a second one. See the note above the calculation.
       subscription_data: {
         metadata: { plan, supabase_user_id: user.id },
+        ...(chargeAtEndOfTrial
+          ? { trial_end: Math.floor(trialEnd!.getTime() / 1000) }
+          : {}),
       },
       success_url: `${Deno.env.get("FRONTEND_URL")}/subscription/success?session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url: `${Deno.env.get("FRONTEND_URL")}/pricing`,

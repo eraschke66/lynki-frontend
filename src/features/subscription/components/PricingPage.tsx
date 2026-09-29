@@ -129,7 +129,7 @@ export function PricingPage() {
             </h1>
             <p className="text-ghibli-bark max-w-md mx-auto">
               Every new account starts with full Pass Pro access — no credit card.
-              Keep it for $9.99/month or $79/year when the week is up.
+              Keep it for $9.99/month or $79.99/year when the week is up.
             </p>
           </div>
 
@@ -243,7 +243,7 @@ export function PricingPage() {
             <ParchmentCard className="p-7 flex flex-col relative overflow-hidden border-t-[3px] border-ghibli-moss bg-gradient-to-br from-ghibli-moss/8 to-transparent">
               {/* Save badge */}
               <div className="absolute top-4 right-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-ghibli-amber/25 text-ghibli-bark border border-ghibli-amber/40">
-                Save 34%
+                Save 33%
               </div>
 
               <div className="flex items-center gap-1.5 mb-5">
@@ -255,13 +255,13 @@ export function PricingPage() {
 
               <div className="mb-5">
                 <p className="text-3xl font-bold text-ghibli-canopy">
-                  $79
+                  $79.99
                   <span className="text-sm font-medium text-ghibli-bark ml-1">
                     / year
                   </span>
                 </p>
                 <p className="text-xs text-ghibli-bark mt-1">
-                  ~$6.58/mo · billed once a year
+                  about $6.67/mo · billed once a year
                 </p>
               </div>
 
@@ -293,7 +293,7 @@ export function PricingPage() {
               )}
 
               <p className="text-xs text-ghibli-bark mt-3 text-center">
-                7-day free trial, then $79/year · cancel anytime
+                7-day free trial, then $79.99/year · cancel anytime
               </p>
               <p className="text-xs text-ghibli-bark mt-1 text-center">
                 Secured by Stripe

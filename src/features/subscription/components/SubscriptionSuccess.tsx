@@ -136,7 +136,7 @@ export function SubscriptionSuccess() {
                   ) : (
                     <>
                       <Calendar className="w-3.5 h-3.5" />
-                      Annual plan · $79/year
+                      Annual plan · $79.99/year
                     </>
                   )}
                 </div>

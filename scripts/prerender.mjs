@@ -67,7 +67,7 @@ const ROUTES = [
       "Upload one document. Take your first quiz. See what needs work.",
       "Set your exam date and target grade, then follow a study plan shaped by your progress.",
       "PassAI was shaped by more than 30 years of teaching experience across American and European educational systems, including the International Baccalaureate.",
-      "The whole garden, free for 7 days. No credit card. After that it is $9.99/month or $79/year.",
+      "The whole garden, free for 7 days. No credit card. After that it is $9.99/month or $79.99/year.",
     ],
     jsonLd: { "@context": "https://schema.org", "@graph": [ORGANIZATION, WEBSITE] },
   },
@@ -76,13 +76,13 @@ const ROUTES = [
     out: "pricing/index.html",
     title: "PassAI pricing | Try the whole garden free for 7 days",
     description:
-      "Every new PassAI account starts with full Pass Pro access and no credit card. Keep it for $9.99 a month or $79 a year when the week is up.",
+      "Every new PassAI account starts with full Pass Pro access and no credit card. Keep it for $9.99 a month or $79.99 a year when the week is up.",
     h1: "Try the whole garden free for 7 days",
     body: [
-      "Every new account starts with full Pass Pro access, with no credit card. Keep it for $9.99/month or $79/year when the week is up.",
+      "Every new account starts with full Pass Pro access, with no credit card. Keep it for $9.99/month or $79.99/year when the week is up.",
       "7-day free trial: $0 for the first 7 days. No credit card required.",
       "No card needed to start. Subscribe any time during your 7 days and your first charge comes when the free week ends.",
-      "Pass Pro: $9.99 per month, or $79 per year.",
+      "Pass Pro: $9.99 per month, or $79.99 per year, which is about $6.67 a month and saves 33 percent.",
     ],
     jsonLd: {
       "@context": "https://schema.org",
@@ -103,7 +103,7 @@ const ROUTES = [
         },
         {
           "@type": "Offer",
-          price: "79.00",
+          price: "79.99",
           priceCurrency: "USD",
           category: "subscription",
           name: "Pass Pro yearly",

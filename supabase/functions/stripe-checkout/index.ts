@@ -134,6 +134,24 @@ Deno.serve(async (req) => {
   const chargeAtEndOfTrial =
     trialEnd !== null && trialEnd.getTime() - Date.now() >= MIN_TRIAL_LEAD_MS;
 
+  // Why the first charge landed where it did. Without this the only way to tell
+  // whether trial_end was sent is to read the Stripe session, and on 2026-09-29
+  // a checkout that charged immediately looked like a bug in this function when
+  // the row simply said status=null (the signup path had refused that address a
+  // trial). No PII: ids and dates only.
+  console.log(
+    JSON.stringify({
+      at: "trial_end_decision",
+      user_id: user.id,
+      plan,
+      subscription_status: profile?.subscription_status ?? null,
+      current_period_end: profile?.current_period_end ?? null,
+      on_trial: onTrial,
+      trial_end: trialEnd ? trialEnd.toISOString() : null,
+      sent_trial_end: chargeAtEndOfTrial,
+    }),
+  );
+
   let customerId: string;
   if (profile?.stripe_customer_id) {
     customerId = profile.stripe_customer_id;

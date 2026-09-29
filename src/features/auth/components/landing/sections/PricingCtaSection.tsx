@@ -50,7 +50,7 @@ export function PricingCtaSection() {
           <div className="parchment-solid rounded-[2rem] p-8 border border-ghibli-moss/10 flex flex-col hover:-translate-y-1 transition-transform duration-500">
             <h3 className="text-xl font-bold font-serif text-ghibli-canopy mb-1">Pass Pro, after day 7</h3>
             <div className="mb-1">
-              <span className="text-4xl font-bold font-serif text-ghibli-canopy">$79</span>
+              <span className="text-4xl font-bold font-serif text-ghibli-canopy">$79.99</span>
               <span className="text-ghibli-bark font-serif">/year</span>
             </div>
             <p className="text-xs text-ghibli-bark font-sans mb-6">
@@ -89,7 +89,7 @@ export function PricingCtaSection() {
 
         <p className="text-center text-sm text-ghibli-bark font-sans mt-6 max-w-xl mx-auto leading-relaxed">
           Free for 7 days, no credit card. After that, Pass Pro is $9.99/month or
-          $79/year — and you will not be charged unless you choose to continue.
+          $79.99/year — and you will not be charged unless you choose to continue.
         </p>
       </div>
     </section>

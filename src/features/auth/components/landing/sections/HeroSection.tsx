@@ -42,7 +42,7 @@ export function HeroSection() {
           </p>
           <p className="text-sm text-ghibli-bark font-sans max-w-md mx-auto lg:mx-0 leading-relaxed">
             The whole garden, free for 7 days. No credit card. After that it is
-            $9.99/month or $79/year.
+            $9.99/month or $79.99/year.
           </p>
         </div>
 

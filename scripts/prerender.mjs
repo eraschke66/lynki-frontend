@@ -230,16 +230,23 @@ for (const r of ROUTES) {
   console.log(`prerendered ${r.path.padEnd(9)} -> dist/${r.out}  (title ${r.title.length}, desc ${r.description.length})`);
 }
 
-// The SPA fallback, byte-identical to the shell Vite produced.
-//
-// vercel.json rewrites everything with no file on disk to this, NOT to
-// index.html. index.html is now the prerendered HOME page, so leaving the
-// catch-all pointed at it would have served the home title, the home canonical
-// and a flash of home marketing copy on /login, /home and every /course/:id
-// deep link. Caught on the preview deploy: those three routes came back with
-// the home <title> and the prerender block in the body.
-writeFileSync(join(DIST, "app.html"), template, "utf8");
-console.log("wrote dist/app.html (SPA fallback, pristine shell)");
+// dist/app.html is the SPA fallback: Vite builds it from the root app.html
+// entry, vercel.json rewrites every path with no file on disk to it, and the
+// service worker precaches it as navigateFallback. It must stay free of
+// prerendered content, and its asset tags must match index.html's, or returning
+// visitors would boot a stale bundle on every app route.
+const appHtml = readFileSync(join(DIST, "app.html"), "utf8");
+if (appHtml.includes('id="prerender"')) {
+  throw new Error("prerender: dist/app.html must stay a pristine shell");
+}
+const assetsOf = (h) => [...h.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map((m) => m[1]).sort().join(",");
+if (assetsOf(appHtml) !== assetsOf(template)) {
+  throw new Error(
+    "prerender: app.html and index.html reference different build assets.\n" +
+      "  Their <head> has drifted. Copy index.html's head into app.html.",
+  );
+}
+console.log("dist/app.html verified (SPA fallback, pristine, assets in sync)");
 
 for (const f of ["robots.txt", "sitemap.xml"]) {
   if (!existsSync(join(DIST, f))) throw new Error(`prerender: dist/${f} is missing after build`);
